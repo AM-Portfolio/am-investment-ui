@@ -74,21 +74,19 @@ jobs:
           name: web-build
           path: build/web
           
-      - name: Get Id Token
-        uses: actions/github-script@v6
+      # Using OIDC token directly from GitHub Actions
+      - name: Get OIDC ID Token
         id: idtoken
-        with:
-           script: |
-                 const coredemo = require('@actions/core')
-                 return await coredemo.getIDToken()
-           result-encoding: string
+        run: |
+          token=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+          echo "token=$token" >> $GITHUB_OUTPUT
           
       - name: Deploy to Azure Static Web Apps (PreProd)
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_YELLOW_SKY_0A558C91E }}
-          github_id_token: ${{ steps.idtoken.outputs.result }}
+          github_id_token: ${{ steps.idtoken.outputs.token }}
           action: "upload"
           app_location: "build/web"
           api_location: ""
@@ -103,6 +101,9 @@ jobs:
     environment:
       name: production
       url: ${{ steps.deploy.outputs.static_web_app_url }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -110,16 +111,23 @@ jobs:
           name: web-build
           path: build/web
           
+      # Using OIDC token directly from GitHub Actions
+      - name: Get OIDC ID Token
+        id: idtoken
+        run: |
+          token=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+          echo "token=$token" >> $GITHUB_OUTPUT
+          
       - name: Deploy to Azure Static Web Apps (Production)
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
-          repo_token: ${{ secrets.GT_TOKEN }}
+          github_id_token: ${{ steps.idtoken.outputs.token }}
           action: "upload"
-          app_location: "/"
+          app_location: "build/web"
           api_location: ""
-          output_location: "build/web"
+          output_location: ""
           skip_app_build: true
 
   close_preprod_pull_request_job:
@@ -133,6 +141,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_YELLOW_SKY_0A558C91E }}
           action: "close"
+          app_location: "/"
           
   close_prod_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.base_ref == 'main'
@@ -145,3 +154,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
           action: "close"
+          app_location: "/"
