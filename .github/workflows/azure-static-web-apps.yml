@@ -63,7 +63,6 @@ jobs:
     name: Deploy to PreProd
     environment:
       name: preprod
-      url: ${{ steps.deploy.outputs.static_web_app_url }}
     permissions:
       id-token: write
       contents: read
@@ -74,23 +73,17 @@ jobs:
           name: web-build
           path: build/web
           
-      # Using OIDC token directly from GitHub Actions
-      - name: Get OIDC ID Token
-        id: idtoken
-        run: |
-          token=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
-          echo "token=$token" >> $GITHUB_OUTPUT
-          
       - name: Deploy to Azure Static Web Apps (PreProd)
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_YELLOW_SKY_0A558C91E }}
-          github_id_token: ${{ steps.idtoken.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} 
           action: "upload"
           app_location: "build/web"
-          api_location: ""
           output_location: ""
+          app_build_command: "echo Skipped"
+          skip_app_build: true
           
   deploy_prod:
     needs: build
