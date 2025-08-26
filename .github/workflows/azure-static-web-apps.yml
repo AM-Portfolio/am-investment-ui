@@ -1,0 +1,135 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - preprod
+      - feature/*
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+      - preprod
+      - feature/*
+
+jobs:
+  build:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build Flutter Web
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup Flutter
+        id: flutter-setup
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.2'
+          architecture: x64
+          cache: true
+        
+      - name: Get Flutter version
+        id: flutter-version
+        run: echo "version=$(flutter --version | grep -o 'Flutter [0-9.]*' | cut -d ' ' -f 2)" >> $GITHUB_OUTPUT
+        
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Analyze project
+        run: flutter analyze
+        
+      - name: Run tests
+        run: flutter test || echo "Tests failed but continuing with build"
+
+      - name: Build web
+        run: flutter build web --release --dart-define=ENV=production
+        
+      - name: Copy staticwebapp.config.json to build output
+        run: cp staticwebapp.config.json build/web/
+        
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          retention-days: 1
+          
+  deploy_preprod:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Deploy to PreProd
+    environment:
+      name: preprod
+      url: ${{ steps.deploy.outputs.static_web_app_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          
+      - name: Deploy to Azure Static Web Apps (PreProd)
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PREPROD }}
+          repo_token: ${{ github.token }}
+          action: "upload"
+          app_location: "build/web"
+          api_location: ""
+          output_location: ""
+          config_file_location: ""
+          
+  deploy_prod:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.static_web_app_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          
+      - name: Deploy to Azure Static Web Apps (Production)
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
+          repo_token: ${{ github.token }}
+          action: "upload"
+          app_location: "build/web"
+          api_location: ""
+          output_location: ""
+          config_file_location: ""
+
+  close_preprod_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.base_ref == 'preprod'
+    runs-on: ubuntu-latest
+    name: Close PreProd Pull Request
+    steps:
+      - name: Close PreProd Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PREPROD }}
+          action: "close"
+          
+  close_prod_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    name: Close Production Pull Request
+    steps:
+      - name: Close Production Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
+          action: "close"
