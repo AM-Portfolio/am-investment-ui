@@ -1,0 +1,35 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*", "/css/*", "/js/*", "/*.{png,jpg,gif,svg,ico}", "/assets/*"]
+  },
+  "mimeTypes": {
+    ".json": "text/json",
+    ".woff": "application/font-woff",
+    ".woff2": "application/font-woff2",
+    ".ttf": "application/font-ttf",
+    ".eot": "application/vnd.ms-fontobject"
+  },
+  "routes": [
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html",
+      "statusCode": 200
+    }
+  },
+  "globalHeaders": {
+    "cache-control": "must-revalidate, max-age=3600",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block"
+  },
+  "networking": {
+    "allowedIpRanges": ["any"]
+  }
+}

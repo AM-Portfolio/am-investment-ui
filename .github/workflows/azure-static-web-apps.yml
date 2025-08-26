@@ -47,25 +47,8 @@ jobs:
       - name: Build web
         run: flutter build web --release --dart-define=ENV=production
         
-      - name: Create staticwebapp.config.json if not exists
-        run: |
-          if [ ! -f staticwebapp.config.json ]; then
-            echo '{
-              "navigationFallback": {
-                "rewrite": "/index.html",
-                "exclude": ["/images/*", "/css/*", "/js/*", "/assets/*", "/*.{png,jpg,gif,svg,ico}"]
-              },
-              "responseOverrides": {
-                "404": {
-                  "rewrite": "/index.html",
-                  "statusCode": 200
-                }
-              }
-            }' > staticwebapp.config.json
-          fi
-        
       - name: Copy staticwebapp.config.json to build output
-        run: cp staticwebapp.config.json build/web/ || echo "No staticwebapp.config.json found, skipping"
+        run: cp staticwebapp.config.json build/web/
         
       - name: Archive build artifacts
         uses: actions/upload-artifact@v4
@@ -98,8 +81,7 @@ jobs:
           app_location: "build/web"
           api_location: ""
           output_location: ""
-          config_file_location: "build/web"
-          skip_app_build: true
+          config_file_location: ""
           
   deploy_prod:
     needs: build
@@ -126,8 +108,7 @@ jobs:
           app_location: "build/web"
           api_location: ""
           output_location: ""
-          config_file_location: "build/web"
-          skip_app_build: true
+          config_file_location: ""
 
   close_preprod_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.base_ref == 'preprod'
@@ -138,7 +119,7 @@ jobs:
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PREPROD }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_YELLOW_SKY_0A558C91E }}
           action: "close"
           
   close_prod_pull_request_job:
