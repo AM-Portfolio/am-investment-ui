@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'config/environment.dart';
+import 'core/services/auth_service.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/register_screen.dart';
 
 void main() {
   // Set environment based on compile-time constants
@@ -9,8 +12,29 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final AuthService _authService = AuthService();
+  AuthState _authState = AuthState.unauthenticated();
+  
+  @override
+  void initState() {
+    super.initState();
+    _authService.authStateChanges.listen((state) {
+      setState(() {
+        _authState = state;
+      });
+    });
+    
+    // Check if user is already logged in
+    _authService.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,20 +44,26 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         brightness: EnvironmentConfig.environment == Environment.preprod ? Brightness.light : Brightness.light,
       ),
-      home: const TodoScreen(),
+      initialRoute: _authState.isAuthenticated ? '/home' : '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/home': (context) => const HomeScreen(),
+      },
       debugShowCheckedModeBanner: EnvironmentConfig.environment == Environment.preprod,
     );
   }
 }
 
-class TodoScreen extends StatefulWidget {
-  const TodoScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<TodoScreen> createState() => _TodoScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _TodoScreenState extends State<TodoScreen> {
+class _HomeScreenState extends State<HomeScreen> {
+  final AuthService _authService = AuthService();
   final List<String> _tasks = [];
   final TextEditingController _controller = TextEditingController();
 
@@ -53,10 +83,26 @@ class _TodoScreenState extends State<TodoScreen> {
     });
   }
 
+  void _logout() async {
+    await _authService.logout();
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My To-Do List')),
+      appBar: AppBar(
+        title: const Text('My To-Do List'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Logout',
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
