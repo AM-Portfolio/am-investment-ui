@@ -1,0 +1,68 @@
+{
+  "project": {
+    "name": "AM Investment UI",
+    "description": "A cross-platform Flutter application for investment management",
+    "type": "flutter",
+    "platforms": ["web", "android", "ios"]
+  },
+  "codeStyle": {
+    "language": "dart",
+    "naming": {
+      "variables": "camelCase",
+      "classes": "PascalCase",
+      "files": "snake_case",
+      "private": "_prefixed"
+    },
+    "formatting": {
+      "indentation": 2,
+      "lineLength": 80,
+      "preferSingleQuotes": true
+    },
+    "documentation": {
+      "publicApi": "///",
+      "implementation": "//"
+    }
+  },
+  "architecture": {
+    "stateManagement": ["provider", "riverpod", "bloc"],
+    "folderStructure": "feature-based",
+    "componentPattern": "platform-adaptive"
+  },
+  "codeStructure": {
+    "maxClassLines": 500,
+    "maxMethodLines": 30,
+    "maxParameters": 4,
+    "principles": [
+      "Keep initialization simple",
+      "Extract reusable components",
+      "Dependency injection",
+      "Design for testability"
+    ]
+  },
+  "dependencies": {
+    "preferredPackages": {
+      "http": "http",
+      "stateManagement": "provider",
+      "routing": "auto_route",
+      "storage": "shared_preferences",
+      "testing": "flutter_test"
+    }
+  },
+  "testing": {
+    "coverageThreshold": 80,
+    "requiredTests": ["unit", "widget"]
+  },
+  "ai": {
+    "contextPriority": [
+      "lib/core/services/auth_service.dart",
+      "lib/features/auth",
+      "lib/core/widgets",
+      "lib/core/theme"
+    ],
+    "codeGeneration": {
+      "followExistingPatterns": true,
+      "includeTests": true,
+      "documentationRequired": true
+    }
+  }
+}

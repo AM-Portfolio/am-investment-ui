@@ -10,6 +10,7 @@
         "cupertino_icons",
         "flutter",
         "http",
+        "intl",
         "shared_preferences"
       ],
       "devDependencies": [
@@ -50,6 +51,15 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "intl",
+      "version": "0.19.0",
+      "dependencies": [
+        "clock",
+        "meta",
+        "path"
       ]
     },
     {

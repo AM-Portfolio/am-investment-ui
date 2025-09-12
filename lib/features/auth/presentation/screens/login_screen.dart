@@ -114,6 +114,42 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }
+  
+  // Login specifically as SSD2658 user
+  Future<void> _ssdLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    // Set credentials for SSD2658 user
+    _identifierController.text = 'ssd2658';
+    _passwordController.text = 'password';
+    
+    // Small delay to show the filled fields before login
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    final result = await _authService.login(
+      _identifierController.text.trim(),
+      _passwordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!result.success) {
+      setState(() {
+        _errorMessage = result.error;
+      });
+      return;
+    }
+
+    // Navigate to home screen or dashboard
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage: _errorMessage,
         onLogin: _login,
         onQuickLogin: _quickLogin,
+        onSsdLogin: _ssdLogin,
         onForgotPassword: () {
           // Navigate to forgot password screen
           ScaffoldMessenger.of(context).showSnackBar(

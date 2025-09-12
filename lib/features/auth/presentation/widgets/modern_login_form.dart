@@ -12,6 +12,7 @@ class ModernLoginForm extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback onLogin;
   final VoidCallback onQuickLogin;
+  final VoidCallback? onSsdLogin;
   final VoidCallback onForgotPassword;
   final VoidCallback onRegister;
   final LoginMethod selectedLoginMethod;
@@ -26,6 +27,7 @@ class ModernLoginForm extends StatelessWidget {
     this.errorMessage,
     required this.onLogin,
     required this.onQuickLogin,
+    this.onSsdLogin,
     required this.onForgotPassword,
     required this.onRegister,
     required this.selectedLoginMethod,
@@ -108,6 +110,16 @@ class ModernLoginForm extends StatelessWidget {
             type: AppButtonType.secondary,
             height: 52,
           ),
+          const SizedBox(height: 16),
+          
+          // SSD2658 login button
+          if (onSsdLogin != null)
+            AppButton(
+              text: 'Login as SSD2658',
+              onPressed: isLoading ? null : onSsdLogin,
+              type: AppButtonType.secondary,
+              height: 52,
+            ),
           const SizedBox(height: 24),
 
           // Register link

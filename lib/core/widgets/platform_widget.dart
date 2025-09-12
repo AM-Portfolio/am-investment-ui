@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/widgets.dart';
 
 /// A base widget that provides different implementations based on the platform.
@@ -23,7 +22,7 @@ abstract class PlatformWidget<I extends Widget, M extends Widget> extends Statel
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return buildWebWidget(context);
-    } else if (Platform.isIOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       return buildIosWidget(context);
     }
     return buildMaterialWidget(context);

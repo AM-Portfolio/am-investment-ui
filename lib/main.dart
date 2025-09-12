@@ -3,6 +3,7 @@ import 'config/environment.dart';
 import 'core/services/auth_service.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
+import 'features/home/screens/home_screen.dart';
 
 void main() {
   // Set environment based on compile-time constants
@@ -55,91 +56,4 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
-  final List<String> _tasks = [];
-  final TextEditingController _controller = TextEditingController();
-
-  void _addTask() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        _tasks.add(text);
-      });
-      _controller.clear();
-    }
-  }
-
-  void _removeTask(int index) {
-    setState(() {
-      _tasks.removeAt(index);
-    });
-  }
-
-  void _logout() async {
-    await _authService.logout();
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My To-Do List'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Enter a task',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addTask,
-                ),
-              ),
-              onSubmitted: (_) => _addTask(),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _tasks.isEmpty
-                  ? const Center(child: Text('No tasks yet. Add one!'))
-                  : ListView.builder(
-                      itemCount: _tasks.length,
-                      itemBuilder: (ctx, index) => Dismissible(
-                        key: Key(_tasks[index]),
-                        onDismissed: (_) => _removeTask(index),
-                        child: Card(
-                          child: ListTile(
-                            title: Text(_tasks[index]),
-                            trailing: const Icon(Icons.delete_outline),
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// HomeScreen is now imported from features/home/screens/home_screen.dart

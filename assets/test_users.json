@@ -23,6 +23,14 @@
       "phone": "+1122334455",
       "name": "Admin User",
       "password": "admin123"
+    },
+    {
+      "id": "ssd2658",
+      "email": "ssd2658@example.com",
+      "username": "ssd2658",
+      "phone": "+9998887777",
+      "name": "SSD User",
+      "password": "password"
     }
   ]
 }

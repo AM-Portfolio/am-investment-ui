@@ -1,0 +1,184 @@
+{
+    "investmentValue": 475001.34,
+    "currentValue": 0.0,
+    "totalGainLoss": -475001.34,
+    "totalGainLossPercentage": -100.0,
+    "todayGainLoss": 0.0,
+    "todayGainLossPercentage": 0.0,
+    "totalAssets": 59,
+    "gainersCount": 0,
+    "losersCount": 0,
+    "todayGainersCount": 0,
+    "todayLosersCount": 0,
+    "lastUpdated": "2025-09-12T04:33:27.3200182",
+    "brokerPortfolios": {
+        "ZERODHA": {
+            "investmentValue": 475001.3411999999,
+            "totalAssets": 70
+        }
+    },
+    "marketCapHoldings": {
+        "SMALL_CAP": [
+            {
+                "isin": "INE131B01039",
+                "symbol": "RELAXO",
+                "sector": "Footwear",
+                "industry": "Footwear",
+                "marketCap": "SMALL_CAP",
+                "quantity": 5.0,
+                "investmentCost": 3607.25,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE191H01014",
+                "symbol": "PVRINOX",
+                "sector": "Film Production- Distribution & Exhibition",
+                "industry": "Film Production- Distribution & Exhibition",
+                "marketCap": "SMALL_CAP",
+                "quantity": 7.0,
+                "investmentCost": 10214.600199999999,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            }
+        ],
+        "LARGE_CAP": [
+            {
+                "isin": "INE0J1Y01017",
+                "symbol": "LICI",
+                "sector": "Life Insurance",
+                "industry": "Life Insurance",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 4612.5,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE066A01021",
+                "symbol": "EICHERMOT",
+                "sector": "2/3 Wheelers",
+                "industry": "2/3 Wheelers",
+                "marketCap": "LARGE_CAP",
+                "quantity": 3.0,
+                "investmentCost": 14135.9499,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            }
+        ],
+        "MID_CAP": [
+            {
+                "isin": "INE335Y01020",
+                "symbol": "IRCTC",
+                "sector": "Tour, Travel Related Services",
+                "industry": "Tour, Travel Related Services",
+                "marketCap": "MID_CAP",
+                "quantity": 7.0,
+                "investmentCost": 6278.1999000000005,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE018E01016",
+                "symbol": "SBICARD",
+                "sector": "Non Banking Financial Company (NBFC)",
+                "industry": "Non Banking Financial Company (NBFC)",
+                "marketCap": "MID_CAP",
+                "quantity": 8.0,
+                "investmentCost": 5708.3504,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
+                    }
+                ]
+            }
+        ]
+    },
+    "sectorialHoldings": {
+        "Aerospace & Defense": [
+            {
+                "isin": "INE171Z01026",
+                "symbol": "BDL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "MICRO_CAP",
+                "quantity": 2.0,
+                "investmentCost": 2417.9,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE263A01024",
+                "symbol": "BEL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 2661.5,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            }
+        ],
+        "Pharmaceuticals": [
+            {
+                "isin": "INE947Q01028",
+                "symbol": "LAURUSLABS",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 18.0,
+                "investmentCost": 7848.0,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 18.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE059A01026",
+                "symbol": "CIPLA",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "LARGE_CAP",
+                "quantity": 11.0,
+                "investmentCost": 17765.4499,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 11.0
+                    }
+                ]
+            }
+        ]
+    }
+}
