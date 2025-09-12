@@ -8,6 +8,7 @@ import '../../portfolio/widgets/holdings_breakdown.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
 import '../../../core/services/api/portfolio_client.dart';
 import '../../../core/services/api/api_client.dart';
+import '../../../config/environment.dart';
 
 /// Home screen displayed after login
 class HomeScreen extends StatefulWidget {
@@ -35,7 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _portfolioClient = PortfolioClient(
-      baseUrl: 'http://localhost:8082',
+      baseUrl: EnvironmentConfig.apiBaseUrl,
+      useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
     );
     _loadPortfolioSummary();
   }

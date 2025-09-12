@@ -3,6 +3,7 @@ import '../../../core/models/portfolio/portfolio_models.dart';
 import '../../../core/services/api/portfolio_client.dart';
 import '../widgets/portfolio_summary_card.dart';
 import '../widgets/holdings_breakdown.dart';
+import '../../../config/environment.dart';
 
 /// Screen to display portfolio summary information
 class PortfolioSummaryScreen extends StatefulWidget {
@@ -30,7 +31,8 @@ class _PortfolioSummaryScreenState extends State<PortfolioSummaryScreen> {
   void initState() {
     super.initState();
     _portfolioClient = PortfolioClient(
-      baseUrl: 'http://localhost:8082',
+      baseUrl: EnvironmentConfig.apiBaseUrl,
+      useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
     );
     _loadPortfolioSummary();
   }

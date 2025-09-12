@@ -17,10 +17,13 @@ class PortfolioClient {
   PortfolioClient({
     required String baseUrl,
     http.Client? httpClient,
+    bool useMockData = false,
   }) : _apiClient = ApiClient(
          baseUrl: baseUrl,
          client: httpClient,
-       );
+       ) {
+    _useMockData = useMockData;
+  }
   
   /// Get portfolio summary for a user
   Future<ApiResponse<PortfolioSummary>> getPortfolioSummary(String userId) async {
@@ -58,8 +61,8 @@ class PortfolioClient {
     }
   }
   
-  /// Flag to use mock data in debug mode
-  bool _useMockData = true;
+  /// Flag to use mock data
+  bool _useMockData = false;
   
   /// Set whether to use mock data in debug mode
   set useMockData(bool value) {
