@@ -39,14 +39,14 @@ class PortfolioClient {
         // API call failed, log the error
         debugPrint('API call failed: $apiError');
         
-        // If in debug mode and mock data is enabled, use mock data as fallback
-        if (kDebugMode && _useMockData) {
+        // Always fall back to mock data in debug mode
+        if (kDebugMode) {
           debugPrint('Falling back to mock data');
           await Future.delayed(const Duration(milliseconds: 300)); // Small delay
           return ApiResponse.success(await _getMockPortfolioSummary());
         } else {
-          // In production or if mock data is disabled, rethrow the error
-          rethrow;
+          // In production, return an error response
+          return ApiResponse.error('Failed to connect to API: $apiError');
         }
       }
     } on ApiException catch (e) {
