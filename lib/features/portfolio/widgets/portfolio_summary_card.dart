@@ -36,88 +36,121 @@ class PortfolioSummaryCard extends StatelessWidget {
     // Format the last updated time
     final lastUpdatedFormatted = DateFormat('MMM d, yyyy • h:mm a').format(summary.lastUpdated);
     
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with title and last updated
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.account_balance_wallet,
-                        color: theme.colorScheme.primary,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Portfolio Summary',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+              // Modern header with glass effect
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.08),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.account_balance_wallet_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Portfolio Summary',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Last updated: $lastUpdatedFormatted',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    if (onTap != null)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.chevron_right,
+                          color: theme.colorScheme.primary,
+                          size: 16,
                         ),
                       ),
-                    ],
-                  ),
-                  if (onTap != null)
-                    Icon(
-                      CupertinoIcons.chevron_right,
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                ],
+                  ],
+                ),
               ),
               
-              // Last updated info
               Padding(
-                padding: const EdgeInsets.only(left: 32, top: 4, bottom: 16),
-                child: Text(
-                  'Last updated: $lastUpdatedFormatted',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-              ),
-              
-              // Investment value with decorative background
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.primary.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Total Investment',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      currencyFormat.format(summary.investmentValue),
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    // Investment value with modern design
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          currencyFormat.format(summary.investmentValue),
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            'Total Investment',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -125,95 +158,222 @@ class PortfolioSummaryCard extends StatelessWidget {
               
               const SizedBox(height: 16),
               
-              // Key metrics in a more compact layout
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCompactMetricCard(
-                      context,
-                      'Total Gain/Loss',
-                      summary.totalGainLoss,
-                      isPercentage: false,
-                      useCompactFormat: true,
+              // Modern metrics layout with cards
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    // First row of metrics
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildModernMetricCard(
+                            context,
+                            'Total Gain/Loss',
+                            summary.totalGainLoss,
+                            icon: Icons.trending_up,
+                            isPercentage: false,
+                            useCompactFormat: true,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildModernMetricCard(
+                            context,
+                            'Total Return',
+                            summary.totalGainLossPercentage,
+                            icon: Icons.percent,
+                            isPercentage: true,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildCompactMetricCard(
-                      context,
-                      'Total Return',
-                      summary.totalGainLossPercentage,
-                      isPercentage: true,
+                    const SizedBox(height: 12),
+                    // Second row of metrics
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildModernMetricCard(
+                            context,
+                            'Today\'s Gain/Loss',
+                            summary.todayGainLoss,
+                            icon: Icons.today,
+                            isPercentage: false,
+                            useCompactFormat: true,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildModernMetricCard(
+                            context,
+                            'Today\'s Return',
+                            summary.todayGainLossPercentage,
+                            icon: Icons.show_chart,
+                            isPercentage: true,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCompactMetricCard(
-                      context,
-                      'Today\'s Gain/Loss',
-                      summary.todayGainLoss,
-                      isPercentage: false,
-                      useCompactFormat: true,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildCompactMetricCard(
-                      context,
-                      'Today\'s Return',
-                      summary.todayGainLossPercentage,
-                      isPercentage: true,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               
               if (showDetails) ...[
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 
-                // Portfolio statistics
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatItem(context, 'Total Assets', summary.totalAssets.toString()),
-                    _buildStatItem(context, 'Gainers', summary.gainersCount.toString()),
-                    _buildStatItem(context, 'Losers', summary.losersCount.toString()),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Broker breakdown
-                if (summary.brokerPortfolios.isNotEmpty) ...[                  
-                  Text(
-                    'Broker Breakdown',
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  ...summary.brokerPortfolios.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Portfolio statistics in modern cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Section title with subtle divider
+                      Row(
                         children: [
-                          Text(entry.key),
+                          Container(
+                            width: 30,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Text(
-                            currencyFormat.format(entry.value.investmentValue),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                            'Portfolio Statistics',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                         ],
                       ),
-                    );
-                  }).toList(),
-                ],
+                      const SizedBox(height: 16),
+                      
+                      // Stats in a modern row
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: theme.colorScheme.outline.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildModernStatItem(
+                              context, 
+                              'Assets',
+                              summary.totalAssets.toString(),
+                              Icons.pie_chart_outline,
+                            ),
+                            _buildModernStatItem(
+                              context, 
+                              'Gainers',
+                              summary.gainersCount.toString(),
+                              Icons.trending_up_outlined,
+                              color: Colors.green,
+                            ),
+                            _buildModernStatItem(
+                              context, 
+                              'Losers',
+                              summary.losersCount.toString(),
+                              Icons.trending_down_outlined,
+                              color: Colors.red,
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Broker breakdown with modern styling
+                      if (summary.brokerPortfolios.isNotEmpty) ...[
+                        // Section title with subtle divider
+                        Row(
+                          children: [
+                            Container(
+                              width: 30,
+                              height: 2,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Broker Breakdown',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Broker list with modern styling
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: theme.colorScheme.outline.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              ...summary.brokerPortfolios.entries.map((entry) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: theme.colorScheme.primary.withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(
+                                              Icons.account_balance_outlined,
+                                              size: 14,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            entry.key,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        currencyFormat.format(entry.value.investmentValue),
+                                        style: theme.textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
               ],
             ],
           ),
@@ -222,47 +382,63 @@ class PortfolioSummaryCard extends StatelessWidget {
     );
   }
   
-  /// Build a statistic item
-  Widget _buildStatItem(BuildContext context, String label, String value) {
+  /// Build a modern statistic item
+  Widget _buildModernStatItem(BuildContext context, String label, String value, IconData icon, {
+    Color? color,
+  }) {
     final theme = Theme.of(context);
+    final accentColor = color ?? theme.colorScheme.primary;
     
     return Column(
       children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: accentColor.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: accentColor,
+            size: 20,
+          ),
+        ),
+        const SizedBox(height: 8),
         Text(
           value,
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: theme.textTheme.bodySmall,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
         ),
       ],
     );
   }
   
-  /// Build a compact metric card with value indicator
-  Widget _buildCompactMetricCard(BuildContext context, String label, double value, {
+  /// Build a modern metric card with value indicator
+  Widget _buildModernMetricCard(BuildContext context, String label, double value, {
+    required IconData icon,
     bool isPercentage = false,
     bool useCompactFormat = false,
   }) {
     final theme = Theme.of(context);
     
     // Determine color based on value
-    Color textColor;
-    IconData? indicatorIcon;
+    Color accentColor;
+    IconData indicatorIcon = icon;
     
     if (value > 0) {
-      textColor = Colors.green;
-      indicatorIcon = Icons.arrow_upward;
+      accentColor = Colors.green.shade600;
     } else if (value < 0) {
-      textColor = Colors.red;
-      indicatorIcon = Icons.arrow_downward;
+      accentColor = Colors.red.shade600;
     } else {
-      textColor = theme.colorScheme.onSurface;
-      indicatorIcon = null;
+      accentColor = theme.colorScheme.primary;
     }
     
     // Format the value
@@ -289,16 +465,19 @@ class PortfolioSummaryCard extends StatelessWidget {
     }
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: value > 0 ? Colors.green.shade50 : 
-               value < 0 ? Colors.red.shade50 : 
-               theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
         border: Border.all(
-          color: value > 0 ? Colors.green.shade200 : 
-                 value < 0 ? Colors.red.shade200 : 
-                 theme.colorScheme.outline.withOpacity(0.3),
+          color: accentColor.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -306,34 +485,46 @@ class PortfolioSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
+          // Label and icon
           Row(
             children: [
-              if (indicatorIcon != null)
-                Icon(
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
                   indicatorIcon,
                   size: 14,
-                  color: textColor,
+                  color: accentColor,
                 ),
-              if (indicatorIcon != null) const SizedBox(width: 2),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  formattedValue,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          // Value
+          Text(
+            formattedValue,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: accentColor,
+              letterSpacing: -0.5,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
