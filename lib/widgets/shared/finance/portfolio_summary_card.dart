@@ -6,6 +6,7 @@ import '../../../core/models/portfolio/portfolio_models.dart';
 import 'package:intl/intl.dart';
 
 /// Widget to display portfolio summary information
+/// This widget is reusable across portfolio and trade management modules
 class PortfolioSummaryCard extends StatelessWidget {
   /// Portfolio summary data
   final PortfolioSummary summary;
@@ -128,26 +129,60 @@ class PortfolioSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Investment value with modern design
+                    // Investment and current values with modern design
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          currencyFormat.format(summary.investmentValue),
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                        // Investment value
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Invested',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                currencyFormat.format(summary.investmentValue),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            'Total Investment',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                              fontWeight: FontWeight.w500,
-                            ),
+                        
+                        // Current value
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Current',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                currencyFormat.format(summary.currentValue),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                  color: summary.currentValue >= summary.investmentValue 
+                                      ? Colors.green.shade700 
+                                      : Colors.red.shade700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -527,75 +562,6 @@ class PortfolioSummaryCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
-      ),
-    );
-  }
-  
-  /// Build a metric card with value indicator
-  Widget _buildMetricCard(BuildContext context, String label, double value, {
-    bool isPercentage = false,
-    bool useCompactFormat = false,
-  }) {
-    final theme = Theme.of(context);
-    
-    // Determine color based on value
-    Color cardColor;
-    IconData? indicatorIcon;
-    
-    if (value > 0) {
-      cardColor = Colors.green.shade50;
-      indicatorIcon = Icons.arrow_upward;
-    } else if (value < 0) {
-      cardColor = Colors.red.shade50;
-      indicatorIcon = Icons.arrow_downward;
-    } else {
-      cardColor = theme.colorScheme.surfaceVariant;
-      indicatorIcon = null;
-    }
-    
-    return Card(
-      color: cardColor,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Label
-            Text(
-              label,
-              style: theme.textTheme.bodySmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Spacer(),
-            // Value with indicator
-            Row(
-              children: [
-                if (indicatorIcon != null)
-                  Icon(
-                    indicatorIcon,
-                    size: 16,
-                    color: value > 0 ? Colors.green : Colors.red,
-                  ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: ValueIndicator(
-                    label: '',
-                    value: value,
-                    isPercentage: isPercentage,
-                    useCompactFormat: useCompactFormat,
-                    showIndicator: false,
-                    valueStyle: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

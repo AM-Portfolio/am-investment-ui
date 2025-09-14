@@ -1,103 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
-import '../../../core/services/auth_service.dart';
-import '../../../core/widgets/platform_widget.dart';
-import '../../portfolio/widgets/portfolio_summary_card.dart';
-import '../../portfolio/widgets/holdings_breakdown.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/services/api/portfolio_client.dart';
-import '../../../core/services/api/api_client.dart';
-import '../../../config/environment.dart';
+import '../../../core/widgets/platform_widget.dart';
+import '../../../widgets/shared/finance/portfolio_summary_card.dart';
+import '../../../widgets/shared/finance/holdings_breakdown.dart';
 
-/// Home screen displayed after login
-class HomeScreen extends StatefulWidget {
-  /// Constructor
-  const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
+/// Android-specific implementation of the home screen
+class HomeAndroidScreen extends StatelessWidget {
   /// Current navigation index
-  int _currentIndex = 0;
+  final int currentIndex;
   
-  /// Portfolio client for API calls
-  late final PortfolioClient _portfolioClient;
+  /// Callback when navigation index changes
+  final ValueChanged<int> onIndexChanged;
   
   /// Future for portfolio summary data
-  late Future<PortfolioSummary> _portfolioSummaryFuture;
+  final Future<PortfolioSummary> portfolioSummaryFuture;
   
-  /// Auth service instance
-  final _authService = AuthService();
+  /// Callback to refresh portfolio data
+  final Future<void> Function() onRefresh;
   
-  @override
-  void initState() {
-    super.initState();
-    _portfolioClient = PortfolioClient(
-      baseUrl: EnvironmentConfig.apiBaseUrl,
-      useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
-    );
-    _loadPortfolioSummary();
-  }
+  /// Callback when logout is requested
+  final VoidCallback onLogout;
   
-  /// Load portfolio summary data
-  void _loadPortfolioSummary() {
-    // Get user ID from auth service
-    final userId = _authService.currentState.user?.id ?? 'ssd2658';
-    debugPrint('Loading portfolio data for user: $userId');
-    
-    // Ensure we're using the live API first
-    _portfolioClient.useMockData = false;
-    
-    _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(userId).then((response) {
-      if (response.isSuccess) {
-        debugPrint('Successfully loaded portfolio data');
-        return response.data!;
-      } else {
-        debugPrint('Failed to load portfolio data: ${response.error}');
-        throw Exception(response.error ?? 'Failed to load portfolio data');
-      }
-    });
-  }
-  
-  /// Refresh portfolio data
-  Future<void> _refreshPortfolio() async {
-    // Show a loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Refreshing portfolio data...')),
-    );
-    
-    // Always try to fetch from the API when manually refreshing
-    _portfolioClient.useMockData = false;
-    
-    setState(() {
-      _loadPortfolioSummary();
-    });
-  }
-  
-  @override
-  void dispose() {
-    _portfolioClient.dispose();
-    super.dispose();
-  }
+  /// Constructor
+  const HomeAndroidScreen({
+    Key? key,
+    required this.currentIndex,
+    required this.onIndexChanged,
+    required this.portfolioSummaryFuture,
+    required this.onRefresh,
+    required this.onLogout,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return _HomeScreenContent(
-      currentIndex: _currentIndex,
-      onIndexChanged: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      portfolioSummaryFuture: _portfolioSummaryFuture,
-      onRefresh: _refreshPortfolio,
-      onLogout: () async {
-        await _authService.logout();
-        // Navigation will be handled by auth state listener in main.dart
-      },
+      currentIndex: currentIndex,
+      onIndexChanged: onIndexChanged,
+      portfolioSummaryFuture: portfolioSummaryFuture,
+      onRefresh: onRefresh,
+      onLogout: onLogout,
     );
   }
 }
@@ -224,7 +166,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
                 showDetails: false,
                 onTap: () {
                   // Navigate to detailed portfolio view
-                  // This will be implemented later
+                  Navigator.pushNamed(context, '/portfolio');
                 },
               ),
               
@@ -321,53 +263,28 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
   
   /// Build bottom navigation
   Widget _buildBottomNavigation(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && !kIsWeb) {
-      return CupertinoTabBar(
-        currentIndex: currentIndex,
-        onTap: onIndexChanged,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.chart_bar_fill),
-            label: 'Portfolio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.arrow_right_arrow_left),
-            label: 'Transactions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.news),
-            label: 'News',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.settings),
-            label: 'Settings',
-          ),
-        ],
-      );
-    } else {
-      return NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: onIndexChanged,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            label: 'Portfolio',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_horiz),
-            label: 'Transactions',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.newspaper),
-            label: 'News',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      );
-    }
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: onIndexChanged,
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.bar_chart),
+          label: 'Portfolio',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.swap_horiz),
+          label: 'Transactions',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.newspaper),
+          label: 'News',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
+      ],
+    );
   }
   
   /// Build drawer for material design
@@ -467,6 +384,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
               );
             },
           ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
@@ -482,74 +400,37 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
   
   /// Show profile options
   void _showProfileOptions(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && !kIsWeb) {
-      showCupertinoModalPopup(
-        context: context,
-        builder: (context) => CupertinoActionSheet(
-          title: const Text('Profile Options'),
-          actions: [
-            CupertinoActionSheetAction(
-              child: const Text('Account Settings'),
-              onPressed: () {
-                Navigator.pop(context);
-                // Will be implemented in future
-              },
-            ),
-            CupertinoActionSheetAction(
-              child: const Text('Help & Support'),
-              onPressed: () {
-                Navigator.pop(context);
-                // Will be implemented in future
-              },
-            ),
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () {
-                Navigator.pop(context);
-                onLogout();
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Account Settings'),
+            onTap: () {
+              Navigator.pop(context);
+              // Will be implemented in future
+            },
           ),
-        ),
-      );
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Account Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                // Will be implemented in future
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.help),
-              title: const Text('Help & Support'),
-              onTap: () {
-                Navigator.pop(context);
-                // Will be implemented in future
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(context);
-                onLogout();
-              },
-            ),
-          ],
-        ),
-      );
-    }
+          ListTile(
+            leading: const Icon(Icons.help),
+            title: const Text('Help & Support'),
+            onTap: () {
+              Navigator.pop(context);
+              // Will be implemented in future
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            onTap: () {
+              Navigator.pop(context);
+              onLogout();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

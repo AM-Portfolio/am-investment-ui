@@ -1,0 +1,3 @@
+@echo off
+echo Running Flutter in Edge on fixed port 8060 with reuse-window flag...
+flutter run -d edge --web-port=8060 --web-browser-flag="--reuse-window" %*

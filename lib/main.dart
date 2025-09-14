@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'config/environment.dart';
 import 'core/services/auth_service.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
-import 'features/home/screens/home_screen.dart';
+import 'features/home/home_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
+import 'features/portfolio/portfolio_summary_screen.dart';
 
 void main() {
   // Set environment based on compile-time constants
@@ -42,18 +45,38 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: EnvironmentConfig.settings['appTitle'],
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: EnvironmentConfig.environment == Environment.preprod ? Brightness.light : Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: EnvironmentConfig.environment == Environment.preprod ? Brightness.light : Brightness.light,
+        ),
+        useMaterial3: true,
       ),
-      initialRoute: _authState.isAuthenticated ? '/home' : '/login',
+      initialRoute: _getInitialRoute(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/portfolio': (context) => const PortfolioSummaryScreen(userId: 'ssd2658'),
       },
       debugShowCheckedModeBanner: EnvironmentConfig.environment == Environment.preprod,
     );
   }
+  
+  /// Get the initial route based on authentication state and platform
+  String _getInitialRoute() {
+    if (!_authState.isAuthenticated) {
+      return '/login';
+    }
+    
+    // For web, go to dashboard as default
+    if (kIsWeb) {
+      return '/dashboard';
+    }
+    
+    // For mobile, use the home screen
+    return '/home';
+  }
 }
 
-// HomeScreen is now imported from features/home/screens/home_screen.dart
+// HomeScreen is now imported from features/home/home_screen.dart

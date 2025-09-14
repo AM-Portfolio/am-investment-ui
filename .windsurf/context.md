@@ -12,26 +12,42 @@ AM Investment UI is a cross-platform Flutter application for investment manageme
 
 ```
 lib/
-├── core/                  # Shared infrastructure
-│   ├── constants/         # App-wide constants (colors, strings, routes)
-│   ├── theme/             # App theme (light/dark, text styles, etc.)
-│   ├── utils/             # Helpers (validators, formatters, extensions)
-│   ├── widgets/           # Reusable common widgets (buttons, loaders, inputs)
-│   ├── services/          # API, storage, navigation, etc.
-│   └── errors/            # Error handling
-│
-├── features/              # Feature-based modules
-│   ├── auth/              # Auth feature
-│   │   ├── presentation/  # UI (screens, widgets)
-│   │   ├── domain/        # Models, interfaces
-│   │   └── data/          # Repos, impl, API calls
+├── main.dart                     # Entry point
+├── core/
+│   ├── constants/
+│   │   └── app_constants.dart    # Colors, fonts, spacing
+│   ├── services/
+│   │   └── auth_service.dart     # API, Firebase, etc.
+│   └── utils/
+│       └── platform_utils.dart   # Helper for platform detection
+├── features/                     # Feature modules (clean architecture)
+│   ├── home/
+│   │   ├── home_screen.dart      # Shared logic + base widget
+│   │   ├── web/
+│   │   │   └── home_web_screen.dart      # Web-specific UI
+│   │   ├── ios/
+│   │   │   └── home_ios_screen.dart      # iOS-specific UI
+│   │   └── android/
+│   │       └── home_android_screen.dart  # Android-specific UI
 │   │
-│   └── ...                # Other features
-│
-├── shared/                # Cross-feature reusable logic
-├── routes/                # App routing
-├── di/                    # Dependency Injection
-└── main.dart              # Entry point
+│   ├── profile/
+│   │   ├── profile_screen.dart
+│   │   ├── web/profile_web_screen.dart
+│   │   ├── ios/profile_ios_screen.dart
+│   │   └── android/profile_android_screen.dart
+│   └── ...
+├── widgets/
+│   ├── shared/                   # Reusable across platforms
+│   │   ├── custom_button.dart
+│   │   └── card_widget.dart
+│   └── platform/                 # Platform-aware widgets
+│       ├── responsive_layout.dart
+│       └── platform_button.dart
+├── routes/
+│   └── app_router.dart           # GoRouter or Navigator 2.0 routing
+└── themes/
+    ├── light_theme.dart
+    └── dark_theme.dart
 ```
 
 ### State Management
