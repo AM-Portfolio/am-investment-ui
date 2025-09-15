@@ -75,8 +75,9 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate responsive padding based on screen size
-        final horizontalPadding = constraints.maxWidth * 0.02; // 2% of width
-        final verticalPadding = constraints.maxHeight * 0.02; // 2% of height
+        // Reduce padding to maximize available space for content
+        final horizontalPadding = constraints.maxWidth * 0.01; // 1% of width
+        final verticalPadding = constraints.maxHeight * 0.01; // 1% of height
         
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -86,16 +87,27 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Page title
-              Text(
-                'Portfolio Holdings',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              // Page title - make more compact
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Portfolio Holdings',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // Add refresh button at the top level for easier access
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _refreshHoldings,
+                    tooltip: 'Refresh holdings',
+                  ),
+                ],
               ),
-              SizedBox(height: constraints.maxHeight * 0.02), // 2% of height
+              SizedBox(height: constraints.maxHeight * 0.01), // 1% of height
               
-              // Holdings view - use remaining space
+              // Holdings view - give maximum space
               Expanded(
                 child: PortfolioHoldingsView(
                   holdingsFuture: _holdingsFuture,

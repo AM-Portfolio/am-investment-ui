@@ -63,37 +63,35 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Entry count selector
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0, right: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text('Show entries: ', 
-                        style: Theme.of(context).textTheme.bodyMedium,
+                // Entry count selector - make more compact
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('Show entries: ', 
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    DropdownButton<int>(
+                      value: _selectedEntryCount,
+                      isDense: true, // Make dropdown more compact
+                      underline: Container(
+                        height: 1,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      DropdownButton<int>(
-                        value: _selectedEntryCount,
-                        underline: Container(
-                          height: 1,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onChanged: (int? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _selectedEntryCount = newValue;
-                            });
-                          }
-                        },
-                        items: _entryCounts.map<DropdownMenuItem<int>>((int value) {
-                          return DropdownMenuItem<int>(
-                            value: value,
-                            child: Text('$value'),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
+                      onChanged: (int? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedEntryCount = newValue;
+                          });
+                        }
+                      },
+                      items: _entryCounts.map<DropdownMenuItem<int>>((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text('$value', style: Theme.of(context).textTheme.bodySmall),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
                 
                 // Holdings card with sortable table - use Expanded to fill available space
@@ -110,30 +108,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                   ),
                 ),
                 
-                // Action buttons - use fixed padding for consistency
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Export feature coming soon')),
-                          );
-                        },
-                        icon: const Icon(Icons.download_outlined),
-                        label: const Text('Export'),
-                      ),
-                      const SizedBox(width: 8.0),
-                      ElevatedButton.icon(
-                        onPressed: widget.onRefresh,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh'),
-                      ),
-                    ],
-                  ),
-                ),
+                // Removed bottom action buttons to maximize space for the table
               ],
             );
           },

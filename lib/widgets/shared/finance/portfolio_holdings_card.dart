@@ -66,12 +66,13 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
     _sortedHoldings = List.from(widget.holdings.equityHoldings);
     _sortedHoldings.sort((a, b) => b.weightInPortfolio.compareTo(a.weightInPortfolio));
     
-    // Calculate total pages
+    // Calculate total pages correctly
+    // If we have 59 records and maxHoldings is 50, we should have 2 pages (not 3)
     _totalPages = (_sortedHoldings.length / widget.maxHoldings).ceil();
     if (_totalPages == 0) _totalPages = 1; // At least one page even if empty
     
-    // Reset to first page when data changes
-    _currentPage = 0;
+    // Ensure current page is valid
+    _currentPage = min(_currentPage, max(0, _totalPages - 1));
   }
   
   void _nextPage() {
@@ -109,8 +110,8 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
         final List<EquityHolding> displayHoldings = _sortedHoldings.isEmpty ? <EquityHolding>[] : 
             _sortedHoldings.sublist(startIndex, endIndex);
         
-        // Use a fixed row height that works well for all content
-        final rowHeight = 40.0;
+        // Calculate dynamic row height based on container size
+        final rowHeight = constraints.maxHeight * 0.06; // 6% of container height
         
         return Card(
           elevation: 0,
@@ -120,47 +121,43 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
               color: theme.colorScheme.outline.withOpacity(0.2),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0), // Fixed padding for consistency
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: LayoutBuilder(
+            builder: (context, cardConstraints) {
+              // Minimal padding to maximize table space
+              final horizontalPadding = cardConstraints.maxWidth * 0.01;
+              final verticalPadding = cardConstraints.maxHeight * 0.01;
+              
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Compact header with title
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(6.0),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.account_balance,
-                            color: theme.colorScheme.primary,
-                            size: 16.0, // Fixed size for consistency
-                          ),
+                        Icon(
+                          Icons.account_balance,
+                          color: theme.colorScheme.primary,
+                          size: cardConstraints.maxWidth * 0.02,
                         ),
-                        const SizedBox(width: 8.0),
+                        SizedBox(width: cardConstraints.maxWidth * 0.01),
                         Text(
                           'Portfolio Holdings',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12.0),
                 
                 // Summary section if enabled
                 if (widget.showDetails) ...[                  
                   _buildSummarySection(theme, currencyFormat),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: cardConstraints.maxHeight * 0.01),
                 ],
                 
                 // Sortable table for holdings - use Expanded to fill available space
@@ -177,78 +174,70 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                   ),
                 ),
                 
-                const SizedBox(height: 12.0),
-                
-                // Pagination controls
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Pagination controls
-                    if (_totalPages > 1)
+                // Compact pagination controls integrated with table footer
+                if (_totalPages > 1)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Total holdings count
+                      Text(
+                        _sortedHoldings.isEmpty
+                            ? 'No holdings'
+                            : '${startIndex + 1}-$endIndex of ${_sortedHoldings.length}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: cardConstraints.maxWidth * 0.015,
+                        ),
+                      ),
+                      
+                      // Page navigation
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           // Previous page button
                           IconButton(
                             onPressed: _currentPage > 0 ? _previousPage : null,
-                            icon: const Icon(Icons.chevron_left),
+                            icon: const Icon(Icons.chevron_left, size: 16),
                             tooltip: 'Previous page',
                             color: theme.colorScheme.primary,
                             disabledColor: theme.colorScheme.onSurface.withOpacity(0.3),
-                            iconSize: 16.0, // Fixed size for consistency
                             padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 24.0, 
-                              minHeight: 24.0
-                            ),
+                            visualDensity: VisualDensity.compact,
+                            constraints: BoxConstraints.tightFor(),
                           ),
                           
                           // Page indicator
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              'Page ${_currentPage + 1} of $_totalPages',
-                              style: theme.textTheme.bodySmall,
+                          Text(
+                            '${_currentPage + 1}/$_totalPages',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: cardConstraints.maxWidth * 0.015,
                             ),
                           ),
                           
                           // Next page button
                           IconButton(
                             onPressed: _currentPage < _totalPages - 1 ? _nextPage : null,
-                            icon: const Icon(Icons.chevron_right),
+                            icon: const Icon(Icons.chevron_right, size: 16),
                             tooltip: 'Next page',
                             color: theme.colorScheme.primary,
                             disabledColor: theme.colorScheme.onSurface.withOpacity(0.3),
-                            iconSize: 16.0, // Fixed size for consistency
                             padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 24.0,
-                              minHeight: 24.0
-                            ),
+                            visualDensity: VisualDensity.compact,
+                            constraints: BoxConstraints.tightFor(),
                           ),
                         ],
                       ),
-                    
-                    const SizedBox(height: 4.0),
-                    
-                    // Total holdings count
-                    Text(
-                      'Showing ${startIndex + 1}-$endIndex of ${_sortedHoldings.length} holdings',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+                    ],
+                  ),
+                ],
+              ),
+          },
+        ),
+      );
+    }
   }
   
-  /// Build summary section with fixed sizing
+  /// Build summary section with dynamic sizing
   Widget _buildSummarySection(ThemeData theme, NumberFormat currencyFormat) {
     // Calculate total investment and current value
     double totalInvestment = 0;
@@ -270,11 +259,11 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
     final valueColor = isPositive ? Colors.green.shade700 : Colors.red.shade700;
     
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.1),
         ),
@@ -291,14 +280,16 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                   'Investment',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: 2.0),
                 Text(
                   currencyFormat.format(totalInvestment),
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -316,15 +307,16 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                   'Current Value',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: 2.0),
                 Text(
                   currencyFormat.format(totalCurrentValue),
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: valueColor,
+                    fontSize: 12,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -342,39 +334,31 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                   'Gain/Loss',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: 2.0),
                 Row(
                   children: [
-                    Flexible(
-                      child: Text(
-                        '${isPositive ? "+" : ""}${currencyFormat.format(totalGainLoss)}',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: valueColor,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      '${isPositive ? '+' : ''}${currencyFormat.format(totalGainLoss)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: valueColor,
+                        fontSize: 12,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 4.0),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4.0,
-                        vertical: 2.0,
+                    const SizedBox(width: 2.0),
+                    Text(
+                      '(${isPositive ? '+' : ''}${totalGainLossPercentage.toStringAsFixed(1)}%)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: valueColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
                       ),
-                      decoration: BoxDecoration(
-                        color: valueColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '${isPositive ? "+" : ""}${totalGainLossPercentage.toStringAsFixed(2)}%',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: valueColor,
-                        ),
-                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
