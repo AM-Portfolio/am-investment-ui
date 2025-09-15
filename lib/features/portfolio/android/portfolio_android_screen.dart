@@ -12,11 +12,15 @@ class PortfolioAndroidScreen extends StatelessWidget {
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
   
+  /// User ID for portfolio data
+  final String userId;
+  
   /// Constructor
   const PortfolioAndroidScreen({
     Key? key,
     required this.portfolioSummaryFuture,
     required this.refreshPortfolio,
+    required this.userId,
   }) : super(key: key);
 
   @override

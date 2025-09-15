@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'api_exception.dart';
 
 /// Base API client for handling HTTP requests
 class ApiClient {
@@ -49,12 +50,12 @@ class ApiClient {
         final errorData = jsonDecode(response.body);
         throw ApiException(
           errorData['message'] ?? 'Unknown error',
-          code: response.statusCode,
+          statusCode: response.statusCode,
         );
       } catch (_) {
         throw ApiException(
           'Error ${response.statusCode}: ${response.reasonPhrase}',
-          code: response.statusCode,
+          statusCode: response.statusCode,
         );
       }
     }
@@ -188,20 +189,7 @@ class ApiClient {
   }
 }
 
-/// Exception thrown when API requests fail
-class ApiException implements Exception {
-  /// Error message
-  final String message;
-  
-  /// HTTP status code
-  final int? code;
-  
-  /// Constructor
-  ApiException(this.message, {this.code});
-  
-  @override
-  String toString() => 'ApiException: $message (code: $code)';
-}
+// ApiException is now imported from api_exception.dart
 
 /// API response wrapper
 class ApiResponse<T> {

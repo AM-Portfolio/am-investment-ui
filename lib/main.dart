@@ -6,7 +6,7 @@ import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
-import 'features/portfolio/portfolio_summary_screen.dart';
+import 'features/portfolio/portfolio_screen.dart';
 
 void main() {
   // Set environment based on compile-time constants
@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
         '/dashboard': (context) => const DashboardScreen(),
-        '/portfolio': (context) => const PortfolioSummaryScreen(userId: 'ssd2658'),
+        '/portfolio': (context) => const PortfolioScreen(userId: 'ssd2658'),
       },
       debugShowCheckedModeBanner: EnvironmentConfig.environment == Environment.preprod,
     );

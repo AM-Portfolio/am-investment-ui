@@ -159,15 +159,19 @@ class WebLayout extends StatelessWidget {
           Container(
             color: theme.colorScheme.primaryContainer,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                _buildNavItem(context, 'Dashboard', Icons.dashboard),
-                _buildNavItem(context, 'Portfolio', Icons.bar_chart),
-                _buildNavItem(context, 'Trade', Icons.swap_horiz),
-                _buildNavItem(context, 'Market', Icons.trending_up),
-                _buildNavItem(context, 'News', Icons.newspaper),
-                _buildNavItem(context, 'Reports', Icons.analytics),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildNavItem(context, 'Dashboard', Icons.dashboard),
+                  _buildNavItem(context, 'Portfolio', Icons.bar_chart),
+                  _buildNavItem(context, 'Trade', Icons.swap_horiz),
+                  _buildNavItem(context, 'Market', Icons.trending_up),
+                  _buildNavItem(context, 'News', Icons.newspaper),
+                  _buildNavItem(context, 'Reports', Icons.analytics),
+                ],
+              ),
             ),
           ),
         ],

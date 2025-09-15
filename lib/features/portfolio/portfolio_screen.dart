@@ -8,23 +8,23 @@ import 'web/portfolio_web_screen.dart';
 import 'ios/portfolio_ios_screen.dart';
 import 'android/portfolio_android_screen.dart';
 
-/// Screen to display portfolio summary information
+/// Screen to display portfolio information
 /// This is the base class that handles shared logic and delegates UI to platform-specific implementations
-class PortfolioSummaryScreen extends StatefulWidget {
+class PortfolioScreen extends StatefulWidget {
   /// User ID for portfolio data
   final String userId;
   
   /// Constructor
-  const PortfolioSummaryScreen({
+  const PortfolioScreen({
     Key? key,
     required this.userId,
   }) : super(key: key);
 
   @override
-  State<PortfolioSummaryScreen> createState() => _PortfolioSummaryScreenState();
+  State<PortfolioScreen> createState() => _PortfolioScreenState();
 }
 
-class _PortfolioSummaryScreenState extends State<PortfolioSummaryScreen> {
+class _PortfolioScreenState extends State<PortfolioScreen> {
   /// Portfolio client for API calls
   late final PortfolioClient _portfolioClient;
   
@@ -88,18 +88,20 @@ class _PortfolioSummaryScreenState extends State<PortfolioSummaryScreen> {
     // Delegate to platform-specific implementations
     if (PlatformUtils.isWeb) {
       return PortfolioWebScreen(
-        portfolioSummaryFuture: _portfolioSummaryFuture,
         refreshPortfolio: _refreshPortfolio,
+        userId: widget.userId,
       );
     } else if (PlatformUtils.isIOS) {
       return PortfolioIOSScreen(
         portfolioSummaryFuture: _portfolioSummaryFuture,
         refreshPortfolio: _refreshPortfolio,
+        userId: widget.userId,
       );
     } else {
       return PortfolioAndroidScreen(
         portfolioSummaryFuture: _portfolioSummaryFuture,
         refreshPortfolio: _refreshPortfolio,
+        userId: widget.userId,
       );
     }
   }

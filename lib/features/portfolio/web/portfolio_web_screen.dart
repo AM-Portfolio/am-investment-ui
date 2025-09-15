@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/services/api/api_client.dart';
-import '../../../widgets/shared/finance/portfolio_summary_card.dart';
-import '../../../widgets/shared/finance/holdings_breakdown.dart';
+import '../../../core/models/portfolio/portfolio_holdings.dart';
+import '../../../core/services/api/portfolio_client.dart';
+import '../../../widgets/shared/finance/portfolio_holdings_view.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
 
-/// Web-specific implementation of the portfolio summary screen
-class PortfolioWebScreen extends StatelessWidget {
-  /// Future for portfolio summary data
-  final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
+/// Web-specific implementation of the portfolio screen
+/// Simplified version that only shows portfolio holdings
+class PortfolioWebScreen extends StatefulWidget {
+  /// User ID for portfolio data
+  final String userId;
   
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
@@ -16,161 +16,102 @@ class PortfolioWebScreen extends StatelessWidget {
   /// Constructor
   const PortfolioWebScreen({
     Key? key,
-    required this.portfolioSummaryFuture,
     required this.refreshPortfolio,
+    required this.userId,
   }) : super(key: key);
+  
+  @override
+  State<PortfolioWebScreen> createState() => _PortfolioWebScreenState();
+}
 
+class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
+  // Portfolio client for API calls
+  late final PortfolioClient _portfolioClient;
+  
+  // Future for portfolio holdings data
+  late Future<PortfolioHoldings> _holdingsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApiClient();
+    _loadHoldings();
+  }
+  
+  /// Initialize API client
+  void _initializeApiClient() {
+    _portfolioClient = PortfolioClient(
+      baseUrl: 'http://localhost:8082',
+      useMockData: false, // Using real API data
+    );
+    debugPrint('Portfolio client initialized with baseUrl: http://localhost:8082');
+  }
+  
+  /// Load portfolio holdings data
+  void _loadHoldings() {
+    debugPrint('Loading portfolio holdings for user: ${widget.userId}');
+    _holdingsFuture = _portfolioClient.getPortfolioHoldings(widget.userId);
+  }
+  
+  /// Refresh holdings data
+  void _refreshHoldings() {
+    debugPrint('Refreshing portfolio holdings for user: ${widget.userId}');
+    setState(() {
+      _loadHoldings();
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return WebLayout(
-      title: 'Portfolio Summary',
+      title: 'Portfolio Holdings',
       activeNavItem: 'Portfolio',
-      child: _buildPortfolioContent(context),
+      child: _buildContent(),
     );
   }
   
-  /// Build the portfolio content
-  Widget _buildPortfolioContent(BuildContext context) {
-    return FutureBuilder<ApiResponse<PortfolioSummary>>(
-      future: portfolioSummaryFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+  /// Build the main content
+  Widget _buildContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive padding based on screen size
+        final horizontalPadding = constraints.maxWidth * 0.02; // 2% of width
+        final verticalPadding = constraints.maxHeight * 0.02; // 2% of height
         
-        if (snapshot.hasError) {
-          return _buildErrorState(context, snapshot.error.toString());
-        }
-        
-        final response = snapshot.data!;
-        
-        if (!response.isSuccess) {
-          return _buildErrorState(context, response.error ?? 'Unknown error');
-        }
-        
-        final summary = response.data!;
-        
-        // Web-specific layout with responsive design
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Page title
-                  Text(
-                    'Portfolio Summary',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Portfolio content
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left column - Summary card
-                      Expanded(
-                        flex: 3,
-                        child: PortfolioSummaryCard(
-                          summary: summary,
-                          showDetails: true,
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      // Right column - Holdings breakdown
-                      Expanded(
-                        flex: 4,
-                        child: HoldingsBreakdown(
-                          summary: summary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Action buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          // Export portfolio
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Export feature coming soon')),
-                          );
-                        },
-                        icon: const Icon(Icons.download),
-                        label: const Text('Export'),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: refreshPortfolio,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh'),
-                      ),
-                    ],
-                  ),
-                ],
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Page title
+              Text(
+                'Portfolio Holdings',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              SizedBox(height: constraints.maxHeight * 0.02), // 2% of height
+              
+              // Holdings view - use remaining space
+              Expanded(
+                child: PortfolioHoldingsView(
+                  holdingsFuture: _holdingsFuture,
+                  onRefresh: _refreshHoldings,
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
-
-  /// Build error state widget
-  Widget _buildErrorState(BuildContext context, String errorMessage) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
-        child: Card(
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Error loading portfolio data',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  errorMessage,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: refreshPortfolio,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  
+  @override
+  void dispose() {
+    _portfolioClient.dispose();
+    super.dispose();
   }
 }
