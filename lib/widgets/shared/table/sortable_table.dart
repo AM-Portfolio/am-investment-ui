@@ -92,7 +92,6 @@ class SortableTable<T> extends StatefulWidget {
 }
 
 class _SortableTableState<T> extends State<SortableTable<T>> {
-  static const double _headerHeight = 44.0;
   late int _sortColumnIndex;
   late SortDirection _sortDirection;
   late List<T> _sortedItems;
@@ -211,7 +210,6 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
             // Table header
             Container(
               color: widget.headerBackgroundColor ?? theme.colorScheme.surface,
-              height: _headerHeight,
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [

@@ -124,9 +124,12 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
             ? <EquityHolding>[]
             : _sortedHoldings.sublist(startIndex, endIndex);
 
-        // Use a fixed, compact row height so selected entry count fits
-        // This avoids cases where tall dynamic rows reduce visible entries
-        const double rowHeight = 48.0;
+        // Responsive row height based on text size and scale factor
+        final baseFontSize = theme.textTheme.bodyMedium?.fontSize ?? 14.0;
+        final textScale = MediaQuery.textScaleFactorOf(context);
+        final double rowHeight = (baseFontSize * 2.6 * textScale)
+            .clamp(40.0, 64.0)
+            .toDouble();
 
         return Card(
           elevation: 0,
@@ -173,29 +176,18 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                       SizedBox(height: cardConstraints.maxHeight * 0.01),
                     ],
 
-                    // Sortable table for holdings - size to show exactly
-                    // the selected number of entries (no extra scrolling).
-                    Builder(
-                      builder: (_) {
-                        // Header + divider inside SortableTable is ~48px
-                        const double headerAndDivider = 48.0;
-                        final int visibleRows = displayHoldings.length;
-                        final double tableHeight =
-                            headerAndDivider + (visibleRows * rowHeight);
-                        return SizedBox(
-                          height: tableHeight,
-                          child: SortableTable<EquityHolding>(
-                            items: displayHoldings,
-                            columns: _buildColumns(currencyFormat),
-                            initialSortColumnIndex:
-                                2, // Sort by current value initially
-                            initialSortDirection: SortDirection.descending,
-                            onItemTap: widget.onHoldingTap,
-                            showDividers: true,
-                            rowHeight: rowHeight,
-                          ),
-                        );
-                      },
+                    // Sortable table for holdings - fill remaining space and scroll
+                    Expanded(
+                      child: SortableTable<EquityHolding>(
+                        items: displayHoldings,
+                        columns: _buildColumns(currencyFormat),
+                        initialSortColumnIndex:
+                            2, // Sort by current value initially
+                        initialSortDirection: SortDirection.descending,
+                        onItemTap: widget.onHoldingTap,
+                        showDividers: true,
+                        rowHeight: rowHeight,
+                      ),
                     ),
 
                     // Compact pagination controls integrated with table footer
