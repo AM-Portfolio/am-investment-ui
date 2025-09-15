@@ -3,28 +3,39 @@ import 'package:flutter/material.dart';
 /// A widget that displays watchlist information
 class Watchlist extends StatelessWidget {
   /// Constructor
-  const Watchlist({
-    Key? key,
-  }) : super(key: key);
+  const Watchlist({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dummy watchlist data
     final watchlist = [
-      {'symbol': 'RELIANCE', 'price': '₹2,890.45', 'change': '+1.8%', 'isPositive': true},
-      {'symbol': 'TATASTEEL', 'price': '₹145.75', 'change': '-0.5%', 'isPositive': false},
-      {'symbol': 'ICICIBANK', 'price': '₹978.30', 'change': '+0.7%', 'isPositive': true},
+      {
+        'symbol': 'RELIANCE',
+        'price': '₹2,890.45',
+        'change': '+1.8%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'TATASTEEL',
+        'price': '₹145.75',
+        'change': '-0.5%',
+        'isPositive': false,
+      },
+      {
+        'symbol': 'ICICIBANK',
+        'price': '₹978.30',
+        'change': '+0.7%',
+        'isPositive': true,
+      },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,7 +61,10 @@ class Watchlist extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: (item['isPositive'] as bool)
                                 ? Colors.green.withOpacity(0.1)
@@ -85,25 +99,75 @@ class Watchlist extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Show full watchlist dialog
   static void showFullWatchlist(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Extended watchlist data for full view
     final extendedWatchlist = [
-      {'symbol': 'RELIANCE', 'price': '₹2,890.45', 'change': '+1.8%', 'isPositive': true},
-      {'symbol': 'TATASTEEL', 'price': '₹145.75', 'change': '-0.5%', 'isPositive': false},
-      {'symbol': 'ICICIBANK', 'price': '₹978.30', 'change': '+0.7%', 'isPositive': true},
-      {'symbol': 'HDFCBANK', 'price': '₹1,675.20', 'change': '+0.3%', 'isPositive': true},
-      {'symbol': 'INFY', 'price': '₹1,850.60', 'change': '+2.1%', 'isPositive': true},
-      {'symbol': 'TCS', 'price': '₹3,450.75', 'change': '-0.2%', 'isPositive': false},
-      {'symbol': 'WIPRO', 'price': '₹425.30', 'change': '+1.5%', 'isPositive': true},
-      {'symbol': 'SBIN', 'price': '₹567.80', 'change': '+0.8%', 'isPositive': true},
-      {'symbol': 'AXISBANK', 'price': '₹890.45', 'change': '-0.7%', 'isPositive': false},
-      {'symbol': 'MARUTI', 'price': '₹9,875.60', 'change': '+1.2%', 'isPositive': true},
+      {
+        'symbol': 'RELIANCE',
+        'price': '₹2,890.45',
+        'change': '+1.8%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'TATASTEEL',
+        'price': '₹145.75',
+        'change': '-0.5%',
+        'isPositive': false,
+      },
+      {
+        'symbol': 'ICICIBANK',
+        'price': '₹978.30',
+        'change': '+0.7%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'HDFCBANK',
+        'price': '₹1,675.20',
+        'change': '+0.3%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'INFY',
+        'price': '₹1,850.60',
+        'change': '+2.1%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'TCS',
+        'price': '₹3,450.75',
+        'change': '-0.2%',
+        'isPositive': false,
+      },
+      {
+        'symbol': 'WIPRO',
+        'price': '₹425.30',
+        'change': '+1.5%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'SBIN',
+        'price': '₹567.80',
+        'change': '+0.8%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'AXISBANK',
+        'price': '₹890.45',
+        'change': '-0.7%',
+        'isPositive': false,
+      },
+      {
+        'symbol': 'MARUTI',
+        'price': '₹9,875.60',
+        'change': '+1.2%',
+        'isPositive': true,
+      },
     ];
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -146,7 +210,7 @@ class Watchlist extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Column headers
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -157,7 +221,9 @@ class Watchlist extends StatelessWidget {
                               'Symbol',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.6,
+                                ),
                               ),
                             ),
                             Row(
@@ -168,7 +234,8 @@ class Watchlist extends StatelessWidget {
                                     'Price',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -179,7 +246,8 @@ class Watchlist extends StatelessWidget {
                                     'Change',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -190,11 +258,14 @@ class Watchlist extends StatelessWidget {
                         ),
                       ),
                       const Divider(),
-                      
+
                       // Watchlist items
                       for (final item in extendedWatchlist)
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 8.0,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -217,7 +288,10 @@ class Watchlist extends StatelessWidget {
                                   SizedBox(
                                     width: 80,
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: (item['isPositive'] as bool)
                                             ? Colors.green.withOpacity(0.1)
@@ -226,12 +300,14 @@ class Watchlist extends StatelessWidget {
                                       ),
                                       child: Text(
                                         item['change'] as String,
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: (item['isPositive'] as bool)
-                                              ? Colors.green
-                                              : Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color:
+                                                  (item['isPositive'] as bool)
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
@@ -253,7 +329,9 @@ class Watchlist extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Add Stock feature coming soon')),
+                        const SnackBar(
+                          content: Text('Add Stock feature coming soon'),
+                        ),
                       );
                     },
                     icon: const Icon(Icons.add),

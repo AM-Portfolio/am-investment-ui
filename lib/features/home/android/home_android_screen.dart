@@ -9,28 +9,28 @@ import '../../../widgets/shared/finance/holdings_breakdown.dart';
 class HomeAndroidScreen extends StatelessWidget {
   /// Current navigation index
   final int currentIndex;
-  
+
   /// Callback when navigation index changes
   final ValueChanged<int> onIndexChanged;
-  
+
   /// Future for portfolio summary data
   final Future<PortfolioSummary> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() onRefresh;
-  
+
   /// Callback when logout is requested
   final VoidCallback onLogout;
-  
+
   /// Constructor
   const HomeAndroidScreen({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onIndexChanged,
     required this.portfolioSummaryFuture,
     required this.onRefresh,
     required this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,31 +45,31 @@ class HomeAndroidScreen extends StatelessWidget {
 }
 
 /// Platform-adaptive home screen content
-class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold> {
+class _HomeScreenContent
+    extends PlatformWidget<CupertinoPageScaffold, Scaffold> {
   /// Current navigation index
   final int currentIndex;
-  
+
   /// Callback when navigation index changes
   final ValueChanged<int> onIndexChanged;
-  
+
   /// Future for portfolio summary data
   final Future<PortfolioSummary> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() onRefresh;
-  
+
   /// Callback when logout is requested
   final VoidCallback onLogout;
-  
+
   /// Constructor
   const _HomeScreenContent({
-    Key? key,
     required this.currentIndex,
     required this.onIndexChanged,
     required this.portfolioSummaryFuture,
     required this.onRefresh,
     required this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   CupertinoPageScaffold buildIosWidget(BuildContext context) {
@@ -82,9 +82,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
           onPressed: () => _showProfileOptions(context),
         ),
       ),
-      child: SafeArea(
-        child: _buildBody(context),
-      ),
+      child: SafeArea(child: _buildBody(context)),
     );
   }
 
@@ -105,23 +103,19 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
       bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
-  
+
   /// Build the main body content
   Widget _buildBody(BuildContext context) {
     // Currently we only have the portfolio view
     // In the future, we can switch based on currentIndex
     return CustomScrollView(
       slivers: [
-        CupertinoSliverRefreshControl(
-          onRefresh: onRefresh,
-        ),
-        SliverToBoxAdapter(
-          child: _buildPortfolioContent(context),
-        ),
+        CupertinoSliverRefreshControl(onRefresh: onRefresh),
+        SliverToBoxAdapter(child: _buildPortfolioContent(context)),
       ],
     );
   }
-  
+
   /// Build the portfolio content
   Widget _buildPortfolioContent(BuildContext context) {
     return Padding(
@@ -137,17 +131,17 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
               ),
             );
           }
-          
+
           if (snapshot.hasError) {
             return _buildErrorView(
-              context, 
+              context,
               'Error loading portfolio data',
               snapshot.error.toString(),
             );
           }
-          
+
           final summary = snapshot.data!;
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -159,7 +153,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-              
+
               // Portfolio summary card
               PortfolioSummaryCard(
                 summary: summary,
@@ -169,17 +163,15 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
                   Navigator.pushNamed(context, '/portfolio');
                 },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Holdings breakdown
-              HoldingsBreakdown(
-                summary: summary,
-              ),
-              
+              HoldingsBreakdown(summary: summary),
+
               // Space for additional panels in the future
               const SizedBox(height: 32),
-              
+
               // Placeholder for future panels
               _buildPlaceholderPanel(
                 context,
@@ -187,9 +179,9 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
                 'View your recent investment activities',
                 Icons.history,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               _buildPlaceholderPanel(
                 context,
                 'Market News',
@@ -202,7 +194,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
       ),
     );
   }
-  
+
   /// Build a placeholder panel for future features
   Widget _buildPlaceholderPanel(
     BuildContext context,
@@ -218,14 +210,14 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           // Will be implemented in future
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title coming soon!')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$title coming soon!')));
         },
       ),
     );
   }
-  
+
   /// Build error view
   Widget _buildErrorView(BuildContext context, String title, String message) {
     return Center(
@@ -234,16 +226,9 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               message,
@@ -251,65 +236,47 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onRefresh,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRefresh, child: const Text('Retry')),
           ],
         ),
       ),
     );
   }
-  
+
   /// Build bottom navigation
   Widget _buildBottomNavigation(BuildContext context) {
     return NavigationBar(
       selectedIndex: currentIndex,
       onDestinationSelected: onIndexChanged,
       destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.bar_chart),
-          label: 'Portfolio',
-        ),
+        NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Portfolio'),
         NavigationDestination(
           icon: Icon(Icons.swap_horiz),
           label: 'Transactions',
         ),
-        NavigationDestination(
-          icon: Icon(Icons.newspaper),
-          label: 'News',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.settings),
-          label: 'Settings',
-        ),
+        NavigationDestination(icon: Icon(Icons.newspaper), label: 'News'),
+        NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
       ],
     );
   }
-  
+
   /// Build drawer for material design
   Widget _buildDrawer(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-            ),
+            decoration: BoxDecoration(color: theme.colorScheme.primary),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 30,
-                    color: Colors.blueGrey,
-                  ),
+                  child: Icon(Icons.person, size: 30, color: Colors.blueGrey),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -397,7 +364,7 @@ class _HomeScreenContent extends PlatformWidget<CupertinoPageScaffold, Scaffold>
       ),
     );
   }
-  
+
   /// Show profile options
   void _showProfileOptions(BuildContext context) {
     showModalBottomSheet(

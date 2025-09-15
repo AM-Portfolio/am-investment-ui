@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/utils/validators.dart';
 import '../../../../core/services/auth_service.dart';
 import '../widgets/modern_login_form.dart';
 import '../widgets/animated_login_elements.dart';
@@ -12,7 +9,7 @@ import '../widgets/app_logo.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -23,12 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  
+
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   LoginMethod _selectedLoginMethod = LoginMethod.email;
-  
+
   @override
   void dispose() {
     _identifierController.dispose();
@@ -67,14 +64,14 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }
-  
+
   // Quick login with test user
   Future<void> _quickLogin() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     // Set the appropriate identifier based on selected login method
     switch (_selectedLoginMethod) {
       case LoginMethod.email:
@@ -87,12 +84,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _identifierController.text = '+1234567890';
         break;
     }
-    
+
     _passwordController.text = 'password123';
-    
+
     // Small delay to show the filled fields before login
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     final result = await _authService.login(
       _identifierController.text.trim(),
       _passwordController.text,
@@ -114,21 +111,21 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }
-  
+
   // Login specifically as SSD2658 user
   Future<void> _ssdLogin() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     // Set credentials for SSD2658 user
     _identifierController.text = 'ssd2658';
     _passwordController.text = 'password';
-    
+
     // Small delay to show the filled fields before login
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     final result = await _authService.login(
       _identifierController.text.trim(),
       _passwordController.text,
@@ -154,18 +151,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     // Set system overlay style for status bar
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Theme.of(context).primaryColor,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ));
-    
-    return Scaffold(
-      body: LoginBackground(
-        child: _buildResponsiveLayout(),
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Theme.of(context).primaryColor,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
     );
+
+    return Scaffold(body: LoginBackground(child: _buildResponsiveLayout()));
   }
 
   Widget _buildResponsiveLayout() {
@@ -206,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     delay: 0,
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Login form
                   _buildLoginForm(),
                 ],
@@ -239,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 delay: 0,
               ),
               const SizedBox(height: 40),
-              
+
               // Login form with glass effect
               Container(
                 decoration: BoxDecoration(
@@ -277,22 +272,32 @@ class _LoginScreenState extends State<LoginScreen> {
         onForgotPassword: () {
           // Navigate to forgot password screen
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Forgot password feature coming soon')),
+            const SnackBar(
+              content: Text('Forgot password feature coming soon'),
+            ),
           );
         },
         onRegister: () {
           Navigator.push(
             context,
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => const RegisterScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0);
-                const end = Offset.zero;
-                const curve = Curves.easeInOutCubic;
-                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                var offsetAnimation = animation.drive(tween);
-                return SlideTransition(position: offsetAnimation, child: child);
-              },
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const RegisterScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    const begin = Offset(1.0, 0.0);
+                    const end = Offset.zero;
+                    const curve = Curves.easeInOutCubic;
+                    var tween = Tween(
+                      begin: begin,
+                      end: end,
+                    ).chain(CurveTween(curve: curve));
+                    var offsetAnimation = animation.drive(tween);
+                    return SlideTransition(
+                      position: offsetAnimation,
+                      child: child,
+                    );
+                  },
             ),
           );
         },
@@ -308,5 +313,4 @@ class _LoginScreenState extends State<LoginScreen> {
       delay: 200,
     );
   }
-  
 }

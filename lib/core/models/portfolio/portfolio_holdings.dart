@@ -1,14 +1,10 @@
-import 'package:flutter/foundation.dart';
-
 /// Model class for portfolio holdings response
 class PortfolioHoldings {
   /// List of equity holdings
   final List<EquityHolding> equityHoldings;
 
   /// Constructor
-  PortfolioHoldings({
-    required this.equityHoldings,
-  });
+  PortfolioHoldings({required this.equityHoldings});
 
   /// Create from JSON
   factory PortfolioHoldings.fromJson(Map<String, dynamic> json) {
@@ -21,9 +17,7 @@ class PortfolioHoldings {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'equityHoldings': equityHoldings.map((e) => e.toJson()).toList(),
-    };
+    return {'equityHoldings': equityHoldings.map((e) => e.toJson()).toList()};
   }
 }
 
@@ -31,49 +25,49 @@ class PortfolioHoldings {
 class EquityHolding {
   /// ISIN code
   final String isin;
-  
+
   /// Stock symbol
   final String symbol;
-  
+
   /// Sector
   final String sector;
-  
+
   /// Industry
   final String industry;
-  
+
   /// Market capitalization category
   final String marketCap;
-  
+
   /// Quantity of shares
   final double quantity;
-  
+
   /// Investment cost
   final double investmentCost;
-  
+
   /// Current value
   final double currentValue;
-  
+
   /// Weight in portfolio (percentage)
   final double weightInPortfolio;
-  
+
   /// Total gain/loss
   final double gainLoss;
-  
+
   /// Total gain/loss percentage
   final double gainLossPercentage;
-  
+
   /// Today's gain/loss
   final double todayGainLoss;
-  
+
   /// Today's gain/loss percentage
   final double todayGainLossPercentage;
-  
+
   /// Current price per share
   final double currentPrice;
-  
+
   /// Percentage change today
   final double percentageChange;
-  
+
   /// Broker portfolios containing this holding
   final List<BrokerHolding> brokerPortfolios;
 
@@ -117,12 +111,12 @@ class EquityHolding {
       percentageChange: _parseDouble(json['percentageChange']),
       brokerPortfolios: json['brokerPortfolios'] != null
           ? (json['brokerPortfolios'] as List)
-              .map((e) => BrokerHolding.fromJson(e))
-              .toList()
+                .map((e) => BrokerHolding.fromJson(e))
+                .toList()
           : [],
     );
   }
-  
+
   /// Helper method to parse double values safely
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
@@ -165,15 +159,12 @@ class EquityHolding {
 class BrokerHolding {
   /// Broker type
   final String brokerType;
-  
+
   /// Quantity of shares
   final double quantity;
 
   /// Constructor
-  BrokerHolding({
-    required this.brokerType,
-    required this.quantity,
-  });
+  BrokerHolding({required this.brokerType, required this.quantity});
 
   /// Create from JSON
   factory BrokerHolding.fromJson(Map<String, dynamic> json) {
@@ -185,9 +176,6 @@ class BrokerHolding {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'brokerType': brokerType,
-      'quantity': quantity,
-    };
+    return {'brokerType': brokerType, 'quantity': quantity};
   }
 }

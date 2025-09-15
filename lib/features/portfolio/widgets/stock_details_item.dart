@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/widgets/value_indicator.dart';
 import 'package:intl/intl.dart';
 
 /// Widget to display detailed information about a stock
 class StockDetailsItem extends StatelessWidget {
   /// The asset holding data
   final AssetHolding asset;
-  
+
   /// Whether to show expanded details
   final bool showDetails;
-  
+
   /// Callback when the item is tapped
   final VoidCallback? onTap;
-  
+
   /// Constructor
   const StockDetailsItem({
-    Key? key,
+    super.key,
     required this.asset,
     this.showDetails = false,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class StockDetailsItem extends StatelessWidget {
       locale: 'en_IN',
       decimalDigits: 2,
     );
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
@@ -48,7 +47,10 @@ class StockDetailsItem extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(4),
@@ -64,7 +66,7 @@ class StockDetailsItem extends StatelessWidget {
                       const SizedBox(width: 8),
                       if (asset.marketCap != null)
                         _buildChip(
-                          context, 
+                          context,
                           _formatMarketCap(asset.marketCap!),
                           color: _getMarketCapColor(context, asset.marketCap!),
                         ),
@@ -78,9 +80,9 @@ class StockDetailsItem extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Quantity and sector info
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,28 +100,25 @@ class StockDetailsItem extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               // Expanded details section
               if (showDetails) ...[
                 const Divider(height: 24),
-                
+
                 // ISIN code
                 _buildDetailRow(context, 'ISIN', asset.isin),
-                
+
                 // Industry if different from sector
                 if (asset.industry != null && asset.industry != asset.sector)
                   _buildDetailRow(context, 'Industry', asset.industry!),
-                
+
                 // Broker breakdown
                 if (asset.brokerPortfolios.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(
-                    'Broker Breakdown',
-                    style: theme.textTheme.titleSmall,
-                  ),
+                  Text('Broker Breakdown', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 4),
-                  ...asset.brokerPortfolios.map((broker) => 
-                    Padding(
+                  ...asset.brokerPortfolios.map(
+                    (broker) => Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,7 +136,7 @@ class StockDetailsItem extends StatelessWidget {
                   ),
                 ],
               ],
-              
+
               // Show more/less button
               if (onTap != null)
                 Align(
@@ -153,11 +152,11 @@ class StockDetailsItem extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build a detail row with label and value
   Widget _buildDetailRow(BuildContext context, String label, String value) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -169,19 +168,16 @@ class StockDetailsItem extends StatelessWidget {
               color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium,
-          ),
+          Text(value, style: theme.textTheme.bodyMedium),
         ],
       ),
     );
   }
-  
+
   /// Build a chip with text
   Widget _buildChip(BuildContext context, String text, {Color? color}) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -196,7 +192,7 @@ class StockDetailsItem extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Format market cap category for display
   String _formatMarketCap(String marketCap) {
     final parts = marketCap.split('_');
@@ -205,11 +201,11 @@ class StockDetailsItem extends StatelessWidget {
     }
     return marketCap[0] + marketCap.substring(1).toLowerCase();
   }
-  
+
   /// Get color based on market cap
   Color _getMarketCapColor(BuildContext context, String marketCap) {
     final theme = Theme.of(context);
-    
+
     switch (marketCap) {
       case 'LARGE_CAP':
         return Colors.blue.shade700;

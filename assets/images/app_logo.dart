@@ -5,16 +5,12 @@ class AppLogo extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const AppLogo({
-    Key? key,
-    this.size = 60,
-    this.color,
-  }) : super(key: key);
+  const AppLogo({super.key, this.size = 60, this.color});
 
   @override
   Widget build(BuildContext context) {
     final logoColor = color ?? Theme.of(context).primaryColor;
-    
+
     return SizedBox(
       width: size,
       height: size,
@@ -30,14 +26,11 @@ class AppLogo extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  logoColor.withOpacity(0.8),
-                  logoColor,
-                ],
+                colors: [logoColor.withOpacity(0.8), logoColor],
               ),
             ),
           ),
-          
+
           // Inner circle
           Container(
             width: size * 0.7,
@@ -47,7 +40,7 @@ class AppLogo extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          
+
           // AM text
           Text(
             'AM',
@@ -72,17 +65,17 @@ class AppLogoWithText extends StatelessWidget {
   final bool vertical;
 
   const AppLogoWithText({
-    Key? key,
+    super.key,
     this.logoSize = 60,
     this.fontSize = 24,
     this.color,
     this.vertical = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final textColor = color ?? Theme.of(context).primaryColor;
-    
+
     if (vertical) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -101,7 +94,7 @@ class AppLogoWithText extends StatelessWidget {
         ],
       );
     }
-    
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

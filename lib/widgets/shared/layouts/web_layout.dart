@@ -6,24 +6,24 @@ import '../../../core/services/auth_service.dart';
 class WebLayout extends StatelessWidget {
   /// The main content of the page
   final Widget child;
-  
+
   /// The title to display in the header
   final String title;
-  
+
   /// The currently active navigation item
   final String activeNavItem;
-  
+
   /// Callback when logout is requested
   final VoidCallback? onLogout;
-  
+
   /// Constructor
   const WebLayout({
-    Key? key,
+    super.key,
     required this.child,
     this.title = 'AM Investment',
     this.activeNavItem = 'Dashboard',
     this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +32,22 @@ class WebLayout extends StatelessWidget {
         children: [
           // Header with navigation
           _buildHeader(context),
-          
+
           // Main content area
-          Expanded(
-            child: child,
-          ),
-          
+          Expanded(child: child),
+
           // Footer
           _buildFooter(context),
         ],
       ),
     );
   }
-  
+
   /// Build the header with navigation
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
     final user = AuthService().currentState.user;
-    
+
     return Container(
       color: theme.colorScheme.primary,
       child: Column(
@@ -77,9 +75,9 @@ class WebLayout extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const Spacer(),
-                
+
                 // User profile and actions
                 Row(
                   children: [
@@ -95,20 +93,22 @@ class WebLayout extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     // Notifications
                     IconButton(
                       icon: const Icon(Icons.notifications_outlined),
                       color: theme.colorScheme.onPrimary,
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Notifications coming soon')),
+                          const SnackBar(
+                            content: Text('Notifications coming soon'),
+                          ),
                         );
                       },
                     ),
-                    
+
                     const SizedBox(width: 16),
-                    
+
                     // User profile
                     InkWell(
                       onTap: () {
@@ -123,8 +123,8 @@ class WebLayout extends StatelessWidget {
                               radius: 16,
                               backgroundColor: theme.colorScheme.onPrimary,
                               child: Text(
-                                user?.name?.isNotEmpty == true 
-                                    ? user!.name![0].toUpperCase() 
+                                user?.name.isNotEmpty == true
+                                    ? user!.name[0].toUpperCase()
                                     : 'U',
                                 style: TextStyle(
                                   color: theme.colorScheme.primary,
@@ -154,7 +154,7 @@ class WebLayout extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Navigation bar
           Container(
             color: theme.colorScheme.primaryContainer,
@@ -178,12 +178,12 @@ class WebLayout extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build a navigation item
   Widget _buildNavItem(BuildContext context, String label, IconData icon) {
     final theme = Theme.of(context);
     final isActive = activeNavItem == label;
-    
+
     return InkWell(
       onTap: () {
         // Handle navigation here
@@ -194,8 +194,8 @@ class WebLayout extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isActive 
-                  ? theme.colorScheme.onPrimaryContainer 
+              color: isActive
+                  ? theme.colorScheme.onPrimaryContainer
                   : Colors.transparent,
               width: 3,
             ),
@@ -205,8 +205,8 @@ class WebLayout extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isActive 
-                  ? theme.colorScheme.onPrimaryContainer 
+              color: isActive
+                  ? theme.colorScheme.onPrimaryContainer
                   : theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
               size: 20,
             ),
@@ -214,8 +214,8 @@ class WebLayout extends StatelessWidget {
             Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isActive 
-                    ? theme.colorScheme.onPrimaryContainer 
+                color: isActive
+                    ? theme.colorScheme.onPrimaryContainer
                     : theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
@@ -225,11 +225,11 @@ class WebLayout extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build the footer
   Widget _buildFooter(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       color: theme.colorScheme.surface,
@@ -243,7 +243,7 @@ class WebLayout extends StatelessWidget {
               color: theme.colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
-          
+
           // Quick links
           Row(
             children: [
@@ -258,19 +258,19 @@ class WebLayout extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build a footer link
   Widget _buildFooterLink(BuildContext context, String label) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: InkWell(
         onTap: () {
           // Handle link tap
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$label coming soon')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$label coming soon')));
         },
         child: Text(
           label,
@@ -281,11 +281,11 @@ class WebLayout extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Show company information dialog
   void _showCompanyInfo(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -355,34 +355,31 @@ class WebLayout extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build info link for company info dialog
   Widget _buildInfoLink(BuildContext context, String label) {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$label coming soon')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$label coming soon')));
       },
       child: Chip(
         label: Text(label),
-        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
     );
   }
-  
+
   /// Show user menu
   void _showUserMenu(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
-        title: Text(
-          'User Menu',
-          style: theme.textTheme.titleMedium,
-        ),
+        title: Text('User Menu', style: theme.textTheme.titleMedium),
         children: [
           SimpleDialogOption(
             onPressed: () {
@@ -426,16 +423,11 @@ class WebLayout extends StatelessWidget {
             },
             child: Row(
               children: [
-                Icon(
-                  Icons.logout,
-                  color: theme.colorScheme.error,
-                ),
+                Icon(Icons.logout, color: theme.colorScheme.error),
                 const SizedBox(width: 12),
                 Text(
                   'Logout',
-                  style: TextStyle(
-                    color: theme.colorScheme.error,
-                  ),
+                  style: TextStyle(color: theme.colorScheme.error),
                 ),
               ],
             ),

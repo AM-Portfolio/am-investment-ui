@@ -13,12 +13,9 @@ import 'android/portfolio_android_screen.dart';
 class PortfolioScreen extends StatefulWidget {
   /// User ID for portfolio data
   final String userId;
-  
+
   /// Constructor
-  const PortfolioScreen({
-    Key? key,
-    required this.userId,
-  }) : super(key: key);
+  const PortfolioScreen({super.key, required this.userId});
 
   @override
   State<PortfolioScreen> createState() => _PortfolioScreenState();
@@ -27,20 +24,20 @@ class PortfolioScreen extends StatefulWidget {
 class _PortfolioScreenState extends State<PortfolioScreen> {
   /// Portfolio client for API calls
   late final PortfolioClient _portfolioClient;
-  
+
   /// Future for portfolio summary data
   late Future<ApiResponse<PortfolioSummary>> _portfolioSummaryFuture;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeApiClient();
     _loadPortfolioSummary();
-    
+
     // Listen for environment changes
     EnvironmentConfig.addListener(_onEnvironmentChanged);
   }
-  
+
   /// Initialize API client with current environment settings
   void _initializeApiClient() {
     _portfolioClient = PortfolioClient(
@@ -48,33 +45,35 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
     );
   }
-  
+
   /// Handle environment changes
   void _onEnvironmentChanged(Environment env) {
     // Dispose old client
     _portfolioClient.dispose();
-    
+
     // Create new client with updated environment
     _initializeApiClient();
-    
+
     // Reload data
     setState(() {
       _loadPortfolioSummary();
     });
   }
-  
+
   /// Load portfolio summary data
   void _loadPortfolioSummary() {
-    _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(widget.userId);
+    _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(
+      widget.userId,
+    );
   }
-  
+
   /// Refresh portfolio data
   Future<void> _refreshPortfolio() async {
     setState(() {
       _loadPortfolioSummary();
     });
   }
-  
+
   @override
   void dispose() {
     // Remove environment change listener

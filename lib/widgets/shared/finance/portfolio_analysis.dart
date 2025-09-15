@@ -5,21 +5,21 @@ import '../../../core/models/portfolio/portfolio_models.dart';
 class PortfolioAnalysis extends StatelessWidget {
   /// Portfolio summary data
   final PortfolioSummary summary;
-  
+
   /// Whether to show detailed information
   final bool showDetails;
-  
+
   /// Constructor
   const PortfolioAnalysis({
-    Key? key,
+    super.key,
     required this.summary,
     this.showDetails = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -43,10 +43,7 @@ class PortfolioAnalysis extends StatelessWidget {
                   color: theme.colorScheme.primary.withOpacity(0.7),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Portfolio Analysis',
-                  style: theme.textTheme.titleLarge,
-                ),
+                Text('Portfolio Analysis', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(
                   'Advanced portfolio analysis metrics coming soon',
@@ -58,7 +55,9 @@ class PortfolioAnalysis extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('This feature is coming soon')),
+                      const SnackBar(
+                        content: Text('This feature is coming soon'),
+                      ),
                     );
                   },
                   child: const Text('Request Early Access'),
@@ -67,10 +66,10 @@ class PortfolioAnalysis extends StatelessWidget {
             ),
           ),
         ),
-        
+
         if (showDetails) ...[
           const SizedBox(height: 24),
-          
+
           // Future analysis metrics sections will be added here
           _buildComingSoonSection(context, 'Performance Metrics'),
           const SizedBox(height: 16),
@@ -81,19 +80,17 @@ class PortfolioAnalysis extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build a coming soon section
   Widget _buildComingSoonSection(BuildContext context, String title) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -129,7 +126,7 @@ class PortfolioAnalysis extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Show the portfolio analysis dialog
   static void showDialog(BuildContext context, PortfolioSummary summary) {
     showModalBottomSheet(
@@ -142,7 +139,7 @@ class PortfolioAnalysis extends StatelessWidget {
         maxChildSize: 0.95,
         builder: (_, controller) => Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.all(24),
@@ -166,15 +163,12 @@ class PortfolioAnalysis extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Analysis content
               Expanded(
                 child: SingleChildScrollView(
                   controller: controller,
-                  child: PortfolioAnalysis(
-                    summary: summary,
-                    showDetails: true,
-                  ),
+                  child: PortfolioAnalysis(summary: summary, showDetails: true),
                 ),
               ),
             ],

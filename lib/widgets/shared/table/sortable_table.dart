@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 class SortableColumn<T> {
   /// Column title
   final String title;
-  
+
   /// Flex value for column width
   final int flex;
-  
+
   /// Builder for cell content
   final Widget Function(T item) builder;
-  
+
   /// Function to get the value for sorting
   final dynamic Function(T item)? sortBy;
-  
+
   /// Text alignment for this column
   final TextAlign? textAlign;
-  
+
   /// Constructor
   const SortableColumn({
     required this.title,
@@ -31,7 +31,7 @@ class SortableColumn<T> {
 enum SortDirection {
   /// Ascending order (A-Z, 1-10)
   ascending,
-  
+
   /// Descending order (Z-A, 10-1)
   descending,
 }
@@ -40,40 +40,40 @@ enum SortDirection {
 class SortableTable<T> extends StatefulWidget {
   /// List of data items
   final List<T> items;
-  
+
   /// Column definitions
   final List<SortableColumn<T>> columns;
-  
+
   /// Initial sort column index
   final int initialSortColumnIndex;
-  
+
   /// Initial sort direction
   final SortDirection initialSortDirection;
-  
+
   /// Callback when an item is tapped
   final Function(T item)? onItemTap;
-  
+
   /// Whether to show dividers between rows
   final bool showDividers;
-  
+
   /// Row height
   final double rowHeight;
-  
+
   /// Header text style
   final TextStyle? headerTextStyle;
-  
+
   /// Row text style
   final TextStyle? rowTextStyle;
-  
+
   /// Header background color
   final Color? headerBackgroundColor;
-  
+
   /// Row hover color
   final Color? rowHoverColor;
-  
+
   /// Constructor
   const SortableTable({
-    Key? key,
+    super.key,
     required this.items,
     required this.columns,
     this.initialSortColumnIndex = 0,
@@ -85,17 +85,18 @@ class SortableTable<T> extends StatefulWidget {
     this.rowTextStyle,
     this.headerBackgroundColor,
     this.rowHoverColor,
-  }) : super(key: key);
+  });
 
   @override
   State<SortableTable<T>> createState() => _SortableTableState<T>();
 }
 
 class _SortableTableState<T> extends State<SortableTable<T>> {
+  static const double _headerHeight = 44.0;
   late int _sortColumnIndex;
   late SortDirection _sortDirection;
   late List<T> _sortedItems;
-  
+
   @override
   void initState() {
     super.initState();
@@ -104,7 +105,7 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
     _sortedItems = List.from(widget.items);
     _sortItems();
   }
-  
+
   @override
   void didUpdateWidget(SortableTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -113,7 +114,7 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
       _sortItems();
     }
   }
-  
+
   void _sortItems() {
     if (_sortColumnIndex >= 0 && _sortColumnIndex < widget.columns.length) {
       final sortBy = widget.columns[_sortColumnIndex].sortBy;
@@ -121,12 +122,14 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
         _sortedItems.sort((a, b) {
           final aValue = sortBy(a);
           final bValue = sortBy(b);
-          
+
           // Handle null values
           if (aValue == null && bValue == null) return 0;
-          if (aValue == null) return _sortDirection == SortDirection.ascending ? -1 : 1;
-          if (bValue == null) return _sortDirection == SortDirection.ascending ? 1 : -1;
-          
+          if (aValue == null)
+            return _sortDirection == SortDirection.ascending ? -1 : 1;
+          if (bValue == null)
+            return _sortDirection == SortDirection.ascending ? 1 : -1;
+
           // Compare values based on their type
           int result;
           if (aValue is num && bValue is num) {
@@ -141,13 +144,13 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
             // Default to string comparison
             result = aValue.toString().compareTo(bValue.toString());
           }
-          
+
           return _sortDirection == SortDirection.ascending ? result : -result;
         });
       }
     }
   }
-  
+
   void _onSortColumn(int columnIndex) {
     setState(() {
       if (_sortColumnIndex == columnIndex) {
@@ -163,7 +166,7 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
       _sortItems();
     });
   }
-  
+
   /// Build a single table row
   Widget _buildTableRow(T item, ThemeData theme) {
     return Material(
@@ -197,19 +200,18 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate column width based on available width and flex values
-        final totalFlex = widget.columns.fold<int>(0, (sum, col) => sum + col.flex);
-        final baseColumnWidth = constraints.maxWidth / totalFlex;
-        
+        // Column sizing uses Expanded with flex on each header/data cell
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Table header
             Container(
               color: widget.headerBackgroundColor ?? theme.colorScheme.surface,
+              height: _headerHeight,
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
@@ -224,25 +226,32 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: widget.columns[i].textAlign == TextAlign.end
+                            mainAxisAlignment:
+                                widget.columns[i].textAlign == TextAlign.end
                                 ? MainAxisAlignment.end
-                                : (widget.columns[i].textAlign == TextAlign.center
-                                    ? MainAxisAlignment.center
-                                    : MainAxisAlignment.start),
+                                : (widget.columns[i].textAlign ==
+                                          TextAlign.center
+                                      ? MainAxisAlignment.center
+                                      : MainAxisAlignment.start),
                             children: [
                               Flexible(
                                 child: Text(
                                   widget.columns[i].title,
-                                  style: widget.headerTextStyle ??
+                                  style:
+                                      widget.headerTextStyle ??
                                       theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
                                         fontWeight: FontWeight.w500,
                                       ),
-                                  textAlign: widget.columns[i].textAlign ?? TextAlign.start,
+                                  textAlign:
+                                      widget.columns[i].textAlign ??
+                                      TextAlign.start,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (widget.columns[i].sortBy != null && _sortColumnIndex == i)
+                              if (widget.columns[i].sortBy != null &&
+                                  _sortColumnIndex == i)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 4.0),
                                   child: Icon(
@@ -261,9 +270,9 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
                 ],
               ),
             ),
-            
+
             if (widget.showDividers) const Divider(height: 1),
-            
+
             // Table rows - use ListView.separated without shrinkWrap to enable proper scrolling
             Expanded(
               child: ListView.separated(
@@ -272,7 +281,8 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
                 // Enable physics for scrolling
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: _sortedItems.length,
-                itemBuilder: (context, index) => _buildTableRow(_sortedItems[index], theme),
+                itemBuilder: (context, index) =>
+                    _buildTableRow(_sortedItems[index], theme),
                 separatorBuilder: (context, index) => widget.showDividers
                     ? const Divider(height: 1, thickness: 1)
                     : const SizedBox.shrink(),

@@ -6,7 +6,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -19,7 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
-  
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -128,10 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Title
           const Text(
             'Create your account',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),

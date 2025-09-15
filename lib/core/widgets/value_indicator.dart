@@ -4,28 +4,28 @@ import 'package:flutter/material.dart';
 class ValueIndicator extends StatelessWidget {
   /// The value to display
   final double value;
-  
+
   /// The label to display above the value
   final String label;
-  
+
   /// Whether to show the value as a percentage
   final bool isPercentage;
-  
+
   /// Whether to show positive/negative indicators
   final bool showIndicator;
-  
+
   /// Whether to use compact formatting for large numbers
   final bool useCompactFormat;
-  
+
   /// Custom text style for the value
   final TextStyle? valueStyle;
-  
+
   /// Custom text style for the label
   final TextStyle? labelStyle;
-  
+
   /// Constructor
   const ValueIndicator({
-    Key? key,
+    super.key,
     required this.value,
     required this.label,
     this.isPercentage = false,
@@ -33,16 +33,16 @@ class ValueIndicator extends StatelessWidget {
     this.useCompactFormat = false,
     this.valueStyle,
     this.labelStyle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Determine color based on value
     Color valueColor;
     IconData? indicatorIcon;
-    
+
     if (value > 0) {
       valueColor = Colors.green;
       indicatorIcon = Icons.arrow_upward;
@@ -53,7 +53,7 @@ class ValueIndicator extends StatelessWidget {
       valueColor = theme.colorScheme.onSurface;
       indicatorIcon = null;
     }
-    
+
     // Format the value
     String formattedValue;
     if (isPercentage) {
@@ -69,27 +69,24 @@ class ValueIndicator extends StatelessWidget {
     } else {
       formattedValue = value.abs().toStringAsFixed(2);
     }
-    
+
     // Add prefix if needed
     if (!isPercentage) {
       formattedValue = '₹$formattedValue';
     }
-    
+
     // Add sign if needed
     if (value > 0 && !isPercentage) {
       formattedValue = '+$formattedValue';
     } else if (value < 0 && !isPercentage) {
       formattedValue = '-$formattedValue';
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: labelStyle ?? theme.textTheme.bodySmall,
-        ),
+        Text(label, style: labelStyle ?? theme.textTheme.bodySmall),
         const SizedBox(height: 4),
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -97,16 +94,13 @@ class ValueIndicator extends StatelessWidget {
             if (showIndicator && indicatorIcon != null)
               Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: Icon(
-                  indicatorIcon,
-                  color: valueColor,
-                  size: 16,
-                ),
+                child: Icon(indicatorIcon, color: valueColor, size: 16),
               ),
             Text(
               formattedValue,
-              style: valueStyle?.copyWith(color: valueColor) ?? 
-                theme.textTheme.titleMedium?.copyWith(color: valueColor),
+              style:
+                  valueStyle?.copyWith(color: valueColor) ??
+                  theme.textTheme.titleMedium?.copyWith(color: valueColor),
             ),
           ],
         ),

@@ -7,16 +7,16 @@ import 'holdings_breakdown.dart';
 class PortfolioOverview extends StatelessWidget {
   /// Portfolio summary data
   final PortfolioSummary summary;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() onRefresh;
-  
+
   /// Constructor
   const PortfolioOverview({
-    Key? key,
+    super.key,
     required this.summary,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,20 +24,15 @@ class PortfolioOverview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Portfolio summary card
-        PortfolioSummaryCard(
-          summary: summary,
-          showDetails: true,
-        ),
-        
+        PortfolioSummaryCard(summary: summary, showDetails: true),
+
         const SizedBox(height: 32),
-        
+
         // Holdings breakdown
-        HoldingsBreakdown(
-          summary: summary,
-        ),
-        
+        HoldingsBreakdown(summary: summary),
+
         const SizedBox(height: 24),
-        
+
         // Action buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.end,

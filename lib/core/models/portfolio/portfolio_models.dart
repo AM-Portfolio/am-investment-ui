@@ -1,49 +1,50 @@
 /// Model classes for portfolio data
+library;
 
 /// Portfolio summary model
 class PortfolioSummary {
   /// Total investment value
   final double investmentValue;
-  
+
   /// Current portfolio value
   final double currentValue;
-  
+
   /// Total gain/loss amount
   final double totalGainLoss;
-  
+
   /// Total gain/loss percentage
   final double totalGainLossPercentage;
-  
+
   /// Today's gain/loss amount
   final double todayGainLoss;
-  
+
   /// Today's gain/loss percentage
   final double todayGainLossPercentage;
-  
+
   /// Total number of assets
   final int totalAssets;
-  
+
   /// Number of gaining assets
   final int gainersCount;
-  
+
   /// Number of losing assets
   final int losersCount;
-  
+
   /// Number of assets gaining today
   final int todayGainersCount;
-  
+
   /// Number of assets losing today
   final int todayLosersCount;
-  
+
   /// Last updated timestamp
   final DateTime lastUpdated;
-  
+
   /// Broker portfolios breakdown
   final Map<String, BrokerPortfolio> brokerPortfolios;
-  
+
   /// Market cap holdings breakdown
   final Map<String, List<AssetHolding>> marketCapHoldings;
-  
+
   /// Sectorial holdings breakdown
   final Map<String, List<AssetHolding>> sectorialHoldings;
 
@@ -100,9 +101,11 @@ class PortfolioSummary {
       investmentValue: json['investmentValue']?.toDouble() ?? 0.0,
       currentValue: json['currentValue']?.toDouble() ?? 0.0,
       totalGainLoss: json['totalGainLoss']?.toDouble() ?? 0.0,
-      totalGainLossPercentage: json['totalGainLossPercentage']?.toDouble() ?? 0.0,
+      totalGainLossPercentage:
+          json['totalGainLossPercentage']?.toDouble() ?? 0.0,
       todayGainLoss: json['todayGainLoss']?.toDouble() ?? 0.0,
-      todayGainLossPercentage: json['todayGainLossPercentage']?.toDouble() ?? 0.0,
+      todayGainLossPercentage:
+          json['todayGainLossPercentage']?.toDouble() ?? 0.0,
       totalAssets: json['totalAssets'] ?? 0,
       gainersCount: json['gainersCount'] ?? 0,
       losersCount: json['losersCount'] ?? 0,
@@ -158,15 +161,12 @@ class PortfolioSummary {
 class BrokerPortfolio {
   /// Investment value in this broker
   final double investmentValue;
-  
+
   /// Total assets in this broker
   final int totalAssets;
 
   /// Constructor
-  BrokerPortfolio({
-    required this.investmentValue,
-    required this.totalAssets,
-  });
+  BrokerPortfolio({required this.investmentValue, required this.totalAssets});
 
   /// Create from JSON
   factory BrokerPortfolio.fromJson(Map<String, dynamic> json) {
@@ -178,10 +178,7 @@ class BrokerPortfolio {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'investmentValue': investmentValue,
-      'totalAssets': totalAssets,
-    };
+    return {'investmentValue': investmentValue, 'totalAssets': totalAssets};
   }
 }
 
@@ -189,25 +186,25 @@ class BrokerPortfolio {
 class AssetHolding {
   /// ISIN code
   final String isin;
-  
+
   /// Symbol/ticker
   final String symbol;
-  
+
   /// Sector
   final String? sector;
-  
+
   /// Industry
   final String? industry;
-  
+
   /// Market cap category
   final String? marketCap;
-  
+
   /// Quantity held
   final double quantity;
-  
+
   /// Investment cost
   final double investmentCost;
-  
+
   /// Broker portfolios containing this asset
   final List<BrokerAssetHolding> brokerPortfolios;
 
@@ -235,8 +232,8 @@ class AssetHolding {
       investmentCost: json['investmentCost']?.toDouble() ?? 0.0,
       brokerPortfolios: json['brokerPortfolios'] != null
           ? (json['brokerPortfolios'] as List)
-              .map((item) => BrokerAssetHolding.fromJson(item))
-              .toList()
+                .map((item) => BrokerAssetHolding.fromJson(item))
+                .toList()
           : [],
     );
   }
@@ -251,7 +248,9 @@ class AssetHolding {
       'marketCap': marketCap,
       'quantity': quantity,
       'investmentCost': investmentCost,
-      'brokerPortfolios': brokerPortfolios.map((item) => item.toJson()).toList(),
+      'brokerPortfolios': brokerPortfolios
+          .map((item) => item.toJson())
+          .toList(),
     };
   }
 }
@@ -260,15 +259,12 @@ class AssetHolding {
 class BrokerAssetHolding {
   /// Broker type
   final String brokerType;
-  
+
   /// Quantity held in this broker
   final double quantity;
 
   /// Constructor
-  BrokerAssetHolding({
-    required this.brokerType,
-    required this.quantity,
-  });
+  BrokerAssetHolding({required this.brokerType, required this.quantity});
 
   /// Create from JSON
   factory BrokerAssetHolding.fromJson(Map<String, dynamic> json) {
@@ -280,9 +276,6 @@ class BrokerAssetHolding {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'brokerType': brokerType,
-      'quantity': quantity,
-    };
+    return {'brokerType': brokerType, 'quantity': quantity};
   }
 }

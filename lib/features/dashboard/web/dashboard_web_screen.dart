@@ -9,20 +9,20 @@ import '../../../core/services/auth_service.dart';
 class DashboardWebScreen extends StatelessWidget {
   /// Future for portfolio summary data
   final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
-  
+
   /// Callback when logout is requested
   final VoidCallback? onLogout;
-  
+
   /// Constructor
   const DashboardWebScreen({
-    Key? key,
+    super.key,
     required this.portfolioSummaryFuture,
     required this.refreshPortfolio,
     this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,31 +33,29 @@ class DashboardWebScreen extends StatelessWidget {
       child: _buildDashboardContent(context),
     );
   }
-  
+
   /// Build the dashboard content
   Widget _buildDashboardContent(BuildContext context) {
     return FutureBuilder<ApiResponse<PortfolioSummary>>(
       future: portfolioSummaryFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (snapshot.hasError) {
           return _buildErrorState(context, snapshot.error.toString());
         }
-        
+
         final response = snapshot.data!;
-        
+
         if (!response.isSuccess) {
           return _buildErrorState(context, response.error ?? 'Unknown error');
         }
-        
+
         final summary = response.data!;
         final user = AuthService().currentState.user;
-        
+
         // Dashboard layout with multiple sections
         return SingleChildScrollView(
           child: Padding(
@@ -67,9 +65,9 @@ class DashboardWebScreen extends StatelessWidget {
               children: [
                 // Welcome section
                 _buildWelcomeSection(context, user?.name ?? 'Investor'),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Dashboard content in a grid layout
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -83,32 +81,38 @@ class DashboardWebScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Portfolio summary
-                              _buildSectionHeader(context, 'Portfolio Overview'),
+                              _buildSectionHeader(
+                                context,
+                                'Portfolio Overview',
+                              ),
                               const SizedBox(height: 16),
                               PortfolioSummaryCard(
                                 summary: summary,
                                 showDetails: false,
                               ),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Market overview
                               _buildSectionHeader(context, 'Market Overview'),
                               const SizedBox(height: 16),
                               _buildMarketOverview(context),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Recent transactions
-                              _buildSectionHeader(context, 'Recent Transactions'),
+                              _buildSectionHeader(
+                                context,
+                                'Recent Transactions',
+                              ),
                               const SizedBox(height: 16),
                               _buildRecentTransactions(context),
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(width: 24),
-                        
+
                         // Right column - 1/3 width
                         Expanded(
                           child: Column(
@@ -118,16 +122,16 @@ class DashboardWebScreen extends StatelessWidget {
                               _buildSectionHeader(context, 'Account Summary'),
                               const SizedBox(height: 16),
                               _buildAccountSummary(context),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Watchlist
                               _buildSectionHeader(context, 'Watchlist'),
                               const SizedBox(height: 16),
                               _buildWatchlist(context),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // News and insights
                               _buildSectionHeader(context, 'News & Insights'),
                               const SizedBox(height: 16),
@@ -146,13 +150,13 @@ class DashboardWebScreen extends StatelessWidget {
       },
     );
   }
-  
+
   /// Build welcome section
   Widget _buildWelcomeSection(BuildContext context, String userName) {
     final theme = Theme.of(context);
     final now = DateTime.now();
     String greeting;
-    
+
     if (now.hour < 12) {
       greeting = 'Good Morning';
     } else if (now.hour < 17) {
@@ -160,7 +164,7 @@ class DashboardWebScreen extends StatelessWidget {
     } else {
       greeting = 'Good Evening';
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -180,11 +184,11 @@ class DashboardWebScreen extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build section header
   Widget _buildSectionHeader(BuildContext context, String title) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
@@ -205,26 +209,44 @@ class DashboardWebScreen extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build market overview section
   Widget _buildMarketOverview(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dummy market data
     final marketData = [
-      {'name': 'NIFTY 50', 'value': '22,456.30', 'change': '+1.2%', 'isPositive': true},
-      {'name': 'SENSEX', 'value': '73,890.45', 'change': '+0.9%', 'isPositive': true},
-      {'name': 'NIFTY BANK', 'value': '48,123.75', 'change': '-0.3%', 'isPositive': false},
-      {'name': 'NIFTY IT', 'value': '35,678.20', 'change': '+2.1%', 'isPositive': true},
+      {
+        'name': 'NIFTY 50',
+        'value': '22,456.30',
+        'change': '+1.2%',
+        'isPositive': true,
+      },
+      {
+        'name': 'SENSEX',
+        'value': '73,890.45',
+        'change': '+0.9%',
+        'isPositive': true,
+      },
+      {
+        'name': 'NIFTY BANK',
+        'value': '48,123.75',
+        'change': '-0.3%',
+        'isPositive': false,
+      },
+      {
+        'name': 'NIFTY IT',
+        'value': '35,678.20',
+        'change': '+2.1%',
+        'isPositive': true,
+      },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -249,7 +271,10 @@ class DashboardWebScreen extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: (item['isPositive'] as bool)
                             ? Colors.green.withOpacity(0.1)
@@ -284,11 +309,11 @@ class DashboardWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build recent transactions section
   Widget _buildRecentTransactions(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dummy transaction data
     final transactions = [
       {
@@ -316,14 +341,12 @@ class DashboardWebScreen extends StatelessWidget {
         'quantity': '2',
       },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -378,7 +401,9 @@ class DashboardWebScreen extends StatelessWidget {
                           Text(
                             transaction['date']!,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
+                              ),
                             ),
                           ),
                         ],
@@ -417,18 +442,16 @@ class DashboardWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build account summary section
   Widget _buildAccountSummary(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -481,7 +504,7 @@ class DashboardWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build account summary item
   Widget _buildAccountSummaryItem(
     BuildContext context,
@@ -490,7 +513,7 @@ class DashboardWebScreen extends StatelessWidget {
     IconData icon,
   ) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
@@ -499,19 +522,10 @@ class DashboardWebScreen extends StatelessWidget {
             color: theme.colorScheme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: theme.colorScheme.primary,
-            size: 16,
-          ),
+          child: Icon(icon, color: theme.colorScheme.primary, size: 16),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -521,26 +535,44 @@ class DashboardWebScreen extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build watchlist section
   Widget _buildWatchlist(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dummy watchlist data
     final watchlist = [
-      {'symbol': 'RELIANCE', 'price': '₹2,890.45', 'change': '+1.8%', 'isPositive': true},
-      {'symbol': 'TATASTEEL', 'price': '₹145.75', 'change': '-0.5%', 'isPositive': false},
-      {'symbol': 'ICICIBANK', 'price': '₹978.30', 'change': '+0.7%', 'isPositive': true},
-      {'symbol': 'WIPRO', 'price': '₹456.20', 'change': '-1.2%', 'isPositive': false},
+      {
+        'symbol': 'RELIANCE',
+        'price': '₹2,890.45',
+        'change': '+1.8%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'TATASTEEL',
+        'price': '₹145.75',
+        'change': '-0.5%',
+        'isPositive': false,
+      },
+      {
+        'symbol': 'ICICIBANK',
+        'price': '₹978.30',
+        'change': '+0.7%',
+        'isPositive': true,
+      },
+      {
+        'symbol': 'WIPRO',
+        'price': '₹456.20',
+        'change': '-1.2%',
+        'isPositive': false,
+      },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -566,7 +598,10 @@ class DashboardWebScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: (item['isPositive'] as bool)
                                 ? Colors.green.withOpacity(0.1)
@@ -603,11 +638,11 @@ class DashboardWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build news and insights section
   Widget _buildNewsInsights(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Dummy news data
     final news = [
       {
@@ -626,14 +661,12 @@ class DashboardWebScreen extends StatelessWidget {
         'time': '1 day ago',
       },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -681,7 +714,8 @@ class DashboardWebScreen extends StatelessWidget {
                               Text(
                                 item['time']!,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                 ),
                               ),
                             ],
@@ -706,7 +740,7 @@ class DashboardWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build error state widget
   Widget _buildErrorState(BuildContext context, String errorMessage) {
     return Center(
@@ -719,11 +753,7 @@ class DashboardWebScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 24),
                 Text(
                   'Error loading dashboard data',

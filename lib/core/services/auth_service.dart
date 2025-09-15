@@ -9,36 +9,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
-  
+
   // Base API URL - would come from environment config in a real app
   final String _baseUrl = 'https://api.example.com';
-  
+
   // Stream controller for auth state changes
   final _authStateController = StreamController<AuthState>.broadcast();
   Stream<AuthState> get authStateChanges => _authStateController.stream;
-  
+
   // Current auth state
   AuthState _currentState = AuthState.unauthenticated();
   AuthState get currentState => _currentState;
-  
+
   // Test users loaded from JSON
-  Map<String, TestUser> _testUsers = {};
+  final Map<String, TestUser> _testUsers = {};
   bool _testUsersLoaded = false;
-  
+
   // Singleton instance
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal() {
     _loadTestUsers();
   }
-  
+
   /// Load test users from JSON file
   Future<void> _loadTestUsers() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/test_users.json');
+      final String jsonString = await rootBundle.loadString(
+        'assets/test_users.json',
+      );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       final List<dynamic> usersList = jsonData['users'];
-      
+
       // Create a map for quick lookup by email, username, and phone
       for (var userData in usersList) {
         final testUser = TestUser.fromJson(userData);
@@ -46,7 +48,7 @@ class AuthService {
         _testUsers[testUser.username] = testUser;
         _testUsers[testUser.phone] = testUser;
       }
-      
+
       _testUsersLoaded = true;
       debugPrint('Loaded ${usersList.length} test users');
     } catch (e) {
@@ -55,7 +57,7 @@ class AuthService {
       _addFallbackTestUser();
     }
   }
-  
+
   /// Add a fallback test user if JSON loading fails
   void _addFallbackTestUser() {
     final testUser = TestUser(
@@ -66,13 +68,13 @@ class AuthService {
       name: 'Demo User',
       password: 'password123',
     );
-    
+
     _testUsers[testUser.email] = testUser;
     _testUsers[testUser.username] = testUser;
     _testUsers[testUser.phone] = testUser;
     _testUsersLoaded = true;
   }
-  
+
   /// Initialize the auth service and restore session if available
   Future<void> initialize() async {
     try {
@@ -80,11 +82,11 @@ class AuthService {
       if (!_testUsersLoaded) {
         await _loadTestUsers();
       }
-      
+
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_tokenKey);
       final userData = prefs.getString(_userKey);
-      
+
       if (token != null && userData != null) {
         final user = User.fromJson(jsonDecode(userData));
         _currentState = AuthState.authenticated(user, token);
@@ -96,23 +98,23 @@ class AuthService {
       await _clearAuthData();
     }
   }
-  
+
   /// Login with identifier (email, username, or phone) and password
   Future<AuthResult> login(String identifier, String password) async {
     try {
       _currentState = AuthState.loading();
       _authStateController.add(_currentState);
-      
+
       // Simulate network delay in debug mode
       if (kDebugMode) {
         await Future.delayed(const Duration(seconds: 1));
       }
-      
+
       // Ensure test users are loaded
       if (!_testUsersLoaded) {
         await _loadTestUsers();
       }
-      
+
       // Check for test users first
       if (_testUsers.containsKey(identifier)) {
         final testUser = _testUsers[identifier]!;
@@ -125,11 +127,11 @@ class AuthService {
             phone: testUser.phone,
           );
           const token = 'demo_token_12345';
-          
+
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.success();
         } else {
           _currentState = AuthState.error('Invalid password');
@@ -137,7 +139,7 @@ class AuthService {
           return AuthResult.failure('Invalid password');
         }
       }
-      
+
       // Always use demo mode in debug builds to avoid network errors
       if (kDebugMode) {
         // If not a test user but contains 'test', also allow login
@@ -150,24 +152,24 @@ class AuthService {
             phone: identifier.startsWith('+') ? identifier : null,
           );
           const token = 'demo_token_12345';
-          
+
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.success();
         }
-        
+
         _currentState = AuthState.error('Invalid credentials');
         _authStateController.add(_currentState);
         return AuthResult.failure('Invalid credentials');
       }
-      
+
       // In production, make actual API call
       try {
         // Determine login type (email, username, or phone)
         final Map<String, String> requestBody = {'password': password};
-        
+
         if (identifier.contains('@')) {
           requestBody['email'] = identifier;
         } else if (identifier.startsWith('+')) {
@@ -175,57 +177,63 @@ class AuthService {
         } else {
           requestBody['username'] = identifier;
         }
-        
+
         final response = await http.post(
           Uri.parse('$_baseUrl/auth/login'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(requestBody),
         );
-        
+
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final user = User.fromJson(data['user']);
           final token = data['token'];
-          
+
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.success();
         } else {
           final error = _parseErrorResponse(response);
           _currentState = AuthState.error(error);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.failure(error);
         }
       } catch (e) {
         final error = 'Network error: Unable to connect to server';
         _currentState = AuthState.error(error);
         _authStateController.add(_currentState);
-        
+
         return AuthResult.failure(error);
       }
     } catch (e) {
       final error = 'Login failed: ${e.toString()}';
       _currentState = AuthState.error(error);
       _authStateController.add(_currentState);
-      
+
       return AuthResult.failure(error);
     }
   }
-  
+
   /// Register a new user
-  Future<AuthResult> register(String name, String email, String password, {String? username, String? phone}) async {
+  Future<AuthResult> register(
+    String name,
+    String email,
+    String password, {
+    String? username,
+    String? phone,
+  }) async {
     try {
       _currentState = AuthState.loading();
       _authStateController.add(_currentState);
-      
+
       // Simulate network delay in debug mode
       if (kDebugMode) {
         await Future.delayed(const Duration(seconds: 1));
       }
-      
+
       // Always use demo mode in debug builds to avoid network errors
       if (kDebugMode) {
         final user = User(
@@ -236,14 +244,14 @@ class AuthService {
           phone: phone,
         );
         const token = 'demo_token_67890';
-        
+
         await _saveAuthData(user, token);
         _currentState = AuthState.authenticated(user, token);
         _authStateController.add(_currentState);
-        
+
         return AuthResult.success();
       }
-      
+
       // In production, make actual API call
       try {
         final requestBody = {
@@ -251,54 +259,54 @@ class AuthService {
           'email': email,
           'password': password,
         };
-        
+
         if (username != null) {
           requestBody['username'] = username;
         }
-        
+
         if (phone != null) {
           requestBody['phone'] = phone;
         }
-        
+
         final response = await http.post(
           Uri.parse('$_baseUrl/auth/register'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(requestBody),
         );
-        
+
         if (response.statusCode == 201) {
           final data = jsonDecode(response.body);
           final user = User.fromJson(data['user']);
           final token = data['token'];
-          
+
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.success();
         } else {
           final error = _parseErrorResponse(response);
           _currentState = AuthState.error(error);
           _authStateController.add(_currentState);
-          
+
           return AuthResult.failure(error);
         }
       } catch (e) {
         final error = 'Network error: Unable to connect to server';
         _currentState = AuthState.error(error);
         _authStateController.add(_currentState);
-        
+
         return AuthResult.failure(error);
       }
     } catch (e) {
       final error = 'Registration failed: ${e.toString()}';
       _currentState = AuthState.error(error);
       _authStateController.add(_currentState);
-      
+
       return AuthResult.failure(error);
     }
   }
-  
+
   /// Logout the current user
   Future<void> logout() async {
     try {
@@ -313,21 +321,21 @@ class AuthService {
       _authStateController.add(_currentState);
     }
   }
-  
+
   /// Save authentication data to persistent storage
   Future<void> _saveAuthData(User user, String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
     await prefs.setString(_userKey, jsonEncode(user.toJson()));
   }
-  
+
   /// Clear authentication data from persistent storage
   Future<void> _clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_userKey);
   }
-  
+
   /// Parse error response from API
   String _parseErrorResponse(http.Response response) {
     try {
@@ -337,7 +345,7 @@ class AuthService {
       return 'Error ${response.statusCode}: ${response.reasonPhrase}';
     }
   }
-  
+
   /// Dispose resources
   void dispose() {
     _authStateController.close();
@@ -352,7 +360,7 @@ class TestUser {
   final String phone;
   final String name;
   final String password;
-  
+
   TestUser({
     required this.id,
     required this.email,
@@ -361,7 +369,7 @@ class TestUser {
     required this.name,
     required this.password,
   });
-  
+
   factory TestUser.fromJson(Map<String, dynamic> json) {
     return TestUser(
       id: json['id'],
@@ -372,7 +380,7 @@ class TestUser {
       password: json['password'],
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -392,7 +400,7 @@ class User {
   final String name;
   final String? username;
   final String? phone;
-  
+
   User({
     required this.id,
     required this.email,
@@ -400,7 +408,7 @@ class User {
     this.username,
     this.phone,
   });
-  
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
@@ -410,7 +418,7 @@ class User {
       phone: json['phone'],
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -428,18 +436,13 @@ class AuthState {
   final User? user;
   final String? token;
   final String? error;
-  
-  AuthState._({
-    required this.status,
-    this.user,
-    this.token,
-    this.error,
-  });
-  
+
+  AuthState._({required this.status, this.user, this.token, this.error});
+
   factory AuthState.unauthenticated() {
     return AuthState._(status: AuthStatus.unauthenticated);
   }
-  
+
   factory AuthState.authenticated(User user, String token) {
     return AuthState._(
       status: AuthStatus.authenticated,
@@ -447,48 +450,34 @@ class AuthState {
       token: token,
     );
   }
-  
+
   factory AuthState.loading() {
     return AuthState._(status: AuthStatus.loading);
   }
-  
+
   factory AuthState.error(String error) {
-    return AuthState._(
-      status: AuthStatus.error,
-      error: error,
-    );
+    return AuthState._(status: AuthStatus.error, error: error);
   }
-  
+
   bool get isAuthenticated => status == AuthStatus.authenticated;
   bool get isLoading => status == AuthStatus.loading;
 }
 
 /// Authentication status
-enum AuthStatus {
-  unauthenticated,
-  authenticated,
-  loading,
-  error,
-}
+enum AuthStatus { unauthenticated, authenticated, loading, error }
 
 /// Result of authentication operations
 class AuthResult {
   final bool success;
   final String? error;
-  
-  AuthResult._({
-    required this.success,
-    this.error,
-  });
-  
+
+  AuthResult._({required this.success, this.error});
+
   factory AuthResult.success() {
     return AuthResult._(success: true);
   }
-  
+
   factory AuthResult.failure(String error) {
-    return AuthResult._(
-      success: false,
-      error: error,
-    );
+    return AuthResult._(success: false, error: error);
   }
 }

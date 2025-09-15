@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
 import '../../../core/services/api/api_client.dart';
 import '../../../widgets/shared/finance/portfolio_summary_card.dart';
@@ -9,20 +8,20 @@ import '../../../widgets/shared/finance/holdings_breakdown.dart';
 class PortfolioIOSScreen extends StatelessWidget {
   /// Future for portfolio summary data
   final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
-  
+
   /// User ID for portfolio data
   final String userId;
-  
+
   /// Constructor
   const PortfolioIOSScreen({
-    Key? key,
+    super.key,
     required this.portfolioSummaryFuture,
     required this.refreshPortfolio,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,42 +34,36 @@ class PortfolioIOSScreen extends StatelessWidget {
           future: portfolioSummaryFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CupertinoActivityIndicator(),
-              );
+              return const Center(child: CupertinoActivityIndicator());
             }
-            
+
             if (snapshot.hasError) {
               return _buildErrorState(context, snapshot.error.toString());
             }
-            
+
             final response = snapshot.data!;
-            
+
             if (!response.isSuccess) {
-              return _buildErrorState(context, response.error ?? 'Unknown error');
+              return _buildErrorState(
+                context,
+                response.error ?? 'Unknown error',
+              );
             }
-            
+
             final summary = response.data!;
-            
+
             // iOS-specific layout with Cupertino styling
             return CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                CupertinoSliverRefreshControl(
-                  onRefresh: refreshPortfolio,
-                ),
+                CupertinoSliverRefreshControl(onRefresh: refreshPortfolio),
                 SliverPadding(
                   padding: const EdgeInsets.all(16.0),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      PortfolioSummaryCard(
-                        summary: summary,
-                        showDetails: true,
-                      ),
+                      PortfolioSummaryCard(summary: summary, showDetails: true),
                       const SizedBox(height: 16),
-                      HoldingsBreakdown(
-                        summary: summary,
-                      ),
+                      HoldingsBreakdown(summary: summary),
                     ]),
                   ),
                 ),

@@ -3,11 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'platform_widget.dart';
 
 /// Button types for different visual styles
-enum AppButtonType {
-  primary,
-  secondary,
-  text,
-}
+enum AppButtonType { primary, secondary, text }
 
 /// A cross-platform button component that adapts to the current platform.
 ///
@@ -24,7 +20,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
   final double? height;
 
   const AppButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
@@ -33,12 +29,12 @@ class AppButton extends PlatformWidget<Widget, Widget> {
     this.padding,
     this.minWidth,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   Widget buildIosWidget(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Determine button color based on type
     Color? buttonColor;
     switch (type) {
@@ -56,7 +52,8 @@ class AppButton extends PlatformWidget<Widget, Widget> {
     // For text buttons on iOS, use a simple CupertinoButton with no background
     if (type == AppButtonType.text) {
       return CupertinoButton(
-        padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding:
+            padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         onPressed: isLoading ? null : onPressed,
         child: _buildChild(context, CupertinoColors.activeBlue),
       );
@@ -72,8 +69,10 @@ class AppButton extends PlatformWidget<Widget, Widget> {
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         onPressed: isLoading ? null : onPressed,
         child: _buildChild(
-          context, 
-          type == AppButtonType.primary ? CupertinoColors.white : theme.primaryColor,
+          context,
+          type == AppButtonType.primary
+              ? CupertinoColors.white
+              : theme.primaryColor,
         ),
       ),
     );
@@ -82,7 +81,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
   @override
   Widget buildMaterialWidget(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Build the appropriate button based on type
     switch (type) {
       case AppButtonType.primary:
@@ -100,7 +99,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
             child: _buildChild(context, Colors.white),
           ),
         );
-      
+
       case AppButtonType.secondary:
         return SizedBox(
           height: height ?? 48,
@@ -116,7 +115,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
             child: _buildChild(context, theme.primaryColor),
           ),
         );
-      
+
       case AppButtonType.text:
         return TextButton(
           style: TextButton.styleFrom(
@@ -132,7 +131,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
   Widget buildWebWidget(BuildContext context) {
     // For web, we use Material buttons with some adjustments for better web UX
     final theme = Theme.of(context);
-    
+
     switch (type) {
       case AppButtonType.primary:
         return SizedBox(
@@ -149,7 +148,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
             child: _buildChild(context, Colors.white),
           ),
         );
-      
+
       case AppButtonType.secondary:
         return SizedBox(
           height: height ?? 48,
@@ -165,7 +164,7 @@ class AppButton extends PlatformWidget<Widget, Widget> {
             child: _buildChild(context, theme.primaryColor),
           ),
         );
-      
+
       case AppButtonType.text:
         return TextButton(
           style: TextButton.styleFrom(
@@ -201,14 +200,16 @@ class AppButton extends PlatformWidget<Widget, Widget> {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       return const CupertinoActivityIndicator();
     }
-    
+
     return SizedBox(
       width: 20,
       height: 20,
       child: CircularProgressIndicator(
         strokeWidth: 2,
         valueColor: AlwaysStoppedAnimation<Color>(
-          type == AppButtonType.primary ? Colors.white : Theme.of(context).primaryColor,
+          type == AppButtonType.primary
+              ? Colors.white
+              : Theme.of(context).primaryColor,
         ),
       ),
     );

@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 class ErrorState extends StatelessWidget {
   /// Error message to display
   final String errorMessage;
-  
+
   /// Callback when retry button is pressed
   final VoidCallback onRetry;
-  
+
   /// Title for the error state
   final String title;
-  
+
   /// Constructor
   const ErrorState({
-    Key? key,
+    super.key,
     required this.errorMessage,
     required this.onRetry,
     this.title = 'Error',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +31,9 @@ class ErrorState extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 24),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+                Text(title, style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 Text(
                   errorMessage,

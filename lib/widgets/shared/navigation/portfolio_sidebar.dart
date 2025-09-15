@@ -4,29 +4,27 @@ import 'package:flutter/material.dart';
 class PortfolioSidebar extends StatelessWidget {
   /// Current selected page
   final String currentPage;
-  
+
   /// Callback when a page is selected
   final Function(String) onPageSelected;
-  
+
   /// Constructor
   const PortfolioSidebar({
-    Key? key,
+    super.key,
     required this.currentPage,
     required this.onPageSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: 220,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -34,7 +32,10 @@ class PortfolioSidebar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Text(
                 'Portfolio',
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -66,17 +67,24 @@ class PortfolioSidebar extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build a sidebar navigation item
-  Widget _buildSidebarItem(BuildContext context, String title, IconData icon, bool isActive) {
+  Widget _buildSidebarItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    bool isActive,
+  ) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: () => onPageSelected(title),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: isActive ? theme.colorScheme.primary.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? theme.colorScheme.primary.withOpacity(0.1)
+              : Colors.transparent,
           border: Border(
             left: BorderSide(
               color: isActive ? theme.colorScheme.primary : Colors.transparent,
@@ -89,14 +97,18 @@ class PortfolioSidebar extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.7),
+              color: isActive
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withOpacity(0.7),
             ),
             const SizedBox(width: 12),
             Text(
               title,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.7),
+                color: isActive
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ],

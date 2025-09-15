@@ -11,7 +11,7 @@ import 'web/dashboard_web_screen.dart';
 /// Delegates to platform-specific implementations
 class DashboardScreen extends StatefulWidget {
   /// Constructor
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -20,23 +20,23 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   /// Portfolio client for API calls
   late final PortfolioClient _portfolioClient;
-  
+
   /// Future for portfolio summary data
   late Future<ApiResponse<PortfolioSummary>> _portfolioSummaryFuture;
-  
+
   /// Auth service instance
   final _authService = AuthService();
-  
+
   @override
   void initState() {
     super.initState();
     _initializeApiClient();
     _loadPortfolioSummary();
-    
+
     // Listen for environment changes
     EnvironmentConfig.addListener(_onEnvironmentChanged);
   }
-  
+
   /// Initialize API client with current environment settings
   void _initializeApiClient() {
     _portfolioClient = PortfolioClient(
@@ -44,42 +44,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
       useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
     );
   }
-  
+
   /// Handle environment changes
   void _onEnvironmentChanged(Environment env) {
     // Dispose old client
     _portfolioClient.dispose();
-    
+
     // Create new client with updated environment
     _initializeApiClient();
-    
+
     // Reload data
     setState(() {
       _loadPortfolioSummary();
     });
   }
-  
+
   /// Load portfolio summary data
   void _loadPortfolioSummary() {
     // Get user ID from auth service
     final userId = _authService.currentState.user?.id ?? 'ssd2658';
-    
+
     _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(userId);
   }
-  
+
   /// Refresh portfolio data
   Future<void> _refreshPortfolio() async {
     setState(() {
       _loadPortfolioSummary();
     });
   }
-  
+
   /// Handle logout
   Future<void> _handleLogout() async {
     await _authService.logout();
     // Navigation will be handled by auth state listener in main.dart
   }
-  
+
   @override
   void dispose() {
     // Remove environment change listener
@@ -98,17 +98,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onLogout: _handleLogout,
       );
     }
-    
+
     // For mobile platforms, we'll implement platform-specific screens later
     // For now, just show a placeholder
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleLogout,
-          ),
+          IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout),
         ],
       ),
       body: Center(

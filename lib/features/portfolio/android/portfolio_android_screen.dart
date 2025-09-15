@@ -8,20 +8,20 @@ import '../../../widgets/shared/finance/holdings_breakdown.dart';
 class PortfolioAndroidScreen extends StatelessWidget {
   /// Future for portfolio summary data
   final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
-  
+
   /// User ID for portfolio data
   final String userId;
-  
+
   /// Constructor
   const PortfolioAndroidScreen({
-    Key? key,
+    super.key,
     required this.portfolioSummaryFuture,
     required this.refreshPortfolio,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,35 +42,31 @@ class PortfolioAndroidScreen extends StatelessWidget {
           future: portfolioSummaryFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (snapshot.hasError) {
               return _buildErrorState(context, snapshot.error.toString());
             }
-            
+
             final response = snapshot.data!;
-            
+
             if (!response.isSuccess) {
-              return _buildErrorState(context, response.error ?? 'Unknown error');
+              return _buildErrorState(
+                context,
+                response.error ?? 'Unknown error',
+              );
             }
-            
+
             final summary = response.data!;
-            
+
             // Android-specific layout with Material Design
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                PortfolioSummaryCard(
-                  summary: summary,
-                  showDetails: true,
-                ),
+                PortfolioSummaryCard(summary: summary, showDetails: true),
                 const SizedBox(height: 16),
-                HoldingsBreakdown(
-                  summary: summary,
-                ),
+                HoldingsBreakdown(summary: summary),
               ],
             );
           },
@@ -87,11 +83,7 @@ class PortfolioAndroidScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 24),
             Text(
               'Error loading portfolio data',

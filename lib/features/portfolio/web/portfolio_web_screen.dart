@@ -9,17 +9,17 @@ import '../../../widgets/shared/layouts/web_layout.dart';
 class PortfolioWebScreen extends StatefulWidget {
   /// User ID for portfolio data
   final String userId;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
-  
+
   /// Constructor
   const PortfolioWebScreen({
-    Key? key,
+    super.key,
     required this.refreshPortfolio,
     required this.userId,
-  }) : super(key: key);
-  
+  });
+
   @override
   State<PortfolioWebScreen> createState() => _PortfolioWebScreenState();
 }
@@ -27,7 +27,7 @@ class PortfolioWebScreen extends StatefulWidget {
 class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
   // Portfolio client for API calls
   late final PortfolioClient _portfolioClient;
-  
+
   // Future for portfolio holdings data
   late Future<PortfolioHoldings> _holdingsFuture;
 
@@ -37,22 +37,24 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
     _initializeApiClient();
     _loadHoldings();
   }
-  
+
   /// Initialize API client
   void _initializeApiClient() {
     _portfolioClient = PortfolioClient(
       baseUrl: 'http://localhost:8082',
       useMockData: false, // Using real API data
     );
-    debugPrint('Portfolio client initialized with baseUrl: http://localhost:8082');
+    debugPrint(
+      'Portfolio client initialized with baseUrl: http://localhost:8082',
+    );
   }
-  
+
   /// Load portfolio holdings data
   void _loadHoldings() {
     debugPrint('Loading portfolio holdings for user: ${widget.userId}');
     _holdingsFuture = _portfolioClient.getPortfolioHoldings(widget.userId);
   }
-  
+
   /// Refresh holdings data
   void _refreshHoldings() {
     debugPrint('Refreshing portfolio holdings for user: ${widget.userId}');
@@ -60,7 +62,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
       _loadHoldings();
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return WebLayout(
@@ -69,7 +71,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
       child: _buildContent(),
     );
   }
-  
+
   /// Build the main content
   Widget _buildContent() {
     return LayoutBuilder(
@@ -78,7 +80,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
         // Reduce padding to maximize available space for content
         final horizontalPadding = constraints.maxWidth * 0.01; // 1% of width
         final verticalPadding = constraints.maxHeight * 0.01; // 1% of height
-        
+
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
@@ -106,7 +108,6 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
                 ],
               ),
               SizedBox(height: constraints.maxHeight * 0.01), // 1% of height
-              
               // Holdings view - give maximum space
               Expanded(
                 child: PortfolioHoldingsView(
@@ -120,7 +121,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
       },
     );
   }
-  
+
   @override
   void dispose() {
     _portfolioClient.dispose();

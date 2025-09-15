@@ -25,7 +25,7 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
   final Widget? suffix;
 
   const AppTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.labelText,
     this.hintText,
@@ -42,12 +42,12 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
     this.contentPadding,
     this.prefix,
     this.suffix,
-  }) : super(key: key);
+  });
 
   @override
   CupertinoTextField buildIosWidget(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return CupertinoTextField(
       controller: controller,
       placeholder: hintText,
@@ -60,21 +60,17 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
       autofocus: autofocus,
       focusNode: focusNode,
       padding: contentPadding ?? const EdgeInsets.all(12),
-      prefix: prefix != null 
-          ? Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: prefix,
-            ) 
+      prefix: prefix != null
+          ? Padding(padding: const EdgeInsets.only(left: 12), child: prefix)
           : null,
-      suffix: suffix != null 
-          ? Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: suffix,
-            ) 
+      suffix: suffix != null
+          ? Padding(padding: const EdgeInsets.only(right: 12), child: suffix)
           : null,
       decoration: BoxDecoration(
         border: Border.all(
-          color: errorText != null ? CupertinoColors.systemRed : CupertinoColors.systemGrey,
+          color: errorText != null
+              ? CupertinoColors.systemRed
+              : CupertinoColors.systemGrey,
           width: 1.0,
         ),
         borderRadius: BorderRadius.circular(8),
@@ -123,7 +119,10 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
+            width: 2,
+          ),
         ),
       ),
       obscureText: obscureText,

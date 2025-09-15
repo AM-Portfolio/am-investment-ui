@@ -3,7 +3,6 @@ import '../../../core/models/portfolio/portfolio_models.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
 import '../../../widgets/shared/finance/portfolio_summary_card.dart';
-import '../../../widgets/shared/finance/holdings_breakdown.dart';
 import '../../../widgets/shared/finance/market_summary.dart';
 import '../../../widgets/shared/finance/watchlist.dart';
 
@@ -11,20 +10,20 @@ import '../../../widgets/shared/finance/watchlist.dart';
 class HomeWebScreen extends StatelessWidget {
   /// Future for portfolio summary data
   final Future<PortfolioSummary> portfolioSummaryFuture;
-  
+
   /// Callback to refresh portfolio data
   final Future<void> Function() onRefresh;
-  
+
   /// Callback when logout is requested
   final VoidCallback onLogout;
-  
+
   /// Constructor
   const HomeWebScreen({
-    Key? key,
+    super.key,
     required this.portfolioSummaryFuture,
     required this.onRefresh,
     required this.onLogout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,25 +34,23 @@ class HomeWebScreen extends StatelessWidget {
       child: _buildHomeContent(context),
     );
   }
-  
+
   /// Build the home content
   Widget _buildHomeContent(BuildContext context) {
     return FutureBuilder<PortfolioSummary>(
       future: portfolioSummaryFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (snapshot.hasError) {
           return _buildErrorState(context, snapshot.error.toString());
         }
-        
+
         final summary = snapshot.data!;
         final user = AuthService().currentState.user;
-        
+
         // Modern home layout with multiple sections
         return SingleChildScrollView(
           child: Padding(
@@ -61,7 +58,6 @@ class HomeWebScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 // Dashboard content in a grid layout
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -75,7 +71,10 @@ class HomeWebScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Portfolio summary
-                              _buildSectionHeader(context, 'Portfolio Overview'),
+                              _buildSectionHeader(
+                                context,
+                                'Portfolio Overview',
+                              ),
                               const SizedBox(height: 16),
                               PortfolioSummaryCard(
                                 summary: summary,
@@ -87,9 +86,9 @@ class HomeWebScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(width: 24),
-                        
+
                         // Right column - 1/3 width
                         Expanded(
                           child: Column(
@@ -99,18 +98,19 @@ class HomeWebScreen extends StatelessWidget {
                               _buildSectionHeader(context, 'Quick Actions'),
                               const SizedBox(height: 16),
                               _buildQuickActions(context),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Market summary
                               _buildSectionHeader(context, 'Market Summary'),
                               const SizedBox(height: 16),
                               MarketSummary(
-                                onViewFullSummary: () => _showFullMarketSummary(context),
+                                onViewFullSummary: () =>
+                                    _showFullMarketSummary(context),
                               ),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Watchlist
                               _buildSectionHeader(context, 'Watchlist'),
                               const SizedBox(height: 16),
@@ -129,13 +129,13 @@ class HomeWebScreen extends StatelessWidget {
       },
     );
   }
-  
+
   // Welcome section removed as requested
-  
+
   /// Build section header
   Widget _buildSectionHeader(BuildContext context, String title) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Container(
@@ -156,24 +156,34 @@ class HomeWebScreen extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build quick actions section
   Widget _buildQuickActions(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     final actions = [
-      {'icon': Icons.add_chart, 'label': 'New Investment', 'color': Colors.blue},
-      {'icon': Icons.history, 'label': 'Transaction History', 'color': Colors.orange},
-      {'icon': Icons.analytics, 'label': 'Portfolio Analysis', 'color': Colors.purple},
+      {
+        'icon': Icons.add_chart,
+        'label': 'New Investment',
+        'color': Colors.blue,
+      },
+      {
+        'icon': Icons.history,
+        'label': 'Transaction History',
+        'color': Colors.orange,
+      },
+      {
+        'icon': Icons.analytics,
+        'label': 'Portfolio Analysis',
+        'color': Colors.purple,
+      },
     ];
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: theme.colorScheme.outline.withOpacity(0.2),
-        ),
+        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -185,27 +195,33 @@ class HomeWebScreen extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 16,
                 alignment: WrapAlignment.spaceAround,
-                children: actions.map((action) => _buildActionItem(context, action)).toList(),
+                children: actions
+                    .map((action) => _buildActionItem(context, action))
+                    .toList(),
               );
             }
             // Use Row for larger screens
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: actions.map((action) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildActionItem(context, action),
-              )).toList(),
+              children: actions
+                  .map(
+                    (action) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: _buildActionItem(context, action),
+                    ),
+                  )
+                  .toList(),
             );
           },
         ),
       ),
     );
   }
-  
+
   /// Build an individual action item
   Widget _buildActionItem(BuildContext context, Map<String, dynamic> action) {
     final theme = Theme.of(context);
-    
+
     return InkWell(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -244,11 +260,11 @@ class HomeWebScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   // Market summary component has been moved to a separate file: widgets/shared/finance/market_summary.dart
-  
+
   // Watchlist component has been moved to a separate file: widgets/shared/finance/watchlist.dart
-  
+
   /// Show full market summary dialog
   void _showFullMarketSummary(BuildContext context) {
     showDialog(
@@ -307,11 +323,7 @@ class HomeWebScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red,
-                ),
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
                 const SizedBox(height: 24),
                 Text(
                   'Error loading dashboard data',

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/value_indicator.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
 import 'package:intl/intl.dart';
 
@@ -10,20 +8,20 @@ import 'package:intl/intl.dart';
 class PortfolioSummaryCard extends StatelessWidget {
   /// Portfolio summary data
   final PortfolioSummary summary;
-  
+
   /// Whether to show detailed information
   final bool showDetails;
-  
+
   /// Callback when the card is tapped
   final VoidCallback? onTap;
-  
+
   /// Constructor
   const PortfolioSummaryCard({
-    Key? key,
+    super.key,
     required this.summary,
     this.showDetails = true,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +31,12 @@ class PortfolioSummaryCard extends StatelessWidget {
       locale: 'en_IN',
       decimalDigits: 2,
     );
-    
+
     // Format the last updated time
-    final lastUpdatedFormatted = DateFormat('MMM d, yyyy • h:mm a').format(summary.lastUpdated);
-    
+    final lastUpdatedFormatted = DateFormat(
+      'MMM d, yyyy • h:mm a',
+    ).format(summary.lastUpdated);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -66,7 +66,10 @@ class PortfolioSummaryCard extends StatelessWidget {
             children: [
               // Modern header with glass effect
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary.withOpacity(0.08),
                 ),
@@ -100,7 +103,9 @@ class PortfolioSummaryCard extends StatelessWidget {
                             Text(
                               'Last updated: $lastUpdatedFormatted',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.6,
+                                ),
                               ),
                             ),
                           ],
@@ -123,7 +128,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -141,7 +146,8 @@ class PortfolioSummaryCard extends StatelessWidget {
                               Text(
                                 'Invested',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -157,7 +163,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        
+
                         // Current value
                         Expanded(
                           child: Column(
@@ -166,7 +172,8 @@ class PortfolioSummaryCard extends StatelessWidget {
                               Text(
                                 'Current',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -176,8 +183,10 @@ class PortfolioSummaryCard extends StatelessWidget {
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,
-                                  color: summary.currentValue >= summary.investmentValue 
-                                      ? Colors.green.shade700 
+                                  color:
+                                      summary.currentValue >=
+                                          summary.investmentValue
+                                      ? Colors.green.shade700
                                       : Colors.red.shade700,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -190,9 +199,9 @@ class PortfolioSummaryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Modern metrics layout with cards
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -252,10 +261,10 @@ class PortfolioSummaryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               if (showDetails) ...[
                 const SizedBox(height: 24),
-                
+
                 // Portfolio statistics in modern cards
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -284,7 +293,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Stats in a modern row
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -299,20 +308,20 @@ class PortfolioSummaryCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildModernStatItem(
-                              context, 
+                              context,
                               'Assets',
                               summary.totalAssets.toString(),
                               Icons.pie_chart_outline,
                             ),
                             _buildModernStatItem(
-                              context, 
+                              context,
                               'Gainers',
                               summary.gainersCount.toString(),
                               Icons.trending_up_outlined,
                               color: Colors.green,
                             ),
                             _buildModernStatItem(
-                              context, 
+                              context,
                               'Losers',
                               summary.losersCount.toString(),
                               Icons.trending_down_outlined,
@@ -321,9 +330,9 @@ class PortfolioSummaryCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Broker breakdown with modern styling
                       if (summary.brokerPortfolios.isNotEmpty) ...[
                         // Section title with subtle divider
@@ -348,7 +357,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Broker list with modern styling
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -365,15 +374,18 @@ class PortfolioSummaryCard extends StatelessWidget {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
                                           Container(
                                             padding: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: theme.colorScheme.primary.withOpacity(0.1),
-                                              borderRadius: BorderRadius.circular(8),
+                                              color: theme.colorScheme.primary
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: Icon(
                                               Icons.account_balance_outlined,
@@ -384,22 +396,26 @@ class PortfolioSummaryCard extends StatelessWidget {
                                           const SizedBox(width: 8),
                                           Text(
                                             entry.key,
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
                                           ),
                                         ],
                                       ),
                                       Text(
-                                        currencyFormat.format(entry.value.investmentValue),
-                                        style: theme.textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w600,
+                                        currencyFormat.format(
+                                          entry.value.investmentValue,
                                         ),
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                     ],
                                   ),
                                 );
-                              }).toList(),
+                              }),
                             ],
                           ),
                         ),
@@ -407,7 +423,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
               ],
             ],
@@ -416,14 +432,18 @@ class PortfolioSummaryCard extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build a modern statistic item
-  Widget _buildModernStatItem(BuildContext context, String label, String value, IconData icon, {
+  Widget _buildModernStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon, {
     Color? color,
   }) {
     final theme = Theme.of(context);
     final accentColor = color ?? theme.colorScheme.primary;
-    
+
     return Column(
       children: [
         Container(
@@ -432,11 +452,7 @@ class PortfolioSummaryCard extends StatelessWidget {
             color: accentColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            color: accentColor,
-            size: 20,
-          ),
+          child: Icon(icon, color: accentColor, size: 20),
         ),
         const SizedBox(height: 8),
         Text(
@@ -455,19 +471,22 @@ class PortfolioSummaryCard extends StatelessWidget {
       ],
     );
   }
-  
+
   /// Build a modern metric card with value indicator
-  Widget _buildModernMetricCard(BuildContext context, String label, double value, {
+  Widget _buildModernMetricCard(
+    BuildContext context,
+    String label,
+    double value, {
     required IconData icon,
     bool isPercentage = false,
     bool useCompactFormat = false,
   }) {
     final theme = Theme.of(context);
-    
+
     // Determine color based on value
     Color accentColor;
     IconData indicatorIcon = icon;
-    
+
     if (value > 0) {
       accentColor = Colors.green.shade600;
     } else if (value < 0) {
@@ -475,7 +494,7 @@ class PortfolioSummaryCard extends StatelessWidget {
     } else {
       accentColor = theme.colorScheme.primary;
     }
-    
+
     // Format the value
     String formattedValue;
     if (isPercentage) {
@@ -491,14 +510,14 @@ class PortfolioSummaryCard extends StatelessWidget {
     } else {
       formattedValue = '₹${value.abs().toStringAsFixed(2)}';
     }
-    
+
     // Add sign if needed
     if (value > 0) {
       formattedValue = '+$formattedValue';
     } else if (value < 0 && !isPercentage) {
       formattedValue = '-$formattedValue';
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -511,10 +530,7 @@ class PortfolioSummaryCard extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(
-          color: accentColor.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: accentColor.withOpacity(0.2), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -529,11 +545,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                   color: accentColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  indicatorIcon,
-                  size: 14,
-                  color: accentColor,
-                ),
+                child: Icon(indicatorIcon, size: 14, color: accentColor),
               ),
               const SizedBox(width: 8),
               Expanded(

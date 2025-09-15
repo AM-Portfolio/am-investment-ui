@@ -19,7 +19,7 @@ class ModernLoginForm extends StatelessWidget {
   final Function(Set<LoginMethod>) onLoginMethodChanged;
 
   const ModernLoginForm({
-    Key? key,
+    super.key,
     required this.formKey,
     required this.identifierController,
     required this.passwordController,
@@ -32,7 +32,7 @@ class ModernLoginForm extends StatelessWidget {
     required this.onRegister,
     required this.selectedLoginMethod,
     required this.onLoginMethodChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,7 @@ class ModernLoginForm extends StatelessWidget {
             height: 52,
           ),
           const SizedBox(height: 16),
-          
+
           // Quick login button
           AppButton(
             text: 'Quick Login (Demo User)',
@@ -111,7 +111,7 @@ class ModernLoginForm extends StatelessWidget {
             height: 52,
           ),
           const SizedBox(height: 16),
-          
+
           // SSD2658 login button
           if (onSsdLogin != null)
             AppButton(
@@ -177,22 +177,22 @@ class ModernLoginForm extends StatelessWidget {
         selected: {selectedLoginMethod},
         onSelectionChanged: onLoginMethodChanged,
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return Colors.white.withOpacity(0.2);
-              }
-              return Colors.transparent;
-            },
-          ),
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return Colors.white;
-              }
-              return Colors.white70;
-            },
-          ),
+          backgroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.white.withOpacity(0.2);
+            }
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith<Color>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.white;
+            }
+            return Colors.white70;
+          }),
           visualDensity: VisualDensity.compact,
         ),
       ),
@@ -206,7 +206,7 @@ class ModernLoginForm extends StatelessWidget {
     late final TextInputType keyboardType;
     late final Widget prefix;
     late final String? Function(String?)? validator;
-    
+
     switch (selectedLoginMethod) {
       case LoginMethod.email:
         labelText = 'Email';
@@ -230,7 +230,7 @@ class ModernLoginForm extends StatelessWidget {
         validator = Validators.validatePhone;
         break;
     }
-    
+
     return _buildStyledTextField(
       controller: identifierController,
       labelText: labelText,
@@ -287,7 +287,10 @@ class ModernLoginForm extends StatelessWidget {
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.redAccent.withOpacity(0.5), width: 1),
+            borderSide: BorderSide(
+              color: Colors.redAccent.withOpacity(0.5),
+              width: 1,
+            ),
           ),
           labelStyle: const TextStyle(color: Colors.white70),
           hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
@@ -312,16 +315,16 @@ class ModernLoginForm extends StatelessWidget {
     if (value == null || value.isEmpty) {
       return 'Username is required';
     }
-    
+
     if (value.length < 3) {
       return 'Username must be at least 3 characters';
     }
-    
+
     final usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
     if (!usernameRegex.hasMatch(value)) {
       return 'Username can only contain letters, numbers, and underscores';
     }
-    
+
     return null;
   }
 }

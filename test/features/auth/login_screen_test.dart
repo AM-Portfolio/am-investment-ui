@@ -2,29 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
-import '../../../lib/features/auth/presentation/screens/login_screen.dart';
-import '../../../lib/core/services/auth_service.dart';
-import '../../../lib/core/widgets/app_button.dart';
-import '../../../lib/core/widgets/app_text_field.dart';
+import 'package:todo_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:todo_app/core/widgets/app_button.dart';
+import 'package:todo_app/core/widgets/app_text_field.dart';
 
 void main() {
   late Widget testWidget;
 
   setUp(() {
-    testWidget = const MaterialApp(
-      home: LoginScreen(),
-    );
+    testWidget = const MaterialApp(home: LoginScreen());
   });
 
   group('LoginScreen UI Tests', () {
-    testWidgets('Renders login form with all elements', (WidgetTester tester) async {
+    testWidgets('Renders login form with all elements', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Verify the app title is displayed
       expect(find.text('AM Investment'), findsOneWidget);
 
       // Verify form fields are present
-      expect(find.byType(AppTextField), findsNWidgets(2)); // Email and password fields
+      expect(
+        find.byType(AppTextField),
+        findsNWidgets(2),
+      ); // Email and password fields
       expect(find.text('Email'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
 
@@ -36,7 +38,9 @@ void main() {
       expect(find.text('Register'), findsOneWidget);
     });
 
-    testWidgets('Shows validation errors when form is submitted empty', (WidgetTester tester) async {
+    testWidgets('Shows validation errors when form is submitted empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Find and tap the login button
@@ -49,12 +53,14 @@ void main() {
       expect(find.text('Password is required'), findsOneWidget);
     });
 
-    testWidgets('Shows validation error for invalid email format', (WidgetTester tester) async {
+    testWidgets('Shows validation error for invalid email format', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Enter invalid email
       await tester.enterText(find.byType(TextField).first, 'invalid-email');
-      
+
       // Enter valid password
       await tester.enterText(find.byType(TextField).last, 'password123');
 
@@ -68,12 +74,14 @@ void main() {
       expect(find.text('Password is required'), findsNothing);
     });
 
-    testWidgets('Shows validation error for short password', (WidgetTester tester) async {
+    testWidgets('Shows validation error for short password', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Enter valid email
       await tester.enterText(find.byType(TextField).first, 'test@example.com');
-      
+
       // Enter short password
       await tester.enterText(find.byType(TextField).last, '123');
 
@@ -83,31 +91,42 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify validation error message is shown for password
-      expect(find.text('Password must be at least 6 characters'), findsOneWidget);
+      expect(
+        find.text('Password must be at least 6 characters'),
+        findsOneWidget,
+      );
       expect(find.text('Email is required'), findsNothing);
     });
 
-    testWidgets('Shows loading state when login button is pressed with valid inputs', (WidgetTester tester) async {
-      await tester.pumpWidget(testWidget);
+    testWidgets(
+      'Shows loading state when login button is pressed with valid inputs',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(testWidget);
 
-      // Enter valid email
-      await tester.enterText(find.byType(TextField).first, 'test@example.com');
-      
-      // Enter valid password
-      await tester.enterText(find.byType(TextField).last, 'password123');
+        // Enter valid email
+        await tester.enterText(
+          find.byType(TextField).first,
+          'test@example.com',
+        );
 
-      // Find and tap the login button
-      final loginButton = find.text('Login');
-      await tester.tap(loginButton);
-      
-      // Pump once to start the loading state
-      await tester.pump();
+        // Enter valid password
+        await tester.enterText(find.byType(TextField).last, 'password123');
 
-      // Verify loading indicator is shown
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
+        // Find and tap the login button
+        final loginButton = find.text('Login');
+        await tester.tap(loginButton);
 
-    testWidgets('Navigates to register screen when register button is tapped', (WidgetTester tester) async {
+        // Pump once to start the loading state
+        await tester.pump();
+
+        // Verify loading indicator is shown
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      },
+    );
+
+    testWidgets('Navigates to register screen when register button is tapped', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Find and tap the register button
@@ -121,11 +140,15 @@ void main() {
   });
 
   group('Platform-specific UI Tests', () {
-    testWidgets('Uses correct text field style based on platform', (WidgetTester tester) async {
+    testWidgets('Uses correct text field style based on platform', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Check if the correct text field widget is used based on platform
-      if (kIsWeb || Theme.of(tester.element(find.byType(MaterialApp))).platform == TargetPlatform.android) {
+      if (kIsWeb ||
+          Theme.of(tester.element(find.byType(MaterialApp))).platform ==
+              TargetPlatform.android) {
         expect(find.byType(TextField), findsWidgets);
         expect(find.byType(CupertinoTextField), findsNothing);
       } else {
@@ -134,11 +157,15 @@ void main() {
       }
     });
 
-    testWidgets('Uses correct button style based on platform', (WidgetTester tester) async {
+    testWidgets('Uses correct button style based on platform', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(testWidget);
 
       // Check if the correct button widget is used based on platform
-      if (kIsWeb || Theme.of(tester.element(find.byType(MaterialApp))).platform == TargetPlatform.android) {
+      if (kIsWeb ||
+          Theme.of(tester.element(find.byType(MaterialApp))).platform ==
+              TargetPlatform.android) {
         expect(find.byType(ElevatedButton), findsWidgets);
         expect(find.byType(CupertinoButton), findsNothing);
       } else {
