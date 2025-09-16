@@ -32,6 +32,9 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
   
   // Filtered holdings
   List<EquityHolding>? _filteredHoldings;
+  
+  // Filter visibility state
+  bool _isFilterExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +75,25 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Filter button
+                    // Filter toggle button
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.filter_list, size: 16),
-                      label: const Text('Advanced Filters'),
+                      icon: Icon(
+                        _isFilterExpanded ? Icons.filter_list_off : Icons.filter_list,
+                        size: 16,
+                      ),
+                      label: Text(_isFilterExpanded ? 'Hide Filters' : 'Show Filters'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         textStyle: Theme.of(context).textTheme.bodySmall,
+                        backgroundColor: _isFilterExpanded
+                            ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
+                            : null,
                       ),
-                      onPressed: () => _showAdvancedFilters(holdings),
+                      onPressed: () {
+                        setState(() {
+                          _isFilterExpanded = !_isFilterExpanded;
+                        });
+                      },
                     ),
                     
                     // Entry count selector
@@ -119,18 +132,19 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                   ],
                 ),
                 
-                // Show filter widget if filters are active
-                if (_filteredHoldings != null)
+                // Always show the filter widget when expanded
+                if (_isFilterExpanded)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
                     child: PortfolioFilterWidget(
                       holdings: holdings.equityHoldings,
                       onFiltersApplied: _applyFilters,
                       onFiltersReset: _resetFilters,
+                      initiallyExpanded: true,
                     ),
                   ),
                 
-                // Filter status indicator
+                // Filter status indicator when filters are applied
                 if (_filteredHoldings != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
@@ -183,17 +197,6 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
     );
   }
   
-  /// Show advanced filters dialog
-  void _showAdvancedFilters(PortfolioHoldings holdings) async {
-    final result = await PortfolioFilterWidget.showFilterDialog(
-      context,
-      holdings.equityHoldings,
-    );
-    
-    if (result != null) {
-      _applyFilters(result);
-    }
-  }
   
   /// Apply filters to the holdings
   void _applyFilters(List<EquityHolding> filtered) {
