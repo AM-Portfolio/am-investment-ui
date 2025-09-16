@@ -95,32 +95,11 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              // Page title - make more compact
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Portfolio Holdings',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // Portfolio holdings view - with dynamic height
+                  PortfolioHoldingsView(
+                    holdingsFuture: _holdingsFuture,
+                    onRefresh: _refreshHoldings,
                   ),
-                  // Add refresh button at the top level for easier access
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: _refreshHoldings,
-                    tooltip: 'Refresh holdings',
-                  ),
-                ],
-              ),
-              SizedBox(height: constraints.maxHeight * 0.02), // 2% of height
-              
-              // Portfolio holdings view - with dynamic height
-              // This allows both filter and holdings to be visible
-              PortfolioHoldingsView(
-                holdingsFuture: _holdingsFuture,
-                onRefresh: _refreshHoldings,
-              ),
             ],
           ),
         ),

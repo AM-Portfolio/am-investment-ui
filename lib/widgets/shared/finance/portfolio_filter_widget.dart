@@ -350,11 +350,65 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
             result = result.where((holding) {
               switch (filter.field) {
                 case 'symbol':
-                  return holding.symbol.toLowerCase().contains(searchTerm);
+                  // Check if the symbol contains all characters in the search term in order
+                  final symbol = holding.symbol.toLowerCase();
+                  final searchChars = searchTerm.split('');
+                  int lastFoundIndex = -1;
+                  bool allCharsFound = true;
+                  
+                  for (final char in searchChars) {
+                    int index = symbol.indexOf(char, lastFoundIndex + 1);
+                    if (index == -1) {
+                      allCharsFound = false;
+                      break;
+                    }
+                    lastFoundIndex = index;
+                  }
+                  
+                  return allCharsFound;
                 default:
                   return true;
               }
             }).toList();
+            
+            // Sort matching symbols to show most relevant matches first
+            if (filter.field == 'symbol') {
+              result.sort((a, b) {
+                final symbolA = a.symbol.toLowerCase();
+                final symbolB = b.symbol.toLowerCase();
+                
+                // First prioritize exact matches
+                bool aExactMatch = symbolA == searchTerm;
+                bool bExactMatch = symbolB == searchTerm;
+                
+                if (aExactMatch && !bExactMatch) return -1;
+                if (!aExactMatch && bExactMatch) return 1;
+                
+                // Then prioritize symbols that start with the search term
+                bool aStartsWith = symbolA.startsWith(searchTerm);
+                bool bStartsWith = symbolB.startsWith(searchTerm);
+                
+                if (aStartsWith && !bStartsWith) return -1;
+                if (!aStartsWith && bStartsWith) return 1;
+                
+                // Then prioritize by how early the first character appears
+                int aFirstCharIndex = symbolA.indexOf(searchTerm[0]);
+                int bFirstCharIndex = symbolB.indexOf(searchTerm[0]);
+                
+                if (aFirstCharIndex < bFirstCharIndex) return -1;
+                if (aFirstCharIndex > bFirstCharIndex) return 1;
+                
+                // Then prioritize by sequence match quality (fewer gaps between matched chars)
+                int aGapSum = _calculateMatchGapSum(symbolA, searchTerm);
+                int bGapSum = _calculateMatchGapSum(symbolB, searchTerm);
+                
+                if (aGapSum < bGapSum) return -1;
+                if (aGapSum > bGapSum) return 1;
+                
+                // Finally sort alphabetically
+                return symbolA.compareTo(symbolB);
+              });
+            }
           }
           break;
           
@@ -425,18 +479,39 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
   
   /// Reset all filters
   void _resetFilters() {
-    for (final filter in _filters) {
-      filter.reset();
-    }
-    
     setState(() {
-      _filteredHoldings = List.from(widget.holdings);
+      for (final filter in _filters) {
+        filter.textValue = null;
+        filter.selectedCategories = null;
+        filter.minValue = null;
+        filter.maxValue = null;
+        filter.isPositive = null;
+      }
     });
     
-    widget.onFiltersApplied(_filteredHoldings);
-    if (widget.onFiltersReset != null) {
-      widget.onFiltersReset!();
+    _applyFilters();
+  }
+  
+  /// Calculate the sum of gaps between matched characters in a symbol
+  /// Lower values indicate better matches with fewer gaps between matched characters
+  int _calculateMatchGapSum(String symbol, String searchTerm) {
+    final searchChars = searchTerm.split('');
+    int lastFoundIndex = -1;
+    int gapSum = 0;
+    
+    for (final char in searchChars) {
+      int index = symbol.indexOf(char, lastFoundIndex + 1);
+      if (index == -1) return 999; // Large penalty for missing characters
+      
+      if (lastFoundIndex >= 0) {
+        // Add the gap between this character and the previous one
+        gapSum += (index - lastFoundIndex - 1);
+      }
+      
+      lastFoundIndex = index;
     }
+    
+    return gapSum;
   }
   
   @override
@@ -673,6 +748,15 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
     FilterCriteria filter,
     {String hintText = 'Enter text...'}
   ) {
+    // Create a controller that won't reset cursor position
+    final controller = TextEditingController(text: filter.textValue);
+    // Set cursor to end of text
+    if (filter.textValue != null) {
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: filter.textValue!.length),
+      );
+    }
+    
     return SizedBox(
       width: 200,
       child: Column(
@@ -703,6 +787,7 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
                       onPressed: () {
                         setState(() {
                           filter.textValue = null;
+                          _applyFilters();
                         });
                       },
                     )
@@ -711,9 +796,10 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
             onChanged: (value) {
               setState(() {
                 filter.textValue = value;
+                _applyFilters();
               });
             },
-            controller: TextEditingController(text: filter.textValue),
+            controller: controller,
           ),
         ],
       ),

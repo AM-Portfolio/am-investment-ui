@@ -7,18 +7,23 @@ import 'dart:developer' as dev;
 
 /// A widget to display portfolio holdings
 class PortfolioHoldingsView extends StatefulWidget {
-  /// Future for portfolio holdings data
-  final Future<PortfolioHoldings> holdingsFuture;
+  /// Future that resolves to portfolio holdings
+  final Future<PortfolioHoldings>? holdingsFuture;
 
-  /// Callback to refresh holdings data
-  final VoidCallback onRefresh;
+  /// Portfolio holdings data (if already available)
+  final PortfolioHoldings? holdings;
+  
+  /// Callback when refresh button is pressed
+  final VoidCallback? onRefresh;
 
   /// Constructor
   const PortfolioHoldingsView({
     super.key,
-    required this.holdingsFuture,
-    required this.onRefresh,
-  });
+    this.holdingsFuture,
+    this.holdings,
+    this.onRefresh,
+  }) : assert(holdingsFuture != null || holdings != null,
+            'Either holdingsFuture or holdings must be provided');
 
   @override
   State<PortfolioHoldingsView> createState() => _PortfolioHoldingsViewState();
@@ -76,7 +81,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Filter controls
+                    // Left side: Filter buttons
                     Row(
                       children: [
                         // Inline filter toggle button
@@ -110,10 +115,23 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                             backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                           ),
                         ),
+                        
+                        // Refresh button
+                        if (widget.onRefresh != null) ...[  
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            tooltip: 'Refresh Holdings',
+                            onPressed: widget.onRefresh,
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     
-                    // Entry count selector
+                    // Right side: Entry count selector
                     Row(
                       children: [
                         Text(
@@ -190,7 +208,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                 // Use SizedBox with responsive height for the holdings card
                 // This ensures consistent display regardless of filter state
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.6, // 60% of screen height
+                  height: MediaQuery.of(context).size.height * 0.75, // 75% of screen height
                   child: PortfolioHoldingsCard(
                     holdings: _filteredHoldings != null
                         ? PortfolioHoldings(equityHoldings: _filteredHoldings!)
