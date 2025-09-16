@@ -7,22 +7,26 @@ class WebLayout extends StatelessWidget {
   /// The main content of the page
   final Widget child;
 
-  /// The title to display in the header
+  /// The title to display in the header (only used for page title, not displayed)
   final String title;
-
+  
   /// The currently active navigation item
   final String activeNavItem;
 
   /// Callback when logout is requested
   final VoidCallback? onLogout;
+  
+  /// Callback when navigation is requested
+  final void Function(String navItem)? onNavigate;
 
   /// Constructor
   const WebLayout({
     super.key,
     required this.child,
-    this.title = 'AM Investment',
+    this.title = 'AM Investment', // Title parameter kept for compatibility
     this.activeNavItem = 'Dashboard',
     this.onLogout,
+    this.onNavigate,
   });
 
   @override
@@ -50,129 +54,177 @@ class WebLayout extends StatelessWidget {
 
     return Container(
       color: theme.colorScheme.primary,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Column(
         children: [
-          // Top bar with logo and user info
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: Row(
-              children: [
-                // Logo
-                Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance,
-                      color: theme.colorScheme.onPrimary,
-                      size: 32,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'AM Investment',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const Spacer(),
-
-                // User profile and actions
-                Row(
-                  children: [
-                    // Company Info
-                    TextButton(
-                      onPressed: () {
-                        _showCompanyInfo(context);
-                      },
-                      child: Text(
-                        'About',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-
-                    // Notifications
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined),
-                      color: theme.colorScheme.onPrimary,
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Notifications coming soon'),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // User profile
-                    InkWell(
-                      onTap: () {
-                        _showUserMenu(context);
-                      },
-                      borderRadius: BorderRadius.circular(24),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: theme.colorScheme.onPrimary,
-                              child: Text(
-                                user?.name.isNotEmpty == true
-                                    ? user!.name[0].toUpperCase()
-                                    : 'U',
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              user?.name ?? 'User',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: theme.colorScheme.onPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // Navigation bar
-          Container(
-            color: theme.colorScheme.primaryContainer,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+          // Top header with logo, navigation, and user profile
+          Row(
+            children: [
+              // Logo and title
+              Row(
                 children: [
-                  _buildNavItem(context, 'Dashboard', Icons.dashboard),
-                  _buildNavItem(context, 'Portfolio', Icons.bar_chart),
-                  _buildNavItem(context, 'Trade', Icons.swap_horiz),
-                  _buildNavItem(context, 'Market', Icons.trending_up),
-                  _buildNavItem(context, 'News', Icons.newspaper),
-                  _buildNavItem(context, 'Reports', Icons.analytics),
+                  // App logo - improved design
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onPrimary,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Background circle
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        // Main icon
+                        Icon(
+                          Icons.show_chart,
+                          color: theme.colorScheme.primary,
+                          size: 22,
+                        ),
+                        // Accent element
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.tertiary,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.onPrimary,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // App title - always 'AM Investment'
+                  Text(
+                    'AM Investment',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
-            ),
+              
+              const SizedBox(width: 40),
+              
+              // Navigation bar - moved to the middle
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildNavItem(context, 'Dashboard', Icons.dashboard),
+                      _buildNavItem(context, 'Portfolio', Icons.bar_chart),
+                      _buildNavItem(context, 'Trade', Icons.swap_horiz),
+                      _buildNavItem(context, 'Market', Icons.trending_up),
+                      _buildNavItem(context, 'News', Icons.newspaper),
+                      _buildNavItem(context, 'Reports', Icons.analytics),
+                    ],
+                  ),
+                ),
+              ),
+
+              // User actions
+              Row(
+                children: [
+                  // Search
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    tooltip: 'Search',
+                    color: theme.colorScheme.onPrimary,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Search coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Notifications
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    tooltip: 'Notifications',
+                    color: theme.colorScheme.onPrimary,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Notifications coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // User profile
+                  InkWell(
+                    onTap: () {
+                      _showUserMenu(context);
+                    },
+                    borderRadius: BorderRadius.circular(24),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: theme.colorScheme.onPrimary,
+                            child: Text(
+                              user?.name.isNotEmpty == true
+                                  ? user!.name[0].toUpperCase()
+                                  : 'U',
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            user?.name ?? 'User',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -186,8 +238,12 @@ class WebLayout extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        // Handle navigation here
-        Navigator.of(context).pushNamed('/${label.toLowerCase()}');
+        // Use onNavigate callback if provided, otherwise use traditional navigation
+        if (onNavigate != null) {
+          onNavigate!(label);
+        } else {
+          Navigator.of(context).pushNamed('/${label.toLowerCase()}');
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -195,7 +251,7 @@ class WebLayout extends StatelessWidget {
           border: Border(
             bottom: BorderSide(
               color: isActive
-                  ? theme.colorScheme.onPrimaryContainer
+                  ? theme.colorScheme.onPrimary
                   : Colors.transparent,
               width: 3,
             ),
@@ -206,8 +262,8 @@ class WebLayout extends StatelessWidget {
             Icon(
               icon,
               color: isActive
-                  ? theme.colorScheme.onPrimaryContainer
-                  : theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onPrimary.withOpacity(0.7),
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -215,8 +271,8 @@ class WebLayout extends StatelessWidget {
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: isActive
-                    ? theme.colorScheme.onPrimaryContainer
-                    : theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onPrimary.withOpacity(0.7),
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),
