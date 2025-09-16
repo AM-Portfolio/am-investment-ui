@@ -101,14 +101,19 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  /// Format a number as currency
+  String formatCurrency(double value) {
     final currencyFormat = NumberFormat.currency(
       symbol: '₹',
       locale: 'en_IN',
       decimalDigits: 2,
     );
+    return currencyFormat.format(value);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -172,7 +177,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
 
                     // Summary section if enabled
                     if (widget.showDetails) ...[
-                      _buildSummarySection(theme, currencyFormat),
+                      _buildSummarySection(theme),
                       SizedBox(height: cardConstraints.maxHeight * 0.01),
                     ],
 
@@ -180,7 +185,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                     Expanded(
                       child: SortableTable<EquityHolding>(
                         items: displayHoldings,
-                        columns: _buildColumns(currencyFormat),
+                        columns: _buildColumns(),
                         initialSortColumnIndex:
                             2, // Sort by current value initially
                         initialSortDirection: SortDirection.descending,
@@ -264,7 +269,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
   }
 
   /// Build summary section with dynamic sizing
-  Widget _buildSummarySection(ThemeData theme, NumberFormat currencyFormat) {
+  Widget _buildSummarySection(ThemeData theme) {
     // Calculate total investment and current value
     double totalInvestment = 0;
     double totalCurrentValue = 0;
@@ -301,26 +306,22 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Investment',
+                  'Total Investment',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2.0),
                 Text(
-                  currencyFormat.format(totalInvestment),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  formatCurrency(totalInvestment),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-
+          
           // Current value
           Expanded(
             child: Column(
@@ -330,24 +331,20 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                 Text(
                   'Current Value',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2.0),
                 Text(
-                  currencyFormat.format(totalCurrentValue),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  formatCurrency(totalCurrentValue),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-
+          
           // Gain/Loss
           Expanded(
             child: Column(
@@ -357,32 +354,32 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                 Text(
                   'Gain/Loss',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2.0),
                 Row(
                   children: [
                     Text(
-                      '${isPositive ? '+' : ''}${currencyFormat.format(totalGainLoss)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      formatCurrency(totalGainLoss),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                         color: valueColor,
-                        fontSize: 12,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 2.0),
+                    const SizedBox(width: 4),
                     Text(
-                      '(${isPositive ? '+' : ''}${totalGainLossPercentage.toStringAsFixed(1)}%)',
+                      '(${totalGainLossPercentage.toStringAsFixed(2)}%)',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: valueColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                      color: valueColor,
+                      size: 12,
                     ),
                   ],
                 ),
@@ -394,9 +391,9 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
     );
   }
 
+
   /// Build columns for the sortable table with fixed sizing
   List<SortableColumn<EquityHolding>> _buildColumns(
-    NumberFormat currencyFormat,
   ) {
     final theme = Theme.of(context);
 
@@ -458,7 +455,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
         textAlign: TextAlign.end,
         sortBy: (holding) => holding.investmentCost,
         builder: (holding) => Text(
-          currencyFormat.format(holding.investmentCost),
+          formatCurrency(holding.investmentCost),
           textAlign: TextAlign.end,
           overflow: TextOverflow.ellipsis,
         ),
@@ -471,7 +468,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
         textAlign: TextAlign.end,
         sortBy: (holding) => holding.currentValue,
         builder: (holding) => Text(
-          currencyFormat.format(holding.currentValue),
+          formatCurrency(holding.currentValue),
           textAlign: TextAlign.end,
           style: const TextStyle(fontWeight: FontWeight.w500),
           overflow: TextOverflow.ellipsis,
@@ -485,7 +482,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
         textAlign: TextAlign.end,
         sortBy: (holding) => holding.investmentCost / holding.quantity,
         builder: (holding) => Text(
-          currencyFormat.format(holding.investmentCost / holding.quantity),
+          formatCurrency(holding.investmentCost / holding.quantity),
           textAlign: TextAlign.end,
           overflow: TextOverflow.ellipsis,
         ),
@@ -503,7 +500,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              currencyFormat.format(holding.currentPrice),
+              formatCurrency(holding.currentPrice),
               textAlign: TextAlign.end,
               overflow: TextOverflow.ellipsis,
             ),
@@ -556,7 +553,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${isPositive ? "+" : ""}${currencyFormat.format(holding.gainLoss)}',
+                '${isPositive ? "+" : ""}${formatCurrency(holding.gainLoss)}',
                 style: TextStyle(
                   color: valueColor,
                   fontWeight: FontWeight.w500,

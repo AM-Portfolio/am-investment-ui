@@ -16,6 +16,21 @@ enum FilterType {
   performance
 }
 
+/// Filter category enum to group filters by category
+enum FilterCategory {
+  /// Basic filters (symbol search, etc.)
+  basic,
+  
+  /// Classification filters (sector, industry, market cap)
+  classification,
+  
+  /// Value filters (investment cost, current value)
+  value,
+  
+  /// Performance filters (gain/loss)
+  performance
+}
+
 /// Filter criteria class to store filter settings
 class FilterCriteria {
   /// The field to filter on
@@ -23,6 +38,12 @@ class FilterCriteria {
   
   /// The type of filter
   final FilterType type;
+  
+  /// The category this filter belongs to
+  final FilterCategory category;
+  
+  /// Display name for the filter
+  final String displayName;
   
   /// Text value for text filters
   String? textValue;
@@ -43,6 +64,8 @@ class FilterCriteria {
   FilterCriteria({
     required this.field,
     required this.type,
+    required this.category,
+    required this.displayName,
     this.textValue,
     this.minValue,
     this.maxValue,
@@ -55,6 +78,8 @@ class FilterCriteria {
     return FilterCriteria(
       field: field,
       type: type,
+      category: category,
+      displayName: displayName,
       textValue: textValue,
       minValue: minValue,
       maxValue: maxValue,
@@ -112,48 +137,6 @@ class PortfolioFilterWidget extends StatefulWidget {
     this.initiallyExpanded = false,
   });
   
-  /// Static method to show the filter dialog
-  static Future<List<EquityHolding>?> showFilterDialog(
-    BuildContext context,
-    List<EquityHolding> holdings,
-  ) async {
-    List<EquityHolding>? result;
-    
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Filter Holdings'),
-          content: SizedBox(
-            width: 600,
-            child: PortfolioFilterWidget(
-              holdings: holdings,
-              initiallyExpanded: true,
-              onFiltersApplied: (filtered) {
-                result = filtered;
-              },
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Apply'),
-            ),
-          ],
-        );
-      },
-    );
-    
-    return result;
-  }
 
   @override
   State<PortfolioFilterWidget> createState() => _PortfolioFilterWidgetState();
@@ -163,6 +146,9 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
   bool _isExpanded = false;
   final List<FilterCriteria> _filters = [];
   List<EquityHolding> _filteredHoldings = [];
+  
+  // Selected filter categories
+  final Set<FilterCategory> _selectedCategories = {FilterCategory.basic};
   
   // Available sectors and industries for dropdown filters
   List<String> _availableSectors = [];
@@ -203,53 +189,71 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
   void _initializeFilters() {
     _filters.clear();
     
-    // Add text filters
+    // Add basic filters (always shown)
     _filters.add(FilterCriteria(
       field: 'symbol',
       type: FilterType.text,
+      category: FilterCategory.basic,
+      displayName: 'Symbol',
     ));
     
-    // Add category filters
+    // Add classification filters
     _filters.add(FilterCriteria(
       field: 'sector',
       type: FilterType.category,
+      category: FilterCategory.classification,
+      displayName: 'Sector',
     ));
     
     _filters.add(FilterCriteria(
       field: 'industry',
       type: FilterType.category,
+      category: FilterCategory.classification,
+      displayName: 'Industry',
     ));
     
     _filters.add(FilterCriteria(
       field: 'marketCap',
       type: FilterType.category,
+      category: FilterCategory.classification,
+      displayName: 'Market Cap',
     ));
     
-    // Add range filters
+    // Add value filters
     _filters.add(FilterCriteria(
       field: 'investmentCost',
       type: FilterType.range,
+      category: FilterCategory.value,
+      displayName: 'Investment',
     ));
     
     _filters.add(FilterCriteria(
       field: 'currentValue',
       type: FilterType.range,
+      category: FilterCategory.value,
+      displayName: 'Current Value',
     ));
     
     _filters.add(FilterCriteria(
       field: 'quantity',
       type: FilterType.range,
+      category: FilterCategory.value,
+      displayName: 'Quantity',
     ));
     
     // Add performance filters
     _filters.add(FilterCriteria(
       field: 'gainLoss',
       type: FilterType.performance,
+      category: FilterCategory.performance,
+      displayName: 'Gain/Loss',
     ));
     
     _filters.add(FilterCriteria(
       field: 'gainLossPercentage',
       type: FilterType.range,
+      category: FilterCategory.performance,
+      displayName: 'Gain/Loss %',
     ));
   }
   
@@ -521,69 +525,111 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
                 children: [
                   const Divider(),
                   
-                  // Filter sections
+                  // Category selection chips
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select Filter Categories:',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            _buildCategoryChip(
+                              theme,
+                              FilterCategory.basic,
+                              'Basic',
+                              Icons.search,
+                            ),
+                            _buildCategoryChip(
+                              theme,
+                              FilterCategory.classification,
+                              'Classification',
+                              Icons.category,
+                            ),
+                            _buildCategoryChip(
+                              theme,
+                              FilterCategory.value,
+                              'Value',
+                              Icons.attach_money,
+                            ),
+                            _buildCategoryChip(
+                              theme,
+                              FilterCategory.performance,
+                              'Performance',
+                              Icons.trending_up,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const Divider(),
+                  
+                  // Filter sections by category
                   Wrap(
                     spacing: 16.0,
                     runSpacing: 16.0,
-                    children: [
-                      // Symbol search filter
-                      _buildTextFilter(
-                        'Symbol',
-                        _getFilterByField('symbol'),
-                        hintText: 'Search by symbol...',
-                      ),
-                      
-                      // Sector filter
-                      _buildCategoryFilter(
-                        'Sector',
-                        _getFilterByField('sector'),
-                        _availableSectors,
-                      ),
-                      
-                      // Industry filter
-                      _buildCategoryFilter(
-                        'Industry',
-                        _getFilterByField('industry'),
-                        _availableIndustries,
-                      ),
-                      
-                      // Market Cap filter
-                      _buildCategoryFilter(
-                        'Market Cap',
-                        _getFilterByField('marketCap'),
-                        _availableMarketCaps,
-                      ),
-                      
-                      // Investment range filter
-                      _buildRangeFilter(
-                        'Investment',
-                        _getFilterByField('investmentCost'),
-                        _minInvestment,
-                        _maxInvestment,
-                      ),
-                      
-                      // Current Value range filter
-                      _buildRangeFilter(
-                        'Current Value',
-                        _getFilterByField('currentValue'),
-                        _minCurrentValue,
-                        _maxCurrentValue,
-                      ),
-                      
-                      // Quantity range filter
-                      _buildRangeFilter(
-                        'Quantity',
-                        _getFilterByField('quantity'),
-                        _minQuantity,
-                        _maxQuantity,
-                      ),
-                      
-                      // Performance filter
-                      _buildPerformanceFilter(
-                        'Performance',
-                        _getFilterByField('gainLoss'),
-                      ),
-                    ],
+                    children: _filters
+                      .where((filter) => _selectedCategories.contains(filter.category))
+                      .map((filter) {
+                        switch (filter.type) {
+                          case FilterType.text:
+                            return _buildTextFilter(
+                              filter.displayName,
+                              filter,
+                              hintText: 'Search by ${filter.displayName.toLowerCase()}...',
+                            );
+                          case FilterType.category:
+                            List<String> options = [];
+                            if (filter.field == 'sector') options = _availableSectors;
+                            else if (filter.field == 'industry') options = _availableIndustries;
+                            else if (filter.field == 'marketCap') options = _availableMarketCaps;
+                            
+                            return _buildCategoryFilter(
+                              filter.displayName,
+                              filter,
+                              options,
+                            );
+                          case FilterType.range:
+                            double minValue = 0;
+                            double maxValue = 0;
+                            
+                            if (filter.field == 'investmentCost') {
+                              minValue = _minInvestment;
+                              maxValue = _maxInvestment;
+                            } else if (filter.field == 'currentValue') {
+                              minValue = _minCurrentValue;
+                              maxValue = _maxCurrentValue;
+                            } else if (filter.field == 'quantity') {
+                              minValue = _minQuantity;
+                              maxValue = _maxQuantity;
+                            } else if (filter.field == 'gainLossPercentage') {
+                              minValue = -50;
+                              maxValue = 50;
+                            }
+                            
+                            return _buildRangeFilter(
+                              filter.displayName,
+                              filter,
+                              minValue,
+                              maxValue,
+                            );
+                          case FilterType.performance:
+                            return _buildPerformanceFilter(
+                              filter.displayName,
+                              filter,
+                            );
+                        }
+                      }).toList(),
                   ),
                   
                   const SizedBox(height: 16),
@@ -894,6 +940,59 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
           ],
         ),
       ),
+    );
+  }
+  
+  /// Build a category selection chip
+  Widget _buildCategoryChip(
+    ThemeData theme,
+    FilterCategory category,
+    String label,
+    IconData icon,
+  ) {
+    final bool isSelected = _selectedCategories.contains(category);
+    final Color chipColor = theme.colorScheme.primary;
+    
+    return FilterChip(
+      selected: isSelected,
+      showCheckmark: false,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: theme.colorScheme.surface,
+      selectedColor: chipColor,
+      checkmarkColor: theme.colorScheme.onPrimary,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      side: BorderSide(
+        color: isSelected ? chipColor : theme.colorScheme.outline.withOpacity(0.5),
+      ),
+      onSelected: (selected) {
+        setState(() {
+          if (selected) {
+            _selectedCategories.add(category);
+          } else {
+            // Don't allow removing the last category
+            if (_selectedCategories.length > 1) {
+              _selectedCategories.remove(category);
+            }
+          }
+        });
+      },
     );
   }
   

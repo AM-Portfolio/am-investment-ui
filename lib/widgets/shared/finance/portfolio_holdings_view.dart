@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_holdings.dart';
 import 'portfolio_holdings_card.dart';
 import 'portfolio_filter_widget.dart';
+import 'portfolio_filter_dialog.dart';
 import 'dart:developer' as dev;
 
 /// A widget to display portfolio holdings
@@ -75,25 +76,41 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Filter toggle button
-                    ElevatedButton.icon(
-                      icon: Icon(
-                        _isFilterExpanded ? Icons.filter_list_off : Icons.filter_list,
-                        size: 16,
-                      ),
-                      label: Text(_isFilterExpanded ? 'Hide Filters' : 'Show Filters'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        textStyle: Theme.of(context).textTheme.bodySmall,
-                        backgroundColor: _isFilterExpanded
-                            ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
-                            : null,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isFilterExpanded = !_isFilterExpanded;
-                        });
-                      },
+                    // Filter controls
+                    Row(
+                      children: [
+                        // Inline filter toggle button
+                        ElevatedButton.icon(
+                          icon: Icon(
+                            _isFilterExpanded ? Icons.filter_list_off : Icons.filter_list,
+                            size: 16,
+                          ),
+                          label: Text(_isFilterExpanded ? 'Hide Filters' : 'Show Filters'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            textStyle: Theme.of(context).textTheme.bodySmall,
+                            backgroundColor: _isFilterExpanded
+                                ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
+                                : null,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isFilterExpanded = !_isFilterExpanded;
+                            });
+                          },
+                        ),
+                        
+                        // Popup filter dialog button
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.filter_alt),
+                          tooltip: 'Open Filter Dialog',
+                          onPressed: () => _showFilterDialog(holdings),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                     
                     // Entry count selector
@@ -210,5 +227,17 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
     setState(() {
       _filteredHoldings = null;
     });
+  }
+  
+  /// Show filter dialog
+  void _showFilterDialog(PortfolioHoldings holdings) async {
+    final result = await PortfolioFilterDialog.show(
+      context,
+      holdings.equityHoldings,
+    );
+    
+    if (result != null) {
+      _applyFilters(result);
+    }
   }
 }
