@@ -3,6 +3,7 @@ import '../../../core/models/portfolio/portfolio_holdings.dart';
 import '../../../core/services/api/portfolio_client.dart';
 import '../../../widgets/shared/finance/portfolio_holdings_view.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
+import '../../../widgets/shared/navigation/portfolio_sidebar.dart';
 
 /// Web-specific implementation of the portfolio screen
 /// Simplified version that only shows portfolio holdings
@@ -25,11 +26,21 @@ class PortfolioWebScreen extends StatefulWidget {
 }
 
 class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
+  // Current selected page in sidebar
+  String _currentPage = 'Holdings';
+  
   // Portfolio client for API calls
   late final PortfolioClient _portfolioClient;
 
   // Future for portfolio holdings data
   late Future<PortfolioHoldings> _holdingsFuture;
+  
+  /// Handle page selection from sidebar
+  void _handlePageSelected(String page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
 
   @override
   void initState() {
@@ -85,25 +96,42 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
             horizontal: horizontalPadding,
             vertical: verticalPadding,
           ),
-          // Use SingleChildScrollView to make the entire content scrollable
-          child: SingleChildScrollView(
-            // Set a minimum height to ensure proper scrolling behavior
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - (verticalPadding * 2),
+          // Use Row to place sidebar on the left
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left sidebar
+              PortfolioSidebar(
+                currentPage: _currentPage,
+                onPageSelected: _handlePageSelected,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Portfolio holdings view - with dynamic height
-                  PortfolioHoldingsView(
-                    holdingsFuture: _holdingsFuture,
-                    onRefresh: _refreshHoldings,
+              
+              // Add spacing between sidebar and content
+              SizedBox(width: horizontalPadding),
+              
+              // Main content area - expanded to fill available space
+              Expanded(
+                child: SingleChildScrollView(
+                  // Set a minimum height to ensure proper scrolling behavior
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - (verticalPadding * 2),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Portfolio holdings view - with dynamic height
+                        PortfolioHoldingsView(
+                          holdingsFuture: _holdingsFuture,
+                          onRefresh: _refreshHoldings,
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+              ),
             ],
           ),
-        ),
-      ),
         );
       },
     );

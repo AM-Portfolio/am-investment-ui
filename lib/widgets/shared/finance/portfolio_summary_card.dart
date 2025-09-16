@@ -566,6 +566,7 @@ class PortfolioSummaryCard extends StatelessWidget {
           Text(
             formattedValue,
             style: theme.textTheme.titleMedium?.copyWith(
+
               fontWeight: FontWeight.w700,
               color: accentColor,
               letterSpacing: -0.5,
