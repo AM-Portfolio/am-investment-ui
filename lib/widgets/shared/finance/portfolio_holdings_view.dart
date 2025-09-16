@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_holdings.dart';
 import 'portfolio_holdings_card.dart';
+import 'portfolio_filter_widget.dart';
 import 'dart:developer' as dev;
 
 /// A widget to display portfolio holdings
@@ -28,6 +29,9 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
 
   // Default entry count
   int _selectedEntryCount = 20;
+  
+  // Filtered holdings
+  List<EquityHolding>? _filteredHoldings;
 
   @override
   Widget build(BuildContext context) {
@@ -59,53 +63,109 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
               'Available width: ${constraints.maxWidth}, height: ${constraints.maxHeight}',
             );
 
+            // Use a Column with dynamic layout for the content
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Entry count selector - make more compact
+                // Filter and entry count controls
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Show entries: ',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    DropdownButton<int>(
-                      value: _selectedEntryCount,
-                      isDense: true, // Make dropdown more compact
-                      underline: Container(
-                        height: 1,
-                        color: Theme.of(context).colorScheme.primary,
+                    // Filter button
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.filter_list, size: 16),
+                      label: const Text('Advanced Filters'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        textStyle: Theme.of(context).textTheme.bodySmall,
                       ),
-                      onChanged: (int? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedEntryCount = newValue;
-                          });
-                        }
-                      },
-                      items: _entryCounts.map<DropdownMenuItem<int>>((
-                        int value,
-                      ) {
-                        return DropdownMenuItem<int>(
-                          value: value,
-                          child: Text(
-                            '$value',
-                            style: Theme.of(context).textTheme.bodySmall,
+                      onPressed: () => _showAdvancedFilters(holdings),
+                    ),
+                    
+                    // Entry count selector
+                    Row(
+                      children: [
+                        Text(
+                          'Show entries: ',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        DropdownButton<int>(
+                          value: _selectedEntryCount,
+                          isDense: true, // Make dropdown more compact
+                          underline: Container(
+                            height: 1,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
-                        );
-                      }).toList(),
+                          onChanged: (int? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _selectedEntryCount = newValue;
+                              });
+                            }
+                          },
+                          items: _entryCounts.map<DropdownMenuItem<int>>((int value,) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(
+                                '$value',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                
+                // Show filter widget if filters are active
+                if (_filteredHoldings != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: PortfolioFilterWidget(
+                      holdings: holdings.equityHoldings,
+                      onFiltersApplied: _applyFilters,
+                      onFiltersReset: _resetFilters,
+                    ),
+                  ),
+                
+                // Filter status indicator
+                if (_filteredHoldings != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Showing ${_filteredHoldings!.length} of ${holdings.equityHoldings.length} holdings',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: _resetFilters,
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Clear Filters'),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                // Holdings card with sortable table - use Expanded to fill available space
-                Expanded(
+                // Use SizedBox with responsive height for the holdings card
+                // This ensures consistent display regardless of filter state
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6, // 60% of screen height
                   child: PortfolioHoldingsCard(
-                    holdings: holdings,
+                    holdings: _filteredHoldings != null
+                        ? PortfolioHoldings(equityHoldings: _filteredHoldings!)
+                        : holdings,
                     showDetails: true,
-                    maxHoldings:
-                        _selectedEntryCount, // Use selected entry count
+                    maxHoldings: _selectedEntryCount, // Use selected entry count
                     onHoldingTap: (holding) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Selected ${holding.symbol}')),
@@ -121,5 +181,31 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
         );
       },
     );
+  }
+  
+  /// Show advanced filters dialog
+  void _showAdvancedFilters(PortfolioHoldings holdings) async {
+    final result = await PortfolioFilterWidget.showFilterDialog(
+      context,
+      holdings.equityHoldings,
+    );
+    
+    if (result != null) {
+      _applyFilters(result);
+    }
+  }
+  
+  /// Apply filters to the holdings
+  void _applyFilters(List<EquityHolding> filtered) {
+    setState(() {
+      _filteredHoldings = filtered;
+    });
+  }
+  
+  /// Reset all filters
+  void _resetFilters() {
+    setState(() {
+      _filteredHoldings = null;
+    });
   }
 }

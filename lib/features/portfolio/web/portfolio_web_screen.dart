@@ -77,18 +77,24 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate responsive padding based on screen size
-        // Reduce padding to maximize available space for content
-        final horizontalPadding = constraints.maxWidth * 0.01; // 1% of width
-        final verticalPadding = constraints.maxHeight * 0.01; // 1% of height
+        final horizontalPadding = constraints.maxWidth * 0.02; // 2% of width
+        final verticalPadding = constraints.maxHeight * 0.02; // 2% of height
 
         return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
             vertical: verticalPadding,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          // Use SingleChildScrollView to make the entire content scrollable
+          child: SingleChildScrollView(
+            // Set a minimum height to ensure proper scrolling behavior
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - (verticalPadding * 2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Page title - make more compact
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,16 +113,18 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: constraints.maxHeight * 0.01), // 1% of height
-              // Holdings view - give maximum space
-              Expanded(
-                child: PortfolioHoldingsView(
-                  holdingsFuture: _holdingsFuture,
-                  onRefresh: _refreshHoldings,
-                ),
+              SizedBox(height: constraints.maxHeight * 0.02), // 2% of height
+              
+              // Portfolio holdings view - with dynamic height
+              // This allows both filter and holdings to be visible
+              PortfolioHoldingsView(
+                holdingsFuture: _holdingsFuture,
+                onRefresh: _refreshHoldings,
               ),
             ],
           ),
+        ),
+      ),
         );
       },
     );
