@@ -7,8 +7,21 @@ import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/portfolio/portfolio_screen.dart';
+import 'core/config/config_service.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter framework is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    // Initialize configuration service
+    await ConfigService.initialize(environment: 'development');
+    print('Configuration initialized successfully');
+  } catch (e) {
+    print('Failed to initialize configuration: $e');
+    // The app will continue with default configuration
+  }
+  
   // Set environment based on compile-time constants
   // This will be overridden by build arguments in CI/CD
   EnvironmentConfig.setEnvironment(const String.fromEnvironment('ENV', defaultValue: 'production'));

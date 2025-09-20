@@ -50,7 +50,7 @@ class EnvironmentConfig {
       case Environment.development:
         // For development, use platform-specific URLs
         if (kIsWeb) {
-          return 'http://localhost:8082'; // Web uses localhost directly
+          return 'http://localhost:8072'; // Web uses localhost directly
         } else if (Platform.isAndroid) {
           return 'http://10.0.2.2:8082'; // Android emulator special IP for host machine
         } else {
@@ -60,7 +60,7 @@ class EnvironmentConfig {
         return 'https://preprod-api.example.com';
       case Environment.production:
         if (kIsWeb) {
-          return 'http://localhost:8082'; // Web uses localhost directly
+          return 'http://localhost:8072'; // Web uses localhost directly
         } else if (Platform.isAndroid) {
           return 'http://10.0.2.2:8082'; // Android emulator special IP for host machine
         } else {

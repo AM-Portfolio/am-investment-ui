@@ -1,0 +1,17 @@
+{
+  "api": {
+    "baseUrl": "https://api.yourdomain.com",
+    "timeout": 30000,
+    "useMockData": false,
+    "portfolio": {
+      "holdingsEndpoint": "/api/v1/portfolios/holdings",
+      "summaryEndpoint": "/api/v1/portfolios/summary",
+      "transactionsEndpoint": "/api/v1/portfolios/transactions"
+    }
+  },
+  "environment": {
+    "name": "production",
+    "debugMode": false,
+    "logLevel": "error"
+  }
+}

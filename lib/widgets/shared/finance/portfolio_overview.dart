@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
 import 'portfolio_summary_card.dart';
 import 'holdings_breakdown.dart';
+import 'portfolio_quick_actions.dart';
 
 /// A widget to display portfolio overview information
 class PortfolioOverview extends StatelessWidget {
@@ -25,6 +26,23 @@ class PortfolioOverview extends StatelessWidget {
       children: [
         // Portfolio summary card
         PortfolioSummaryCard(summary: summary, showDetails: true),
+
+        const SizedBox(height: 32),
+
+        // Quick actions
+        PortfolioQuickActions(
+          onFileUploaded: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('File upload functionality triggered')),
+            );
+          },
+          onAddStockEntry: () {
+            // Handle add stock entry
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Add stock entry feature coming soon')),
+            );
+          },
+        ),
 
         const SizedBox(height: 32),
 
