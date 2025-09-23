@@ -172,7 +172,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12.0, bottom: 8.0),
                     child: PortfolioFilterWidget(
-                      holdings: holdings.equityHoldings,
+                      holdings: holdings.holdings,
                       onFiltersApplied: _applyFilters,
                       onFiltersReset: _resetFilters,
                       initiallyExpanded: true,
@@ -186,7 +186,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                     child: Row(
                       children: [
                         Text(
-                          'Showing ${_filteredHoldings!.length} of ${holdings.equityHoldings.length} holdings',
+                          'Showing ${_filteredHoldings!.length} of ${holdings.holdings.length} holdings',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontStyle: FontStyle.italic,
                           ),
@@ -211,7 +211,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
                   height: MediaQuery.of(context).size.height * 0.75, // 75% of screen height
                   child: PortfolioHoldingsCard(
                     holdings: _filteredHoldings != null
-                        ? PortfolioHoldings(equityHoldings: _filteredHoldings!)
+                        ? PortfolioHoldings(holdings: _filteredHoldings!, metadata: holdings.metadata)
                         : holdings,
                     showDetails: true,
                     maxHoldings: _selectedEntryCount, // Use selected entry count
@@ -251,7 +251,7 @@ class _PortfolioHoldingsViewState extends State<PortfolioHoldingsView> {
   void _showFilterDialog(PortfolioHoldings holdings) async {
     final result = await PortfolioFilterDialog.show(
       context,
-      holdings.equityHoldings,
+      holdings.holdings,
     );
     
     if (result != null) {

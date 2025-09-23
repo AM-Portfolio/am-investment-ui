@@ -10,7 +10,17 @@ class PortfolioHoldingsCard extends StatefulWidget {
   /// Portfolio holdings data
   final PortfolioHoldings holdings;
 
-  /// Whether to show detailed information
+        sort        sortBy:         sortBy: (holding) =>         sortBy: (holding) => holding.investment.averageCost,
+         sortBy: (holding) => holding.performance.totalGainLoss,
+        child: (holding) {
+          final isPositive = holding.performance.totalGainLoss >= 0;    child: (holding) => Text(
+          formatCurrency(holding.investment.averageCost),ding.investedAmount,
+        child: (holding) => Text(
+          formatCurrency(holding.investedAmount),lding) => holding.portfolioWeight,
+        child: (holding) => Text(
+          '${holding.portfolioWeight.toStringAsFixed(1)}%', (holding) => holding.shares,
+        child: (holding) =>
+            Text(holding.shares.toString(), overflow: TextOverflow.ellipsis),// Whether to show detailed information
   final bool showDetails;
 
   /// Maximum number of holdings to show per page
@@ -61,16 +71,16 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
 
   void _sortHoldingsByAllocation() {
     // Sort holdings by weight in portfolio (allocation percentage) in descending order
-    _sortedHoldings = List.from(widget.holdings.equityHoldings);
+    _sortedHoldings = List.from(widget.holdings.holdings);
     _sortedHoldings.sort(
-      (a, b) => b.weightInPortfolio.compareTo(a.weightInPortfolio),
+      (a, b) => b.portfolioWeight.compareTo(a.portfolioWeight),
     );
 
     debugPrint(
-      'Total holdings received: ${widget.holdings.equityHoldings.length}',
+      'Total holdings received: ${widget.holdings.holdings.length}',
     );
     debugPrint(
-      'Holdings symbols: ${widget.holdings.equityHoldings.map((h) => h.symbol).toList()}',
+      'Holdings symbols: ${widget.holdings.holdings.map((h) => h.symbol).toList()}',
     );
     debugPrint('Max holdings to show: ${widget.maxHoldings}');
 
@@ -274,7 +284,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
     double totalInvestment = 0;
     double totalCurrentValue = 0;
 
-    for (final holding in widget.holdings.equityHoldings) {
+    for (final holding in widget.holdings.holdings) {
       totalInvestment += holding.investmentCost;
       totalCurrentValue += holding.currentValue;
     }
@@ -509,7 +519,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    holding.percentageChange >= 0
+                    holding.performance.isTodayPositive
                         ? Icons.arrow_upward
                         : Icons.arrow_downward,
                     color: holding.percentageChange >= 0
@@ -519,9 +529,9 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                   ),
                   const SizedBox(width: 2),
                   Text(
-                    '${holding.percentageChange.abs().toStringAsFixed(1)}%',
+                    '${holding.performance.todayGainLossPercentage.abs().toStringAsFixed(1)}%',
                     style: TextStyle(
-                      color: holding.percentageChange >= 0
+                      color: holding.performance.isTodayPositive
                           ? Colors.green
                           : Colors.red,
                       fontWeight: FontWeight.w500,
@@ -553,7 +563,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${isPositive ? "+" : ""}${formatCurrency(holding.gainLoss)}',
+                '${isPositive ? "+" : ""}${formatCurrency(holding.performance.totalGainLoss)}',
                 style: TextStyle(
                   color: valueColor,
                   fontWeight: FontWeight.w500,
@@ -562,7 +572,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                '${isPositive ? "+" : ""}${holding.gainLossPercentage.toStringAsFixed(1)}%',
+                '${isPositive ? "+" : ""}${holding.performance.totalGainLossPercentage.toStringAsFixed(1)}%',
                 style: TextStyle(
                   color: valueColor,
                   fontSize: 11, // Fixed smaller font size

@@ -277,25 +277,25 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
       // Collect categories
       if (holding.sector.isNotEmpty) sectors.add(holding.sector);
       if (holding.industry.isNotEmpty) industries.add(holding.industry);
-      if (holding.marketCap.isNotEmpty) marketCaps.add(holding.marketCap);
+      marketCaps.add(holding.identity.marketCap.displayName);
       
       // Collect broker types
-      for (final broker in holding.brokerPortfolios) {
+      for (final broker in holding.brokerHoldings) {
         if (broker.brokerType.isNotEmpty) brokers.add(broker.brokerType);
       }
       
       // Find min/max values
-      minInv = holding.investmentCost < minInv ? holding.investmentCost : minInv;
-      maxInv = holding.investmentCost > maxInv ? holding.investmentCost : maxInv;
+      minInv = holding.investedAmount < minInv ? holding.investedAmount : minInv;
+      maxInv = holding.investedAmount > maxInv ? holding.investedAmount : maxInv;
       
       minCurr = holding.currentValue < minCurr ? holding.currentValue : minCurr;
       maxCurr = holding.currentValue > maxCurr ? holding.currentValue : maxCurr;
       
-      minGain = holding.gainLoss < minGain ? holding.gainLoss : minGain;
-      maxGain = holding.gainLoss > maxGain ? holding.gainLoss : maxGain;
+      minGain = holding.performance.totalGainLoss < minGain ? holding.performance.totalGainLoss : minGain;
+      maxGain = holding.performance.totalGainLoss > maxGain ? holding.performance.totalGainLoss : maxGain;
       
-      minQty = holding.quantity < minQty ? holding.quantity : minQty;
-      maxQty = holding.quantity > maxQty ? holding.quantity : maxQty;
+      minQty = holding.shares < minQty ? holding.shares : minQty;
+      maxQty = holding.shares > maxQty ? holding.shares : maxQty;
     }
     
     // Update the lists and values without using setState directly on the variables
@@ -421,7 +421,7 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
                 case 'industry':
                   return filter.selectedCategories!.contains(holding.industry);
                 case 'marketCap':
-                  return filter.selectedCategories!.contains(holding.marketCap);
+                  return filter.selectedCategories!.contains(holding.identity.marketCap.displayName);
                 default:
                   return true;
               }
@@ -434,16 +434,16 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
             double value;
             switch (filter.field) {
               case 'investmentCost':
-                value = holding.investmentCost;
+                value = holding.investedAmount;
                 break;
               case 'currentValue':
                 value = holding.currentValue;
                 break;
               case 'quantity':
-                value = holding.quantity;
+                value = holding.shares;
                 break;
               case 'gainLossPercentage':
-                value = holding.gainLossPercentage;
+                value = holding.performance.totalGainLossPercentage;
                 break;
               default:
                 return true;
@@ -460,7 +460,7 @@ class _PortfolioFilterWidgetState extends State<PortfolioFilterWidget> {
             result = result.where((holding) {
               switch (filter.field) {
                 case 'gainLoss':
-                  return filter.isPositive! ? holding.gainLoss >= 0 : holding.gainLoss < 0;
+                  return filter.isPositive! ? holding.performance.totalGainLoss >= 0 : holding.performance.totalGainLoss < 0;
                 default:
                   return true;
               }

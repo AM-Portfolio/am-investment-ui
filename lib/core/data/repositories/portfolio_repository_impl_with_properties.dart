@@ -19,7 +19,7 @@ class PortfolioRepositoryImpl extends PortfolioRepository with PropertyInjection
 
   void _initializeServices() {
     // Use properties to configure the client
-    final baseUrl = property('api.baseUrl', defaultValue: 'http://localhost:8072');
+    final baseUrl = property('api.baseUrl');
     final useMock = boolProperty('mock.data.enabled', defaultValue: true);
     
     _client = PortfolioClient(

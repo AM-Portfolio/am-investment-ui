@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../core/services/auth_service.dart';
-import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../../core/domain/entities/portfolio/portfolio_summary.dart';
 import '../../core/domain/repositories/portfolio_repository.dart';
 import '../../config/environment.dart';
 import 'web/home_web_screen.dart';
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Initialize portfolio repository
   void _initializeRepository() {
-    _portfolioRepository = PortfolioRepository();
+    _portfolioRepository = PortfolioRepositoryImpl();
   }
 
   /// Handle environment changes

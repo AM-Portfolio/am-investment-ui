@@ -56,7 +56,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
 
   /// Initialize portfolio repository
   void _initializeRepository() {
-    _portfolioRepository = PortfolioRepository();
+    _portfolioRepository = PortfolioRepositoryImpl();
   }
 
   /// Load portfolio holdings data

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 /// Properties loader similar to Spring's @Value concept
 class AppProperties {
   static final AppProperties _instance = AppProperties._internal();
+  final Map<String, dynamic> _properties = {};
   factory AppProperties() => _instance;
   AppProperties._internal();
 
@@ -58,7 +59,8 @@ class AppProperties {
   /// Get property value (similar to Spring's @Value)
   String getValue(String key, {String? defaultValue}) {
     // First check environment variables
-    final envValue = const String.fromEnvironment(key.replaceAll('.', '_').toUpperCase());
+    final envKey = key.replaceAll('.', '_').toUpperCase();
+    final envValue = const String.fromEnvironment('DEFAULT_ENV_VAR');
     if (envValue.isNotEmpty) {
       return envValue;
     }
@@ -106,7 +108,7 @@ class AppProperties {
   /// Check if property exists
   bool hasProperty(String key) {
     return _properties.containsKey(key) || 
-           const String.fromEnvironment(key.replaceAll('.', '_').toUpperCase()).isNotEmpty;
+           const String.fromEnvironment('DEFAULT_ENV_VAR').isNotEmpty;
   }
 
   /// Get all properties

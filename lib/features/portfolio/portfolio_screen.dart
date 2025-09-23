@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';  // Portfolio repository for data operation
-import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import '../../core/config/config_service.dart';
+import '../../core/domain/entities/portfolio/portfolio_summary.dart';
 import '../../core/domain/repositories/portfolio_repository.dart';
-import '../../core/services/api/api_client.dart';
 import '../../config/environment.dart';
 import '../../core/utils/platform_utils.dart';
 import 'web/portfolio_web_screen.dart';
@@ -22,37 +23,31 @@ class PortfolioScreen extends StatefulWidget {
 }
 
 class _PortfolioScreenState extends State<PortfolioScreen> {
-  /// Portfolio client for API calls
-  late final PortfolioClient _portfolioClient;
+  /// Portfolio repository for data access
+  late final PortfolioRepository _portfolioRepository;
 
   /// Future for portfolio summary data
-  late Future<ApiResponse<PortfolioSummary>> _portfolioSummaryFuture;
+  late Future<PortfolioSummary> _portfolioSummaryFuture;
 
   @override
   void initState() {
     super.initState();
-    _initializeApiClient();
+    _initializeRepository();
     _loadPortfolioSummary();
 
     // Listen for environment changes
     EnvironmentConfig.addListener(_onEnvironmentChanged);
   }
 
-  /// Initialize API client with current environment settings
-  void _initializeApiClient() {
-    _portfolioClient = PortfolioClient(
-      baseUrl: EnvironmentConfig.apiBaseUrl,
-      useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
-    );
+  /// Initialize repository
+  void _initializeRepository() {
+    _portfolioRepository = PortfolioRepositoryImpl();
   }
 
   /// Handle environment changes
   void _onEnvironmentChanged(Environment env) {
-    // Dispose old client
-    _portfolioClient.dispose();
-
-    // Create new client with updated environment
-    _initializeApiClient();
+    // Reinitialize repository with new settings
+    _initializeRepository();
 
     // Reload data
     setState(() {
@@ -62,9 +57,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   /// Load portfolio summary data
   void _loadPortfolioSummary() {
-    _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(
-      widget.userId,
-    );
+    _portfolioSummaryFuture = _portfolioRepository.getSummary();
   }
 
   /// Refresh portfolio data
@@ -78,7 +71,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   void dispose() {
     // Remove environment change listener
     EnvironmentConfig.removeListener(_onEnvironmentChanged);
-    _portfolioClient.dispose();
     super.dispose();
   }
 

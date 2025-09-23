@@ -38,7 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Initialize portfolio repository
   void _initializeRepository() {
-    _portfolioRepository = PortfolioRepository();
+    _portfolioRepository = PortfolioRepositoryImpl();
   }
 
   /// Handle environment changes

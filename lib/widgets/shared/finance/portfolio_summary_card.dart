@@ -35,7 +35,7 @@ class PortfolioSummaryCard extends StatelessWidget {
     // Format the last updated time
     final lastUpdatedFormatted = DateFormat(
       'MMM d, yyyy • h:mm a',
-    ).format(summary.lastUpdated);
+    ).format(summary.metadata.lastUpdated);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -153,7 +153,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                currencyFormat.format(summary.investmentValue),
+                                currencyFormat.format(summary.totalInvested),
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,
@@ -179,13 +179,13 @@ class PortfolioSummaryCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                currencyFormat.format(summary.currentValue),
+                                currencyFormat.format(summary.totalValue),
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,
                                   color:
-                                      summary.currentValue >=
-                                          summary.investmentValue
+                                      summary.totalValue >=
+                                          summary.totalInvested
                                       ? Colors.green.shade700
                                       : Colors.red.shade700,
                                 ),
@@ -310,7 +310,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                             _buildModernStatItem(
                               context,
                               'Assets',
-                              summary.totalAssets.toString(),
+                              summary.metadata.totalHoldings.toString(),
                               Icons.pie_chart_outline,
                             ),
                             _buildModernStatItem(

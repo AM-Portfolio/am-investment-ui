@@ -31,7 +31,7 @@ class HoldingsBreakdown extends StatefulWidget {
   /// Optional callback when a category is tapped
   final Function(
     String categoryName,
-    List<AssetHolding> assets,
+    List<EquityHolding> assets,
     CategoryType categoryType,
   )?
   onCategoryTap;
@@ -61,7 +61,7 @@ class _HoldingsBreakdownState extends State<HoldingsBreakdown> {
     );
 
     // Get the appropriate holdings map based on the selected breakdown type
-    final Map<String, List<AssetHolding>> holdingsMap =
+    final Map<String, List<EquityHolding>> holdingsMap =
         _breakdownType == BreakdownType.marketCap
         ? widget.summary.marketCapHoldings
         : widget.summary.sectorialHoldings;
@@ -100,12 +100,12 @@ class _HoldingsBreakdownState extends State<HoldingsBreakdown> {
               // Calculate total investment for this category
               final totalInvestment = entry.value.fold<double>(
                 0,
-                (sum, holding) => sum + holding.investmentCost,
+                (sum, holding) => sum + holding.investedAmount,
               );
 
               // Calculate percentage of total portfolio
               final percentage =
-                  (totalInvestment / widget.summary.investmentValue) * 100;
+                  (totalInvestment / widget.summary.totalInvested) * 100;
 
               // Create a more elegant category card
               return Card(

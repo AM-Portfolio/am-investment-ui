@@ -7,11 +7,7 @@ import '../../../widgets/shared/finance/holdings_breakdown.dart';
 class PortfolioAndroidScreen extends StatelessWidget {
   /// Future for portfolio summary data
   final Future<PortfolioSummary> portfolioSummaryFuture;
-
-  /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
-
-  /// User ID for portfolio data
   final String userId;
 
   /// Constructor
