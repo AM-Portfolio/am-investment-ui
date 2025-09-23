@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_segmented_control.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
 import 'package:intl/intl.dart';
 
 /// Breakdown type for portfolio holdings

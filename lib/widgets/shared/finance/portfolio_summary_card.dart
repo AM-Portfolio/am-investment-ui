@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
 import 'package:intl/intl.dart';
 
 /// Widget to display portfolio summary information

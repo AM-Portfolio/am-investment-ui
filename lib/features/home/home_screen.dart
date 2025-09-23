@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../core/services/auth_service.dart';
-import '../../core/models/portfolio/portfolio_models.dart';
-import '../../core/services/api/portfolio_client.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../../core/domain/repositories/portfolio_repository.dart';
 import '../../config/environment.dart';
 import 'web/home_web_screen.dart';
 import 'android/home_android_screen.dart';
@@ -20,8 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Current navigation index
   int _currentIndex = 0;
 
-  /// Portfolio client for API calls
-  late final PortfolioClient _portfolioClient;
+  /// Portfolio repository for data operations
+  late final PortfolioRepository _portfolioRepository;
 
   /// Future for portfolio summary data
   late Future<PortfolioSummary> _portfolioSummaryFuture;
@@ -32,30 +32,21 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApiClient();
+    _initializeRepository();
     _loadPortfolioSummary();
 
     // Listen for environment changes
     EnvironmentConfig.addListener(_onEnvironmentChanged);
   }
 
-  /// Initialize API client with current environment settings
-  void _initializeApiClient() {
-    _portfolioClient = PortfolioClient(
-      baseUrl: EnvironmentConfig.apiBaseUrl,
-      useMockData: EnvironmentConfig.settings['useMockData'] ?? true,
-    );
+  /// Initialize portfolio repository
+  void _initializeRepository() {
+    _portfolioRepository = PortfolioRepository();
   }
 
   /// Handle environment changes
   void _onEnvironmentChanged(Environment env) {
-    // Dispose old client
-    _portfolioClient.dispose();
-
-    // Create new client with updated environment
-    _initializeApiClient();
-
-    // Reload data
+    // Reload data with updated environment
     setState(() {
       _loadPortfolioSummary();
     });
@@ -79,20 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = _authService.currentState.user?.id ?? 'ssd2658';
     debugPrint('Loading portfolio data for user: $userId');
 
-    // Ensure we're using the live API first
-    _portfolioClient.useMockData = false;
-
-    _portfolioSummaryFuture = _portfolioClient.getPortfolioSummary(userId).then(
-      (response) {
-        if (response.isSuccess) {
-          debugPrint('Successfully loaded portfolio data');
-          return response.data!;
-        } else {
-          debugPrint('Failed to load portfolio data: ${response.error}');
-          throw Exception(response.error ?? 'Failed to load portfolio data');
-        }
+    _portfolioSummaryFuture = _portfolioRepository.getPortfolioSummary(userId).then(
+      (summary) {
+        debugPrint('Successfully loaded portfolio data');
+        return summary;
       },
-    );
+    ).catchError((error) {
+      debugPrint('Failed to load portfolio data: $error');
+      throw Exception('Failed to load portfolio data: $error');
+    });
   }
 
   /// Refresh portfolio data
@@ -101,9 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Refreshing portfolio data...')),
     );
-
-    // Always try to fetch from the API when manually refreshing
-    _portfolioClient.useMockData = false;
 
     setState(() {
       _loadPortfolioSummary();
@@ -114,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     // Remove environment change listener
     EnvironmentConfig.removeListener(_onEnvironmentChanged);
-    _portfolioClient.dispose();
     super.dispose();
   }
 

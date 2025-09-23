@@ -1,5 +1,5 @@
-import '../../domain/entities/portfolio_holdings.dart';
-import '../../domain/entities/portfolio_summary.dart';
+import '../../domain/entities/portfolio/portfolio_holdings.dart';
+import '../../domain/entities/portfolio/portfolio_summary.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 import '../api/models/api_portfolio_holdings.dart';
 import '../api/models/api_portfolio_summary.dart';

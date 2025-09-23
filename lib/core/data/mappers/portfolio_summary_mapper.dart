@@ -1,5 +1,5 @@
 import '../api/models/api_portfolio_summary.dart';
-import '../../domain/entities/portfolio_summary.dart';
+import '../../domain/entities/portfolio/portfolio_summary.dart';
 
 /// Mapper to convert between API models and domain entities for portfolio summary
 /// This provides isolation between external API structure and internal business logic

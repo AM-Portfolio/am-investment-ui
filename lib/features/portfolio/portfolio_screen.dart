@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../core/models/portfolio/portfolio_models.dart';
-import '../../core/services/api/portfolio_client.dart';
+import 'package:flutter/material.dart';  // Portfolio repository for data operation
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../../core/domain/repositories/portfolio_repository.dart';
 import '../../core/services/api/api_client.dart';
 import '../../config/environment.dart';
 import '../../core/utils/platform_utils.dart';

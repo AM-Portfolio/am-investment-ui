@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
 
 /// A widget to display portfolio analysis metrics
 class PortfolioAnalysis extends StatelessWidget {

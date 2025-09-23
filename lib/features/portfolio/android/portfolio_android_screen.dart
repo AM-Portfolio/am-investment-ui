@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/services/api/api_client.dart';
 import '../../../widgets/shared/finance/portfolio_summary_card.dart';
 import '../../../widgets/shared/finance/holdings_breakdown.dart';
 
 /// Android-specific implementation of the portfolio summary screen
 class PortfolioAndroidScreen extends StatelessWidget {
   /// Future for portfolio summary data
-  final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
+  final Future<PortfolioSummary> portfolioSummaryFuture;
 
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
@@ -38,7 +37,7 @@ class PortfolioAndroidScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: refreshPortfolio,
-        child: FutureBuilder<ApiResponse<PortfolioSummary>>(
+        child: FutureBuilder<PortfolioSummary>(
           future: portfolioSummaryFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,16 +48,7 @@ class PortfolioAndroidScreen extends StatelessWidget {
               return _buildErrorState(context, snapshot.error.toString());
             }
 
-            final response = snapshot.data!;
-
-            if (!response.isSuccess) {
-              return _buildErrorState(
-                context,
-                response.error ?? 'Unknown error',
-              );
-            }
-
-            final summary = response.data!;
+            final summary = snapshot.data!;
 
             // Android-specific layout with Material Design
             return ListView(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/services/api/api_client.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../../../core/domain/repositories/portfolio_repository.dart';
 import '../../../widgets/shared/finance/portfolio_summary_card.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
 import '../../../core/services/auth_service.dart';
@@ -8,7 +8,7 @@ import '../../../core/services/auth_service.dart';
 /// Web-specific implementation of the dashboard screen
 class DashboardWebScreen extends StatelessWidget {
   /// Future for portfolio summary data
-  final Future<ApiResponse<PortfolioSummary>> portfolioSummaryFuture;
+  final Future<PortfolioSummary> portfolioSummaryFuture;
 
   /// Callback to refresh portfolio data
   final Future<void> Function() refreshPortfolio;
@@ -36,7 +36,7 @@ class DashboardWebScreen extends StatelessWidget {
 
   /// Build the dashboard content
   Widget _buildDashboardContent(BuildContext context) {
-    return FutureBuilder<ApiResponse<PortfolioSummary>>(
+    return FutureBuilder<PortfolioSummary>(
       future: portfolioSummaryFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,13 +47,7 @@ class DashboardWebScreen extends StatelessWidget {
           return _buildErrorState(context, snapshot.error.toString());
         }
 
-        final response = snapshot.data!;
-
-        if (!response.isSuccess) {
-          return _buildErrorState(context, response.error ?? 'Unknown error');
-        }
-
-        final summary = response.data!;
+        final summary = snapshot.data!;
         final user = AuthService().currentState.user;
 
         // Dashboard layout with multiple sections

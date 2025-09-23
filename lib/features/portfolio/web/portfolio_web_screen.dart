@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/config/config_service.dart';
-import '../../../core/models/portfolio/portfolio_holdings.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
-import '../../../core/services/api/portfolio_client.dart';
+import '../../../core/repositories/portfolio_repository.dart';
 import '../../../widgets/shared/finance/portfolio_holdings_view.dart';
 import '../../../widgets/shared/finance/portfolio_overview.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
@@ -32,8 +30,8 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
   // Current selected page in sidebar
   String _currentPage = 'Overview';
   
-  // Portfolio client for API calls
-  late final PortfolioClient _portfolioClient;
+  // Portfolio repository for data operations
+  late final PortfolioRepository _portfolioRepository;
 
   // Future for portfolio holdings data
   late Future<PortfolioHoldings> _holdingsFuture;
@@ -51,33 +49,14 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApiClient();
+    _initializeRepository();
     _loadHoldings();
     _loadSummary();
   }
 
-  /// Initialize API client
-  void _initializeApiClient() {
-    try {
-      // Print configuration for debugging
-      ConfigService.printConfig();
-      
-      _portfolioClient = PortfolioClient(
-        baseUrl: ConfigService.config.api.baseUrl,
-        useMockData: ConfigService.useMockData,
-      );
-      debugPrint(
-        'Portfolio client initialized with baseUrl: ${ConfigService.config.api.baseUrl}',
-      );
-    } catch (e) {
-      // Fallback to default configuration if ConfigService is not initialized
-      debugPrint('Configuration not loaded, using fallback: $e');
-      _portfolioClient = PortfolioClient(
-        baseUrl: 'http://localhost:8072',
-        useMockData: false,
-      );
-      debugPrint('Portfolio client initialized with fallback baseUrl: http://localhost:8072');
-    }
+  /// Initialize portfolio repository
+  void _initializeRepository() {
+    _portfolioRepository = PortfolioRepository();
   }
 
   /// Load portfolio holdings data
@@ -86,7 +65,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
     debugPrint('Using base URL: ${ConfigService.config.api.baseUrl}');
     debugPrint('Holdings endpoint: ${ConfigService.config.api.portfolio.holdingsEndpoint}');
     debugPrint('Full holdings URL: ${ConfigService.getPortfolioHoldingsUrl(userId: widget.userId)}');
-    _holdingsFuture = _portfolioClient.getPortfolioHoldings(widget.userId);
+    _holdingsFuture = _portfolioRepository.getPortfolioHoldings(widget.userId);
   }
   
   /// Load portfolio summary data
@@ -95,14 +74,7 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
     debugPrint('Using base URL: ${ConfigService.config.api.baseUrl}');
     debugPrint('Summary endpoint: ${ConfigService.config.api.portfolio.summaryEndpoint}');
     debugPrint('Full summary URL: ${ConfigService.getPortfolioSummaryUrl(userId: widget.userId)}');
-    _summaryFuture = _portfolioClient.getPortfolioSummary(widget.userId)
-        .then((response) {
-      if (response.isSuccess && response.data != null) {
-        return response.data!;
-      } else {
-        throw Exception(response.error ?? 'Failed to load portfolio summary');
-      }
-    });
+    _summaryFuture = _portfolioRepository.getPortfolioSummary(widget.userId);
   }
 
   /// Refresh holdings data
@@ -246,7 +218,6 @@ class _PortfolioWebScreenState extends State<PortfolioWebScreen> {
 
   @override
   void dispose() {
-    _portfolioClient.dispose();
     super.dispose();
   }
 }

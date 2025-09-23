@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/portfolio/portfolio_models.dart';
+import '../../../core/domain/entities/portfolio/portfolio_summary.dart';
 import 'portfolio_summary_card.dart';
 import 'holdings_breakdown.dart';
 import 'portfolio_quick_actions.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/portfolio/portfolio_holdings.dart';
+import '../../../core/domain/entities/portfolio/portfolio_holdings.dart';
 import 'portfolio_filter_widget.dart';
 
 /// A dialog widget that displays advanced filtering options for portfolio holdings
