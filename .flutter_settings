@@ -1,0 +1,4 @@
+# Flutter default run settings
+enable-web: true
+web-renderer: html
+web-browser-flag: --reuse-window

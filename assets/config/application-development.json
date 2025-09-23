@@ -1,0 +1,17 @@
+{
+  "api": {
+    "baseUrl": "http://localhost:8072",
+    "timeout": 30000,
+    "useMockData": false,
+    "portfolio": {
+      "holdingsEndpoint": "/api/v1/portfolios/holdings",
+      "summaryEndpoint": "/api/v1/portfolios/summary",
+      "transactionsEndpoint": "/api/v1/portfolios/transactions"
+    }
+  },
+  "environment": {
+    "name": "development",
+    "debugMode": true,
+    "logLevel": "debug"
+  }
+}
