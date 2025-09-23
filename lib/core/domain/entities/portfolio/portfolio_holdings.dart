@@ -200,11 +200,13 @@ class BrokerHolding {
   final String brokerName;
   final double quantity;
   final double percentage;
+  final String brokerType;
 
   const BrokerHolding({
     required this.brokerName,
     required this.quantity,
     required this.percentage,
+    required this.brokerType,
   });
 }
 
