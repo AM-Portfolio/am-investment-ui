@@ -13,11 +13,13 @@ class AppConfig {
 class ApiConfig {
   final String baseUrl;
   final int timeout;
+  final bool useMockData;
   final PortfolioApiConfig portfolio;
 
   const ApiConfig({
     required this.baseUrl,
     required this.timeout,
+    required this.useMockData,
     required this.portfolio,
   });
 }
