@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
-import '../../models/portfolio/portfolio_models.dart';
-import '../../models/portfolio/portfolio_holdings.dart';
+import '../../data/api/models/api_portfolio_holdings.dart';
+import '../../data/api/models/api_portfolio_summary.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
+import 'portfolio_mock_data_provider.dart';
 
 /// Client for portfolio-related API calls
 class PortfolioClient {
@@ -26,7 +27,7 @@ class PortfolioClient {
   }
 
   /// Get portfolio summary for a user
-  Future<ApiResponse<PortfolioSummary>> getPortfolioSummary(
+  Future<ApiResponse<ApiPortfolioSummaryResponse>> getPortfolioSummary(
     String userId,
   ) async {
     final String fullUrl =
@@ -37,14 +38,20 @@ class PortfolioClient {
       // Always try to fetch from API first
       try {
         debugPrint('Attempting to fetch portfolio summary from: $fullUrl');
-        final result = await _apiClient.get<PortfolioSummary>(
+        
+        // Use new API model and then convert to legacy format for backward compatibility
+        final apiResult = await _apiClient.get<ApiPortfolioSummaryResponse>(
           '$_portfolioEndpoint/summary',
           queryParams: {'userId': userId},
-          parser: (data) => PortfolioSummary.fromJson(data),
+          parser: (data) => ApiPortfolioSummaryResponse.fromJson(data),
         );
 
+        // Convert API model to domain model
+        final domainSummary = PortfolioSummaryMapper.fromApiModel(apiResult);
+        
+
         debugPrint('Successfully fetched portfolio data from API: $fullUrl');
-        return ApiResponse.success(result);
+        return ApiResponse.success(domainSummary);
       } catch (apiError) {
         // API call failed, log the error
         debugPrint('API call failed: $apiError');
@@ -55,7 +62,7 @@ class PortfolioClient {
           await Future.delayed(
             const Duration(milliseconds: 300),
           ); // Small delay
-          return ApiResponse.success(await _getMockPortfolioSummary());
+          return ApiResponse.success(await PortfolioMockDataProvider.getMockPortfolioSummary());
         } else {
           // In production, return an error response
           return ApiResponse.error('Failed to connect to API: $apiError');
@@ -80,87 +87,29 @@ class PortfolioClient {
     _useMockData = value;
   }
 
-  /// Get mock portfolio summary data
-  Future<PortfolioSummary> _getMockPortfolioSummary() async {
-    try {
-      // Load mock data from assets
-      final mockData = await rootBundle.loadString(
-        'assets/mock_data/portfolio_summary.json',
-      );
-      final json = jsonDecode(mockData);
-      return PortfolioSummary.fromJson(json);
-    } catch (e) {
-      // Throw exception if mock data loading fails
-      debugPrint('Error loading mock portfolio data: $e');
-      throw ApiException(
-        'Failed to load mock portfolio data',
-        data: e.toString(),
-      );
-    }
-  }
-
   /// Get portfolio holdings for a user
-  Future<PortfolioHoldings> getPortfolioHoldings(String userId) async {
+  Future<ApiPortfolioHoldingsResponse> getPortfolioHoldings(String userId) async {
     final String fullUrl =
         '${_apiClient.baseUrl}/$_portfolioEndpoint/holdings?userId=$userId';
     debugPrint('API call: GET $fullUrl');
 
     try {
       // Always try to fetch from API first
-      try {
-        // Only use API in production or when mock data is disabled
-        if (!_useMockData) {
-          debugPrint('Attempting to fetch real data from: $fullUrl');
-          try {
-            final result = await _apiClient.get<PortfolioHoldings>(
+            final apiResult = await _apiClient.get<ApiPortfolioHoldingsResponse>(
               '$_portfolioEndpoint/holdings',
               queryParams: {'userId': userId},
               parser: (data) {
                 debugPrint(
                   'Parsing API response data: ${data.toString().substring(0, min(100, data.toString().length))}...',
                 );
-                return PortfolioHoldings.fromJson(data);
+                return ApiPortfolioHoldingsResponse.fromJson(data);
               },
             );
 
             debugPrint(
               'Successfully fetched portfolio holdings from API: $fullUrl',
             );
-            return result;
-          } catch (parseError) {
-            debugPrint('Error parsing API response: $parseError');
-            // Try to handle the error gracefully
-            if (parseError.toString().contains(
-              "'null' is not a subtype of type 'double'",
-            )) {
-              debugPrint(
-                'Detected null value in numeric field, using null-safe parsing',
-              );
-              // Continue with mock data as fallback
-              throw ApiException('Error parsing API response: $parseError');
-            }
-            rethrow;
-          }
-        } else {
-          debugPrint('Mock data configured, skipping API call to: $fullUrl');
-          throw ApiException('Using mock data as configured');
-        }
-      } catch (apiError) {
-        // API call failed, log the error
-        debugPrint('API call failed: $apiError');
-
-        // Fall back to mock data in debug mode or when mock data is enabled
-        if (kDebugMode || _useMockData) {
-          debugPrint('Falling back to mock data');
-          await Future.delayed(
-            const Duration(milliseconds: 300),
-          ); // Small delay
-          return await _getMockPortfolioHoldings();
-        } else {
-          // In production, rethrow the error
-          throw ApiException('Failed to connect to API: $apiError');
-        }
-      }
+            return apiResult;
     } catch (e) {
       if (e is ApiException) {
         debugPrint('Error fetching portfolio holdings: ${e.message}');
@@ -172,90 +121,9 @@ class PortfolioClient {
     }
   }
 
-  /// Get mock portfolio holdings data
-  Future<PortfolioHoldings> _getMockPortfolioHoldings() async {
-    try {
-      // Load mock data from assets
-      final mockData = await rootBundle.loadString(
-        'assets/mock_data/portfolio_summary.json',
-      );
-      final json = jsonDecode(mockData);
-
-      // Extract holdings from all market cap categories
-      List<Map<String, dynamic>> allHoldings = [];
-
-      if (json['marketCapHoldings'] != null) {
-        final marketCapHoldings =
-            json['marketCapHoldings'] as Map<String, dynamic>;
-
-        debugPrint(
-          'Market cap categories found: ${marketCapHoldings.keys.toList()}',
-        );
-
-        // Iterate through each market cap category
-        for (String marketCap in marketCapHoldings.keys) {
-          final holdings = marketCapHoldings[marketCap] as List;
-          debugPrint('Processing $marketCap with ${holdings.length} holdings');
-
-          // Convert each holding to equity holding format
-          for (var holding in holdings) {
-            debugPrint('Processing holding: ${holding['symbol']}');
-            allHoldings.add({
-              "isin": holding['isin'] ?? '',
-              "symbol": holding['symbol'] ?? '',
-              "sector": holding['sector'] ?? '',
-              "industry": holding['industry'] ?? '',
-              "marketCap": holding['marketCap'] ?? marketCap,
-              "quantity": (holding['quantity'] ?? 0.0).toDouble(),
-              "investmentCost": (holding['investmentCost'] ?? 0.0).toDouble(),
-              "currentValue":
-                  (holding['investmentCost'] ?? 0.0).toDouble() *
-                  1.1, // Mock 10% gain
-              "weightInPortfolio":
-                  ((holding['investmentCost'] ?? 0.0) /
-                          (json['investmentValue'] ?? 1.0) *
-                          100)
-                      .toDouble(),
-              "gainLoss":
-                  (holding['investmentCost'] ?? 0.0).toDouble() *
-                  0.1, // Mock 10% gain
-              "gainLossPercentage": 10.0, // Mock 10% gain
-              "todayGainLoss":
-                  (holding['investmentCost'] ?? 0.0).toDouble() *
-                  0.02, // Mock 2% today gain
-              "todayGainLossPercentage": 2.0, // Mock 2% today gain
-              "currentPrice":
-                  ((holding['investmentCost'] ?? 0.0) /
-                          (holding['quantity'] ?? 1.0) *
-                          1.1)
-                      .toDouble(),
-              "percentageChange": 2.0,
-              "brokerPortfolios": holding['brokerPortfolios'] ?? [],
-            });
-          }
-        }
-      }
-
-      debugPrint('Total holdings processed: ${allHoldings.length}');
-      debugPrint(
-        'Holdings symbols: ${allHoldings.map((h) => h['symbol']).toList()}',
-      );
-
-      final portfolioHoldingsData = {"equityHoldings": allHoldings};
-
-      return PortfolioHoldings.fromJson(portfolioHoldingsData);
-    } catch (e) {
-      // Throw exception if mock data creation fails
-      debugPrint('Error creating mock portfolio holdings data: $e');
-      throw ApiException(
-        'Failed to create mock portfolio holdings data',
-        data: e.toString(),
-      );
-    }
-  }
-
   /// Dispose resources
   void dispose() {
     _apiClient.dispose();
   }
 }
+

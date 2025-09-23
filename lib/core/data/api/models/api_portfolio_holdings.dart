@@ -1,78 +1,51 @@
-/// Model class for portfolio holdings response
-class PortfolioHoldings {
-  /// List of equity holdings
-  final List<EquityHolding> equityHoldings;
+/// API response model for portfolio holdings
+/// This model directly maps to the API response structure
+class ApiPortfolioHoldingsResponse {
+  /// List of equity holdings from API
+  final List<ApiEquityHolding> equityHoldings;
 
   /// Constructor
-  PortfolioHoldings({required this.equityHoldings});
+  const ApiPortfolioHoldingsResponse({required this.equityHoldings});
 
-  /// Create from JSON
-  factory PortfolioHoldings.fromJson(Map<String, dynamic> json) {
-    return PortfolioHoldings(
-      equityHoldings: (json['equityHoldings'] as List)
-          .map((e) => EquityHolding.fromJson(e))
+  /// Create from JSON response
+  factory ApiPortfolioHoldingsResponse.fromJson(Map<String, dynamic> json) {
+    return ApiPortfolioHoldingsResponse(
+      equityHoldings: (json['equityHoldings'] as List? ?? [])
+          .map((e) => ApiEquityHolding.fromJson(e))
           .toList(),
     );
   }
 
-  /// Convert to JSON
+  /// Convert to JSON for API requests
   Map<String, dynamic> toJson() {
-    return {'equityHoldings': equityHoldings.map((e) => e.toJson()).toList()};
+    return {
+      'equityHoldings': equityHoldings.map((e) => e.toJson()).toList(),
+    };
   }
 }
 
-/// Model class for equity holding
-class EquityHolding {
-  /// ISIN code
+/// API model for individual equity holding
+class ApiEquityHolding {
+  /// Raw API fields - exact mapping to backend response
   final String isin;
-
-  /// Stock symbol
   final String symbol;
-
-  /// Sector
   final String sector;
-
-  /// Industry
   final String industry;
-
-  /// Market capitalization category
   final String marketCap;
-
-  /// Quantity of shares
   final double quantity;
-
-  /// Investment cost
   final double investmentCost;
-
-  /// Current value
   final double currentValue;
-
-  /// Weight in portfolio (percentage)
   final double weightInPortfolio;
-
-  /// Total gain/loss
   final double gainLoss;
-
-  /// Total gain/loss percentage
   final double gainLossPercentage;
-
-  /// Today's gain/loss
   final double todayGainLoss;
-
-  /// Today's gain/loss percentage
   final double todayGainLossPercentage;
-
-  /// Current price per share
   final double currentPrice;
-
-  /// Percentage change today
   final double percentageChange;
-
-  /// Broker portfolios containing this holding
-  final List<BrokerHolding> brokerPortfolios;
+  final List<ApiBrokerHolding> brokerPortfolios;
 
   /// Constructor
-  EquityHolding({
+  const ApiEquityHolding({
     required this.isin,
     required this.symbol,
     required this.sector,
@@ -91,9 +64,9 @@ class EquityHolding {
     required this.brokerPortfolios,
   });
 
-  /// Create from JSON
-  factory EquityHolding.fromJson(Map<String, dynamic> json) {
-    return EquityHolding(
+  /// Create from JSON response
+  factory ApiEquityHolding.fromJson(Map<String, dynamic> json) {
+    return ApiEquityHolding(
       isin: json['isin'] as String? ?? '',
       symbol: json['symbol'] as String? ?? '',
       sector: json['sector'] as String? ?? '',
@@ -109,15 +82,13 @@ class EquityHolding {
       todayGainLossPercentage: _parseDouble(json['todayGainLossPercentage']),
       currentPrice: _parseDouble(json['currentPrice']),
       percentageChange: _parseDouble(json['percentageChange']),
-      brokerPortfolios: json['brokerPortfolios'] != null
-          ? (json['brokerPortfolios'] as List)
-                .map((e) => BrokerHolding.fromJson(e))
-                .toList()
-          : [],
+      brokerPortfolios: (json['brokerPortfolios'] as List? ?? [])
+          .map((e) => ApiBrokerHolding.fromJson(e))
+          .toList(),
     );
   }
 
-  /// Helper method to parse double values safely
+  /// Helper method to safely parse double values from API
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is int) return value.toDouble();
@@ -132,7 +103,7 @@ class EquityHolding {
     return 0.0;
   }
 
-  /// Convert to JSON
+  /// Convert to JSON for API requests
   Map<String, dynamic> toJson() {
     return {
       'isin': isin,
@@ -155,27 +126,31 @@ class EquityHolding {
   }
 }
 
-/// Model class for broker holding
-class BrokerHolding {
-  /// Broker type
+/// API model for broker holding
+class ApiBrokerHolding {
+  /// Raw API fields
   final String brokerType;
-
-  /// Quantity of shares
   final double quantity;
 
   /// Constructor
-  BrokerHolding({required this.brokerType, required this.quantity});
+  const ApiBrokerHolding({
+    required this.brokerType,
+    required this.quantity,
+  });
 
-  /// Create from JSON
-  factory BrokerHolding.fromJson(Map<String, dynamic> json) {
-    return BrokerHolding(
+  /// Create from JSON response
+  factory ApiBrokerHolding.fromJson(Map<String, dynamic> json) {
+    return ApiBrokerHolding(
       brokerType: json['brokerType'] as String? ?? '',
-      quantity: EquityHolding._parseDouble(json['quantity']),
+      quantity: ApiEquityHolding._parseDouble(json['quantity']),
     );
   }
 
-  /// Convert to JSON
+  /// Convert to JSON for API requests
   Map<String, dynamic> toJson() {
-    return {'brokerType': brokerType, 'quantity': quantity};
+    return {
+      'brokerType': brokerType,
+      'quantity': quantity,
+    };
   }
 }

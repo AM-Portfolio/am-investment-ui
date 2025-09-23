@@ -1,16 +1,16 @@
 {
     "investmentValue": 475001.34,
-    "currentValue": 0.0,
-    "totalGainLoss": -475001.34,
-    "totalGainLossPercentage": -100.0,
-    "todayGainLoss": 0.0,
-    "todayGainLossPercentage": 0.0,
-    "totalAssets": 60,
-    "gainersCount": 0,
-    "losersCount": 0,
-    "todayGainersCount": 0,
-    "todayLosersCount": 0,
-    "lastUpdated": "2025-09-12T04:33:27.3200182",
+    "currentValue": 437925.78,
+    "totalGainLoss": -37075.56,
+    "totalGainLossPercentage": -7.81,
+    "todayGainLoss": -2124.47,
+    "todayGainLossPercentage": -0.49,
+    "totalAssets": 59,
+    "gainersCount": 30,
+    "losersCount": 28,
+    "todayGainersCount": 11,
+    "todayLosersCount": 45,
+    "lastUpdated": "2025-09-23T23:40:46.394716663",
     "brokerPortfolios": {
         "ZERODHA": {
             "investmentValue": 475001.3411999999,
@@ -27,6 +27,14 @@
                 "marketCap": "SMALL_CAP",
                 "quantity": 5.0,
                 "investmentCost": 3607.25,
+                "currentValue": 2276.0,
+                "weightInPortfolio": 0.52,
+                "gainLoss": -1331.25,
+                "gainLossPercentage": -36.9,
+                "todayGainLoss": -50.5,
+                "todayGainLossPercentage": -2.17,
+                "currentPrice": 455.2,
+                "percentageChange": -2.17,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -42,6 +50,14 @@
                 "marketCap": "SMALL_CAP",
                 "quantity": 7.0,
                 "investmentCost": 10214.600199999999,
+                "currentValue": 7806.400000000001,
+                "weightInPortfolio": 1.78,
+                "gainLoss": -2408.2,
+                "gainLossPercentage": -23.58,
+                "todayGainLoss": 18.9,
+                "todayGainLossPercentage": 0.24,
+                "currentPrice": 1115.2,
+                "percentageChange": 0.24,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -49,26 +65,282 @@
                     }
                 ]
             },
-            { "isin": "INSMALL00001", "symbol": "SCOMP1", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 10.0, "investmentCost": 2500.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 10.0}] },
-            { "isin": "INSMALL00002", "symbol": "SCOMP2", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 12.0, "investmentCost": 3200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 12.0}] },
-            { "isin": "INSMALL00003", "symbol": "SCOMP3", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 8.0,  "investmentCost": 2100.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 8.0}] },
-            { "isin": "INSMALL00004", "symbol": "SCOMP4", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 15.0, "investmentCost": 4100.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 15.0}] },
-            { "isin": "INSMALL00005", "symbol": "SCOMP5", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 6.0,  "investmentCost": 1800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 6.0}] },
-            { "isin": "INSMALL00006", "symbol": "SCOMP6", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 9.0,  "investmentCost": 2700.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 9.0}] },
-            { "isin": "INSMALL00007", "symbol": "SCOMP7", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 11.0, "investmentCost": 3300.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 11.0}] },
-            { "isin": "INSMALL00008", "symbol": "SCOMP8", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 7.0,  "investmentCost": 2000.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 7.0}] },
-            { "isin": "INSMALL00009", "symbol": "SCOMP9",  "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 13.0, "investmentCost": 3500.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 13.0}] },
-            { "isin": "INSMALL00010", "symbol": "SCOMP10", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 14.0, "investmentCost": 3600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 14.0}] },
-            { "isin": "INSMALL00011", "symbol": "SCOMP11", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 16.0, "investmentCost": 4200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 16.0}] },
-            { "isin": "INSMALL00012", "symbol": "SCOMP12", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 9.0,  "investmentCost": 2600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 9.0}] },
-            { "isin": "INSMALL00013", "symbol": "SCOMP13", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 10.0, "investmentCost": 2800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 10.0}] },
-            { "isin": "INSMALL00014", "symbol": "SCOMP14", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 18.0, "investmentCost": 4800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 18.0}] },
-            { "isin": "INSMALL00015", "symbol": "SCOMP15", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 20.0, "investmentCost": 5200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 20.0}] },
-            { "isin": "INSMALL00016", "symbol": "SCOMP16", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 22.0, "investmentCost": 5600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 22.0}] },
-            { "isin": "INSMALL00017", "symbol": "SCOMP17", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 24.0, "investmentCost": 6000.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 24.0}] },
-            { "isin": "INSMALL00018", "symbol": "SCOMP18", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 26.0, "investmentCost": 6400.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 26.0}] },
-            { "isin": "INSMALL00019", "symbol": "SCOMP19", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 28.0, "investmentCost": 6800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 28.0}] },
-            { "isin": "INSMALL00020", "symbol": "SCOMP20", "sector": "SmallCap Sector", "industry": "SmallCap Industry", "marketCap": "SMALL_CAP", "quantity": 30.0, "investmentCost": 7200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 30.0}] }
+            {
+                "isin": "INE947Q01028",
+                "symbol": "LAURUSLABS",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 18.0,
+                "investmentCost": 7848.0,
+                "currentValue": 16380.9,
+                "weightInPortfolio": 3.74,
+                "gainLoss": 8532.9,
+                "gainLossPercentage": 108.73,
+                "todayGainLoss": 89.1,
+                "todayGainLossPercentage": 0.55,
+                "currentPrice": 910.05,
+                "percentageChange": 0.55,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 18.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE182A01018",
+                "symbol": "PFIZER",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 1.0,
+                "investmentCost": 5142.0,
+                "currentValue": 5026.0,
+                "weightInPortfolio": 1.15,
+                "gainLoss": -116.0,
+                "gainLossPercentage": -2.26,
+                "todayGainLoss": -36.0,
+                "todayGainLossPercentage": -0.71,
+                "currentPrice": 5026.0,
+                "percentageChange": -0.71,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE050E01027",
+                "symbol": "BALAMINES",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 3.0,
+                "investmentCost": 6320.549999999999,
+                "currentValue": 4387.799999999999,
+                "weightInPortfolio": 1.0,
+                "gainLoss": -1932.75,
+                "gainLossPercentage": -30.58,
+                "todayGainLoss": -52.2,
+                "todayGainLossPercentage": -1.18,
+                "currentPrice": 1462.6,
+                "percentageChange": -1.18,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE885A01032",
+                "symbol": "ARE&M",
+                "sector": "Auto Components & Equipments",
+                "industry": "Auto Components & Equipments",
+                "marketCap": "SMALL_CAP",
+                "quantity": 4.0,
+                "investmentCost": 5619.8,
+                "currentValue": 4034.6,
+                "weightInPortfolio": 0.92,
+                "gainLoss": -1585.2,
+                "gainLossPercentage": -28.21,
+                "todayGainLoss": 23.0,
+                "todayGainLossPercentage": 0.57,
+                "currentPrice": 1008.65,
+                "percentageChange": 0.57,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE836A01035",
+                "symbol": "BSOFT",
+                "sector": "Computers - Software & Consulting",
+                "industry": "Computers - Software & Consulting",
+                "marketCap": "SMALL_CAP",
+                "quantity": 9.0,
+                "investmentCost": 5328.0,
+                "currentValue": 3351.15,
+                "weightInPortfolio": 0.77,
+                "gainLoss": -1976.85,
+                "gainLossPercentage": -37.1,
+                "todayGainLoss": -9.9,
+                "todayGainLossPercentage": -0.29,
+                "currentPrice": 372.35,
+                "percentageChange": -0.29,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 9.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE095N01031",
+                "symbol": "NBCC",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "SMALL_CAP",
+                "quantity": 80.0,
+                "investmentCost": 8934.048,
+                "currentValue": 9027.2,
+                "weightInPortfolio": 2.06,
+                "gainLoss": 93.15,
+                "gainLossPercentage": 1.04,
+                "todayGainLoss": -212.8,
+                "todayGainLossPercentage": -2.3,
+                "currentPrice": 112.84,
+                "percentageChange": -2.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 80.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE962Y01021",
+                "symbol": "IRCON",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "SMALL_CAP",
+                "quantity": 20.0,
+                "investmentCost": 4404.25,
+                "currentValue": 3585.7999999999997,
+                "weightInPortfolio": 0.82,
+                "gainLoss": -818.45,
+                "gainLossPercentage": -18.58,
+                "todayGainLoss": -55.2,
+                "todayGainLossPercentage": -1.52,
+                "currentPrice": 179.29,
+                "percentageChange": -1.52,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 20.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE351F01018",
+                "symbol": "JPPOWER",
+                "sector": "Power Generation",
+                "industry": "Power Generation",
+                "marketCap": "SMALL_CAP",
+                "quantity": 250.0,
+                "investmentCost": 4425.0,
+                "currentValue": 4580.0,
+                "weightInPortfolio": 1.05,
+                "gainLoss": 155.0,
+                "gainLossPercentage": 3.5,
+                "todayGainLoss": -62.5,
+                "todayGainLossPercentage": -1.35,
+                "currentPrice": 18.32,
+                "percentageChange": -1.35,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 250.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE054A01027",
+                "symbol": "VIPIND",
+                "sector": "Plastic Products - Consumer",
+                "industry": "Plastic Products - Consumer",
+                "marketCap": "SMALL_CAP",
+                "quantity": 11.0,
+                "investmentCost": 5033.6,
+                "currentValue": 4834.5,
+                "weightInPortfolio": 1.1,
+                "gainLoss": -199.1,
+                "gainLossPercentage": -3.96,
+                "todayGainLoss": -94.05,
+                "todayGainLossPercentage": -1.91,
+                "currentPrice": 439.5,
+                "percentageChange": -1.91,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 11.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE230A01023",
+                "symbol": "EIHOTEL",
+                "sector": "Hotels & Resorts",
+                "industry": "Hotels & Resorts",
+                "marketCap": "SMALL_CAP",
+                "quantity": 10.0,
+                "investmentCost": 3928.0,
+                "currentValue": 3872.0,
+                "weightInPortfolio": 0.88,
+                "gainLoss": -56.0,
+                "gainLossPercentage": -1.43,
+                "todayGainLoss": -68.0,
+                "todayGainLossPercentage": -1.73,
+                "currentPrice": 387.2,
+                "percentageChange": -1.73,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE769A01020",
+                "symbol": "AARTIIND",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 8.0,
+                "investmentCost": 4736.4496,
+                "currentValue": 3092.4,
+                "weightInPortfolio": 0.71,
+                "gainLoss": -1644.05,
+                "gainLossPercentage": -34.71,
+                "todayGainLoss": -12.0,
+                "todayGainLossPercentage": -0.39,
+                "currentPrice": 386.55,
+                "percentageChange": -0.39,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE704P01025",
+                "symbol": "COCHINSHIP",
+                "sector": "Ship Building & Allied Services",
+                "industry": "Ship Building & Allied Services",
+                "marketCap": "SMALL_CAP",
+                "quantity": 4.0,
+                "investmentCost": 6096.0,
+                "currentValue": 7541.6,
+                "weightInPortfolio": 1.72,
+                "gainLoss": 1445.6,
+                "gainLossPercentage": 23.71,
+                "todayGainLoss": -154.4,
+                "todayGainLossPercentage": -2.01,
+                "currentPrice": 1885.4,
+                "percentageChange": -2.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            }
         ],
         "LARGE_CAP": [
             {
@@ -79,6 +351,14 @@
                 "marketCap": "LARGE_CAP",
                 "quantity": 5.0,
                 "investmentCost": 4612.5,
+                "currentValue": 4488.25,
+                "weightInPortfolio": 1.02,
+                "gainLoss": -124.25,
+                "gainLossPercentage": -2.69,
+                "todayGainLoss": -34.0,
+                "todayGainLossPercentage": -0.75,
+                "currentPrice": 897.65,
+                "percentageChange": -0.75,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -94,6 +374,14 @@
                 "marketCap": "LARGE_CAP",
                 "quantity": 3.0,
                 "investmentCost": 14135.9499,
+                "currentValue": 20971.5,
+                "weightInPortfolio": 4.79,
+                "gainLoss": 6835.55,
+                "gainLossPercentage": 48.36,
+                "todayGainLoss": -73.5,
+                "todayGainLossPercentage": -0.35,
+                "currentPrice": 6990.5,
+                "percentageChange": -0.35,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -101,26 +389,328 @@
                     }
                 ]
             },
-            { "isin": "INLARGE00001", "symbol": "LCOMP1", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 2.0,  "investmentCost": 15200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 2.0}] },
-            { "isin": "INLARGE00002", "symbol": "LCOMP2", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 4.0,  "investmentCost": 8200.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 4.0}] },
-            { "isin": "INLARGE00003", "symbol": "LCOMP3", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 1.0,  "investmentCost": 21000.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 1.0}] },
-            { "isin": "INLARGE00004", "symbol": "LCOMP4", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 3.0,  "investmentCost": 9800.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 3.0}] },
-            { "isin": "INLARGE00005", "symbol": "LCOMP5", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 6.0,  "investmentCost": 12500.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 6.0}] },
-            { "isin": "INLARGE00006", "symbol": "LCOMP6", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 2.0,  "investmentCost": 7600.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 2.0}] },
-            { "isin": "INLARGE00007", "symbol": "LCOMP7", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 5.0,  "investmentCost": 13400.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 5.0}] },
-            { "isin": "INLARGE00008", "symbol": "LCOMP8", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 7.0,  "investmentCost": 15600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 7.0}] },
-            { "isin": "INLARGE00009",  "symbol": "LCOMP9",  "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 8.0,  "investmentCost": 16600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 8.0}] },
-            { "isin": "INLARGE00010",  "symbol": "LCOMP10", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 9.0,  "investmentCost": 17600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 9.0}] },
-            { "isin": "INLARGE00011",  "symbol": "LCOMP11", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 10.0, "investmentCost": 18600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 10.0}] },
-            { "isin": "INLARGE00012",  "symbol": "LCOMP12", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 11.0, "investmentCost": 19600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 11.0}] },
-            { "isin": "INLARGE00013",  "symbol": "LCOMP13", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 12.0, "investmentCost": 20600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 12.0}] },
-            { "isin": "INLARGE00014",  "symbol": "LCOMP14", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 13.0, "investmentCost": 21600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 13.0}] },
-            { "isin": "INLARGE00015",  "symbol": "LCOMP15", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 14.0, "investmentCost": 22600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 14.0}] },
-            { "isin": "INLARGE00016",  "symbol": "LCOMP16", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 15.0, "investmentCost": 23600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 15.0}] },
-            { "isin": "INLARGE00017",  "symbol": "LCOMP17", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 16.0, "investmentCost": 24600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 16.0}] },
-            { "isin": "INLARGE00018",  "symbol": "LCOMP18", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 17.0, "investmentCost": 25600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 17.0}] },
-            { "isin": "INLARGE00019",  "symbol": "LCOMP19", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 18.0, "investmentCost": 26600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 18.0}] },
-            { "isin": "INLARGE00020",  "symbol": "LCOMP20", "sector": "LargeCap Sector", "industry": "LargeCap Industry", "marketCap": "LARGE_CAP", "quantity": 19.0, "investmentCost": 27600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 19.0}] }
+            {
+                "isin": "INE053F01010",
+                "symbol": "IRFC",
+                "sector": "Financial Institution",
+                "industry": "Financial Institution",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 1414.5,
+                "currentValue": 1272.9,
+                "weightInPortfolio": 0.29,
+                "gainLoss": -141.6,
+                "gainLossPercentage": -10.01,
+                "todayGainLoss": -9.4,
+                "todayGainLossPercentage": -0.73,
+                "currentPrice": 127.29,
+                "percentageChange": -0.73,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE160A01022",
+                "symbol": "PNB",
+                "sector": "Public Sector Bank",
+                "industry": "Public Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 191.0,
+                "investmentCost": 19093.5633,
+                "currentValue": 21665.13,
+                "weightInPortfolio": 4.95,
+                "gainLoss": 2571.57,
+                "gainLossPercentage": 13.47,
+                "todayGainLoss": 64.94,
+                "todayGainLossPercentage": 0.3,
+                "currentPrice": 113.43,
+                "percentageChange": 0.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 191.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE030A01027",
+                "symbol": "HINDUNILVR",
+                "sector": "Diversified FMCG",
+                "industry": "Diversified FMCG",
+                "marketCap": "LARGE_CAP",
+                "quantity": 2.0,
+                "investmentCost": 4952.2,
+                "currentValue": 5044.4,
+                "weightInPortfolio": 1.15,
+                "gainLoss": 92.2,
+                "gainLossPercentage": 1.86,
+                "todayGainLoss": -93.4,
+                "todayGainLossPercentage": -1.82,
+                "currentPrice": 2522.2,
+                "percentageChange": -1.82,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE062A01020",
+                "symbol": "SBIN",
+                "sector": "Public Sector Bank",
+                "industry": "Public Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 4896.0498,
+                "currentValue": 5223.6,
+                "weightInPortfolio": 1.19,
+                "gainLoss": 327.55,
+                "gainLossPercentage": 6.69,
+                "todayGainLoss": 96.0,
+                "todayGainLossPercentage": 1.87,
+                "currentPrice": 870.6,
+                "percentageChange": 1.87,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE646L01027",
+                "symbol": "INDIGO",
+                "sector": "Airline",
+                "industry": "Airline",
+                "marketCap": "LARGE_CAP",
+                "quantity": 1.0,
+                "investmentCost": 4068.95,
+                "currentValue": 5732.0,
+                "weightInPortfolio": 1.31,
+                "gainLoss": 1663.05,
+                "gainLossPercentage": 40.87,
+                "todayGainLoss": -33.0,
+                "todayGainLossPercentage": -0.57,
+                "currentPrice": 5732.0,
+                "percentageChange": -0.57,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE280A01028",
+                "symbol": "TITAN",
+                "sector": "Gems- Jewellery And Watches",
+                "industry": "Gems- Jewellery And Watches",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 31989.15,
+                "currentValue": 34392.0,
+                "weightInPortfolio": 7.85,
+                "gainLoss": 2402.85,
+                "gainLossPercentage": 7.51,
+                "todayGainLoss": -260.0,
+                "todayGainLossPercentage": -0.75,
+                "currentPrice": 3439.2,
+                "percentageChange": -0.75,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE079A01024",
+                "symbol": "AMBUJACEM",
+                "sector": "Cement & Cement Products",
+                "industry": "Cement & Cement Products",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 2841.75,
+                "currentValue": 2958.0,
+                "weightInPortfolio": 0.68,
+                "gainLoss": 116.25,
+                "gainLossPercentage": 4.09,
+                "todayGainLoss": -1.75,
+                "todayGainLossPercentage": -0.06,
+                "currentPrice": 591.6,
+                "percentageChange": -0.06,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE040A01034",
+                "symbol": "HDFCBANK",
+                "sector": "Private Sector Bank",
+                "industry": "Private Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 8779.2,
+                "currentValue": 5743.200000000001,
+                "weightInPortfolio": 1.31,
+                "gainLoss": -3036.0,
+                "gainLossPercentage": -34.58,
+                "todayGainLoss": -58.8,
+                "todayGainLossPercentage": -1.01,
+                "currentPrice": 957.2,
+                "percentageChange": -1.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE059A01026",
+                "symbol": "CIPLA",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "LARGE_CAP",
+                "quantity": 11.0,
+                "investmentCost": 17765.4499,
+                "currentValue": 16798.1,
+                "weightInPortfolio": 3.84,
+                "gainLoss": -967.35,
+                "gainLossPercentage": -5.45,
+                "todayGainLoss": -166.1,
+                "todayGainLossPercentage": -0.98,
+                "currentPrice": 1527.1,
+                "percentageChange": -0.98,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 11.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE021A01026",
+                "symbol": "ASIANPAINT",
+                "sector": "Paints",
+                "industry": "Paints",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 12516.7,
+                "currentValue": 12234.5,
+                "weightInPortfolio": 2.79,
+                "gainLoss": -282.2,
+                "gainLossPercentage": -2.25,
+                "todayGainLoss": -126.0,
+                "todayGainLossPercentage": -1.02,
+                "currentPrice": 2446.9,
+                "percentageChange": -1.02,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE263A01024",
+                "symbol": "BEL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 2661.5,
+                "currentValue": 4044.5,
+                "weightInPortfolio": 0.92,
+                "gainLoss": 1383.0,
+                "gainLossPercentage": 51.96,
+                "todayGainLoss": -19.5,
+                "todayGainLossPercentage": -0.48,
+                "currentPrice": 404.45,
+                "percentageChange": -0.48,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE237A01028",
+                "symbol": "KOTAKBANK",
+                "sector": "Private Sector Bank",
+                "industry": "Private Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 13.0,
+                "investmentCost": 22782.5494,
+                "currentValue": 26620.100000000002,
+                "weightInPortfolio": 6.08,
+                "gainLoss": 3837.55,
+                "gainLossPercentage": 16.84,
+                "todayGainLoss": 321.1,
+                "todayGainLossPercentage": 1.22,
+                "currentPrice": 2047.7,
+                "percentageChange": 1.22,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 13.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE066F01020",
+                "symbol": "HAL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "LARGE_CAP",
+                "quantity": 1.0,
+                "investmentCost": 4133.7,
+                "currentValue": 4799.9,
+                "weightInPortfolio": 1.1,
+                "gainLoss": 666.2,
+                "gainLossPercentage": 16.12,
+                "todayGainLoss": -14.6,
+                "todayGainLossPercentage": -0.3,
+                "currentPrice": 4799.9,
+                "percentageChange": -0.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE192R01011",
+                "symbol": "DMART",
+                "sector": "Diversified Retail",
+                "industry": "Diversified Retail",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 23359.800000000003,
+                "currentValue": 27803.399999999998,
+                "weightInPortfolio": 6.35,
+                "gainLoss": 4443.6,
+                "gainLossPercentage": 19.02,
+                "todayGainLoss": -371.4,
+                "todayGainLossPercentage": -1.32,
+                "currentPrice": 4633.9,
+                "percentageChange": -1.32,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            }
         ],
         "MID_CAP": [
             {
@@ -131,6 +721,14 @@
                 "marketCap": "MID_CAP",
                 "quantity": 7.0,
                 "investmentCost": 6278.1999000000005,
+                "currentValue": 5058.2,
+                "weightInPortfolio": 1.16,
+                "gainLoss": -1220.0,
+                "gainLossPercentage": -19.43,
+                "todayGainLoss": -31.85,
+                "todayGainLossPercentage": -0.63,
+                "currentPrice": 722.6,
+                "percentageChange": -0.63,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -146,6 +744,14 @@
                 "marketCap": "MID_CAP",
                 "quantity": 8.0,
                 "investmentCost": 5708.3504,
+                "currentValue": 6962.4,
+                "weightInPortfolio": 1.59,
+                "gainLoss": 1254.05,
+                "gainLossPercentage": 21.97,
+                "todayGainLoss": -33.6,
+                "todayGainLossPercentage": -0.48,
+                "currentPrice": 870.3,
+                "percentageChange": -0.48,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -153,26 +759,621 @@
                     }
                 ]
             },
-            { "isin": "INMID00001", "symbol": "MCOMP1", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 9.0,  "investmentCost": 5400.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 9.0}] },
-            { "isin": "INMID00002", "symbol": "MCOMP2", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 6.0,  "investmentCost": 3600.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 6.0}] },
-            { "isin": "INMID00003", "symbol": "MCOMP3", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 12.0, "investmentCost": 7200.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 12.0}] },
-            { "isin": "INMID00004", "symbol": "MCOMP4", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 4.0,  "investmentCost": 2800.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 4.0}] },
-            { "isin": "INMID00005", "symbol": "MCOMP5", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 11.0, "investmentCost": 6600.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 11.0}] },
-            { "isin": "INMID00006", "symbol": "MCOMP6", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 7.0,  "investmentCost": 4350.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 7.0}] },
-            { "isin": "INMID00007", "symbol": "MCOMP7", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 5.0,  "investmentCost": 3000.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 5.0}] },
-            { "isin": "INMID00008", "symbol": "MCOMP8", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 10.0, "investmentCost": 6000.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 10.0}] },
-            { "isin": "INMID00009", "symbol": "MCOMP9",  "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 13.0, "investmentCost": 7800.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 13.0}] },
-            { "isin": "INMID00010", "symbol": "MCOMP10", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 14.0, "investmentCost": 8400.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 14.0}] },
-            { "isin": "INMID00011", "symbol": "MCOMP11", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 15.0, "investmentCost": 9000.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 15.0}] },
-            { "isin": "INMID00012", "symbol": "MCOMP12", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 16.0, "investmentCost": 9600.0,  "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 16.0}] },
-            { "isin": "INMID00013", "symbol": "MCOMP13", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 17.0, "investmentCost": 10200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 17.0}] },
-            { "isin": "INMID00014", "symbol": "MCOMP14", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 18.0, "investmentCost": 10800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 18.0}] },
-            { "isin": "INMID00015", "symbol": "MCOMP15", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 19.0, "investmentCost": 11400.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 19.0}] },
-            { "isin": "INMID00016", "symbol": "MCOMP16", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 20.0, "investmentCost": 12000.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 20.0}] },
-            { "isin": "INMID00017", "symbol": "MCOMP17", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 21.0, "investmentCost": 12600.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 21.0}] },
-            { "isin": "INMID00018", "symbol": "MCOMP18", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 22.0, "investmentCost": 13200.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 22.0}] },
-            { "isin": "INMID00019", "symbol": "MCOMP19", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 23.0, "investmentCost": 13800.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 23.0}] },
-            { "isin": "INMID00020", "symbol": "MCOMP20", "sector": "MidCap Sector", "industry": "MidCap Industry", "marketCap": "MID_CAP", "quantity": 24.0, "investmentCost": 14400.0, "brokerPortfolios": [{"brokerType": "ZERODHA", "quantity": 24.0}] }
+            {
+                "isin": "INE848E01016",
+                "symbol": "NHPC",
+                "sector": "Power Generation",
+                "industry": "Power Generation",
+                "marketCap": "MID_CAP",
+                "quantity": 308.0,
+                "investmentCost": 24487.694,
+                "currentValue": 26682.039999999997,
+                "weightInPortfolio": 6.09,
+                "gainLoss": 2194.35,
+                "gainLossPercentage": 8.96,
+                "todayGainLoss": -375.76,
+                "todayGainLossPercentage": -1.39,
+                "currentPrice": 86.63,
+                "percentageChange": -1.39,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 308.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE628A01036",
+                "symbol": "UPLBBPH",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MID_CAP",
+                "quantity": 3.0,
+                "investmentCost": 1674.8999999999999,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE531E01026",
+                "symbol": "HINDCOPPER",
+                "sector": "Copper",
+                "industry": "Copper",
+                "marketCap": "MID_CAP",
+                "quantity": 19.0,
+                "investmentCost": 5804.5,
+                "currentValue": 5841.17,
+                "weightInPortfolio": 1.33,
+                "gainLoss": 36.67,
+                "gainLossPercentage": 0.63,
+                "todayGainLoss": 177.27,
+                "todayGainLossPercentage": 3.13,
+                "currentPrice": 307.43,
+                "percentageChange": 3.13,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 19.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE031A01017",
+                "symbol": "HUDCO",
+                "sector": "Financial Institution",
+                "industry": "Financial Institution",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 1020.5,
+                "currentValue": 1176.1499999999999,
+                "weightInPortfolio": 0.27,
+                "gainLoss": 155.65,
+                "gainLossPercentage": 15.25,
+                "todayGainLoss": -23.85,
+                "todayGainLossPercentage": -1.99,
+                "currentPrice": 235.23,
+                "percentageChange": -1.99,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE415G01027",
+                "symbol": "RVNL",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 2276.25,
+                "currentValue": 1788.0,
+                "weightInPortfolio": 0.41,
+                "gainLoss": -488.25,
+                "gainLossPercentage": -21.45,
+                "todayGainLoss": -22.0,
+                "todayGainLossPercentage": -1.22,
+                "currentPrice": 357.6,
+                "percentageChange": -1.22,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE732I01013",
+                "symbol": "ANGELONE",
+                "sector": "Stockbroking & Allied",
+                "industry": "Stockbroking & Allied",
+                "marketCap": "MID_CAP",
+                "quantity": 6.0,
+                "investmentCost": 15802.9002,
+                "currentValue": 13367.400000000001,
+                "weightInPortfolio": 3.05,
+                "gainLoss": -2435.5,
+                "gainLossPercentage": -15.41,
+                "todayGainLoss": -72.6,
+                "todayGainLossPercentage": -0.54,
+                "currentPrice": 2227.9,
+                "percentageChange": -0.54,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE821I01022",
+                "symbol": "IRB",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "MID_CAP",
+                "quantity": 50.0,
+                "investmentCost": 2663.5,
+                "currentValue": 2156.0,
+                "weightInPortfolio": 0.49,
+                "gainLoss": -507.5,
+                "gainLossPercentage": -19.05,
+                "todayGainLoss": -11.5,
+                "todayGainLossPercentage": -0.53,
+                "currentPrice": 43.12,
+                "percentageChange": -0.53,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 50.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE647A01010",
+                "symbol": "SRF",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "MID_CAP",
+                "quantity": 2.0,
+                "investmentCost": 4490.6,
+                "currentValue": 5806.4,
+                "weightInPortfolio": 1.33,
+                "gainLoss": 1315.8,
+                "gainLossPercentage": 29.3,
+                "todayGainLoss": -31.6,
+                "todayGainLossPercentage": -0.54,
+                "currentPrice": 2903.2,
+                "percentageChange": -0.54,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE699H01024",
+                "symbol": "AWL",
+                "sector": "Edible Oil",
+                "industry": "Edible Oil",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 1637.75,
+                "currentValue": 1300.5,
+                "weightInPortfolio": 0.3,
+                "gainLoss": -337.25,
+                "gainLossPercentage": -20.59,
+                "todayGainLoss": -60.5,
+                "todayGainLossPercentage": -4.45,
+                "currentPrice": 260.1,
+                "percentageChange": -4.45,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE584A01023",
+                "symbol": "NMDC",
+                "sector": "Industrial Minerals",
+                "industry": "Industrial Minerals",
+                "marketCap": "MID_CAP",
+                "quantity": 6.0,
+                "investmentCost": 1307.2302,
+                "currentValue": 468.59999999999997,
+                "weightInPortfolio": 0.11,
+                "gainLoss": -838.63,
+                "gainLossPercentage": -64.15,
+                "todayGainLoss": 7.32,
+                "todayGainLossPercentage": 1.59,
+                "currentPrice": 78.1,
+                "percentageChange": 1.59,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE474Q01031",
+                "symbol": "MEDANTA",
+                "sector": "Hospital",
+                "industry": "Hospital",
+                "marketCap": "MID_CAP",
+                "quantity": 4.0,
+                "investmentCost": 4276.0,
+                "currentValue": 5286.8,
+                "weightInPortfolio": 1.21,
+                "gainLoss": 1010.8,
+                "gainLossPercentage": 23.64,
+                "todayGainLoss": -55.6,
+                "todayGainLossPercentage": -1.04,
+                "currentPrice": 1321.7,
+                "percentageChange": -1.04,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE115A01026",
+                "symbol": "LICHSGFIN",
+                "sector": "Housing Finance Company",
+                "industry": "Housing Finance Company",
+                "marketCap": "MID_CAP",
+                "quantity": 10.0,
+                "investmentCost": 6810.0,
+                "currentValue": 5826.0,
+                "weightInPortfolio": 1.33,
+                "gainLoss": -984.0,
+                "gainLossPercentage": -14.45,
+                "todayGainLoss": -47.0,
+                "todayGainLossPercentage": -0.8,
+                "currentPrice": 582.6,
+                "percentageChange": -0.8,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE042A01014",
+                "symbol": "ESCORTS",
+                "sector": "Tractors",
+                "industry": "Tractors",
+                "marketCap": "MID_CAP",
+                "quantity": 2.0,
+                "investmentCost": 7475.1,
+                "currentValue": 7478.2,
+                "weightInPortfolio": 1.71,
+                "gainLoss": 3.1,
+                "gainLossPercentage": 0.04,
+                "todayGainLoss": 134.2,
+                "todayGainLossPercentage": 1.83,
+                "currentPrice": 3739.1,
+                "percentageChange": 1.83,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            }
+        ],
+        "MICRO_CAP": [
+            {
+                "isin": "INE124G01033",
+                "symbol": "DELTACORP",
+                "sector": "Amusement Parks/ Other Recreation",
+                "industry": "Amusement Parks/ Other Recreation",
+                "marketCap": "MICRO_CAP",
+                "quantity": 7.0,
+                "investmentCost": 892.15,
+                "currentValue": 582.4,
+                "weightInPortfolio": 0.13,
+                "gainLoss": -309.75,
+                "gainLossPercentage": -34.72,
+                "todayGainLoss": -5.6,
+                "todayGainLossPercentage": -0.95,
+                "currentPrice": 83.2,
+                "percentageChange": -0.95,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF204KB14I2",
+                "symbol": "NIFTYBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 9.0,
+                "investmentCost": 2474.1099,
+                "currentValue": 2559.15,
+                "weightInPortfolio": 0.58,
+                "gainLoss": 85.04,
+                "gainLossPercentage": 3.44,
+                "todayGainLoss": -9.36,
+                "todayGainLossPercentage": -0.36,
+                "currentPrice": 284.35,
+                "percentageChange": -0.36,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 9.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC16E5",
+                "symbol": "INFRAIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 32.0,
+                "investmentCost": 2956.72,
+                "currentValue": 3028.16,
+                "weightInPortfolio": 0.69,
+                "gainLoss": 71.44,
+                "gainLossPercentage": 2.42,
+                "todayGainLoss": -11.52,
+                "todayGainLossPercentage": -0.38,
+                "currentPrice": 94.63,
+                "percentageChange": -0.38,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 32.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC17L8",
+                "symbol": "FINIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 201.0,
+                "investmentCost": 5404.7694,
+                "currentValue": 6182.76,
+                "weightInPortfolio": 1.41,
+                "gainLoss": 777.99,
+                "gainLossPercentage": 14.39,
+                "todayGainLoss": -14.07,
+                "todayGainLossPercentage": -0.23,
+                "currentPrice": 30.76,
+                "percentageChange": -0.23,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 201.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE155A01022",
+                "symbol": "TATAMOTORS",
+                "sector": "Passenger Cars & Utility Vehicles",
+                "industry": "Passenger Cars & Utility Vehicles",
+                "marketCap": "MICRO_CAP",
+                "quantity": 16.0,
+                "investmentCost": 14782.9504,
+                "currentValue": 11221.6,
+                "weightInPortfolio": 2.56,
+                "gainLoss": -3561.35,
+                "gainLossPercentage": -24.09,
+                "todayGainLoss": -7.2,
+                "todayGainLossPercentage": -0.06,
+                "currentPrice": 701.35,
+                "percentageChange": -0.06,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 16.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF769K01LC3",
+                "symbol": "SMALLCAP",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 125.0,
+                "investmentCost": 6328.1875,
+                "currentValue": 5778.75,
+                "weightInPortfolio": 1.32,
+                "gainLoss": -549.44,
+                "gainLossPercentage": -8.68,
+                "todayGainLoss": -50.0,
+                "todayGainLossPercentage": -0.86,
+                "currentPrice": 46.23,
+                "percentageChange": -0.86,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 125.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF204KB16I7",
+                "symbol": "PSUBNKBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 60.0,
+                "investmentCost": 4379.952,
+                "currentValue": 4981.8,
+                "weightInPortfolio": 1.14,
+                "gainLoss": 601.85,
+                "gainLossPercentage": 13.74,
+                "todayGainLoss": 7.8,
+                "todayGainLossPercentage": 0.16,
+                "currentPrice": 83.03,
+                "percentageChange": 0.16,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 60.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC18W3",
+                "symbol": "OILIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 372.0,
+                "investmentCost": 4417.313999999999,
+                "currentValue": 4263.12,
+                "weightInPortfolio": 0.97,
+                "gainLoss": -154.19,
+                "gainLossPercentage": -3.49,
+                "todayGainLoss": -33.48,
+                "todayGainLossPercentage": -0.78,
+                "currentPrice": 11.46,
+                "percentageChange": -0.78,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 372.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF204KB15I9",
+                "symbol": "BANKBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 7.0,
+                "investmentCost": 3693.3799000000004,
+                "currentValue": 4008.34,
+                "weightInPortfolio": 0.92,
+                "gainLoss": 314.96,
+                "gainLossPercentage": 8.53,
+                "todayGainLoss": 0.56,
+                "todayGainLossPercentage": 0.01,
+                "currentPrice": 572.62,
+                "percentageChange": 0.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE074B01023",
+                "symbol": "PARACABLES",
+                "sector": "Cables - Electricals",
+                "industry": "Cables - Electricals",
+                "marketCap": "MICRO_CAP",
+                "quantity": 29.0,
+                "investmentCost": 2352.48,
+                "currentValue": 1365.03,
+                "weightInPortfolio": 0.31,
+                "gainLoss": -987.45,
+                "gainLossPercentage": -41.97,
+                "todayGainLoss": -3.77,
+                "todayGainLossPercentage": -0.28,
+                "currentPrice": 47.07,
+                "percentageChange": -0.28,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 29.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE171Z01026",
+                "symbol": "BDL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "MICRO_CAP",
+                "quantity": 2.0,
+                "investmentCost": 2417.9,
+                "currentValue": 3190.8,
+                "weightInPortfolio": 0.73,
+                "gainLoss": 772.9,
+                "gainLossPercentage": 31.97,
+                "todayGainLoss": -59.2,
+                "todayGainLossPercentage": -1.82,
+                "currentPrice": 1595.4,
+                "percentageChange": -1.82,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF769K01HF4",
+                "symbol": "MAFANG",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 51.0,
+                "investmentCost": 4981.9911,
+                "currentValue": 8760.78,
+                "weightInPortfolio": 2.0,
+                "gainLoss": 3778.79,
+                "gainLossPercentage": 75.85,
+                "todayGainLoss": 0.0,
+                "todayGainLossPercentage": 0.0,
+                "currentPrice": 171.78,
+                "percentageChange": 0.0,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 51.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE142M01025",
+                "symbol": "TATATECH",
+                "sector": "IT Enabled Services",
+                "industry": "IT Enabled Services",
+                "marketCap": "MICRO_CAP",
+                "quantity": 8.0,
+                "investmentCost": 8609.6,
+                "currentValue": 5582.4,
+                "weightInPortfolio": 1.27,
+                "gainLoss": -3027.2,
+                "gainLossPercentage": -35.16,
+                "todayGainLoss": -35.6,
+                "todayGainLossPercentage": -0.63,
+                "currentPrice": 697.8,
+                "percentageChange": -0.63,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC19W1",
+                "symbol": "METALIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 750.0,
+                "investmentCost": 7194.224999999999,
+                "currentValue": 7635.0,
+                "weightInPortfolio": 1.74,
+                "gainLoss": 440.78,
+                "gainLossPercentage": 6.13,
+                "todayGainLoss": 0.0,
+                "todayGainLossPercentage": 0.0,
+                "currentPrice": 10.18,
+                "percentageChange": 0.0,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 750.0
+                    }
+                ]
+            }
         ]
     },
     "sectorialHoldings": {
@@ -185,6 +1386,14 @@
                 "marketCap": "MICRO_CAP",
                 "quantity": 2.0,
                 "investmentCost": 2417.9,
+                "currentValue": 3190.8,
+                "weightInPortfolio": 0.73,
+                "gainLoss": 772.9,
+                "gainLossPercentage": 31.97,
+                "todayGainLoss": -59.2,
+                "todayGainLossPercentage": -1.82,
+                "currentPrice": 1595.4,
+                "percentageChange": -1.82,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
@@ -200,10 +1409,1324 @@
                 "marketCap": "LARGE_CAP",
                 "quantity": 10.0,
                 "investmentCost": 2661.5,
+                "currentValue": 4044.5,
+                "weightInPortfolio": 0.92,
+                "gainLoss": 1383.0,
+                "gainLossPercentage": 51.96,
+                "todayGainLoss": -19.5,
+                "todayGainLossPercentage": -0.48,
+                "currentPrice": 404.45,
+                "percentageChange": -0.48,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
                         "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE066F01020",
+                "symbol": "HAL",
+                "sector": "Aerospace & Defense",
+                "industry": "Aerospace & Defense",
+                "marketCap": "LARGE_CAP",
+                "quantity": 1.0,
+                "investmentCost": 4133.7,
+                "currentValue": 4799.9,
+                "weightInPortfolio": 1.1,
+                "gainLoss": 666.2,
+                "gainLossPercentage": 16.12,
+                "todayGainLoss": -14.6,
+                "todayGainLossPercentage": -0.3,
+                "currentPrice": 4799.9,
+                "percentageChange": -0.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
+                    }
+                ]
+            }
+        ],
+        "": [
+            {
+                "isin": "INF109KC16E5",
+                "symbol": "INFRAIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 32.0,
+                "investmentCost": 2956.72,
+                "currentValue": 3028.16,
+                "weightInPortfolio": 0.69,
+                "gainLoss": 71.44,
+                "gainLossPercentage": 2.42,
+                "todayGainLoss": -11.52,
+                "todayGainLossPercentage": -0.38,
+                "currentPrice": 94.63,
+                "percentageChange": -0.38,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 32.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC17L8",
+                "symbol": "FINIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 201.0,
+                "investmentCost": 5404.7694,
+                "currentValue": 6182.76,
+                "weightInPortfolio": 1.41,
+                "gainLoss": 777.99,
+                "gainLossPercentage": 14.39,
+                "todayGainLoss": -14.07,
+                "todayGainLossPercentage": -0.23,
+                "currentPrice": 30.76,
+                "percentageChange": -0.23,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 201.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE628A01036",
+                "symbol": "UPLBBPH",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MID_CAP",
+                "quantity": 3.0,
+                "investmentCost": 1674.8999999999999,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF769K01LC3",
+                "symbol": "SMALLCAP",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 125.0,
+                "investmentCost": 6328.1875,
+                "currentValue": 5778.75,
+                "weightInPortfolio": 1.32,
+                "gainLoss": -549.44,
+                "gainLossPercentage": -8.68,
+                "todayGainLoss": -50.0,
+                "todayGainLossPercentage": -0.86,
+                "currentPrice": 46.23,
+                "percentageChange": -0.86,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 125.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC18W3",
+                "symbol": "OILIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 372.0,
+                "investmentCost": 4417.313999999999,
+                "currentValue": 4263.12,
+                "weightInPortfolio": 0.97,
+                "gainLoss": -154.19,
+                "gainLossPercentage": -3.49,
+                "todayGainLoss": -33.48,
+                "todayGainLossPercentage": -0.78,
+                "currentPrice": 11.46,
+                "percentageChange": -0.78,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 372.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF769K01HF4",
+                "symbol": "MAFANG",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 51.0,
+                "investmentCost": 4981.9911,
+                "currentValue": 8760.78,
+                "weightInPortfolio": 2.0,
+                "gainLoss": 3778.79,
+                "gainLossPercentage": 75.85,
+                "todayGainLoss": 0.0,
+                "todayGainLossPercentage": 0.0,
+                "currentPrice": 171.78,
+                "percentageChange": 0.0,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 51.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF109KC19W1",
+                "symbol": "METALIETF",
+                "sector": "",
+                "industry": "",
+                "marketCap": "MICRO_CAP",
+                "quantity": 750.0,
+                "investmentCost": 7194.224999999999,
+                "currentValue": 7635.0,
+                "weightInPortfolio": 1.74,
+                "gainLoss": 440.78,
+                "gainLossPercentage": 6.13,
+                "todayGainLoss": 0.0,
+                "todayGainLossPercentage": 0.0,
+                "currentPrice": 10.18,
+                "percentageChange": 0.0,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 750.0
+                    }
+                ]
+            }
+        ],
+        "IT Enabled Services": [
+            {
+                "isin": "INE142M01025",
+                "symbol": "TATATECH",
+                "sector": "IT Enabled Services",
+                "industry": "IT Enabled Services",
+                "marketCap": "MICRO_CAP",
+                "quantity": 8.0,
+                "investmentCost": 8609.6,
+                "currentValue": 5582.4,
+                "weightInPortfolio": 1.27,
+                "gainLoss": -3027.2,
+                "gainLossPercentage": -35.16,
+                "todayGainLoss": -35.6,
+                "todayGainLossPercentage": -0.63,
+                "currentPrice": 697.8,
+                "percentageChange": -0.63,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
+                    }
+                ]
+            }
+        ],
+        "Hotels & Resorts": [
+            {
+                "isin": "INE230A01023",
+                "symbol": "EIHOTEL",
+                "sector": "Hotels & Resorts",
+                "industry": "Hotels & Resorts",
+                "marketCap": "SMALL_CAP",
+                "quantity": 10.0,
+                "investmentCost": 3928.0,
+                "currentValue": 3872.0,
+                "weightInPortfolio": 0.88,
+                "gainLoss": -56.0,
+                "gainLossPercentage": -1.43,
+                "todayGainLoss": -68.0,
+                "todayGainLossPercentage": -1.73,
+                "currentPrice": 387.2,
+                "percentageChange": -1.73,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            }
+        ],
+        "Ship Building & Allied Services": [
+            {
+                "isin": "INE704P01025",
+                "symbol": "COCHINSHIP",
+                "sector": "Ship Building & Allied Services",
+                "industry": "Ship Building & Allied Services",
+                "marketCap": "SMALL_CAP",
+                "quantity": 4.0,
+                "investmentCost": 6096.0,
+                "currentValue": 7541.6,
+                "weightInPortfolio": 1.72,
+                "gainLoss": 1445.6,
+                "gainLossPercentage": 23.71,
+                "todayGainLoss": -154.4,
+                "todayGainLossPercentage": -2.01,
+                "currentPrice": 1885.4,
+                "percentageChange": -2.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            }
+        ],
+        "Non Banking Financial Company (NBFC)": [
+            {
+                "isin": "INE018E01016",
+                "symbol": "SBICARD",
+                "sector": "Non Banking Financial Company (NBFC)",
+                "industry": "Non Banking Financial Company (NBFC)",
+                "marketCap": "MID_CAP",
+                "quantity": 8.0,
+                "investmentCost": 5708.3504,
+                "currentValue": 6962.4,
+                "weightInPortfolio": 1.59,
+                "gainLoss": 1254.05,
+                "gainLossPercentage": 21.97,
+                "todayGainLoss": -33.6,
+                "todayGainLossPercentage": -0.48,
+                "currentPrice": 870.3,
+                "percentageChange": -0.48,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
+                    }
+                ]
+            }
+        ],
+        "Civil Construction": [
+            {
+                "isin": "INE415G01027",
+                "symbol": "RVNL",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 2276.25,
+                "currentValue": 1788.0,
+                "weightInPortfolio": 0.41,
+                "gainLoss": -488.25,
+                "gainLossPercentage": -21.45,
+                "todayGainLoss": -22.0,
+                "todayGainLossPercentage": -1.22,
+                "currentPrice": 357.6,
+                "percentageChange": -1.22,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE095N01031",
+                "symbol": "NBCC",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "SMALL_CAP",
+                "quantity": 80.0,
+                "investmentCost": 8934.048,
+                "currentValue": 9027.2,
+                "weightInPortfolio": 2.06,
+                "gainLoss": 93.15,
+                "gainLossPercentage": 1.04,
+                "todayGainLoss": -212.8,
+                "todayGainLossPercentage": -2.3,
+                "currentPrice": 112.84,
+                "percentageChange": -2.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 80.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE962Y01021",
+                "symbol": "IRCON",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "SMALL_CAP",
+                "quantity": 20.0,
+                "investmentCost": 4404.25,
+                "currentValue": 3585.7999999999997,
+                "weightInPortfolio": 0.82,
+                "gainLoss": -818.45,
+                "gainLossPercentage": -18.58,
+                "todayGainLoss": -55.2,
+                "todayGainLossPercentage": -1.52,
+                "currentPrice": 179.29,
+                "percentageChange": -1.52,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 20.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE821I01022",
+                "symbol": "IRB",
+                "sector": "Civil Construction",
+                "industry": "Civil Construction",
+                "marketCap": "MID_CAP",
+                "quantity": 50.0,
+                "investmentCost": 2663.5,
+                "currentValue": 2156.0,
+                "weightInPortfolio": 0.49,
+                "gainLoss": -507.5,
+                "gainLossPercentage": -19.05,
+                "todayGainLoss": -11.5,
+                "todayGainLossPercentage": -0.53,
+                "currentPrice": 43.12,
+                "percentageChange": -0.53,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 50.0
+                    }
+                ]
+            }
+        ],
+        "Airline": [
+            {
+                "isin": "INE646L01027",
+                "symbol": "INDIGO",
+                "sector": "Airline",
+                "industry": "Airline",
+                "marketCap": "LARGE_CAP",
+                "quantity": 1.0,
+                "investmentCost": 4068.95,
+                "currentValue": 5732.0,
+                "weightInPortfolio": 1.31,
+                "gainLoss": 1663.05,
+                "gainLossPercentage": 40.87,
+                "todayGainLoss": -33.0,
+                "todayGainLossPercentage": -0.57,
+                "currentPrice": 5732.0,
+                "percentageChange": -0.57,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
+                    }
+                ]
+            }
+        ],
+        "Diversified Retail": [
+            {
+                "isin": "INE192R01011",
+                "symbol": "DMART",
+                "sector": "Diversified Retail",
+                "industry": "Diversified Retail",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 23359.800000000003,
+                "currentValue": 27803.399999999998,
+                "weightInPortfolio": 6.35,
+                "gainLoss": 4443.6,
+                "gainLossPercentage": 19.02,
+                "todayGainLoss": -371.4,
+                "todayGainLossPercentage": -1.32,
+                "currentPrice": 4633.9,
+                "percentageChange": -1.32,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            }
+        ],
+        "Public Sector Bank": [
+            {
+                "isin": "INE160A01022",
+                "symbol": "PNB",
+                "sector": "Public Sector Bank",
+                "industry": "Public Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 191.0,
+                "investmentCost": 19093.5633,
+                "currentValue": 21665.13,
+                "weightInPortfolio": 4.95,
+                "gainLoss": 2571.57,
+                "gainLossPercentage": 13.47,
+                "todayGainLoss": 64.94,
+                "todayGainLossPercentage": 0.3,
+                "currentPrice": 113.43,
+                "percentageChange": 0.3,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 191.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE062A01020",
+                "symbol": "SBIN",
+                "sector": "Public Sector Bank",
+                "industry": "Public Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 4896.0498,
+                "currentValue": 5223.6,
+                "weightInPortfolio": 1.19,
+                "gainLoss": 327.55,
+                "gainLossPercentage": 6.69,
+                "todayGainLoss": 96.0,
+                "todayGainLossPercentage": 1.87,
+                "currentPrice": 870.6,
+                "percentageChange": 1.87,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            }
+        ],
+        "Film Production- Distribution & Exhibition": [
+            {
+                "isin": "INE191H01014",
+                "symbol": "PVRINOX",
+                "sector": "Film Production- Distribution & Exhibition",
+                "industry": "Film Production- Distribution & Exhibition",
+                "marketCap": "SMALL_CAP",
+                "quantity": 7.0,
+                "investmentCost": 10214.600199999999,
+                "currentValue": 7806.400000000001,
+                "weightInPortfolio": 1.78,
+                "gainLoss": -2408.2,
+                "gainLossPercentage": -23.58,
+                "todayGainLoss": 18.9,
+                "todayGainLossPercentage": 0.24,
+                "currentPrice": 1115.2,
+                "percentageChange": 0.24,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            }
+        ],
+        "Computers - Software & Consulting": [
+            {
+                "isin": "INE836A01035",
+                "symbol": "BSOFT",
+                "sector": "Computers - Software & Consulting",
+                "industry": "Computers - Software & Consulting",
+                "marketCap": "SMALL_CAP",
+                "quantity": 9.0,
+                "investmentCost": 5328.0,
+                "currentValue": 3351.15,
+                "weightInPortfolio": 0.77,
+                "gainLoss": -1976.85,
+                "gainLossPercentage": -37.1,
+                "todayGainLoss": -9.9,
+                "todayGainLossPercentage": -0.29,
+                "currentPrice": 372.35,
+                "percentageChange": -0.29,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 9.0
+                    }
+                ]
+            }
+        ],
+        "Edible Oil": [
+            {
+                "isin": "INE699H01024",
+                "symbol": "AWL",
+                "sector": "Edible Oil",
+                "industry": "Edible Oil",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 1637.75,
+                "currentValue": 1300.5,
+                "weightInPortfolio": 0.3,
+                "gainLoss": -337.25,
+                "gainLossPercentage": -20.59,
+                "todayGainLoss": -60.5,
+                "todayGainLossPercentage": -4.45,
+                "currentPrice": 260.1,
+                "percentageChange": -4.45,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Financial Institution": [
+            {
+                "isin": "INE053F01010",
+                "symbol": "IRFC",
+                "sector": "Financial Institution",
+                "industry": "Financial Institution",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 1414.5,
+                "currentValue": 1272.9,
+                "weightInPortfolio": 0.29,
+                "gainLoss": -141.6,
+                "gainLossPercentage": -10.01,
+                "todayGainLoss": -9.4,
+                "todayGainLossPercentage": -0.73,
+                "currentPrice": 127.29,
+                "percentageChange": -0.73,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE031A01017",
+                "symbol": "HUDCO",
+                "sector": "Financial Institution",
+                "industry": "Financial Institution",
+                "marketCap": "MID_CAP",
+                "quantity": 5.0,
+                "investmentCost": 1020.5,
+                "currentValue": 1176.1499999999999,
+                "weightInPortfolio": 0.27,
+                "gainLoss": 155.65,
+                "gainLossPercentage": 15.25,
+                "todayGainLoss": -23.85,
+                "todayGainLossPercentage": -1.99,
+                "currentPrice": 235.23,
+                "percentageChange": -1.99,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Cement & Cement Products": [
+            {
+                "isin": "INE079A01024",
+                "symbol": "AMBUJACEM",
+                "sector": "Cement & Cement Products",
+                "industry": "Cement & Cement Products",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 2841.75,
+                "currentValue": 2958.0,
+                "weightInPortfolio": 0.68,
+                "gainLoss": 116.25,
+                "gainLossPercentage": 4.09,
+                "todayGainLoss": -1.75,
+                "todayGainLossPercentage": -0.06,
+                "currentPrice": 591.6,
+                "percentageChange": -0.06,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Hospital": [
+            {
+                "isin": "INE474Q01031",
+                "symbol": "MEDANTA",
+                "sector": "Hospital",
+                "industry": "Hospital",
+                "marketCap": "MID_CAP",
+                "quantity": 4.0,
+                "investmentCost": 4276.0,
+                "currentValue": 5286.8,
+                "weightInPortfolio": 1.21,
+                "gainLoss": 1010.8,
+                "gainLossPercentage": 23.64,
+                "todayGainLoss": -55.6,
+                "todayGainLossPercentage": -1.04,
+                "currentPrice": 1321.7,
+                "percentageChange": -1.04,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            }
+        ],
+        "Copper": [
+            {
+                "isin": "INE531E01026",
+                "symbol": "HINDCOPPER",
+                "sector": "Copper",
+                "industry": "Copper",
+                "marketCap": "MID_CAP",
+                "quantity": 19.0,
+                "investmentCost": 5804.5,
+                "currentValue": 5841.17,
+                "weightInPortfolio": 1.33,
+                "gainLoss": 36.67,
+                "gainLossPercentage": 0.63,
+                "todayGainLoss": 177.27,
+                "todayGainLossPercentage": 3.13,
+                "currentPrice": 307.43,
+                "percentageChange": 3.13,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 19.0
+                    }
+                ]
+            }
+        ],
+        "2/3 Wheelers": [
+            {
+                "isin": "INE066A01021",
+                "symbol": "EICHERMOT",
+                "sector": "2/3 Wheelers",
+                "industry": "2/3 Wheelers",
+                "marketCap": "LARGE_CAP",
+                "quantity": 3.0,
+                "investmentCost": 14135.9499,
+                "currentValue": 20971.5,
+                "weightInPortfolio": 4.79,
+                "gainLoss": 6835.55,
+                "gainLossPercentage": 48.36,
+                "todayGainLoss": -73.5,
+                "todayGainLossPercentage": -0.35,
+                "currentPrice": 6990.5,
+                "percentageChange": -0.35,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            }
+        ],
+        "Gems- Jewellery And Watches": [
+            {
+                "isin": "INE280A01028",
+                "symbol": "TITAN",
+                "sector": "Gems- Jewellery And Watches",
+                "industry": "Gems- Jewellery And Watches",
+                "marketCap": "LARGE_CAP",
+                "quantity": 10.0,
+                "investmentCost": 31989.15,
+                "currentValue": 34392.0,
+                "weightInPortfolio": 7.85,
+                "gainLoss": 2402.85,
+                "gainLossPercentage": 7.51,
+                "todayGainLoss": -260.0,
+                "todayGainLossPercentage": -0.75,
+                "currentPrice": 3439.2,
+                "percentageChange": -0.75,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            }
+        ],
+        "Tractors": [
+            {
+                "isin": "INE042A01014",
+                "symbol": "ESCORTS",
+                "sector": "Tractors",
+                "industry": "Tractors",
+                "marketCap": "MID_CAP",
+                "quantity": 2.0,
+                "investmentCost": 7475.1,
+                "currentValue": 7478.2,
+                "weightInPortfolio": 1.71,
+                "gainLoss": 3.1,
+                "gainLossPercentage": 0.04,
+                "todayGainLoss": 134.2,
+                "todayGainLossPercentage": 1.83,
+                "currentPrice": 3739.1,
+                "percentageChange": 1.83,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            }
+        ],
+        "Life Insurance": [
+            {
+                "isin": "INE0J1Y01017",
+                "symbol": "LICI",
+                "sector": "Life Insurance",
+                "industry": "Life Insurance",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 4612.5,
+                "currentValue": 4488.25,
+                "weightInPortfolio": 1.02,
+                "gainLoss": -124.25,
+                "gainLossPercentage": -2.69,
+                "todayGainLoss": -34.0,
+                "todayGainLossPercentage": -0.75,
+                "currentPrice": 897.65,
+                "percentageChange": -0.75,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Housing Finance Company": [
+            {
+                "isin": "INE115A01026",
+                "symbol": "LICHSGFIN",
+                "sector": "Housing Finance Company",
+                "industry": "Housing Finance Company",
+                "marketCap": "MID_CAP",
+                "quantity": 10.0,
+                "investmentCost": 6810.0,
+                "currentValue": 5826.0,
+                "weightInPortfolio": 1.33,
+                "gainLoss": -984.0,
+                "gainLossPercentage": -14.45,
+                "todayGainLoss": -47.0,
+                "todayGainLossPercentage": -0.8,
+                "currentPrice": 582.6,
+                "percentageChange": -0.8,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 10.0
+                    }
+                ]
+            }
+        ],
+        "Footwear": [
+            {
+                "isin": "INE131B01039",
+                "symbol": "RELAXO",
+                "sector": "Footwear",
+                "industry": "Footwear",
+                "marketCap": "SMALL_CAP",
+                "quantity": 5.0,
+                "investmentCost": 3607.25,
+                "currentValue": 2276.0,
+                "weightInPortfolio": 0.52,
+                "gainLoss": -1331.25,
+                "gainLossPercentage": -36.9,
+                "todayGainLoss": -50.5,
+                "todayGainLossPercentage": -2.17,
+                "currentPrice": 455.2,
+                "percentageChange": -2.17,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Cables - Electricals": [
+            {
+                "isin": "INE074B01023",
+                "symbol": "PARACABLES",
+                "sector": "Cables - Electricals",
+                "industry": "Cables - Electricals",
+                "marketCap": "MICRO_CAP",
+                "quantity": 29.0,
+                "investmentCost": 2352.48,
+                "currentValue": 1365.03,
+                "weightInPortfolio": 0.31,
+                "gainLoss": -987.45,
+                "gainLossPercentage": -41.97,
+                "todayGainLoss": -3.77,
+                "todayGainLossPercentage": -0.28,
+                "currentPrice": 47.07,
+                "percentageChange": -0.28,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 29.0
+                    }
+                ]
+            }
+        ],
+        "Diversified FMCG": [
+            {
+                "isin": "INE030A01027",
+                "symbol": "HINDUNILVR",
+                "sector": "Diversified FMCG",
+                "industry": "Diversified FMCG",
+                "marketCap": "LARGE_CAP",
+                "quantity": 2.0,
+                "investmentCost": 4952.2,
+                "currentValue": 5044.4,
+                "weightInPortfolio": 1.15,
+                "gainLoss": 92.2,
+                "gainLossPercentage": 1.86,
+                "todayGainLoss": -93.4,
+                "todayGainLossPercentage": -1.82,
+                "currentPrice": 2522.2,
+                "percentageChange": -1.82,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            }
+        ],
+        "Power Generation": [
+            {
+                "isin": "INE848E01016",
+                "symbol": "NHPC",
+                "sector": "Power Generation",
+                "industry": "Power Generation",
+                "marketCap": "MID_CAP",
+                "quantity": 308.0,
+                "investmentCost": 24487.694,
+                "currentValue": 26682.039999999997,
+                "weightInPortfolio": 6.09,
+                "gainLoss": 2194.35,
+                "gainLossPercentage": 8.96,
+                "todayGainLoss": -375.76,
+                "todayGainLossPercentage": -1.39,
+                "currentPrice": 86.63,
+                "percentageChange": -1.39,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 308.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE351F01018",
+                "symbol": "JPPOWER",
+                "sector": "Power Generation",
+                "industry": "Power Generation",
+                "marketCap": "SMALL_CAP",
+                "quantity": 250.0,
+                "investmentCost": 4425.0,
+                "currentValue": 4580.0,
+                "weightInPortfolio": 1.05,
+                "gainLoss": 155.0,
+                "gainLossPercentage": 3.5,
+                "todayGainLoss": -62.5,
+                "todayGainLossPercentage": -1.35,
+                "currentPrice": 18.32,
+                "percentageChange": -1.35,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 250.0
+                    }
+                ]
+            }
+        ],
+        "Mutual Fund Scheme - ETF": [
+            {
+                "isin": "INF204KB14I2",
+                "symbol": "NIFTYBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 9.0,
+                "investmentCost": 2474.1099,
+                "currentValue": 2559.15,
+                "weightInPortfolio": 0.58,
+                "gainLoss": 85.04,
+                "gainLossPercentage": 3.44,
+                "todayGainLoss": -9.36,
+                "todayGainLossPercentage": -0.36,
+                "currentPrice": 284.35,
+                "percentageChange": -0.36,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 9.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF204KB16I7",
+                "symbol": "PSUBNKBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 60.0,
+                "investmentCost": 4379.952,
+                "currentValue": 4981.8,
+                "weightInPortfolio": 1.14,
+                "gainLoss": 601.85,
+                "gainLossPercentage": 13.74,
+                "todayGainLoss": 7.8,
+                "todayGainLossPercentage": 0.16,
+                "currentPrice": 83.03,
+                "percentageChange": 0.16,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 60.0
+                    }
+                ]
+            },
+            {
+                "isin": "INF204KB15I9",
+                "symbol": "BANKBEES",
+                "sector": "Mutual Fund Scheme - ETF",
+                "industry": "Mutual Fund Scheme - ETF",
+                "marketCap": "MICRO_CAP",
+                "quantity": 7.0,
+                "investmentCost": 3693.3799000000004,
+                "currentValue": 4008.34,
+                "weightInPortfolio": 0.92,
+                "gainLoss": 314.96,
+                "gainLossPercentage": 8.53,
+                "todayGainLoss": 0.56,
+                "todayGainLossPercentage": 0.01,
+                "currentPrice": 572.62,
+                "percentageChange": 0.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            }
+        ],
+        "Stockbroking & Allied": [
+            {
+                "isin": "INE732I01013",
+                "symbol": "ANGELONE",
+                "sector": "Stockbroking & Allied",
+                "industry": "Stockbroking & Allied",
+                "marketCap": "MID_CAP",
+                "quantity": 6.0,
+                "investmentCost": 15802.9002,
+                "currentValue": 13367.400000000001,
+                "weightInPortfolio": 3.05,
+                "gainLoss": -2435.5,
+                "gainLossPercentage": -15.41,
+                "todayGainLoss": -72.6,
+                "todayGainLossPercentage": -0.54,
+                "currentPrice": 2227.9,
+                "percentageChange": -0.54,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            }
+        ],
+        "Industrial Minerals": [
+            {
+                "isin": "INE584A01023",
+                "symbol": "NMDC",
+                "sector": "Industrial Minerals",
+                "industry": "Industrial Minerals",
+                "marketCap": "MID_CAP",
+                "quantity": 6.0,
+                "investmentCost": 1307.2302,
+                "currentValue": 468.59999999999997,
+                "weightInPortfolio": 0.11,
+                "gainLoss": -838.63,
+                "gainLossPercentage": -64.15,
+                "todayGainLoss": 7.32,
+                "todayGainLossPercentage": 1.59,
+                "currentPrice": 78.1,
+                "percentageChange": 1.59,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            }
+        ],
+        "Auto Components & Equipments": [
+            {
+                "isin": "INE885A01032",
+                "symbol": "ARE&M",
+                "sector": "Auto Components & Equipments",
+                "industry": "Auto Components & Equipments",
+                "marketCap": "SMALL_CAP",
+                "quantity": 4.0,
+                "investmentCost": 5619.8,
+                "currentValue": 4034.6,
+                "weightInPortfolio": 0.92,
+                "gainLoss": -1585.2,
+                "gainLossPercentage": -28.21,
+                "todayGainLoss": 23.0,
+                "todayGainLossPercentage": 0.57,
+                "currentPrice": 1008.65,
+                "percentageChange": 0.57,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 4.0
+                    }
+                ]
+            }
+        ],
+        "Passenger Cars & Utility Vehicles": [
+            {
+                "isin": "INE155A01022",
+                "symbol": "TATAMOTORS",
+                "sector": "Passenger Cars & Utility Vehicles",
+                "industry": "Passenger Cars & Utility Vehicles",
+                "marketCap": "MICRO_CAP",
+                "quantity": 16.0,
+                "investmentCost": 14782.9504,
+                "currentValue": 11221.6,
+                "weightInPortfolio": 2.56,
+                "gainLoss": -3561.35,
+                "gainLossPercentage": -24.09,
+                "todayGainLoss": -7.2,
+                "todayGainLossPercentage": -0.06,
+                "currentPrice": 701.35,
+                "percentageChange": -0.06,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 16.0
+                    }
+                ]
+            }
+        ],
+        "Tour, Travel Related Services": [
+            {
+                "isin": "INE335Y01020",
+                "symbol": "IRCTC",
+                "sector": "Tour, Travel Related Services",
+                "industry": "Tour, Travel Related Services",
+                "marketCap": "MID_CAP",
+                "quantity": 7.0,
+                "investmentCost": 6278.1999000000005,
+                "currentValue": 5058.2,
+                "weightInPortfolio": 1.16,
+                "gainLoss": -1220.0,
+                "gainLossPercentage": -19.43,
+                "todayGainLoss": -31.85,
+                "todayGainLossPercentage": -0.63,
+                "currentPrice": 722.6,
+                "percentageChange": -0.63,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            }
+        ],
+        "Private Sector Bank": [
+            {
+                "isin": "INE040A01034",
+                "symbol": "HDFCBANK",
+                "sector": "Private Sector Bank",
+                "industry": "Private Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 6.0,
+                "investmentCost": 8779.2,
+                "currentValue": 5743.200000000001,
+                "weightInPortfolio": 1.31,
+                "gainLoss": -3036.0,
+                "gainLossPercentage": -34.58,
+                "todayGainLoss": -58.8,
+                "todayGainLossPercentage": -1.01,
+                "currentPrice": 957.2,
+                "percentageChange": -1.01,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 6.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE237A01028",
+                "symbol": "KOTAKBANK",
+                "sector": "Private Sector Bank",
+                "industry": "Private Sector Bank",
+                "marketCap": "LARGE_CAP",
+                "quantity": 13.0,
+                "investmentCost": 22782.5494,
+                "currentValue": 26620.100000000002,
+                "weightInPortfolio": 6.08,
+                "gainLoss": 3837.55,
+                "gainLossPercentage": 16.84,
+                "todayGainLoss": 321.1,
+                "todayGainLossPercentage": 1.22,
+                "currentPrice": 2047.7,
+                "percentageChange": 1.22,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 13.0
+                    }
+                ]
+            }
+        ],
+        "Amusement Parks/ Other Recreation": [
+            {
+                "isin": "INE124G01033",
+                "symbol": "DELTACORP",
+                "sector": "Amusement Parks/ Other Recreation",
+                "industry": "Amusement Parks/ Other Recreation",
+                "marketCap": "MICRO_CAP",
+                "quantity": 7.0,
+                "investmentCost": 892.15,
+                "currentValue": 582.4,
+                "weightInPortfolio": 0.13,
+                "gainLoss": -309.75,
+                "gainLossPercentage": -34.72,
+                "todayGainLoss": -5.6,
+                "todayGainLossPercentage": -0.95,
+                "currentPrice": 83.2,
+                "percentageChange": -0.95,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 7.0
+                    }
+                ]
+            }
+        ],
+        "Plastic Products - Consumer": [
+            {
+                "isin": "INE054A01027",
+                "symbol": "VIPIND",
+                "sector": "Plastic Products - Consumer",
+                "industry": "Plastic Products - Consumer",
+                "marketCap": "SMALL_CAP",
+                "quantity": 11.0,
+                "investmentCost": 5033.6,
+                "currentValue": 4834.5,
+                "weightInPortfolio": 1.1,
+                "gainLoss": -199.1,
+                "gainLossPercentage": -3.96,
+                "todayGainLoss": -94.05,
+                "todayGainLossPercentage": -1.91,
+                "currentPrice": 439.5,
+                "percentageChange": -1.91,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 11.0
+                    }
+                ]
+            }
+        ],
+        "Paints": [
+            {
+                "isin": "INE021A01026",
+                "symbol": "ASIANPAINT",
+                "sector": "Paints",
+                "industry": "Paints",
+                "marketCap": "LARGE_CAP",
+                "quantity": 5.0,
+                "investmentCost": 12516.7,
+                "currentValue": 12234.5,
+                "weightInPortfolio": 2.79,
+                "gainLoss": -282.2,
+                "gainLossPercentage": -2.25,
+                "todayGainLoss": -126.0,
+                "todayGainLossPercentage": -1.02,
+                "currentPrice": 2446.9,
+                "percentageChange": -1.02,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 5.0
+                    }
+                ]
+            }
+        ],
+        "Specialty Chemicals": [
+            {
+                "isin": "INE050E01027",
+                "symbol": "BALAMINES",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 3.0,
+                "investmentCost": 6320.549999999999,
+                "currentValue": 4387.799999999999,
+                "weightInPortfolio": 1.0,
+                "gainLoss": -1932.75,
+                "gainLossPercentage": -30.58,
+                "todayGainLoss": -52.2,
+                "todayGainLossPercentage": -1.18,
+                "currentPrice": 1462.6,
+                "percentageChange": -1.18,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 3.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE647A01010",
+                "symbol": "SRF",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "MID_CAP",
+                "quantity": 2.0,
+                "investmentCost": 4490.6,
+                "currentValue": 5806.4,
+                "weightInPortfolio": 1.33,
+                "gainLoss": 1315.8,
+                "gainLossPercentage": 29.3,
+                "todayGainLoss": -31.6,
+                "todayGainLossPercentage": -0.54,
+                "currentPrice": 2903.2,
+                "percentageChange": -0.54,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 2.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE769A01020",
+                "symbol": "AARTIIND",
+                "sector": "Specialty Chemicals",
+                "industry": "Specialty Chemicals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 8.0,
+                "investmentCost": 4736.4496,
+                "currentValue": 3092.4,
+                "weightInPortfolio": 0.71,
+                "gainLoss": -1644.05,
+                "gainLossPercentage": -34.71,
+                "todayGainLoss": -12.0,
+                "todayGainLossPercentage": -0.39,
+                "currentPrice": 386.55,
+                "percentageChange": -0.39,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 8.0
                     }
                 ]
             }
@@ -217,10 +2740,41 @@
                 "marketCap": "SMALL_CAP",
                 "quantity": 18.0,
                 "investmentCost": 7848.0,
+                "currentValue": 16380.9,
+                "weightInPortfolio": 3.74,
+                "gainLoss": 8532.9,
+                "gainLossPercentage": 108.73,
+                "todayGainLoss": 89.1,
+                "todayGainLossPercentage": 0.55,
+                "currentPrice": 910.05,
+                "percentageChange": 0.55,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
                         "quantity": 18.0
+                    }
+                ]
+            },
+            {
+                "isin": "INE182A01018",
+                "symbol": "PFIZER",
+                "sector": "Pharmaceuticals",
+                "industry": "Pharmaceuticals",
+                "marketCap": "SMALL_CAP",
+                "quantity": 1.0,
+                "investmentCost": 5142.0,
+                "currentValue": 5026.0,
+                "weightInPortfolio": 1.15,
+                "gainLoss": -116.0,
+                "gainLossPercentage": -2.26,
+                "todayGainLoss": -36.0,
+                "todayGainLossPercentage": -0.71,
+                "currentPrice": 5026.0,
+                "percentageChange": -0.71,
+                "brokerPortfolios": [
+                    {
+                        "brokerType": "ZERODHA",
+                        "quantity": 1.0
                     }
                 ]
             },
@@ -232,6 +2786,14 @@
                 "marketCap": "LARGE_CAP",
                 "quantity": 11.0,
                 "investmentCost": 17765.4499,
+                "currentValue": 16798.1,
+                "weightInPortfolio": 3.84,
+                "gainLoss": -967.35,
+                "gainLossPercentage": -5.45,
+                "todayGainLoss": -166.1,
+                "todayGainLossPercentage": -0.98,
+                "currentPrice": 1527.1,
+                "percentageChange": -0.98,
                 "brokerPortfolios": [
                     {
                         "brokerType": "ZERODHA",
