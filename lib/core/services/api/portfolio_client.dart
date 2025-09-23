@@ -26,56 +26,64 @@ class PortfolioClient {
     _useMockData = useMockData;
   }
 
+  /// Get portfolio holdings for a user
+  Future<ApiResponse<ApiPortfolioHoldingsResponse>> getPortfolioHoldings(String userId) async {
+    // Try API first, fallback to mock if needed
+    final apiResult = await _fetchPortfolioHoldingsFromApi(userId);
+    if (apiResult != null) {
+      return ApiResponse.success(apiResult);
+    }
+
+    // API failed, check if we should use mock data
+    if (_shouldUseMockData()) {
+      return await _getMockPortfolioHoldings();
+    }
+
+    // Return error if no fallback is available
+    return ApiResponse.error('Failed to connect to API and no fallback available');
+  }
+  
   /// Get portfolio summary for a user
   Future<ApiResponse<ApiPortfolioSummaryResponse>> getPortfolioSummary(
     String userId,
   ) async {
+    // Try API first, fallback to mock if needed
+    final apiResult = await _fetchPortfolioSummaryFromApi(userId);
+    if (apiResult != null) {
+      return ApiResponse.success(apiResult);
+    }
+
+    // API failed, check if we should use mock data
+    if (_shouldUseMockData()) {
+      return await _getMockPortfolioSummary();
+    }
+
+    // Return error if no fallback is available
+    return ApiResponse.error('Failed to connect to API and no fallback available');
+  }
+
+  /// Attempts to fetch portfolio summary from API
+  /// Returns null if API call fails
+  Future<ApiPortfolioSummaryResponse?> _fetchPortfolioSummaryFromApi(String userId) async {
     final String fullUrl =
         '${_apiClient.baseUrl}/$_portfolioEndpoint/summary?userId=$userId';
     debugPrint('API call: GET $fullUrl');
 
     try {
-      // Always try to fetch from API first
-      try {
-        debugPrint('Attempting to fetch portfolio summary from: $fullUrl');
-        
-        // Use new API model and then convert to legacy format for backward compatibility
-        final apiResult = await _apiClient.get<ApiPortfolioSummaryResponse>(
-          '$_portfolioEndpoint/summary',
-          queryParams: {'userId': userId},
-          parser: (data) => ApiPortfolioSummaryResponse.fromJson(data),
-        );
+      debugPrint('Attempting to fetch portfolio summary from: $fullUrl');
+      
+      // Use new API model and then convert to legacy format for backward compatibility
+      final apiResult = await _apiClient.get<ApiPortfolioSummaryResponse>(
+        '$_portfolioEndpoint/summary',
+        queryParams: {'userId': userId},
+        parser: (data) => ApiPortfolioSummaryResponse.fromJson(data),
+      );
 
-        // Convert API model to domain model
-        final domainSummary = PortfolioSummaryMapper.fromApiModel(apiResult);
-        
-
-        debugPrint('Successfully fetched portfolio data from API: $fullUrl');
-        return ApiResponse.success(domainSummary);
-      } catch (apiError) {
-        // API call failed, log the error
-        debugPrint('API call failed: $apiError');
-
-        // Always fall back to mock data in debug mode
-        if (kDebugMode) {
-          debugPrint('Falling back to mock data');
-          await Future.delayed(
-            const Duration(milliseconds: 300),
-          ); // Small delay
-          return ApiResponse.success(await PortfolioMockDataProvider.getMockPortfolioSummary());
-        } else {
-          // In production, return an error response
-          return ApiResponse.error('Failed to connect to API: $apiError');
-        }
-      }
+      debugPrint('Successfully fetched portfolio data from API: $fullUrl');
+      return apiResult;
     } catch (e) {
-      if (e is ApiException) {
-        debugPrint('Error fetching portfolio summary: ${e.message}');
-        return ApiResponse.error(e.message);
-      } else {
-        debugPrint('Unexpected error fetching portfolio summary: $e');
-        return ApiResponse.error('An unexpected error occurred');
-      }
+      debugPrint('API call failed: $e');
+      return null;
     }
   }
 
@@ -87,38 +95,54 @@ class PortfolioClient {
     _useMockData = value;
   }
 
-  /// Get portfolio holdings for a user
-  Future<ApiPortfolioHoldingsResponse> getPortfolioHoldings(String userId) async {
+  /// Determines if mock data should be used
+  bool _shouldUseMockData() {
+    return kDebugMode || _useMockData;
+  }
+
+  /// Returns mock portfolio summary data
+  Future<ApiResponse<ApiPortfolioSummaryResponse>> _getMockPortfolioSummary() async {
+    debugPrint('Falling back to mock data');
+    await Future.delayed(
+      const Duration(milliseconds: 300),
+    ); // Small delay to simulate network call
+    return ApiResponse.success(await PortfolioMockDataProvider.getMockPortfolioSummary());
+  }
+
+  /// Attempts to fetch portfolio holdings from API
+  /// Returns null if API call fails
+  Future<ApiPortfolioHoldingsResponse?> _fetchPortfolioHoldingsFromApi(String userId) async {
     final String fullUrl =
         '${_apiClient.baseUrl}/$_portfolioEndpoint/holdings?userId=$userId';
     debugPrint('API call: GET $fullUrl');
 
     try {
-      // Always try to fetch from API first
-            final apiResult = await _apiClient.get<ApiPortfolioHoldingsResponse>(
-              '$_portfolioEndpoint/holdings',
-              queryParams: {'userId': userId},
-              parser: (data) {
-                debugPrint(
-                  'Parsing API response data: ${data.toString().substring(0, min(100, data.toString().length))}...',
-                );
-                return ApiPortfolioHoldingsResponse.fromJson(data);
-              },
-            );
+      final apiResult = await _apiClient.get<ApiPortfolioHoldingsResponse>(
+        '$_portfolioEndpoint/holdings',
+        queryParams: {'userId': userId},
+        parser: (data) {
+          debugPrint(
+            'Parsing API response data: ${data.toString().substring(0, min(100, data.toString().length))}...',
+          );
+          return ApiPortfolioHoldingsResponse.fromJson(data);
+        },
+      );
 
-            debugPrint(
-              'Successfully fetched portfolio holdings from API: $fullUrl',
-            );
-            return apiResult;
+      debugPrint('Successfully fetched portfolio holdings from API: $fullUrl');
+      return apiResult;
     } catch (e) {
-      if (e is ApiException) {
-        debugPrint('Error fetching portfolio holdings: ${e.message}');
-        rethrow;
-      } else {
-        debugPrint('Unexpected error fetching portfolio holdings: $e');
-        throw ApiException('An unexpected error occurred');
-      }
+      debugPrint('API call failed: $e');
+      return null;
     }
+  }
+
+  /// Returns mock portfolio holdings data
+  Future<ApiResponse<ApiPortfolioHoldingsResponse>> _getMockPortfolioHoldings() async {
+    debugPrint('Falling back to mock portfolio holdings data');
+    await Future.delayed(
+      const Duration(milliseconds: 300),
+    ); // Small delay to simulate network call
+    return ApiResponse.success(await PortfolioMockDataProvider.getMockPortfolioHoldings());
   }
 
   /// Dispose resources
