@@ -15,7 +15,7 @@ void main() async {
   
   try {
     // Initialize configuration service
-    await ConfigService.initialize(environment: 'development');
+    await ConfigService.initialize(environment: 'dev');
     print('Configuration initialized successfully');
   } catch (e) {
     print('Failed to initialize configuration: $e');

@@ -1,0 +1,9 @@
+# Add this to your pubspec.yaml file in the flutter section:
+
+flutter:
+  assets:
+    - assets/
+    - assets/application.properties
+    - assets/application-dev.properties
+    - assets/application-prod.properties
+    - assets/application-test.properties
