@@ -26,24 +26,28 @@ class ApiConfig {
 
 /// Portfolio API specific configuration
 class PortfolioApiConfig {
-  final String endpoint;
-  final Map<String, String> headers;
+  final String baseUrl;
+  final String holdingsResource;
+  final String summaryResource;
+  final String transactionsResource;
 
   const PortfolioApiConfig({
-    required this.endpoint,
-    required this.headers,
+    required this.baseUrl,
+    required this.holdingsResource,
+    required this.summaryResource,
+    required this.transactionsResource,
   });
 }
 
 /// Environment configuration
 class EnvironmentConfig {
   final String name;
-  final bool isProduction;
-  final bool enableLogging;
+  final bool debugMode;
+  final String logLevel;
 
   const EnvironmentConfig({
     required this.name,
-    required this.isProduction,
-    required this.enableLogging,
+    required this.debugMode,
+    required this.logLevel,
   });
 }

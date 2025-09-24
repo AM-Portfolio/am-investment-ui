@@ -30,9 +30,10 @@ class ConfigService with PropertyInjection {
         timeout: properties.getIntValue('api.timeout'),
         useMockData: properties.getBoolValue('mock.data.enabled'),
         portfolio: PortfolioApiConfig(
-          holdingsEndpoint: properties.getValue('api.portfolio.holdingsEndpoint'),
-          summaryEndpoint: properties.getValue('api.portfolio.summaryEndpoint'),
-          transactionsEndpoint: properties.getValue('api.portfolio.transactionsEndpoint'),
+          baseUrl: properties.getValue('api.portfolio.baseUrl'),
+          holdingsResource: properties.getValue('api.portfolio.holdingsResource'),
+          summaryResource: properties.getValue('api.portfolio.summaryResource'),
+          transactionsResource: properties.getValue('api.portfolio.transactionsResource'),
         ),
       ),
       environment: EnvironmentConfig(
@@ -68,14 +69,14 @@ class ConfigService with PropertyInjection {
 
   /// Get portfolio holdings URL
   static String getPortfolioHoldingsUrl({required String userId}) {
-    final apiConfig = config.api;
-    return '${apiConfig.baseUrl}${apiConfig.portfolio.holdingsEndpoint}/$userId';
+    final portfolioConfig = config.api.portfolio;
+    return '${portfolioConfig.baseUrl}${portfolioConfig.holdingsResource}/$userId';
   }
 
   /// Get portfolio summary URL
   static String getPortfolioSummaryUrl({required String userId}) {
-    final apiConfig = config.api;
-    return '${apiConfig.baseUrl}${apiConfig.portfolio.summaryEndpoint}/$userId';
+    final portfolioConfig = config.api.portfolio;
+    return '${portfolioConfig.baseUrl}${portfolioConfig.summaryResource}/$userId';
   }
 
   /// Print current configuration (for debugging)
@@ -86,8 +87,9 @@ class ConfigService with PropertyInjection {
     print('API Base URL: ${config.api.baseUrl}');
     print('API Timeout: ${config.api.timeout}ms');
     print('Mock Data: ${config.api.useMockData}');
-    print('Holdings Endpoint: ${config.api.portfolio.holdingsEndpoint}');
-    print('Summary Endpoint: ${config.api.portfolio.summaryEndpoint}');
+    print('Portfolio Base URL: ${config.api.portfolio.baseUrl}');
+    print('Holdings Resource: ${config.api.portfolio.holdingsResource}');
+    print('Summary Resource: ${config.api.portfolio.summaryResource}');
     print('Environment: ${config.environment.name}');
     print('Debug Mode: ${config.environment.debugMode}');
     print('Log Level: ${config.environment.logLevel}');

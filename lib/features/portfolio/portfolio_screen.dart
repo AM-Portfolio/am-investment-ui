@@ -6,8 +6,8 @@ import '../../core/domain/repositories/portfolio_repository.dart';
 import '../../config/environment.dart';
 import '../../core/utils/platform_utils.dart';
 import 'web/portfolio_web_screen.dart';
-import 'ios/portfolio_ios_screen.dart';
-import 'android/portfolio_android_screen.dart';
+//import 'ios/portfolio_ios_screen.dart';
+//import 'android/portfolio_android_screen.dart';
 
 /// Screen to display portfolio information
 /// This is the base class that handles shared logic and delegates UI to platform-specific implementations

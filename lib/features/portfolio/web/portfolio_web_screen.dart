@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/config/config_service.dart';
 import '../../core/repositories/portfolio_repository.dart';
-import '../../../widgets/shared/finance/portfolio_holdings_view.dart';
-import '../../../widgets/shared/finance/portfolio_overview.dart';
+//import '../../../widgets/shared/finance/portfolio_holdings_view.dart';
+//import '../../../widgets/shared/finance/portfolio_overview.dart';
 import '../../../widgets/shared/layouts/web_layout.dart';
 import '../../../widgets/shared/navigation/portfolio_sidebar.dart';
 

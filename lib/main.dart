@@ -4,14 +4,17 @@ import 'config/environment.dart';
 import 'core/services/auth_service.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
-import 'features/home/home_screen.dart';
-import 'features/dashboard/dashboard_screen.dart';
+//import 'features/home/home_screen.dart';
+//import 'features/dashboard/dashboard_screen.dart';
 import 'features/portfolio/portfolio_screen.dart';
 import 'core/config/config_service.dart';
+import 'core/di/service_locator.dart';
 
 void main() async {
-  // Ensure Flutter framework is initialized
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Setup dependency injection
+  await setupServiceLocator();
   
   try {
     // Initialize configuration service
