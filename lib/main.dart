@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'config/environment.dart';
 import 'core/services/auth_service.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
-//import 'features/home/home_screen.dart';
-//import 'features/dashboard/dashboard_screen.dart';
+import 'features/home/home_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
 import 'features/portfolio/portfolio_screen.dart';
 import 'core/config/config_service.dart';
 import 'core/di/service_locator.dart';
+import 'core/providers/app_providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,35 +31,23 @@ void main() async {
   // This will be overridden by build arguments in CI/CD
   EnvironmentConfig.setEnvironment(const String.fromEnvironment('ENV', defaultValue: 'production'));
   
-  runApp(const MyApp());
+  runApp(
+    ProviderScope(
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  final AuthService _authService = AuthService();
-  AuthState _authState = AuthState.unauthenticated();
-  
-  @override
-  void initState() {
-    super.initState();
-    _authService.authStateChanges.listen((state) {
-      setState(() {
-        _authState = state;
-      });
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Pre-load essential providers at runtime
+    ref.watch(appConfigProvider);
+    ref.watch(portfolioClientProvider);
+    ref.watch(portfolioRepositoryProvider);
     
-    // Check if user is already logged in
-    _authService.initialize();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return MaterialApp(
       title: EnvironmentConfig.settings['appTitle'],
       theme: ThemeData(
@@ -81,7 +71,10 @@ class _MyAppState extends State<MyApp> {
   
   /// Get the initial route based on authentication state and platform
   String _getInitialRoute() {
-    if (!_authState.isAuthenticated) {
+    final authService = AuthService();
+    final authState = authService.authStateChanges.first;
+    
+    if (!authState.isAuthenticated) {
       return '/login';
     }
     
@@ -94,5 +87,3 @@ class _MyAppState extends State<MyApp> {
     return '/home';
   }
 }
-
-// HomeScreen is now imported from features/home/home_screen.dart

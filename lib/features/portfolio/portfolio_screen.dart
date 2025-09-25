@@ -6,8 +6,7 @@ import '../../core/domain/repositories/portfolio_repository.dart';
 import '../../config/environment.dart';
 import '../../core/utils/platform_utils.dart';
 import 'web/portfolio_web_screen.dart';
-//import 'ios/portfolio_ios_screen.dart';
-//import 'android/portfolio_android_screen.dart';
+import 'widgets/portfolio_holdings_widget.dart';
 
 /// Screen to display portfolio information
 /// This is the base class that handles shared logic and delegates UI to platform-specific implementations
@@ -28,6 +27,9 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
 
   /// Future for portfolio summary data
   late Future<PortfolioSummary> _portfolioSummaryFuture;
+
+  /// Key for holdings widget to trigger refresh
+  final GlobalKey<_PortfolioHoldingsWidgetState> _holdingsKey = GlobalKey();
 
   @override
   void initState() {
@@ -65,6 +67,9 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     setState(() {
       _loadPortfolioSummary();
     });
+
+    // Also refresh holdings if widget is available
+    _holdingsKey.currentState?.refresh();
   }
 
   @override
@@ -81,18 +86,30 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       return PortfolioWebScreen(
         refreshPortfolio: _refreshPortfolio,
         userId: widget.userId,
+        holdingsWidget: PortfolioHoldingsWidget(
+          key: _holdingsKey,
+          userId: widget.userId,
+        ),
       );
     } else if (PlatformUtils.isIOS) {
       return PortfolioIOSScreen(
         portfolioSummaryFuture: _portfolioSummaryFuture,
         refreshPortfolio: _refreshPortfolio,
         userId: widget.userId,
+        holdingsWidget: PortfolioHoldingsWidget(
+          key: _holdingsKey,
+          userId: widget.userId,
+        ),
       );
     } else {
       return PortfolioAndroidScreen(
         portfolioSummaryFuture: _portfolioSummaryFuture,
         refreshPortfolio: _refreshPortfolio,
         userId: widget.userId,
+        holdingsWidget: PortfolioHoldingsWidget(
+          key: _holdingsKey,
+          userId: widget.userId,
+        ),
       );
     }
   }

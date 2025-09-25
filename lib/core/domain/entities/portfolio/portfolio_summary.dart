@@ -1,92 +1,32 @@
-/// Domain model for portfolio summary
-/// Business logic representation, independent of API structure
-class PortfolioSummary {
-  /// Portfolio value information
-  final PortfolioValue portfolioValue;
-  
-  /// Performance metrics
-  final PortfolioPerformance performance;
-  
-  /// Allocation breakdown
-  final PortfolioAllocation allocation;
-  
-  /// Market insights
-  final PortfolioInsights insights;
-  
-  /// Portfolio metadata
-  final PortfolioSummaryMetadata metadata;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  /// Constructor
-  const PortfolioSummary({
-    required this.portfolioValue,
-    required this.performance,
-    required this.allocation,
-    required this.insights,
-    required this.metadata,
-  });
+part 'portfolio_summary.freezed.dart';
+part 'portfolio_summary.g.dart';
 
-  /// Create empty portfolio summary
-  static PortfolioSummary empty() {
-    return PortfolioSummary(
-      portfolioValue: PortfolioValue.empty(),
-      performance: PortfolioPerformance.empty(),
-      allocation: PortfolioAllocation.empty(),
-      insights: PortfolioInsights.empty(),
-      metadata: PortfolioSummaryMetadata.empty(),
-    );
-  }
+@freezed
+class PortfolioSummary with _$PortfolioSummary {
+  const factory PortfolioSummary({
+    required String userId,
+    required double totalValue,
+    required double dailyChange,
+    @Default([]) List<String> holdings,
+  }) = _PortfolioSummary;
 
-  /// Business logic methods
-  bool get isPositive => performance.totalGain >= 0;
-  bool get isTodayPositive => performance.todayGain >= 0;
-  
-  /// Get return on investment percentage
-  double get returnOnInvestment => 
-      portfolioValue.invested > 0 ? (performance.totalGain / portfolioValue.invested) * 100 : 0.0;
-  
-  /// Check if portfolio is well diversified (no single sector > 30%)
-  bool get isWellDiversified => 
-      allocation.sectorBreakdown.values.every((percentage) => percentage <= 30.0);
-  
-  /// Get dominant sector
-  String get dominantSector {
-    if (allocation.sectorBreakdown.isEmpty) return 'N/A';
-    return allocation.sectorBreakdown.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
-  }
-
-  /// Copy with modifications
-  PortfolioSummary copyWith({
-    PortfolioValue? portfolioValue,
-    PortfolioPerformance? performance,
-    PortfolioAllocation? allocation,
-    PortfolioInsights? insights,
-    PortfolioSummaryMetadata? metadata,
-  }) {
-    return PortfolioSummary(
-      portfolioValue: portfolioValue ?? this.portfolioValue,
-      performance: performance ?? this.performance,
-      allocation: allocation ?? this.allocation,
-      insights: insights ?? this.insights,
-      metadata: metadata ?? this.metadata,
-    );
-  }
+  factory PortfolioSummary.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioSummaryFromJson(json);
 }
 
-/// Value object for portfolio value information
-class PortfolioValue {
-  final double current;
-  final double invested;
-  final String currency;
+@freezed
+class PortfolioValue with _$PortfolioValue {
+  const PortfolioValue._();
+  
+  const factory PortfolioValue({
+    required double current,
+    required double invested,
+    required String currency,
+  }) = _PortfolioValue;
 
-  const PortfolioValue({
-    required this.current,
-    required this.invested,
-    required this.currency,
-  });
-
-  static PortfolioValue empty() {
+  factory PortfolioValue.empty() {
     return const PortfolioValue(
       current: 0.0,
       invested: 0.0,
@@ -94,28 +34,25 @@ class PortfolioValue {
     );
   }
 
-  /// Get net worth (current value)
+  factory PortfolioValue.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioValueFromJson(json);
+
   double get netWorth => current;
-  
-  /// Check if portfolio has grown
   bool get hasGrown => current > invested;
 }
 
-/// Value object for portfolio performance metrics
-class PortfolioPerformance {
-  final double totalGain;
-  final double totalGainPercentage;
-  final double todayGain;
-  final double todayGainPercentage;
+@freezed
+class PortfolioPerformance with _$PortfolioPerformance {
+  const PortfolioPerformance._();
+  
+  const factory PortfolioPerformance({
+    required double totalGain,
+    required double totalGainPercentage,
+    required double todayGain,
+    required double todayGainPercentage,
+  }) = _PortfolioPerformance;
 
-  const PortfolioPerformance({
-    required this.totalGain,
-    required this.totalGainPercentage,
-    required this.todayGain,
-    required this.todayGainPercentage,
-  });
-
-  static PortfolioPerformance empty() {
+  factory PortfolioPerformance.empty() {
     return const PortfolioPerformance(
       totalGain: 0.0,
       totalGainPercentage: 0.0,
@@ -124,13 +61,12 @@ class PortfolioPerformance {
     );
   }
 
-  /// Check if overall performance is positive
+  factory PortfolioPerformance.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioPerformanceFromJson(json);
+
   bool get isTotalPositive => totalGain >= 0;
-  
-  /// Check if today's performance is positive
   bool get isTodayPositive => todayGain >= 0;
   
-  /// Get performance category
   PerformanceCategory get category {
     if (totalGainPercentage >= 20) return PerformanceCategory.excellent;
     if (totalGainPercentage >= 10) return PerformanceCategory.good;
@@ -140,28 +76,28 @@ class PortfolioPerformance {
   }
 }
 
-/// Value object for portfolio allocation breakdown
-class PortfolioAllocation {
-  final Map<MarketCapCategory, List<MarketCapHolding>> marketCapBreakdown;
-  final Map<String, double> sectorBreakdown;
+@freezed
+class PortfolioAllocation with _$PortfolioAllocation {
+  const PortfolioAllocation._();
+  
+  const factory PortfolioAllocation({
+    required Map<MarketCapCategory, List<MarketCapHolding>> marketCapBreakdown,
+    required Map<String, double> sectorBreakdown,
+  }) = _PortfolioAllocation;
 
-  const PortfolioAllocation({
-    required this.marketCapBreakdown,
-    required this.sectorBreakdown,
-  });
-
-  static PortfolioAllocation empty() {
+  factory PortfolioAllocation.empty() {
     return const PortfolioAllocation(
       marketCapBreakdown: {},
       sectorBreakdown: {},
     );
   }
 
-  /// Get total number of holdings across all market caps
+  factory PortfolioAllocation.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioAllocationFromJson(json);
+
   int get totalHoldings => marketCapBreakdown.values
       .fold(0, (sum, holdings) => sum + holdings.length);
   
-  /// Get market cap distribution percentages
   Map<MarketCapCategory, double> get marketCapDistribution {
     final total = totalHoldings;
     if (total == 0) return {};
@@ -170,79 +106,71 @@ class PortfolioAllocation {
         MapEntry(category, (holdings.length / total) * 100));
   }
   
-  /// Check if allocation is balanced
   bool get isBalanced => sectorBreakdown.values.every((percentage) => percentage <= 25.0);
 }
 
-/// Domain model for market cap holding
-class MarketCapHolding {
-  final HoldingIdentity identity;
-  final double quantity;
-  final double investedAmount;
-  final List<BrokerAllocation> brokerAllocations;
+@freezed
+class MarketCapHolding with _$MarketCapHolding {
+  const MarketCapHolding._();
+  
+  const factory MarketCapHolding({
+    required HoldingIdentity identity,
+    required double quantity,
+    required double investedAmount,
+    required List<BrokerAllocation> brokerAllocations,
+  }) = _MarketCapHolding;
 
-  const MarketCapHolding({
-    required this.identity,
-    required this.quantity,
-    required this.investedAmount,
-    required this.brokerAllocations,
-  });
+  factory MarketCapHolding.fromJson(Map<String, dynamic> json) =>
+      _$MarketCapHoldingFromJson(json);
 
-  /// Get primary broker (with highest allocation)
   BrokerAllocation? get primaryBroker {
     if (brokerAllocations.isEmpty) return null;
     return brokerAllocations.reduce((a, b) => a.quantity > b.quantity ? a : b);
   }
 }
 
-/// Value object for broker allocation
-class BrokerAllocation {
-  final String brokerName;
-  final double quantity;
-  final double percentage;
+@freezed
+class BrokerAllocation with _$BrokerAllocation {
+  const factory BrokerAllocation({
+    required String brokerName,
+    required double quantity,
+    required double percentage,
+  }) = _BrokerAllocation;
 
-  const BrokerAllocation({
-    required this.brokerName,
-    required this.quantity,
-    required this.percentage,
-  });
+  factory BrokerAllocation.fromJson(Map<String, dynamic> json) =>
+      _$BrokerAllocationFromJson(json);
 }
 
-/// Value object for holding identity (reused from holdings model)
-class HoldingIdentity {
-  final String isin;
-  final String symbol;
-  final String companyName;
-  final String sector;
-  final String industry;
-  final MarketCapCategory marketCap;
+@freezed
+class HoldingIdentity with _$HoldingIdentity {
+  const HoldingIdentity._();
+  
+  const factory HoldingIdentity({
+    required String isin,
+    required String symbol,
+    required String companyName,
+    required String sector,
+    required String industry,
+    required MarketCapCategory marketCap,
+  }) = _HoldingIdentity;
 
-  const HoldingIdentity({
-    required this.isin,
-    required this.symbol,
-    required this.companyName,
-    required this.sector,
-    required this.industry,
-    required this.marketCap,
-  });
+  factory HoldingIdentity.fromJson(Map<String, dynamic> json) =>
+      _$HoldingIdentityFromJson(json);
 
-  /// Get display name (prefer company name over symbol)
   String get displayName => companyName.isNotEmpty ? companyName : symbol;
 }
 
-/// Value object for portfolio insights
-class PortfolioInsights {
-  final List<TopPerformer> topPerformers;
-  final List<TopLoser> topLosers;
-  final List<String> recommendations;
+@freezed
+class PortfolioInsights with _$PortfolioInsights {
+  const PortfolioInsights._();
+  
+  const factory PortfolioInsights({
+    required List<TopPerformer> topPerformers,
+    required List<TopLoser> topLosers,
+    required List<String> recommendations,
+  }) = _PortfolioInsights;
 
-  const PortfolioInsights({
-    required this.topPerformers,
-    required this.topLosers,
-    required this.recommendations,
-  });
-
-  static PortfolioInsights empty() {
+  factory PortfolioInsights.empty() {
     return const PortfolioInsights(
       topPerformers: [],
       topLosers: [],
@@ -250,70 +178,64 @@ class PortfolioInsights {
     );
   }
 
-  /// Get best performing stock
+  factory PortfolioInsights.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioInsightsFromJson(json);
+
   TopPerformer? get bestPerformer {
     if (topPerformers.isEmpty) return null;
     return topPerformers.first;
   }
-  
-  /// Get worst performing stock
+
   TopLoser? get worstPerformer {
     if (topLosers.isEmpty) return null;
     return topLosers.first;
   }
 }
 
-/// Domain model for top performer
-class TopPerformer {
-  final String symbol;
-  final String displayName;
-  final double gainPercentage;
-  final double gainAmount;
+@freezed
+class TopPerformer with _$TopPerformer {
+  const TopPerformer._();
+  
+  const factory TopPerformer({
+    required String symbol,
+    required String displayName,
+    required double gainPercentage,
+    required double gainAmount,
+  }) = _TopPerformer;
 
-  const TopPerformer({
-    required this.symbol,
-    required this.displayName,
-    required this.gainPercentage,
-    required this.gainAmount,
-  });
+  factory TopPerformer.fromJson(Map<String, dynamic> json) =>
+      _$TopPerformerFromJson(json);
 
-  /// Check if it's a significant gain (>10%)
   bool get isSignificantGain => gainPercentage >= 10.0;
 }
 
-/// Domain model for top loser
-class TopLoser {
-  final String symbol;
-  final String displayName;
-  final double lossPercentage;
-  final double lossAmount;
+@freezed
+class TopLoser with _$TopLoser {
+  const TopLoser._();
+  
+  const factory TopLoser({
+    required String symbol,
+    required String displayName,
+    required double lossPercentage,
+    required double lossAmount,
+  }) = _TopLoser;
 
-  const TopLoser({
-    required this.symbol,
-    required this.displayName,
-    required this.lossPercentage,
-    required this.lossAmount,
-  });
+  factory TopLoser.fromJson(Map<String, dynamic> json) =>
+      _$TopLoserFromJson(json);
 
-  /// Check if it's a significant loss (>10%)
   bool get isSignificantLoss => lossPercentage >= 10.0;
 }
 
-/// Portfolio summary metadata
-class PortfolioSummaryMetadata {
-  final DateTime lastUpdated;
-  final String currency;
-  final int totalHoldings;
-  final DataSource dataSource;
+@freezed
+class PortfolioSummaryMetadata with _$PortfolioSummaryMetadata {
+  const factory PortfolioSummaryMetadata({
+    required DateTime lastUpdated,
+    required String currency,
+    required int totalHoldings,
+    required DataSource dataSource,
+  }) = _PortfolioSummaryMetadata;
 
-  const PortfolioSummaryMetadata({
-    required this.lastUpdated,
-    required this.currency,
-    required this.totalHoldings,
-    required this.dataSource,
-  });
-
-  static PortfolioSummaryMetadata empty() {
+  factory PortfolioSummaryMetadata.empty() {
     return PortfolioSummaryMetadata(
       lastUpdated: DateTime.now(),
       currency: 'USD',
@@ -321,9 +243,11 @@ class PortfolioSummaryMetadata {
       dataSource: DataSource.api,
     );
   }
+
+  factory PortfolioSummaryMetadata.fromJson(Map<String, dynamic> json) =>
+      _$PortfolioSummaryMetadataFromJson(json);
 }
 
-/// Enum for market cap categories
 enum MarketCapCategory {
   largeCap,
   midCap,
@@ -331,7 +255,6 @@ enum MarketCapCategory {
   microCap,
   unknown;
 
-  /// Create from string
   static MarketCapCategory fromString(String value) {
     switch (value.toLowerCase()) {
       case 'large':
@@ -355,7 +278,6 @@ enum MarketCapCategory {
     }
   }
 
-  /// Display string
   String get displayName {
     switch (this) {
       case MarketCapCategory.largeCap:
@@ -372,7 +294,6 @@ enum MarketCapCategory {
   }
 }
 
-/// Enum for performance categories
 enum PerformanceCategory {
   excellent,
   good,
@@ -411,7 +332,6 @@ enum PerformanceCategory {
   }
 }
 
-/// Enum for data source
 enum DataSource {
   api,
   cache,
