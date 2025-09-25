@@ -13,6 +13,7 @@
         "flutter_hot_reload",
         "flutter_riverpod",
         "freezed_annotation",
+        "get_it",
         "http",
         "intl",
         "json_annotation",
@@ -189,6 +190,15 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "get_it",
+      "version": "7.7.0",
+      "dependencies": [
+        "async",
+        "collection",
+        "meta"
       ]
     },
     {

@@ -1,4 +1,5 @@
 import '../api/models/api_portfolio_summary.dart';
+import '../api/models/api_broker_holding.dart';
 import '../../domain/entities/portfolio/portfolio_summary.dart';
 
 /// Mapper to convert between API models and domain entities for portfolio summary
@@ -47,40 +48,26 @@ class PortfolioSummaryMapper {
     );
 
     return PortfolioSummary(
-      portfolioValue: portfolioValue,
-      performance: performance,
-      allocation: allocation,
-      insights: insights,
-      metadata: metadata,
+      userId: 'default-user', // Default userId since it's not provided
+      totalValue: portfolioValue.current,
+      dailyChange: performance.todayGain,
+      holdings: [], // Will be populated from holdings data
     );
   }
 
   /// Convert domain entity to API model (for updates/requests)
   static ApiPortfolioSummaryResponse toApiModel(PortfolioSummary domainModel) {
-    // Convert market cap breakdown back to API format
-    final apiMarketCapHoldings = <String, List<ApiMarketCapHolding>>{};
-    for (final entry in domainModel.allocation.marketCapBreakdown.entries) {
-      final categoryName = entry.key.displayName.toLowerCase().replaceAll(' ', '');
-      apiMarketCapHoldings[categoryName] = entry.value
-          .map((holding) => _mapToApiMarketCapHolding(holding))
-          .toList();
-    }
-
     return ApiPortfolioSummaryResponse(
-      totalValue: domainModel.portfolioValue.current,
-      investmentValue: domainModel.portfolioValue.invested,
-      todaysGain: domainModel.performance.todayGain,
-      totalGain: domainModel.performance.totalGain,
-      totalGainPercentage: domainModel.performance.totalGainPercentage,
-      todaysGainPercentage: domainModel.performance.todayGainPercentage,
-      marketCapHoldings: apiMarketCapHoldings,
-      sectorAllocation: domainModel.allocation.sectorBreakdown,
-      topPerformers: domainModel.insights.topPerformers
-          .map((performer) => _mapToApiTopPerformer(performer))
-          .toList(),
-      topLosers: domainModel.insights.topLosers
-          .map((loser) => _mapToApiTopLoser(loser))
-          .toList(),
+      totalValue: domainModel.totalValue,
+      investmentValue: 0.0, // Default value since not available in simplified model
+      todaysGain: domainModel.dailyChange,
+      totalGain: 0.0, // Default value since not available in simplified model
+      totalGainPercentage: 0.0, // Default value since not available in simplified model
+      todaysGainPercentage: 0.0, // Default value since not available in simplified model
+      marketCapHoldings: const {}, // Empty since not available in simplified model
+      sectorAllocation: const {}, // Empty since not available in simplified model
+      topPerformers: const [], // Empty since not available in simplified model
+      topLosers: const [], // Empty since not available in simplified model
     );
   }
 
@@ -265,42 +252,12 @@ class PortfolioSummaryMapper {
   }
 
   /// Create mock portfolio summary with sample data
-  static PortfolioSummary createMock() {
+  static PortfolioSummary createMock({String userId = 'mock-user'}) {
     return PortfolioSummary(
-      portfolioValue: const PortfolioValue(
-        current: 125000.0,
-        invested: 100000.0,
-        currency: 'USD',
-      ),
-      performance: const PortfolioPerformance(
-        totalGain: 25000.0,
-        totalGainPercentage: 25.0,
-        todayGain: 1500.0,
-        todayGainPercentage: 1.2,
-      ),
-      allocation: const PortfolioAllocation(
-        marketCapBreakdown: {},
-        sectorBreakdown: {
-          'Technology': 35.0,
-          'Healthcare': 20.0,
-          'Finance': 25.0,
-          'Consumer': 20.0,
-        },
-      ),
-      insights: const PortfolioInsights(
-        topPerformers: [],
-        topLosers: [],
-        recommendations: [
-          'Consider reducing technology exposure',
-          'Portfolio is well diversified',
-        ],
-      ),
-      metadata: PortfolioSummaryMetadata(
-        lastUpdated: DateTime.now(),
-        currency: 'USD',
-        totalHoldings: 15,
-        dataSource: DataSource.mock,
-      ),
+      userId: userId,
+      totalValue: 125000.0,
+      dailyChange: 1500.0,
+      holdings: const [],
     );
   }
 

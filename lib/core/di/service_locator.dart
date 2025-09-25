@@ -11,7 +11,10 @@ Future<void> setupServiceLocator() async {
     
   // Register API clients
   getIt.registerLazySingleton<PortfolioClient>(
-    () => PortfolioClient(), // Replace with your actual implementation
+    () => PortfolioClient(
+      baseUrl: 'https://api.example.com', // Replace with your actual API base URL
+      useMockData: true, // Set to false when using real API
+    ),
   );
 
   // Register repositories

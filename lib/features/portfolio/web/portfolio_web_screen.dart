@@ -7,14 +7,10 @@ import '../widgets/portfolio_holdings_widget.dart';
 class PortfolioWebScreen extends ConsumerWidget {
   /// User ID for portfolio data
   final String userId;
-  
-  /// Refresh callback for portfolio data
-  final Future<void> Function() refreshPortfolio;
 
   const PortfolioWebScreen({
     super.key,
     required this.userId,
-    required this.refreshPortfolio,
   });
 
   @override
@@ -97,7 +93,7 @@ class PortfolioWebScreen extends ConsumerWidget {
         _buildSummaryCard(
           context,
           'Total Value',
-          '\$${summary.totalValue.toStringAsFixed(2)}',
+          '\$${summary.totalValue?.toStringAsFixed(2) ?? '0.00'}',
           Icons.account_balance_wallet,
           Colors.blue,
         ),
@@ -105,17 +101,17 @@ class PortfolioWebScreen extends ConsumerWidget {
         _buildSummaryCard(
           context,
           'Today\'s Change',
-          '\$${summary.todayChange.toStringAsFixed(2)}',
-          summary.todayChange >= 0 ? Icons.trending_up : Icons.trending_down,
-          summary.todayChange >= 0 ? Colors.green : Colors.red,
+          '\$${summary.dailyChange.toStringAsFixed(2)}',
+          summary.dailyChange >= 0 ? Icons.trending_up : Icons.trending_down,
+          summary.dailyChange >= 0 ? Colors.green : Colors.red,
         ),
         const SizedBox(height: 12),
         _buildSummaryCard(
           context,
           'Total Return',
-          '\$${summary.totalReturn.toStringAsFixed(2)}',
-          summary.totalReturn >= 0 ? Icons.trending_up : Icons.trending_down,
-          summary.totalReturn >= 0 ? Colors.green : Colors.red,
+          '\$${summary.totalReturn?.toStringAsFixed(2) ?? '0.00'}',
+          (summary.totalReturn ?? 0) >= 0 ? Icons.trending_up : Icons.trending_down,
+          (summary.totalReturn ?? 0) >= 0 ? Colors.green : Colors.red,
         ),
       ],
     );
@@ -181,43 +177,5 @@ class PortfolioWebScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.analytics_outlined,
-                                    size: 64,
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Portfolio Analysis',
-                                    style: Theme.of(context).textTheme.headlineMedium,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Advanced portfolio analysis features coming soon.',
-                                    style: Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

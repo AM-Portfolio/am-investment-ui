@@ -3,6 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../data/api/models/api_portfolio_holdings.dart';
 import '../../data/api/models/api_portfolio_summary.dart';
+import '../../data/api/models/api_broker_holding.dart';
+import '../../domain/entities/portfolio/portfolio_summary.dart';
+import '../../domain/entities/portfolio/portfolio_holdings.dart';
+import '../../data/mappers/portfolio_summary_mapper.dart';
+import '../../data/mappers/portfolio_holdings_mapper.dart';
 import '../api/api_exception.dart';
 
 /// Service for providing mock portfolio data

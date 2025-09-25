@@ -38,7 +38,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       final apiResponse = await _apiClient.getPortfolioHoldings(userId);
       
       // Convert to domain model
-      final domainModel = PortfolioHoldingsMapper.fromApiModel(apiResponse);
+      final domainModel = PortfolioHoldingsMapper.fromApiModel(apiResponse.data!);
       
       // Cache the result
       _holdingsCache[userId] = _CachedPortfolioData(

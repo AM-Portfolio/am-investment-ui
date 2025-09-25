@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 /// Properties loader similar to Spring's @Value concept
 class AppProperties {
   static final AppProperties _instance = AppProperties._internal();
-  final Map<String, dynamic> _properties = {};
   factory AppProperties() => _instance;
   AppProperties._internal();
 
@@ -17,14 +16,26 @@ class AppProperties {
     if (_isLoaded) return;
 
     // Try to load from assets/application.properties
-    final propertiesContent = await rootBundle.loadString('assets/application.properties');
-    _parseProperties(propertiesContent);
+    try {
+      final propertiesContent = await rootBundle.loadString('assets/application.properties');
+      _parseProperties(propertiesContent);
+      print('Loaded main properties file: application.properties');
+    } catch (e) {
+      print('Error loading main properties file: $e');
+      throw Exception('Failed to load application.properties: $e');
+    }
     
     // Determine environment - priority: parameter > environment variable > default
-    final env = environment ?? 
-               const String.fromEnvironment('ENV') ?? 
-               const String.fromEnvironment('FLUTTER_ENV') ??
-               'dev';
+    String env = environment ?? 
+                const String.fromEnvironment('ENV', defaultValue: '') ??
+                const String.fromEnvironment('FLUTTER_ENV', defaultValue: '');
+    
+    // Use default if env is empty
+    if (env.isEmpty) {
+      env = 'dev';
+    }
+    
+    print('Using environment: $env');
     
     // Override with environment-specific properties if they exist
     try {
@@ -33,6 +44,7 @@ class AppProperties {
       print('Loaded environment-specific properties: application-$env.properties');
     } catch (e) {
       print('Environment-specific properties file not found: application-$env.properties');
+      // This is not an error - environment-specific files are optional
     }
     
     _isLoaded = true;
@@ -116,6 +128,11 @@ class AppProperties {
     return Map.unmodifiable(_properties);
   }
 
+  /// Set property at runtime (for testing/development)
+  void setProperty(String key, String value) {
+    _properties[key] = value;
+  }
+
   /// Reload properties
   /// @param environment - Optional environment name to load specific properties
   Future<void> reload({String? environment}) async {
@@ -155,5 +172,10 @@ mixin PropertyInjection {
   /// Get property as double
   double doubleProperty(String key, {double? defaultValue}) {
     return _properties.getDoubleValue(key, defaultValue: defaultValue);
+  }
+
+  /// Set property at runtime (for testing/development)
+  void updateProperty(String key, String value) {
+    _properties.setProperty(key, value);
   }
 }

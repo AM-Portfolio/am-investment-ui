@@ -1,4 +1,5 @@
 import '../api/models/api_portfolio_holdings.dart';
+import '../api/models/api_broker_holding.dart';
 import '../../domain/entities/portfolio/portfolio_holdings.dart';
 
 /// Mapper to convert between API models and domain entities
@@ -75,6 +76,7 @@ class PortfolioHoldingsMapper {
               percentage: apiHolding.quantity > 0 
                   ? (apiBroker.quantity / apiHolding.quantity) * 100 
                   : 0.0,
+              brokerType: apiBroker.brokerType,
             ))
         .toList();
 

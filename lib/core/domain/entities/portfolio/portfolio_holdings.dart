@@ -66,6 +66,7 @@ class EquityHolding with _$EquityHolding {
 
   String get id => identity.isin;
   String get symbol => identity.symbol;
+  String get companyName => identity.companyName;
   String get sector => identity.sector;
   String get industry => identity.industry;
   double get shares => investment.quantity;

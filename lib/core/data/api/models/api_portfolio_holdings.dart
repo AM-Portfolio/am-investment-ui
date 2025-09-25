@@ -1,3 +1,5 @@
+import 'api_broker_holding.dart';
+
 /// API response model for portfolio holdings
 /// This model directly maps to the API response structure
 class ApiPortfolioHoldingsResponse {
@@ -126,31 +128,3 @@ class ApiEquityHolding {
   }
 }
 
-/// API model for broker holding
-class ApiBrokerHolding {
-  /// Raw API fields
-  final String brokerType;
-  final double quantity;
-
-  /// Constructor
-  const ApiBrokerHolding({
-    required this.brokerType,
-    required this.quantity,
-  });
-
-  /// Create from JSON response
-  factory ApiBrokerHolding.fromJson(Map<String, dynamic> json) {
-    return ApiBrokerHolding(
-      brokerType: json['brokerType'] as String? ?? '',
-      quantity: ApiEquityHolding._parseDouble(json['quantity']),
-    );
-  }
-
-  /// Convert to JSON for API requests
-  Map<String, dynamic> toJson() {
-    return {
-      'brokerType': brokerType,
-      'quantity': quantity,
-    };
-  }
-}

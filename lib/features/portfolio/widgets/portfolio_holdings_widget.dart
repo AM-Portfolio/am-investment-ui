@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/domain/entities/portfolio/portfolio_holding.dart';
 import '../../../core/providers/app_providers.dart';
 
-/// Shared widget for displaying portfolio holdings
-/// Uses Riverpod providers for data management
+/// Widget for displaying portfolio holdings
 class PortfolioHoldingsWidget extends ConsumerWidget {
-  /// User ID for portfolio data
   final String userId;
-  
-  /// Optional custom styling
-  final EdgeInsetsGeometry? padding;
-  
-  /// Custom item builder for holdings
-  final Widget Function(BuildContext context, PortfolioHolding holding)? itemBuilder;
+  final EdgeInsets? padding;
+  final Widget Function(BuildContext context, dynamic holding)? itemBuilder;
 
   const PortfolioHoldingsWidget({
     super.key,
@@ -26,133 +19,63 @@ class PortfolioHoldingsWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final holdingsAsync = ref.watch(portfolioHoldingsProvider(userId));
 
-    return Container(
-      padding: padding ?? const EdgeInsets.all(16.0),
-      child: holdingsAsync.when(
-        data: (portfolioHoldings) {
-          final holdings = portfolioHoldings.holdings;
-          
-          if (holdings.isEmpty) {
-            return _buildEmptyWidget(context);
-          }
-
-          return _buildHoldingsList(context, ref, holdings);
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, stack) => _buildErrorWidget(context, ref, error.toString()),
-      ),
-    );
-  }
-
-  /// Build error widget
-  Widget _buildErrorWidget(BuildContext context, WidgetRef ref, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Failed to load holdings',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            error,
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => ref.refresh(portfolioHoldingsProvider(userId)),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build empty state widget
-  Widget _buildEmptyWidget(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.portfolio_outlined,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Holdings Found',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Your portfolio is currently empty',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build holdings list
-  Widget _buildHoldingsList(BuildContext context, WidgetRef ref, List<PortfolioHolding> holdings) {
-    return RefreshIndicator(
-      onRefresh: () async {
+    return holdingsAsync.when(
+      data: (holdings) => _buildHoldingsList(context, ref, holdings.holdings ?? []),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => _buildErrorWidget(context, error.toString(), () {
         ref.refresh(portfolioHoldingsProvider(userId));
-      },
-      child: ListView.builder(
-        itemCount: holdings.length,
-        itemBuilder: (context, index) {
-          final holding = holdings[index];
-          
-          // Use custom item builder if provided
-          if (itemBuilder != null) {
-            return itemBuilder!(context, holding);
-          }
-          
-          // Default item builder
-          return _buildDefaultHoldingItem(context, holding);
-        },
-      ),
+      }),
     );
   }
 
-  /// Build default holding item
-  Widget _buildDefaultHoldingItem(BuildContext context, PortfolioHolding holding) {
+  Widget _buildHoldingsList(BuildContext context, WidgetRef ref, List<dynamic> holdings) {
+    if (holdings.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.folder_open, size: 48, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'No holdings found',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: padding ?? const EdgeInsets.all(16),
+      itemCount: holdings.length,
+      itemBuilder: (context, index) {
+        final holding = holdings[index];
+        if (itemBuilder != null) {
+          return itemBuilder!(context, holding);
+        }
+        return _buildDefaultHoldingItem(context, holding);
+      },
+    );
+  }
+
+  Widget _buildDefaultHoldingItem(BuildContext context, dynamic holding) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: CircleAvatar(
-          child: Text(
-            holding.symbol.substring(0, 2).toUpperCase(),
-            style: const TextStyle(fontSize: 12),
-          ),
-        ),
-        title: Text(
-          holding.symbol,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(holding.name ?? 'Unknown'),
+        title: Text(holding?.symbol?.toString() ?? 'Unknown'),
+        subtitle: Text(holding?.companyName?.toString() ?? ''),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '\$${holding.currentValue.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              '\$${holding?.currentPrice?.toStringAsFixed(2) ?? '0.00'}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
-              '${holding.quantity} shares',
+              '${holding?.quantity?.toString() ?? '0'} shares',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -160,41 +83,30 @@ class PortfolioHoldingsWidget extends ConsumerWidget {
       ),
     );
   }
-}
-          // Default item builder
-          return _buildDefaultHoldingItem(holding);
-        },
-      ),
-    );
-  }
 
-  /// Build default holding item
-  Widget _buildDefaultHoldingItem(PortfolioHolding holding) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      child: ListTile(
-        leading: CircleAvatar(
-          child: Text(
-            holding.symbol.substring(0, 2).toUpperCase(),
-            style: const TextStyle(fontSize: 12),
-          ),
-        ),
-        title: Text(
-          holding.symbol,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(holding.name ?? 'Unknown'),
-        trailing: Column(
+  Widget _buildErrorWidget(BuildContext context, String error, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
             Text(
-              '\$${holding.currentValue.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              'Failed to load holdings',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
+            const SizedBox(height: 8),
             Text(
-              '${holding.quantity} shares',
+              error,
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
             ),
           ],
         ),

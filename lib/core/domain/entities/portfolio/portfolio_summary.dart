@@ -12,6 +12,15 @@ class PortfolioSummary with _$PortfolioSummary {
     @Default([]) List<String> holdings,
   }) = _PortfolioSummary;
 
+  factory PortfolioSummary.empty() {
+    return const PortfolioSummary(
+      userId: '',
+      totalValue: 0.0,
+      dailyChange: 0.0,
+      holdings: [],
+    );
+  }
+
   factory PortfolioSummary.fromJson(Map<String, dynamic> json) =>
       _$PortfolioSummaryFromJson(json);
 }

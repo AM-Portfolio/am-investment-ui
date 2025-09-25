@@ -1,9 +1,17 @@
 /// Application configuration
 class AppConfig {
+  final String appName;
+  final String version;
+  final bool debugMode;
+  final int defaultPort;
   final ApiConfig api;
   final EnvironmentConfig environment;
 
   const AppConfig({
+    this.appName = 'AM Investment',
+    this.version = '1.0.0',
+    this.debugMode = true,
+    this.defaultPort = 3000,
     required this.api,
     required this.environment,
   });
@@ -24,7 +32,7 @@ class ApiConfig {
   });
 }
 
-/// Portfolio API specific configuration
+/// Portfolio API configuration
 class PortfolioApiConfig {
   final String baseUrl;
   final String holdingsResource;

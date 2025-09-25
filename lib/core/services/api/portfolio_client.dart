@@ -7,7 +7,7 @@ import '../../data/api/models/api_portfolio_holdings.dart';
 import '../../data/api/models/api_portfolio_summary.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
-import 'portfolio_mock_data_provider.dart';
+import '../mockdata/portfolio_mock_data_provider.dart';
 
 /// Client for portfolio-related API calls
 class PortfolioClient {

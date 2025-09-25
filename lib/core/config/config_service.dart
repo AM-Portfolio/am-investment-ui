@@ -25,6 +25,7 @@ class ConfigService with PropertyInjection {
 
     // Create config from properties
     _config = AppConfig(
+      defaultPort: properties.getIntValue('app.default.port', defaultValue: 3000),
       api: ApiConfig(
         baseUrl: properties.getValue('api.baseUrl'),
         timeout: properties.getIntValue('api.timeout'),
@@ -62,6 +63,19 @@ class ConfigService with PropertyInjection {
   /// Check if using mock data
   static bool get useMockData => config.api.useMockData;
 
+  /// Get default port for application
+  static int get defaultPort => config.defaultPort;
+
+  /// Get Flutter run command with configured port
+  static String getFlutterRunCommand({String device = 'chrome'}) {
+    return 'flutter run -d $device --web-port ${config.defaultPort}';
+  }
+
+  /// Get local URL with configured port
+  static String getLocalUrl() {
+    return 'http://localhost:${config.defaultPort}';
+  }
+
   /// Get property value directly
   static String getProperty(String key, {String? defaultValue}) {
     return AppProperties().getValue(key, defaultValue: defaultValue);
@@ -84,6 +98,9 @@ class ConfigService with PropertyInjection {
     if (!kDebugMode) return;
 
     print('=== Configuration ===');
+    print('Default Port: ${config.defaultPort}');
+    print('Local URL: ${getLocalUrl()}');
+    print('Flutter Command: ${getFlutterRunCommand()}');
     print('API Base URL: ${config.api.baseUrl}');
     print('API Timeout: ${config.api.timeout}ms');
     print('Mock Data: ${config.api.useMockData}');
@@ -105,10 +122,7 @@ class ConfigService with PropertyInjection {
     await initialize(environment: environment);
   }
 
-  /// Update property at runtime (for testing/development)
-  static void updateProperty(String key, String value) {
-    AppProperties()._properties[key] = value;
-  }
+
 }
 
 /// Example usage with @Value-like annotation
