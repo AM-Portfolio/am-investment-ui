@@ -93,7 +93,7 @@ class PortfolioWebScreen extends ConsumerWidget {
         _buildSummaryCard(
           context,
           'Total Value',
-          '\$${summary.totalValue?.toStringAsFixed(2) ?? '0.00'}',
+          '\$${summary.totalValue.toStringAsFixed(2)}',
           Icons.account_balance_wallet,
           Colors.blue,
         ),
@@ -109,9 +109,9 @@ class PortfolioWebScreen extends ConsumerWidget {
         _buildSummaryCard(
           context,
           'Total Return',
-          '\$${summary.totalReturn?.toStringAsFixed(2) ?? '0.00'}',
-          (summary.totalReturn ?? 0) >= 0 ? Icons.trending_up : Icons.trending_down,
-          (summary.totalReturn ?? 0) >= 0 ? Colors.green : Colors.red,
+          '\$${summary.totalValue.toStringAsFixed(2)}',
+          summary.totalValue >= 0 ? Icons.trending_up : Icons.trending_down,
+          summary.totalValue >= 0 ? Colors.green : Colors.red,
         ),
       ],
     );

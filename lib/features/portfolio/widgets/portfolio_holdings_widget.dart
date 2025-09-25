@@ -62,20 +62,20 @@ class PortfolioHoldingsWidget extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        title: Text(holding?.symbol?.toString() ?? 'Unknown'),
-        subtitle: Text(holding?.companyName?.toString() ?? ''),
+        title: Text(holding?.symbol ?? 'Unknown'),
+        subtitle: Text(holding?.companyName ?? ''),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '\$${holding?.currentPrice?.toStringAsFixed(2) ?? '0.00'}',
+              '\$${holding?.currentPrice.toStringAsFixed(2) ?? '0.00'}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              '${holding?.quantity?.toString() ?? '0'} shares',
+              '${holding?.shares.toString() ?? '0'} shares',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
