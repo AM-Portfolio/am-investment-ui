@@ -234,3 +234,162 @@ class PortfolioHoldings with _$PortfolioHoldings {
   }) = _PortfolioHoldings;
 }
 ```
+
+## Data Mapping Pattern
+
+### Mapper Implementation
+```dart
+class PortfolioMapper {
+  static PortfolioHoldings fromApi(ApiPortfolioResponse response) {
+    return PortfolioHoldings(
+      userId: response.userId,
+      holdings: response.equityHoldings.map(EquityHoldingMapper.fromApi).toList(),
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  static ApiPortfolioRequest toApiRequest(PortfolioRequest request) {
+    return ApiPortfolioRequest(
+      userId: request.userId,
+      filters: request.filters?.map(FilterMapper.toApi).toList(),
+    );
+  }
+}
+```
+
+## Error Handling Patterns
+
+### API-Specific Exception Handling
+```dart
+// Repository Level Error Handling
+Future<Portfolio> getPortfolio(String userId) async {
+  try {
+    final response = await _client.getPortfolio(userId);
+    return PortfolioMapper.fromApi(response);
+  } on DioException catch (e) {
+    throw _handleDioError(e);
+  } catch (e) {
+    throw RepositoryException('Unexpected error: $e');
+  }
+}
+
+RepositoryException _handleDioError(DioException e) {
+  switch (e.type) {
+    case DioExceptionType.connectionTimeout:
+      return RepositoryException('Connection timeout');
+    case DioExceptionType.receiveTimeout:
+      return RepositoryException('Request timeout');
+    case DioExceptionType.badResponse:
+      return _handleHttpError(e.response?.statusCode);
+    default:
+      return RepositoryException('Network error: ${e.message}');
+  }
+}
+
+RepositoryException _handleHttpError(int? statusCode) {
+  switch (statusCode) {
+    case 401:
+      return AuthenticationException('Authentication failed');
+    case 403:
+      return AuthorizationException('Access denied');
+    case 404:
+      return NotFoundException('Resource not found');
+    case 500:
+      return ServerException('Internal server error');
+    default:
+      return RepositoryException('HTTP error: $statusCode');
+  }
+}
+```
+
+### Service Layer Error Handling with Mock Fallback
+```dart
+@injectable
+class PortfolioService {
+  final PortfolioRepository _repository;
+  
+  PortfolioService(this._repository);
+
+  Future<Portfolio> getPortfolio(String userId) async {
+    try {
+      return await _repository.getPortfolio(userId);
+    } catch (e) {
+      debugPrint('Error fetching portfolio: $e');
+      
+      // Fallback to mock data in development environment
+      if (_isDevelopmentEnvironment() || ConfigService.mockDataEnabled) {
+        debugPrint('Using mock portfolio data in development');
+        return _getMockPortfolio(userId);
+      }
+      rethrow;
+    }
+  }
+
+  bool _isDevelopmentEnvironment() {
+    return const String.fromEnvironment('ENVIRONMENT', defaultValue: 'prod') == 'dev';
+  }
+
+  Future<Portfolio> _getMockPortfolio(String userId) async {
+    return MockPortfolioDataProvider.getPortfolio(userId);
+  }
+}
+```
+
+## Multi-part File Upload Pattern
+
+### Document Upload Client
+```dart
+@RestApi()
+abstract class DocumentClient {
+  factory DocumentClient(Dio dio, {String baseUrl}) = _DocumentClient;
+
+  @POST('/api/v1/documents/upload')
+  @MultiPart()
+  Future<ApiDocumentUploadResponse> uploadDocument(
+    @Part(name: 'userId') String userId,
+    @Part(name: 'document') MultipartFile file,
+    @Part(name: 'metadata') String metadata,
+  );
+
+  @GET('/api/v1/documents/{documentId}/status')
+  Future<ApiDocumentStatusResponse> getDocumentStatus(
+    @Path('documentId') String documentId,
+  );
+}
+```
+
+### File Upload Service Implementation
+```dart
+@injectable
+class DocumentUploadService {
+  final DocumentRepository _repository;
+  
+  DocumentUploadService(this._repository);
+
+  Future<DocumentUploadResult> uploadDocument(
+    String userId,
+    File file,
+    DocumentMetadata metadata,
+  ) async {
+    try {
+      final multipartFile = await MultipartFile.fromFile(
+        file.path,
+        filename: file.path.split('/').last,
+      );
+      
+      return await _repository.uploadDocument(
+        userId: userId,
+        file: multipartFile,
+        metadata: metadata,
+      );
+    } catch (e) {
+      debugPrint('Error uploading document: $e');
+      
+      if (_isDevelopmentEnvironment()) {
+        return _getMockUploadResult();
+      }
+      rethrow;
+    }
+  }
+}
+```

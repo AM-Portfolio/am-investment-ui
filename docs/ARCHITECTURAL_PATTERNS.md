@@ -1,11 +1,50 @@
 ```markdown
 # Architectural Patterns
 
+> **Related Documentation:** For API client implementation, HTTP patterns, and Retrofit usage, see [API_GUIDELINES.md](./API_GUIDELINES.md)
+
 ## Clean Architecture Layers
 
-### 1. Data Layer (`lib/core/data/`)
+### 1. Data Layer (`lib/core      }      rethrow;
+    }
+  }
+}
 ```
-data/
+
+### Environment and Configuration Patterns
+```dart
+class EnvironmentConfig {
+  static bool get isDevelopment => 
+      const String.fromEnvironment('ENVIRONMENT') == 'dev';
+  
+  static bool get isProduction => 
+      const String.fromEnvironment('ENVIRONMENT') == 'prod';
+  
+  static bool get mockDataEnabled => 
+      const bool.fromEnvironment('MOCK_DATA_ENABLED', defaultValue: false);
+}
+
+// Use in services for environment-specific behavior
+abstract class BaseService {
+  bool get shouldUseMockData => 
+      EnvironmentConfig.isDevelopment || EnvironmentConfig.mockDataEnabled;
+      
+  Future<T> withEnvironmentFallback<T>(
+    Future<T> Function() production,
+    Future<T> Function() development,
+  ) async {
+    if (EnvironmentConfig.isDevelopment) {
+      try {
+        return await production();
+      } catch (e) {
+        debugPrint('Production call failed, using development fallback: $e');
+        return development();
+      }
+    }
+    return production();
+  }
+}
+```ta/
 ├── api/models/          # API request/response models
 ├── repositories/        # Repository implementations  
 └── mappers/            # Data transformation
@@ -36,68 +75,61 @@ features/
 
 ## Repository Pattern Implementation
 
-### Repository Interface
+> **Note:** For complete API client and HTTP implementation details, see [API_GUIDELINES.md](./API_GUIDELINES.md)
+
+### Repository Interface Design
 ```dart
 @injectable
 abstract class PortfolioRepository {
   Future<Portfolio> getPortfolio(String userId);
   Future<List<Holding>> getHoldings(String userId);
+  Stream<Portfolio> watchPortfolio(String userId);
 }
 ```
 
-### Repository Implementation
+### Abstract Repository Pattern
+Create base repository classes for common functionality:
+
 ```dart
-@Injectable(as: PortfolioRepository)
-class PortfolioRepositoryImpl implements PortfolioRepository {
-  final PortfolioClient _client;
+abstract class BaseRepository<TEntity, TId> {
+  Future<TEntity?> getById(TId id);
+  Future<List<TEntity>> getAll();
+  Future<TEntity> create(TEntity entity);
+  Future<TEntity> update(TEntity entity);
+  Future<void> delete(TId id);
+}
+```
+
+### Service Layer Abstraction
+Services should focus on business logic, not API concerns:
+
+```dart
+@injectable
+abstract class PortfolioService {
+  Future<Portfolio> getPortfolio(String userId);
+  Future<void> refreshPortfolio(String userId);
+  Stream<Portfolio> watchPortfolio(String userId);
+}
+
+class PortfolioServiceImpl implements PortfolioService {
+  final PortfolioRepository _repository;
+  final CacheService _cache;
   
-  PortfolioRepositoryImpl(this._client);
+  PortfolioServiceImpl(this._repository, this._cache);
 
   @override
   Future<Portfolio> getPortfolio(String userId) async {
-    try {
-      final response = await _client.getPortfolio(userId);
-      return PortfolioMapper.fromApi(response);
-    } catch (e) {
-      throw RepositoryException('Failed to fetch portfolio: $e');
+    // Business logic: check cache, validate user, apply transforms
+    final cached = await _cache.get('portfolio_$userId');
+    if (cached != null && !_isStale(cached)) {
+      return cached;
     }
+    
+    final portfolio = await _repository.getPortfolio(userId);
+    await _cache.set('portfolio_$userId', portfolio);
+    return portfolio;
   }
 }
-```
-
-### Service Layer
-```dart
-@injectable
-class PortfolioService {
-  final PortfolioRepository _repository;
-  
-  PortfolioService(this._repository);
-
-  Future<Portfolio> getPortfolio(String userId) async {
-    try {
-      return await _repository.getPortfolio(userId);
-    } catch (e) {
-      debugPrint('Error fetching portfolio: $e');
-      
-      // Fallback to mock data in development environment
-      if (_isDevelopmentEnvironment()) {
-        debugPrint('Using mock portfolio data in development');
-        return _getMockPortfolio(userId);
-      }
-      rethrow;
-    }
-  }
-
-  Future<List<Holding>> getHoldings(String userId) async {
-    try {
-      return await _repository.getHoldings(userId);
-    } catch (e) {
-      debugPrint('Error fetching holdings: $e');
-      
-      // Check if environment is dev or mock data is enabled
-      if (_isDevelopmentEnvironment() || ConfigService.mockDataEnabled) {
-        debugPrint('Using mock holdings data in development');
-        return _getMockHoldings(userId);
       }
       rethrow;
     }
@@ -117,38 +149,36 @@ class PortfolioService {
 }
 ```
 
-## Riverpod Provider Patterns
+## Dependency Injection Architecture
 
-### Client Provider
+> **Note:** For specific API client provider implementations, see [API_GUIDELINES.md](./API_GUIDELINES.md)
+
+### Provider Hierarchy Organization
+Organize providers in logical layers that mirror your architecture:
+
 ```dart
+// Core Infrastructure Layer
 @riverpod
-PortfolioClient portfolioClient(PortfolioClientRef ref) {
-  final dio = ref.read(dioProvider);
-  final baseUrl = ref.read(apiConfigProvider).baseUrl;
-  return PortfolioClient(dio, baseUrl: baseUrl);
-}
-```
+Dio dio(DioRef ref) => Dio();
 
-### Repository Provider
-```dart
+@riverpod 
+ConfigService configService(ConfigServiceRef ref) => ConfigService();
+
+// Data Access Layer  
 @riverpod
 PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
-  final client = ref.read(portfolioClientProvider);
-  return PortfolioRepositoryImpl(client);
+  // Implementation details in API_GUIDELINES.md
 }
-```
 
-### Service Provider
-```dart
+// Business Logic Layer
 @riverpod
 PortfolioService portfolioService(PortfolioServiceRef ref) {
   final repository = ref.read(portfolioRepositoryProvider);
-  return PortfolioService(repository);
+  final cache = ref.read(cacheServiceProvider);
+  return PortfolioServiceImpl(repository, cache);
 }
-```
 
-### Data Providers
-```dart
+// Presentation Data Layer
 @riverpod
 Future<Portfolio> portfolioData(
   PortfolioDataRef ref, 
@@ -156,6 +186,30 @@ Future<Portfolio> portfolioData(
 ) async {
   final service = ref.read(portfolioServiceProvider);
   return service.getPortfolio(userId);
+}
+```
+
+### Provider Scoping Strategy
+```dart
+// Global providers (singletons)
+@riverpod
+DatabaseService databaseService(DatabaseServiceRef ref) {
+  // Expensive to create, shared across app
+}
+
+// Scoped providers (per feature/user)
+@riverpod
+Future<UserProfile> userProfile(
+  UserProfileRef ref,
+  String userId,
+) async {
+  // Scoped to specific user
+}
+
+// Disposable providers (auto-dispose when not watched)
+@riverpod
+Stream<MarketData> marketDataStream(MarketDataStreamRef ref) {
+  // Automatically disposed when no listeners
 }
 ```
 
@@ -187,29 +241,69 @@ class PortfolioScreen extends ConsumerWidget {
 }
 ```
 
-## Error Handling Pattern
+## Domain Error Handling Pattern
 
-### Repository Level
+> **Note:** For API-specific error handling (HTTP, Dio exceptions), see [API_GUIDELINES.md](./API_GUIDELINES.md)
+
+### Domain Exception Hierarchy
 ```dart
-Future<Portfolio> getPortfolio(String userId) async {
-  try {
-    final response = await _client.getPortfolio(userId);
-    return _mapResponse(response);
-  } on DioException catch (e) {
-    throw _handleDioError(e);
-  } catch (e) {
-    throw RepositoryException('Unexpected error: $e');
-  }
+abstract class DomainException implements Exception {
+  final String message;
+  final String? code;
+  
+  const DomainException(this.message, {this.code});
 }
 
-RepositoryException _handleDioError(DioException e) {
-  switch (e.type) {
-    case DioExceptionType.connectionTimeout:
-      return RepositoryException('Connection timeout');
-    case DioExceptionType.receiveTimeout:
-      return RepositoryException('Request timeout');
-    default:
-      return RepositoryException('Network error: ${e.message}');
+class ValidationException extends DomainException {
+  final Map<String, List<String>> fieldErrors;
+  
+  const ValidationException(
+    super.message, {
+    super.code,
+    this.fieldErrors = const {},
+  });
+}
+
+class BusinessRuleException extends DomainException {
+  const BusinessRuleException(super.message, {super.code});
+}
+
+class ResourceNotFoundException extends DomainException {
+  final String resourceType;
+  final String resourceId;
+  
+  const ResourceNotFoundException(
+    this.resourceType,
+    this.resourceId,
+  ) : super('$resourceType with id $resourceId not found');
+}
+```
+
+### Service Layer Error Translation
+```dart
+abstract class BaseService {
+  Future<T> executeWithErrorHandling<T>(
+    Future<T> Function() operation,
+    String operationName,
+  ) async {
+    try {
+      return await operation();
+    } on RepositoryException catch (e) {
+      // Translate repository errors to domain errors
+      throw _translateRepositoryError(e, operationName);
+    } catch (e) {
+      throw DomainException('Unexpected error in $operationName: $e');
+    }
+  }
+  
+  DomainException _translateRepositoryError(RepositoryException e, String operation) {
+    if (e is NotFoundException) {
+      return ResourceNotFoundException('Resource', 'unknown');
+    }
+    if (e is ValidationException) {
+      return ValidationException(e.message);
+    }
+    return DomainException('Repository error in $operation: ${e.message}');
   }
 }
 ```

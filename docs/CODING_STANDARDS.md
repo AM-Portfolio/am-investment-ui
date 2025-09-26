@@ -26,22 +26,13 @@ Future<List<Holding>> _extractHoldings(ApiResponse response) async {
 }
 ```
 
-## Dependency Injection with Riverpod
+## Dependency Injection Standards
 
-### Always Use Riverpod for Object Creation
-Never manually initialize objects in widgets/features. Always use Riverpod providers.
+> **Note:** For complete dependency injection patterns and provider organization, see [ARCHITECTURAL_PATTERNS.md](./ARCHITECTURAL_PATTERNS.md)
 
+### Riverpod Usage Rules
 ```dart
-// ❌ Bad - Manual initialization
-class PortfolioScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final service = PortfolioService(PortfolioClient(Dio()));
-    // ...
-  }
-}
-
-// ✅ Good - Use Riverpod providers
+// ✅ Always use providers for object creation
 class PortfolioScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,6 +44,9 @@ class PortfolioScreen extends ConsumerWidget {
     );
   }
 }
+
+// ❌ Never manually initialize services or repositories
+final service = PortfolioService(client); // Bad!
 ```
 
 ## Dart/Flutter Code Style
@@ -63,22 +57,16 @@ class PortfolioScreen extends ConsumerWidget {
 - Use camelCase for variables: `portfolioData`
 
 ### Import Organization
+
+> **Note:** For complete import rules and file organization, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
+
 ```dart
-// 1. Dart core libraries
+// Follow the import order defined in PROJECT_STRUCTURE.md:
+// 1. Dart core → 2. Flutter → 3. Packages → 4. Internal (relative paths)
 import 'dart:async';
-
-// 2. Flutter libraries  
 import 'package:flutter/material.dart';
-
-// 3. Third-party packages
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:retrofit/retrofit.dart';
-import 'package:injectable/injectable.dart';
-
-// 4. Internal imports - relative paths
 import '../config/app_config.dart';
-import '../../domain/entities/portfolio.dart';
 ```
 
 ### Required Annotations
@@ -388,4 +376,84 @@ class PortfolioCalculations {
     );
   }
 }
+```
+
+## Testing Standards
+
+> **Note:** For complete testing workflow and rules, see [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md)
+
+### Test File Conventions
+```dart
+// test/services/portfolio_service_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+
+// Generate mocks for external dependencies only
+@GenerateMocks([PortfolioClient])
+void main() {
+  group('PortfolioService', () {
+    late PortfolioService service;
+    late MockPortfolioClient mockClient;
+    late PortfolioRepository repository;
+    
+    setUp(() {
+      mockClient = MockPortfolioClient();
+      // Use real repository and mapper - don't mock internal logic
+      repository = PortfolioRepositoryImpl(mockClient);
+      service = PortfolioService(repository);
+    });
+    
+    test('should return portfolio data when API call succeeds', () async {
+      // Arrange - Mock external API response
+      when(mockClient.getPortfolio(any))
+          .thenAnswer((_) async => mockApiResponse);
+      
+      // Act - Test real business logic
+      final result = await service.getPortfolio('user123');
+      
+      // Assert - Validate complete flow including mapping
+      expect(result.userId, 'user123');
+      expect(result.holdings, isNotEmpty);
+      verify(mockClient.getPortfolio('user123')).called(1);
+    });
+  });
+}
+```
+
+### Testing Principles
+1. **Mock External Dependencies Only**: HTTP clients, APIs, external services
+2. **Test Real Internal Logic**: Repositories, mappers, business logic
+3. **Validate Complete Flows**: End-to-end data transformation
+4. **Test All Error Scenarios**: Network failures, validation errors, edge cases
+5. **Use Real Data**: Test with realistic data structures and edge cases
+
+### Mock Data Strategy
+```dart
+// ✅ Good - Mock external API responses
+class MockApiResponses {
+  static ApiPortfolioResponse get validPortfolioResponse => ApiPortfolioResponse(
+    userId: 'test-user',
+    totalValue: 50000.0,
+    holdings: [
+      ApiEquityHolding(symbol: 'AAPL', quantity: 10, currentPrice: 150.0),
+      ApiEquityHolding(symbol: 'GOOGL', quantity: 5, currentPrice: 2800.0),
+    ],
+  );
+  
+  static ApiPortfolioResponse get emptyPortfolioResponse => ApiPortfolioResponse(
+    userId: 'test-user',
+    totalValue: 0.0,
+    holdings: [],
+  );
+}
+
+// ✅ Good - Test real mapper logic with mock data
+test('mapper should handle empty holdings list', () {
+  final apiResponse = MockApiResponses.emptyPortfolioResponse;
+  final portfolio = PortfolioMapper.fromApi(apiResponse);
+  
+  expect(portfolio.holdings, isEmpty);
+  expect(portfolio.totalValue, 0.0);
+});
 ```

@@ -1,6 +1,8 @@
 ```markdown
 # File Organization Rules
 
+> **Related Documentation:** For development workflow and build rules, see [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md)
+
 ## Directory Structure
 
 ```
@@ -46,37 +48,19 @@ lib/
 
 ## Riverpod Provider Organization
 
-### Provider Files Structure
+> **Note:** For complete provider patterns and dependency injection details, see [ARCHITECTURAL_PATTERNS.md](./ARCHITECTURAL_PATTERNS.md)
+
+### Provider File Structure Rules
 ```dart
-// lib/core/providers/api_providers.dart
+// lib/core/providers/core_providers.dart - Infrastructure providers
 @riverpod
-Dio dio(DioRef ref) {
-  return Dio()..interceptors.add(LoggingInterceptor());
-}
+Dio dio(DioRef ref) => Dio();
 
-@riverpod
-ApiConfig apiConfig(ApiConfigRef ref) {
-  return ApiConfig.fromProperties();
-}
-
-// lib/features/portfolio/providers/portfolio_providers.dart
-@riverpod
-PortfolioClient portfolioClient(PortfolioClientRef ref) {
-  final dio = ref.read(dioProvider);
-  final config = ref.read(apiConfigProvider);
-  return PortfolioClient(dio, baseUrl: config.baseUrl);
-}
-
+// lib/features/[feature]/providers/[feature]_providers.dart - Feature providers
 @riverpod
 PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
   final client = ref.read(portfolioClientProvider);
   return PortfolioRepositoryImpl(client);
-}
-
-@riverpod
-Future<Portfolio> portfolio(PortfolioRef ref, String userId) async {
-  final repository = ref.read(portfolioRepositoryProvider);
-  return repository.getPortfolio(userId);
 }
 ```
 
@@ -107,18 +91,63 @@ class PortfolioValidationService {   // < 500 lines
 }
 ```
 
-## Import Rules
+## Import & Export Rules
 
-1. **Always use relative imports** within the project
-2. **Group imports** by type (core, flutter, packages, internal)
-3. **Sort imports** alphabetically within groups
-4. **Use barrel exports** where appropriate
-
+### Import Order (Mandatory)
 ```dart
-// Barrel export example - lib/core/providers/providers.dart
+// 1. Dart core libraries (dart:*)
+import 'dart:async';
+import 'dart:convert';
+
+// 2. Flutter libraries (package:flutter/*)
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// 3. Third-party packages (alphabetical)
+import 'package:dio/dio.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+// 4. Internal imports (relative paths, alphabetical)
+import '../config/config_service.dart';
+import '../domain/entities/portfolio.dart';
+import '../../widgets/shared/loading_indicator.dart';
+```
+
+### Barrel Export Strategy
+```dart
+// lib/core/utils/utils.dart - Export all utilities
+export 'currency_utils.dart';
+export 'date_utils.dart';
+export 'validation_utils.dart';
+
+// lib/core/providers/providers.dart - Export all providers
 export 'api_providers.dart';
 export 'auth_providers.dart';
 export 'config_providers.dart';
+
+// lib/widgets/shared/shared.dart - Export shared widgets
+export 'buttons/primary_button.dart';
+export 'cards/info_card.dart';
+export 'displays/currency_display.dart';
+```
+
+### Import Best Practices
+```dart
+// ✅ Good - Use barrel imports for cleaner code
+import '../../core/utils/utils.dart';
+import '../../widgets/shared/shared.dart';
+
+// ❌ Avoid - Multiple individual imports
+// import '../../core/utils/currency_utils.dart';
+// import '../../core/utils/date_utils.dart';
+// import '../../widgets/shared/buttons/primary_button.dart';
+
+// ✅ Good - Use relative imports within project
+import '../config/config_service.dart';
+
+// ❌ Bad - Absolute imports within project
+// import 'package:am_investment_ui/core/config/config_service.dart';
 ```
 
 ## Asset Organization
