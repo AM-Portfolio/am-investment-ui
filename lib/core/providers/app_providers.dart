@@ -4,6 +4,8 @@ import '../domain/repositories/portfolio_repository.dart';
 import '../domain/entities/portfolio/portfolio_holdings.dart';
 import '../domain/entities/portfolio/portfolio_summary.dart';
 import '../services/api/portfolio_client.dart';
+import '../services/api/document_client.dart';
+import '../services/document_upload_service.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
