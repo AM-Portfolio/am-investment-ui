@@ -44,6 +44,7 @@ dependencies:
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
   get_it: ^7.7.0
+  injectable: ^2.4.4
   # Document upload dependencies
   dio: ^5.4.0
   retrofit: ^4.1.0
@@ -67,6 +68,9 @@ dev_dependencies:
   analyzer: ^6.7.0
   # Retrofit code generation
   retrofit_generator: ^8.1.0
+  # Testing dependencies
+  mockito: ^5.4.4
+  test: ^1.25.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
