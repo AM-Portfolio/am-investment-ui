@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../services/auth_service_test.dart' as auth_service_test;
-import '../services/config_service_test.dart' as config_service_test;
 import '../services/document_upload_service_test.dart' as document_upload_service_test;
 
 /// Comprehensive test suite for all service layer components
@@ -21,8 +19,6 @@ import '../services/document_upload_service_test.dart' as document_upload_servic
 /// 6. Configuration-driven behavior
 void main() {
   group('Service Layer Tests', () {
-    group('AuthService Tests', auth_service_test.main);
-    group('ConfigService Tests', config_service_test.main);
     group('DocumentUploadService Tests', document_upload_service_test.main);
   });
 }
