@@ -1,8 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/repositories/portfolio_repository_impl.dart';
+import '../data/repositories/document_repository_impl.dart';
 import '../domain/repositories/portfolio_repository.dart';
+import '../domain/repositories/document_repository.dart';
 import '../domain/entities/portfolio/portfolio_holdings.dart';
 import '../domain/entities/portfolio/portfolio_summary.dart';
+import '../domain/entities/document/document_upload.dart';
 import '../services/api/portfolio_client.dart';
 import '../services/api/document_client.dart';
 import '../services/document_upload_service.dart';
@@ -50,6 +53,17 @@ Future<PortfolioRepository> portfolioRepository(PortfolioRepositoryRef ref) asyn
   return PortfolioRepositoryImpl(apiClient: apiClient);
 }
 
+@riverpod
+DocumentClient documentClient(DocumentClientRef ref) {
+  return ref.watch(documentClientProvider);
+}
+
+@riverpod
+DocumentRepository documentRepository(DocumentRepositoryRef ref) {
+  final apiClient = ref.watch(documentClientProvider);
+  return DocumentRepositoryImpl(apiClient: apiClient);
+}
+
 // Data Providers - Auto-dispose (can be recreated when needed)
 @riverpod
 Future<PortfolioHoldings> portfolioHoldings(PortfolioHoldingsRef ref, String userId) async {
@@ -76,35 +90,107 @@ Stream<PortfolioSummary> portfolioSummaryStream(PortfolioSummaryStreamRef ref, S
   yield* repository.portfolioSummaryUpdatesStream(userId);
 }
 
+// Document Providers - Auto-dispose (can be recreated when needed)
+@riverpod
+Future<DocumentUpload> documentStatus(DocumentStatusRef ref, String processId) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.getDocumentStatus(processId);
+}
+
+@riverpod
+Future<DocumentUploadCollection> documentHistory(DocumentHistoryRef ref, String userId) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.getDocumentHistory(userId: userId);
+}
+
+@riverpod
+Future<DocumentUploadCollection> documentHistoryFiltered(
+  DocumentHistoryFilteredRef ref, 
+  String userId, {
+  DocumentCategory? category,
+  DocumentProcessingStatus? status,
+  int? limit,
+  int? offset,
+}) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.getDocumentHistory(
+    userId: userId,
+    category: category,
+    status: status,
+    limit: limit,
+    offset: offset,
+  );
+}
+
+@riverpod
+Stream<DocumentUpload> documentStatusStream(DocumentStatusStreamRef ref, String processId) {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.documentStatusStream(processId);
+}
+
+@riverpod
+Stream<DocumentUploadCollection> documentHistoryStream(DocumentHistoryStreamRef ref, String userId) {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.documentHistoryStream(userId);
+}
+
+@riverpod
+Future<Map<String, int>> documentStatistics(DocumentStatisticsRef ref, String userId) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  return repository.getProcessingStatistics(userId);
+}
+
 // Cache Management Provider
 @riverpod
 Future<CacheManager> cacheManager(CacheManagerRef ref) async {
-  final repository = await ref.watch(portfolioRepositoryProvider.future);
-  return CacheManager(repository);
+  final portfolioRepository = await ref.watch(portfolioRepositoryProvider.future);
+  final documentRepository = ref.watch(documentRepositoryProvider);
+  return CacheManager(portfolioRepository, documentRepository);
 }
 
 /// Helper class for cache management operations
 class CacheManager {
-  final PortfolioRepository _repository;
+  final PortfolioRepository _portfolioRepository;
+  final DocumentRepository _documentRepository;
   
-  CacheManager(this._repository);
+  CacheManager(this._portfolioRepository, this._documentRepository);
   
   Future<void> clearUserCache(String userId) async {
-    await _repository.clearAllCache(userId);
+    await Future.wait([
+      _portfolioRepository.clearAllCache(userId),
+      _documentRepository.clearAllCache(userId),
+    ]);
   }
   
   Future<void> refreshUserData(String userId) async {
     await Future.wait([
-      _repository.refreshPortfolioHoldings(userId),
-      _repository.refreshPortfolioSummary(userId),
+      _portfolioRepository.refreshPortfolioHoldings(userId),
+      _portfolioRepository.refreshPortfolioSummary(userId),
+      _documentRepository.refreshDocumentHistory(userId),
     ]);
   }
   
-  bool isHoldingsDataFresh(String userId) {
-    return _repository.isHoldingsCachedDataFresh(userId);
+  bool isPortfolioHoldingsDataFresh(String userId) {
+    return _portfolioRepository.isHoldingsCachedDataFresh(userId);
   }
   
-  bool isSummaryDataFresh(String userId) {
-    return _repository.isSummaryCachedDataFresh(userId);
+  bool isPortfolioSummaryDataFresh(String userId) {
+    return _portfolioRepository.isSummaryCachedDataFresh(userId);
+  }
+  
+  bool isDocumentHistoryDataFresh(String userId) {
+    return _documentRepository.isHistoryCachedDataFresh(userId);
+  }
+  
+  bool isDocumentStatusDataFresh(String processId) {
+    return _documentRepository.isDocumentCachedDataFresh(processId);
+  }
+  
+  Future<void> clearDocumentCache(String processId) async {
+    await _documentRepository.clearDocumentCache(processId);
+  }
+  
+  Future<void> clearDocumentHistoryCache(String userId) async {
+    await _documentRepository.clearHistoryCache(userId);
   }
 }

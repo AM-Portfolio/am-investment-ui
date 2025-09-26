@@ -36,6 +36,13 @@ class ConfigService with PropertyInjection {
           summaryResource: properties.getValue('api.portfolio.summaryResource'),
           transactionsResource: properties.getValue('api.portfolio.transactionsResource'),
         ),
+        document: DocumentApiConfig(
+          baseUrl: properties.getValue('api.document.baseUrl', defaultValue: 'http://localhost:8070'),
+          connectTimeout: properties.getIntValue('api.document.connectTimeout', defaultValue: 30),
+          receiveTimeout: properties.getIntValue('api.document.receiveTimeout', defaultValue: 60),
+          sendTimeout: properties.getIntValue('api.document.sendTimeout', defaultValue: 60),
+          enabled: properties.getBoolValue('api.document.enabled', defaultValue: true),
+        ),
       ),
       environment: EnvironmentConfig(
         name: properties.getValue('environment.name'),

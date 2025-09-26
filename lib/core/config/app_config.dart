@@ -23,12 +23,14 @@ class ApiConfig {
   final int timeout;
   final bool useMockData;
   final PortfolioApiConfig portfolio;
+  final DocumentApiConfig? document;
 
   const ApiConfig({
     required this.baseUrl,
     required this.timeout,
     required this.useMockData,
     required this.portfolio,
+    this.document,
   });
 }
 
@@ -44,6 +46,25 @@ class PortfolioApiConfig {
     required this.holdingsResource,
     required this.summaryResource,
     required this.transactionsResource,
+  });
+}
+
+/// Document API configuration
+/// Note: With Retrofit, only baseUrl and client settings can be configured dynamically
+/// API endpoints are hardcoded in @RestApi() annotations
+class DocumentApiConfig {
+  final String baseUrl;
+  final int connectTimeout;
+  final int receiveTimeout;
+  final int sendTimeout;
+  final bool enabled;
+
+  const DocumentApiConfig({
+    required this.baseUrl,
+    this.connectTimeout = 30,
+    this.receiveTimeout = 60,
+    this.sendTimeout = 60,
+    this.enabled = true,
   });
 }
 

@@ -3,56 +3,113 @@
 
 ## Configuration Management
 
+### Retrofit Limitations and Best Practices
+
+**Important**: Retrofit requires static endpoint definitions in annotations. Dynamic endpoint configuration is not well supported.
+
+#### ✅ **What CAN be configured:**
+- Base URLs
+- Timeouts and connection settings
+- Headers and authentication
+- Interceptors and error handling
+
+#### ❌ **What CANNOT be easily configured:**
+- API endpoint paths (must be static in annotations)
+- HTTP methods
+- Path parameters structure
+
 ### Properties File Configuration
-Always read API resources and base URLs from properties file to ensure environment-specific configurations are properly managed.
+Configure base URLs and client settings through properties, but endpoints remain static in code.
 
 ```dart
-// config/api_config.dart
-class ApiConfig {
-  static const String _baseUrlKey = 'api.base.url';
-  static const String _portfolioResourceKey = 'api.portfolio.resource';
-  
-  static String get baseUrl => 
-      PropertiesReader.getString(_baseUrlKey) ?? 'https://api.default.com';
-  
-  static String get portfolioResource => 
-      PropertiesReader.getString(_portfolioResourceKey) ?? '/api/v1/portfolios';
+// Retrofit client with static endpoints
+@RestApi()
+abstract class PortfolioClient {
+  factory PortfolioClient(Dio dio, {String baseUrl}) = _PortfolioClient;
+
+  // ❌ Cannot be dynamic - must be hardcoded
+  @GET('/api/v1/portfolios/holdings')
+  Future<ApiPortfolioHoldingsResponse> getHoldings(@Query('userId') String userId);
+
+  // ❌ Cannot be dynamic - must be hardcoded  
+  @GET('/api/v1/portfolios/summary')
+  Future<ApiPortfolioSummaryResponse> getSummary(@Query('userId') String userId);
 }
 ```
 
 ```properties
 # assets/config/app.properties
+# ✅ These CAN be configured
 api.base.url=https://api.investment.com
-api.portfolio.resource=/api/v1/portfolios
-api.user.resource=/api/v1/users
-api.market.resource=/api/v1/market
+api.timeout=30000
+api.portfolio.baseUrl=http://localhost:8072
+
+# ❌ These CANNOT be used with Retrofit (endpoints are hardcoded)
+# api.portfolio.resource=/api/v1/portfolios
+# api.user.resource=/api/v1/users
+```
+
+### Alternative: Non-Retrofit Implementation
+For full endpoint configurability, use direct Dio implementation instead of Retrofit:
+
+```dart
+// Non-Retrofit approach for dynamic endpoints
+class PortfolioClient {
+  final Dio _dio;
+  
+  PortfolioClient({required String baseUrl, Dio? dio}) : _dio = dio ?? Dio() {
+    _dio.options = BaseOptions(baseUrl: baseUrl);
+  }
+
+  Future<ApiPortfolioHoldingsResponse> getHoldings(String userId) async {
+    // ✅ Can read endpoint from configuration
+    final endpoint = ConfigService.config?.api?.portfolio?.holdingsResource ?? '/api/v1/portfolios/holdings';
+    final response = await _dio.get(endpoint, queryParameters: {'userId': userId});
+    return ApiPortfolioHoldingsResponse.fromJson(response.data);
+  }
+}
 ```
 
 ## Client Implementation Pattern
 
-### Retrofit Style Client with Injectable
+### Retrofit Style Client with Static Endpoints
 ```dart
 @RestApi()
-@injectable
 abstract class PortfolioClient {
-  @factoryMethod
-  factory PortfolioClient(Dio dio, {@Named('baseUrl') String? baseUrl}) = _PortfolioClient;
+  factory PortfolioClient(Dio dio, {String baseUrl}) = _PortfolioClient;
 
-  @GET('${ApiConfig.portfolioResource}/holdings')
+  // Endpoints must be static with Retrofit
+  @GET('/api/v1/portfolios/holdings')
   Future<ApiPortfolioHoldingsResponse> getHoldings(@Query('userId') String userId);
 
-  @GET('${ApiConfig.portfolioResource}/summary')  
+  @GET('/api/v1/portfolios/summary')  
   Future<ApiPortfolioSummaryResponse> getSummary(@Query('userId') String userId);
 }
 ```
 
-### Riverpod Client Provider
+### Riverpod Client Provider (Configurable Base URL Only)
 ```dart
 @riverpod
 PortfolioClient portfolioClient(PortfolioClientRef ref) {
-  final config = ref.read(apiConfigProvider);
-  final dio = ref.read(dioProvider);
-  return PortfolioClient(dio, baseUrl: config.baseUrl);
+  final dio = Dio();
+  
+  // Configure base URL and client settings from properties
+  final config = ConfigService.config;
+  final portfolioApiConfig = config?.api?.portfolio;
+  
+  dio.options = BaseOptions(
+    baseUrl: portfolioApiConfig?.baseUrl ?? 'http://localhost:8072',
+    connectTimeout: Duration(seconds: portfolioApiConfig?.connectTimeout ?? 30),
+    receiveTimeout: Duration(seconds: portfolioApiConfig?.receiveTimeout ?? 60),
+    headers: {
+      'Accept': 'application/json',
+    },
+  );
+  
+  // Add interceptors for auth, logging, etc.
+  _addInterceptors(dio);
+  
+  return PortfolioClient(dio);
 }
 ```
 
