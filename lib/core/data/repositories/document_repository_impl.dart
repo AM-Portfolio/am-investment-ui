@@ -55,17 +55,12 @@ class DocumentRepositoryImpl implements DocumentRepository {
       }
 
       // Convert to domain model with context
-      final domainModel = DocumentMapper.fromApiUploadResponse(apiResponse);
-      final domainModelWithContext = domainModel.copyWith(
-        metadata: domainModel.metadata.copyWith(
-          portfolioId: portfolioId,
-          userId: userId,
-          description: description,
-          customMetadata: metadata,
-        ),
+      return DocumentMapper.fromApiUploadResponseWithContext(
+        apiResponse,
+        portfolioId: portfolioId,
+        userId: userId,
+        description: description,
       );
-
-      return domainModelWithContext;
     } on DioException catch (e) {
       throw _handleDioError(e);
     } catch (e) {

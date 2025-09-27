@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/portfolio/portfolio_screen.dart';
 import 'core/config/config_service.dart';
+import 'features/auth/auth_wrapper.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const PortfolioScreen(userId: 'ssd2658'),
+      home: const AuthWrapper(),
     );
   }
 }

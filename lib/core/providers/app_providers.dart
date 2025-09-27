@@ -5,10 +5,8 @@ import '../domain/repositories/portfolio_repository.dart';
 import '../domain/repositories/document_repository.dart';
 import '../domain/entities/portfolio/portfolio_holdings.dart';
 import '../domain/entities/portfolio/portfolio_summary.dart';
-import '../domain/entities/document/document_upload.dart';
 import '../services/api/portfolio_client.dart';
 import '../services/api/document_client.dart';
-import '../services/document_upload_service.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
@@ -91,74 +89,36 @@ Stream<PortfolioSummary> portfolioSummaryStream(PortfolioSummaryStreamRef ref, S
 }
 
 // Document Providers - Auto-dispose (can be recreated when needed)
-@riverpod
-Future<DocumentUpload> documentStatus(DocumentStatusRef ref, String processId) async {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.getDocumentStatus(processId);
-}
+// Note: Current document API only supports upload, not status/history queries
 
-@riverpod
-Future<DocumentUploadCollection> documentHistory(DocumentHistoryRef ref, String userId) async {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.getDocumentHistory(userId: userId);
-}
 
-@riverpod
-Future<DocumentUploadCollection> documentHistoryFiltered(
-  DocumentHistoryFilteredRef ref, 
-  String userId, {
-  DocumentCategory? category,
-  DocumentProcessingStatus? status,
-  int? limit,
-  int? offset,
-}) async {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.getDocumentHistory(
-    userId: userId,
-    category: category,
-    status: status,
-    limit: limit,
-    offset: offset,
-  );
-}
 
-@riverpod
-Stream<DocumentUpload> documentStatusStream(DocumentStatusStreamRef ref, String processId) {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.documentStatusStream(processId);
-}
 
-@riverpod
-Stream<DocumentUploadCollection> documentHistoryStream(DocumentHistoryStreamRef ref, String userId) {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.documentHistoryStream(userId);
-}
 
-@riverpod
-Future<Map<String, int>> documentStatistics(DocumentStatisticsRef ref, String userId) async {
-  final repository = ref.watch(documentRepositoryProvider);
-  return repository.getProcessingStatistics(userId);
-}
+
+
+
+
+
 
 // Cache Management Provider
 @riverpod
 Future<CacheManager> cacheManager(CacheManagerRef ref) async {
   final portfolioRepository = await ref.watch(portfolioRepositoryProvider.future);
-  final documentRepository = ref.watch(documentRepositoryProvider);
-  return CacheManager(portfolioRepository, documentRepository);
+  return CacheManager(portfolioRepository);
 }
 
 /// Helper class for cache management operations
+/// Note: Document repository currently only supports upload, no caching functionality
 class CacheManager {
   final PortfolioRepository _portfolioRepository;
-  final DocumentRepository _documentRepository;
   
-  CacheManager(this._portfolioRepository, this._documentRepository);
+  CacheManager(this._portfolioRepository);
   
   Future<void> clearUserCache(String userId) async {
     await Future.wait([
       _portfolioRepository.clearAllCache(userId),
-      _documentRepository.clearAllCache(userId),
+      // Document repository doesn't have cache methods yet
     ]);
   }
   
@@ -166,7 +126,7 @@ class CacheManager {
     await Future.wait([
       _portfolioRepository.refreshPortfolioHoldings(userId),
       _portfolioRepository.refreshPortfolioSummary(userId),
-      _documentRepository.refreshDocumentHistory(userId),
+      // Document repository doesn't have refresh methods yet
     ]);
   }
   
@@ -178,19 +138,20 @@ class CacheManager {
     return _portfolioRepository.isSummaryCachedDataFresh(userId);
   }
   
+  // Document repository doesn't have cache checking methods yet
   bool isDocumentHistoryDataFresh(String userId) {
-    return _documentRepository.isHistoryCachedDataFresh(userId);
+    return false; // Always return false as no caching implemented
   }
   
   bool isDocumentStatusDataFresh(String processId) {
-    return _documentRepository.isDocumentCachedDataFresh(processId);
+    return false; // Always return false as no caching implemented
   }
   
   Future<void> clearDocumentCache(String processId) async {
-    await _documentRepository.clearDocumentCache(processId);
+    // No-op as document repository doesn't have cache methods yet
   }
   
   Future<void> clearDocumentHistoryCache(String userId) async {
-    await _documentRepository.clearHistoryCache(userId);
+    // No-op as document repository doesn't have cache methods yet
   }
 }

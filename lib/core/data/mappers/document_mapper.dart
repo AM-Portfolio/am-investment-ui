@@ -28,69 +28,44 @@ class DocumentMapper {
     );
   }
 
-  /// Convert API DocumentProcessStatus to domain DocumentUpload entity
-  static DocumentUpload fromApiProcessStatus(DocumentProcessStatus apiStatus) {
-    return DocumentUpload(
-      identity: DocumentIdentity(
-        processId: apiStatus.processId,
-        fileName: apiStatus.fileName,
-        category: _mapApiDocumentTypeToCategory(apiStatus.documentType),
-      ),
-      metadata: DocumentMetadata(
-        portfolioId: '', // This might need to come from context
-        userId: '', // This might need to come from context
-        uploadedAt: apiStatus.createdAt ?? DateTime.now(),
-        customMetadata: apiStatus.result?.cast<String, String>(),
-      ),
-      status: ProcessingStatus(
-        current: _mapApiStatusToDomainStatus(apiStatus.status),
-        createdAt: apiStatus.createdAt ?? DateTime.now(),
-        completedAt: apiStatus.completedAt,
-        message: apiStatus.message,
-        errorCode: apiStatus.errorCode,
-      ),
-      result: apiStatus.result != null ? _mapApiResultToDomainResult(apiStatus.result!) : null,
-    );
-  }
-
-  /// Convert API DocumentProcessStatus with context to domain DocumentUpload entity
-  static DocumentUpload fromApiProcessStatusWithContext(
-    DocumentProcessStatus apiStatus, {
+  /// Convert API DocumentUploadResponse to domain DocumentUpload entity with context
+  static DocumentUpload fromApiUploadResponseWithContext(
+    DocumentUploadResponse apiResponse, {
     required String portfolioId,
     required String userId,
     String? description,
   }) {
     return DocumentUpload(
       identity: DocumentIdentity(
-        processId: apiStatus.processId,
-        fileName: apiStatus.fileName,
-        category: _mapApiDocumentTypeToCategory(apiStatus.documentType),
+        processId: apiResponse.processId,
+        fileName: apiResponse.fileName,
+        category: _mapApiDocumentTypeToCategory(apiResponse.documentType),
       ),
       metadata: DocumentMetadata(
         portfolioId: portfolioId,
         userId: userId,
-        uploadedAt: apiStatus.createdAt ?? DateTime.now(),
-        description: description,
-        customMetadata: apiStatus.result?.cast<String, String>(),
+        uploadedAt: DateTime.now(),
+        description: description ?? apiResponse.message,
+        customMetadata: apiResponse.metadata?.cast<String, String>(),
       ),
       status: ProcessingStatus(
-        current: _mapApiStatusToDomainStatus(apiStatus.status),
-        createdAt: apiStatus.createdAt ?? DateTime.now(),
-        completedAt: apiStatus.completedAt,
-        message: apiStatus.message,
-        errorCode: apiStatus.errorCode,
+        current: _mapApiStatusToDomainStatus(apiResponse.status),
+        createdAt: DateTime.now(),
+        message: apiResponse.message,
+        errorCode: apiResponse.errorCode,
       ),
-      result: apiStatus.result != null ? _mapApiResultToDomainResult(apiStatus.result!) : null,
     );
   }
 
-  /// Convert list of API DocumentProcessStatus to domain DocumentUploadCollection
-  static DocumentUploadCollection fromApiStatusList(
-    List<DocumentProcessStatus> apiStatusList, {
+
+
+  /// Convert list of API DocumentUploadResponse to domain DocumentUploadCollection
+  static DocumentUploadCollection fromApiUploadResponseList(
+    List<DocumentUploadResponse> apiResponseList, {
     required String userId,
   }) {
-    final uploads = apiStatusList
-        .map((apiStatus) => fromApiProcessStatus(apiStatus))
+    final uploads = apiResponseList
+        .map((apiResponse) => fromApiUploadResponse(apiResponse))
         .toList();
 
     return DocumentUploadCollection(

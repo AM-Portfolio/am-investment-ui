@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../portfolio/portfolio_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final Function(String userId) onLogin;
+  
+  const LoginScreen({
+    super.key,
+    required this.onLogin,
+  });
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -34,21 +38,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // For now, simulate successful login
       await Future.delayed(const Duration(seconds: 2));
       
-      // Navigate to portfolio screen after successful login
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => PortfolioScreen(
-              userId: _emailController.text, // Use email as userId for demo
-            ),
-          ),
-        );
-      }
+      // Call the login callback with user ID
+      widget.onLogin(_emailController.text);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Login failed: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleDemoLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Simulate demo login with predefined credentials
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Call the login callback with demo user ID
+      widget.onLogin("ssd2658");
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Demo login failed: $error'),
             backgroundColor: Colors.red,
           ),
         );
@@ -121,6 +146,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: _isLoading
                         ? const CircularProgressIndicator()
                         : const Text('Login'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _handleDemoLogin,
+                    child: const Text('Demo Login'),
                   ),
                 ),
               ],
