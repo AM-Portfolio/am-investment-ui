@@ -33,7 +33,7 @@ class _PortfolioScreenWithQuickActionsState extends ConsumerState<PortfolioScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Portfolio Management'),
+       // title: const Text('Portfolio Management'),
         actions: [
           IconButton(
             icon: Icon(_showQuickActions ? Icons.expand_less : Icons.expand_more),

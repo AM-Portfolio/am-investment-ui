@@ -155,12 +155,12 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                           size: cardConstraints.maxWidth * 0.02,
                         ),
                         SizedBox(width: cardConstraints.maxWidth * 0.01),
-                        Text(
-                          'Portfolio Holdings',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        // Text(
+                        //   'Portfolio Holdings',
+                        //   style: theme.textTheme.titleSmall?.copyWith(
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
                       ],
                     ),
 

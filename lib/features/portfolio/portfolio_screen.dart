@@ -4,6 +4,7 @@ import '../../core/utils/platform_utils.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/config/environment_config.dart';
 import '../../widgets/shared/navigation/portfolio_sidebar.dart';
+import '../../widgets/shared/ui/right_floating_quick_actions.dart';
 import '../../widgets/shared/ui/enhanced_portfolio_quick_actions.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../widgets/shared/cards/portfolio_holdings_card.dart';
@@ -64,7 +65,7 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Portfolio Management'),
+        //title: const Text('Portfolio Management'),
         actions: [
           IconButton(
             icon: Icon(_showQuickActions ? Icons.expand_less : Icons.expand_more),
@@ -103,48 +104,41 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
             onPageSelected: _onPageSelected,
           ),
         ),
-        // Main Content Area with Quick Actions
+        // Main Content Area
         Expanded(
-          child: Column(
+          child: Stack(
             children: [
-              // Quick Actions Bar at top right
+              _buildMainContent(),
+              // Right Floating Quick Actions
               if (_showQuickActions)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Quick Actions',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                RightFloatingQuickActions(
+                  userId: widget.userId,
+                  portfolioId: _currentPortfolioId,
+                  onPortfolioCreated: (portfolioId) {
+                    setState(() {
+                      _currentPortfolioId = portfolioId;
+                    });
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Portfolio created successfully!'),
+                        backgroundColor: Colors.green,
                       ),
-                      SizedBox(
-                        width: 400,
-                        height: 60,
-                        child: EnhancedPortfolioQuickActions(
-                          userId: widget.userId,
-                          portfolioId: _currentPortfolioId,
-                          onPortfolioCreated: _handlePortfolioCreated,
-                          onTradeDetailsAdded: _handleTradeDetailsAdded,
-                          onError: _handleError,
-                        ),
+                    );
+                    
+                    _refreshPortfolio();
+                  },
+                  onTradeDetailsAdded: (message) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(message),
+                        backgroundColor: Colors.green,
                       ),
-                    ],
-                  ),
+                    );
+                    _refreshPortfolio();
+                  },
+                  onError: _handleError,
                 ),
-              // Main Content
-              Expanded(
-                child: _buildMainContent(),
-              ),
             ],
           ),
         ),
@@ -187,30 +181,40 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
           ],
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Quick Actions Bar for mobile
-          if (_showQuickActions)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade300),
-                ),
-              ),
-              child: EnhancedPortfolioQuickActions(
-                userId: widget.userId,
-                portfolioId: _currentPortfolioId,
-                onPortfolioCreated: _handlePortfolioCreated,
-                onTradeDetailsAdded: _handleTradeDetailsAdded,
-                onError: _handleError,
-              ),
-            ),
           // Main Content
-          Expanded(
-            child: _buildMainContent(),
-          ),
+          _buildMainContent(),
+          // Right Floating Quick Actions for mobile
+          if (_showQuickActions)
+            RightFloatingQuickActions(
+              userId: widget.userId,
+              portfolioId: _currentPortfolioId,
+              onPortfolioCreated: (portfolioId) {
+                setState(() {
+                  _currentPortfolioId = portfolioId;
+                });
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Portfolio created successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                
+                _refreshPortfolio();
+              },
+              onTradeDetailsAdded: (message) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                _refreshPortfolio();
+              },
+              onError: _handleError,
+            ),
         ],
       ),
     );
@@ -271,16 +275,9 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
         children: [
           // Header section
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                'Portfolio Holdings',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              // Action buttons
-              Row(
-                children: [
-                  IconButton(
+              IconButton(
                     icon: Icon(_showFilters ? Icons.filter_list : Icons.filter_list_outlined),
                     onPressed: () {
                       setState(() {
@@ -298,8 +295,6 @@ class _PortfolioScreenState extends ConsumerState<PortfolioScreen> {
                     },
                     tooltip: 'Export Holdings',
                   ),
-                ],
-              ),
             ],
           ),
           
