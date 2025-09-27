@@ -248,22 +248,10 @@ class _EnhancedPortfolioQuickActionsState extends ConsumerState<EnhancedPortfoli
                 onTap: () => _handleQuickAction('add_stock'),
               ),
               _buildQuickAction(
-                icon: Icons.trending_up,
-                label: 'Analysis',
-                color: Colors.green,
-                onTap: () => _handleQuickAction('view_analysis'),
-              ),
-              _buildQuickAction(
                 icon: Icons.upload_file,
                 label: 'Import',
                 color: Colors.orange,
                 onTap: () => _handleQuickAction('import_data'),
-              ),
-              _buildQuickAction(
-                icon: Icons.refresh,
-                label: 'Refresh',
-                color: Colors.purple,
-                onTap: () => _handleQuickAction('refresh'),
               ),
             ],
           ),

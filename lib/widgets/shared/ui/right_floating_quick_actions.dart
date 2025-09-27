@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../dialogs/dialogs.dart';
+
 /// Right-side floating quick actions with flying animations
 class RightFloatingQuickActions extends ConsumerStatefulWidget {
   final String userId;
@@ -44,32 +46,11 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
       description: 'Add new stock to portfolio',
     ),
     QuickActionItem(
-      id: 'view_analysis',
-      icon: Icons.trending_up,
-      label: 'Analysis',
-      color: const Color(0xFF4CAF50),
-      description: 'View portfolio analytics',
-    ),
-    QuickActionItem(
       id: 'import_data',
       icon: Icons.upload_file,
       label: 'Import',
       color: const Color(0xFFFF9800),
       description: 'Import data from file',
-    ),
-    QuickActionItem(
-      id: 'refresh',
-      icon: Icons.refresh,
-      label: 'Refresh',
-      color: const Color(0xFF9C27B0),
-      description: 'Refresh portfolio data',
-    ),
-    QuickActionItem(
-      id: 'settings',
-      icon: Icons.settings,
-      label: 'Settings',
-      color: const Color(0xFF607D8B),
-      description: 'Portfolio settings',
     ),
   ];
 
@@ -468,13 +449,16 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
     try {
       switch (actionId) {
         case 'add_stock':
-          await _showAddStockDialog();
+          await AddStockDialog.show(context);
           break;
         case 'view_analysis':
           _showSnackBar('Analysis feature coming soon!', const Color(0xFF4CAF50));
           break;
         case 'import_data':
-          await _showImportDialog();
+          final result = await ImportDataDialog.show(context);
+          if (result != null) {
+            _showSnackBar('${result.label} feature coming soon!', const Color(0xFFFF9800));
+          }
           break;
         case 'refresh':
           await _performRefresh();
@@ -494,110 +478,11 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
     }
   }
 
-  Future<void> _showAddStockDialog() async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2196F3).withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.add_circle_outline,
-                color: Color(0xFF2196F3),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            const Text('Add Stock'),
-          ],
-        ),
-        content: const Text(
-          'Quick stock addition feature is coming soon! You\'ll be able to add stocks directly from this quick action.',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Future<void> _showImportDialog() async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF9800).withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.upload_file,
-                color: Color(0xFFFF9800),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            const Text('Import Data'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Choose your import method:', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 20),
-            _buildImportOption(Icons.file_upload, 'Upload Excel/CSV file'),
-            _buildImportOption(Icons.link, 'Connect broker account'),
-            _buildImportOption(Icons.edit, 'Manual entry'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showSnackBar('Import feature coming soon!', const Color(0xFFFF9800));
-            },
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildImportOption(IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 15)),
-        ],
-      ),
-    );
-  }
+
+
+
 
   Future<void> _performRefresh() async {
     await Future.delayed(const Duration(milliseconds: 2000)); // Simulate refresh
