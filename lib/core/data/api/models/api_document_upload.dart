@@ -66,22 +66,3 @@ class DocumentUploadResponse with _$DocumentUploadResponse {
   factory DocumentUploadResponse.fromJson(Map<String, dynamic> json) =>
       _$DocumentUploadResponseFromJson(json);
 }
-
-/// Document processing status response
-@freezed
-class DocumentProcessStatus with _$DocumentProcessStatus {
-  const factory DocumentProcessStatus({
-    required String processId,
-    required DocumentStatus status,
-    required String fileName,
-    required DocumentType documentType,
-    String? message,
-    String? errorCode,
-    DateTime? createdAt,
-    DateTime? completedAt,
-    Map<String, dynamic>? result,
-  }) = _DocumentProcessStatus;
-
-  factory DocumentProcessStatus.fromJson(Map<String, dynamic> json) =>
-      _$DocumentProcessStatusFromJson(json);
-}

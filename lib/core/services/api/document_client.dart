@@ -21,58 +21,12 @@ abstract class DocumentClient {
   @POST('/api/v1/documents/process')
   @MultiPart()
   Future<DocumentUploadResponse> uploadDocument(
-    @Part('file') File file,
-    @Part('documentType') String documentType,
-    @Part('portfolioId') String portfolioId,
-    @Part('userId') String userId, {
-    @Part('description') String? description,
+    @Part(name: 'file') File file,
+    @Part(name: 'documentType') String documentType,
+    @Part(name: 'portfolioId') String portfolioId,
+    @Part(name: 'userId') String userId, {
+    @Part(name: 'description') String? description,
   });
-
-  /// Upload document with MultipartFile (for web support)
-  /// POST /api/v1/documents/process
-  @POST('/api/v1/documents/process')
-  @MultiPart()
-  Future<DocumentUploadResponse> uploadDocumentMultipart(
-    @Part() MultipartFile file,
-    @Part('documentType') String documentType,
-    @Part('portfolioId') String portfolioId,
-    @Part('userId') String userId, {
-    @Part('description') String? description,
-  });
-
-  /// Get document processing status
-  /// GET /api/v1/documents/process/{processId}/status
-  @GET('/api/v1/documents/process/{processId}/status')
-  Future<DocumentProcessStatus> getProcessingStatus(
-    @Path('processId') String processId,
-  );
-
-  /// Get all document processing history for a user
-  /// GET /api/v1/documents/process/history
-  @GET('/api/v1/documents/process/history')
-  Future<List<DocumentProcessStatus>> getProcessingHistory(
-    @Query('userId') String userId, {
-    @Query('documentType') String? documentType,
-    @Query('status') String? status,
-    @Query('limit') int? limit,
-    @Query('offset') int? offset,
-  });
-
-  /// Cancel document processing
-  /// DELETE /api/v1/documents/process/{processId}
-  @DELETE('/api/v1/documents/process/{processId}')
-  Future<void> cancelProcessing(
-    @Path('processId') String processId,
-  );
-
-  /// Download processed document results
-  /// GET /api/v1/documents/process/{processId}/download
-  @GET('/api/v1/documents/process/{processId}/download')
-  Future<ResponseBody> downloadProcessedDocument(
-    @Path('processId') String processId,
-  );
-}
-
 }
 
 /// Provider for DocumentClient
@@ -129,7 +83,6 @@ void _addInterceptors(Dio dio) {
     dio.interceptors.add(LogInterceptor(
       request: true,
       requestBody: false, // Don't log file bodies for uploads
-      response: true,
       responseBody: true,
       error: true,
       logPrint: (obj) => debugPrint('[DocumentClient] $obj'),
