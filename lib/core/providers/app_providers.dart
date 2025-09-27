@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
 import '../data/repositories/portfolio_repository_impl.dart';
 import '../data/repositories/document_repository_impl.dart';
 import '../domain/repositories/portfolio_repository.dart';
@@ -53,7 +54,25 @@ Future<PortfolioRepository> portfolioRepository(PortfolioRepositoryRef ref) asyn
 
 @riverpod
 DocumentClient documentClient(DocumentClientRef ref) {
-  return ref.watch(documentClientProvider);
+  final dio = Dio();
+  
+  // Get configuration from ConfigService
+  final config = ConfigService.config;
+  final documentApiConfig = config?.api?.document;
+  
+  // Configure Dio with base options
+  dio.options = BaseOptions(
+    baseUrl: documentApiConfig?.baseUrl ?? 'http://localhost:8070',
+    connectTimeout: Duration(seconds: documentApiConfig?.connectTimeout ?? 30),
+    receiveTimeout: Duration(seconds: documentApiConfig?.receiveTimeout ?? 60),
+    sendTimeout: Duration(seconds: documentApiConfig?.sendTimeout ?? 60),
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Accept': 'application/json',
+    },
+  );
+
+  return DocumentClient(dio);
 }
 
 @riverpod

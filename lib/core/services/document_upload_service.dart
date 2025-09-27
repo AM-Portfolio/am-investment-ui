@@ -92,7 +92,7 @@ class DocumentUploadService {
     }
 
     // File extension validation
-    final allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.tiff'];
+    final allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.tiff','.xls', '.xlsx', '.csv'];
     final extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
     if (!allowedExtensions.contains(extension)) {
       throw ArgumentError('File type not supported. Allowed: ${allowedExtensions.join(', ')}');
