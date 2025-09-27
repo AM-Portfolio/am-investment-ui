@@ -457,7 +457,12 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
         case 'import_data':
           final result = await ImportDataDialog.show(context);
           if (result != null) {
-            _showSnackBar('${result.label} feature coming soon!', const Color(0xFFFF9800));
+            final docType = result.documentType?.label ?? 'Document';
+            final broker = result.brokerType?.label ?? '';
+            final message = broker.isNotEmpty 
+                ? '$docType import from $broker coming soon!'
+                : '$docType import feature coming soon!';
+            _showSnackBar(message, const Color(0xFFFF9800));
           }
           break;
         case 'refresh':
