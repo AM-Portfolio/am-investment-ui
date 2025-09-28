@@ -2,33 +2,20 @@
 import 'portfolio_state.dart';
 import '../../internal/domain/entities/portfolio_summary.dart';
 import '../../internal/domain/entities/portfolio_holding.dart';
-import '../../internal/domain/usecases/get_portfolio_summary.dart';
-import '../../internal/domain/usecases/get_portfolio_holdings.dart';
-import '../../internal/domain/usecases/search_portfolio_holdings.dart';
 
 class PortfolioCubit extends Cubit<PortfolioState> {
-  final GetPortfolioSummary _getPortfolioSummary;
-  final GetPortfolioHoldings _getPortfolioHoldings;
-  final SearchPortfolioHoldings _searchPortfolioHoldings;
-
-  PortfolioCubit(
-    this._getPortfolioSummary,
-    this._getPortfolioHoldings,
-    this._searchPortfolioHoldings,
-  ) : super(PortfolioInitial());
+  PortfolioCubit() : super(PortfolioInitial());
 
   Future<void> loadPortfolio(String userId) async {
     emit(PortfolioLoading());
     
     try {
-      // Load both summary and holdings in parallel
-      final results = await Future.wait([
-        _getPortfolioSummary(userId),
-        _getPortfolioHoldings(userId),
-      ]);
+      // Mock implementation for now - replace with actual service calls
+      await Future.delayed(const Duration(milliseconds: 500));
       
-      final summary = results[0] as PortfolioSummary;
-      final holdings = results[1] as List<PortfolioHolding>;
+      // Create mock data
+      final summary = PortfolioSummary.empty(userId);
+      final holdings = <PortfolioHolding>[];
       
       emit(PortfolioLoaded(
         summary: summary,
@@ -53,13 +40,12 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         // Keep current state while refreshing, set refreshing to true
         emit(currentState.copyWith(isRefreshing: true));
         
-        final results = await Future.wait([
-          _getPortfolioSummary(userId),
-          _getPortfolioHoldings(userId),
-        ]);
+        // Mock delay
+        await Future.delayed(const Duration(seconds: 1));
         
-        final summary = results[0] as PortfolioSummary;
-        final holdings = results[1] as List<PortfolioHolding>;
+        // Create mock refreshed data
+        final summary = PortfolioSummary.empty(userId);
+        final holdings = <PortfolioHolding>[];
         
         emit(currentState.copyWith(
           summary: summary,
@@ -84,7 +70,8 @@ class PortfolioCubit extends Cubit<PortfolioState> {
             searchResults: [],
           ));
         } else {
-          final searchResults = await _searchPortfolioHoldings(userId, query);
+          // Mock search - in real implementation, call search service
+          final searchResults = <PortfolioHolding>[];
           emit(currentState.copyWith(
             searchQuery: query,
             searchResults: searchResults,

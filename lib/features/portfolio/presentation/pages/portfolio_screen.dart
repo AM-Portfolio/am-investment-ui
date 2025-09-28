@@ -20,12 +20,7 @@ class PortfolioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PortfolioCubit(
-        // TODO: Get dependencies from DI container
-        null!, // GetPortfolioSummary
-        null!, // GetPortfolioHoldings  
-        null!, // SearchPortfolioHoldings
-      )..loadPortfolio(userId),
+      create: (context) => PortfolioCubit()..loadPortfolio(userId),
       child: PortfolioView(userId: userId),
     );
   }

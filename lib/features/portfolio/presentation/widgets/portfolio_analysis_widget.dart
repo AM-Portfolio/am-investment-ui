@@ -27,6 +27,9 @@ class PortfolioAnalysisWidget extends StatelessWidget {
                 Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
                 const SizedBox(height: 16),
                 Text('Error: ${state.message}'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.read<PortfolioCubit>().loadPortfolio(userId),
                   child: const Text('Retry'),
                 ),
               ],
