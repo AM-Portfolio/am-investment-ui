@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'file_upload_models.dart';
+import '../../models/file_upload_models.dart';
 import 'drag_drop_area.dart';
-import 'file_list.dart';
+import '../displays/file_list.dart';
 
 /// Complete file upload widget that handles drag & drop and file management
 class FileUploadWidget extends StatefulWidget {

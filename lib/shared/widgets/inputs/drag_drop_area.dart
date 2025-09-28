@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'file_upload_models.dart';
+import '../../models/file_upload_models.dart';
 
 /// Drag and drop area for file upload
 class DragDropArea extends StatelessWidget {
