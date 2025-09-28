@@ -7,6 +7,7 @@ import '../widgets/portfolio_analysis_widget.dart';
 import '../widgets/portfolio_sidebar.dart';
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Main portfolio screen with clean architecture using BLoC
 class PortfolioScreen extends StatelessWidget {
@@ -19,8 +20,14 @@ class PortfolioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.info('Building PortfolioScreen for userId: $userId', tag: 'PortfolioScreen');
+    AppLogger.userAction('Navigate to Portfolio', tag: 'PortfolioScreen', context: {'userId': userId});
+    
     return BlocProvider(
-      create: (context) => PortfolioCubit()..loadPortfolio(userId),
+      create: (context) {
+        AppLogger.debug('Creating PortfolioCubit and loading portfolio', tag: 'PortfolioScreen');
+        return PortfolioCubit()..loadPortfolio(userId);
+      },
       child: PortfolioView(userId: userId),
     );
   }
@@ -44,17 +51,23 @@ class _PortfolioViewState extends State<PortfolioView> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
+    AppLogger.debug('Building PortfolioView - isMobile: $isMobile, userId: ${widget.userId}', tag: 'PortfolioView');
     
     return BlocListener<PortfolioCubit, PortfolioState>(
       listener: (context, state) {
         // Handle any state changes like showing errors, etc.
+        AppLogger.stateChange('Previous', state.runtimeType.toString(), tag: 'PortfolioView');
+        
         if (state is PortfolioError) {
+          AppLogger.error('Portfolio error occurred: ${state.message}', tag: 'PortfolioView');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.message}'),
               backgroundColor: Colors.red,
             ),
           );
+        } else if (state is PortfolioLoaded) {
+          AppLogger.info('Portfolio loaded successfully - ${state.holdings.length} holdings', tag: 'PortfolioView');
         }
       },
       child: Scaffold(
@@ -64,6 +77,8 @@ class _PortfolioViewState extends State<PortfolioView> {
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
+                AppLogger.userAction('Refresh Portfolio', tag: 'PortfolioView', 
+                    context: {'userId': widget.userId});
                 // Refresh portfolio data using cubit
                 context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
               },

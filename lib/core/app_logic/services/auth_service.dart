@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/asset_constants.dart';
+import '../../utils/logger.dart';
 
 /// Authentication service for handling user login, registration, and session management.
 class AuthService {
@@ -35,13 +36,19 @@ class AuthService {
 
   /// Load test users from JSON file
   Future<void> _loadTestUsers() async {
+    AppLogger.methodEntry('_loadTestUsers', tag: 'AuthService');
+    
     try {
+      AppLogger.info('Loading test users from asset file', tag: 'AuthService');
+      
       final String jsonString = await rootBundle.loadString(
         AssetPaths.testUsers,
       );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       final List<dynamic> usersList = jsonData['users'];
 
+      AppLogger.debug('Parsing ${usersList.length} test users', tag: 'AuthService');
+      
       // Create a map for quick lookup by email, username, and phone
       for (var userData in usersList) {
         final testUser = TestUser.fromJson(userData);
@@ -51,67 +58,99 @@ class AuthService {
       }
 
       _testUsersLoaded = true;
-      debugPrint('Loaded ${usersList.length} test users');
+      AppLogger.info('Successfully loaded ${usersList.length} test users', tag: 'AuthService');
+      AppLogger.methodExit('_loadTestUsers', tag: 'AuthService', result: 'success');
     } catch (e, stackTrace) {
-      // Log detailed error information
-      debugPrint('Error loading test users from ${AssetPaths.testUsers}: $e');
-      debugPrint('Stack trace: $stackTrace');
+      AppLogger.error('Failed to load test users from ${AssetPaths.testUsers}', 
+          tag: 'AuthService', error: e, stackTrace: stackTrace);
+      AppLogger.methodExit('_loadTestUsers', tag: 'AuthService', result: 'error');
     
       // Throw meaningful error with context
       if (e.toString().contains('Unable to load asset')) {
-        throw Exception('Failed to load test users: Asset file ${AssetPaths.testUsers} not found. Ensure the file exists and is properly listed in pubspec.yaml assets section.');
+        final errorMsg = 'Failed to load test users: Asset file ${AssetPaths.testUsers} not found. Ensure the file exists and is properly listed in pubspec.yaml assets section.';
+        AppLogger.error(errorMsg, tag: 'AuthService');
+        throw Exception(errorMsg);
       } else if (e.toString().contains('FormatException')) {
-        throw Exception('Failed to load test users: Invalid JSON format in ${AssetPaths.testUsers}. Please check the file syntax.');
+        final errorMsg = 'Failed to load test users: Invalid JSON format in ${AssetPaths.testUsers}. Please check the file syntax.';
+        AppLogger.error(errorMsg, tag: 'AuthService');
+        throw Exception(errorMsg);
       } else {
-        throw Exception('Failed to load test users from ${AssetPaths.testUsers}: ${e.toString()}');
+        final errorMsg = 'Failed to load test users from ${AssetPaths.testUsers}: ${e.toString()}';
+        AppLogger.error(errorMsg, tag: 'AuthService');
+        throw Exception(errorMsg);
       }
     }
   }
 
   /// Initialize the auth service and restore session if available
   Future<void> initialize() async {
+    AppLogger.methodEntry('initialize', tag: 'AuthService');
+    
     try {
+      AppLogger.info('Initializing AuthService', tag: 'AuthService');
+      
       // Ensure test users are loaded
       if (!_testUsersLoaded) {
+        AppLogger.debug('Test users not loaded, loading now', tag: 'AuthService');
         await _loadTestUsers();
       }
 
+      AppLogger.debug('Checking for existing session', tag: 'AuthService');
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_tokenKey);
       final userData = prefs.getString(_userKey);
 
       if (token != null && userData != null) {
+        AppLogger.info('Found existing session, restoring user', tag: 'AuthService');
         final user = User.fromJson(jsonDecode(userData));
         _currentState = AuthState.authenticated(user, token);
         _authStateController.add(_currentState);
+        AppLogger.info('Session restored successfully for user: ${user.email}', tag: 'AuthService');
+      } else {
+        AppLogger.debug('No existing session found', tag: 'AuthService');
       }
+      
+      AppLogger.methodExit('initialize', tag: 'AuthService', result: 'success');
     } catch (e) {
-      debugPrint('Error initializing auth service: $e');
+      AppLogger.error('Error initializing auth service', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
       // Clear any potentially corrupted data
       await _clearAuthData();
+      AppLogger.methodExit('initialize', tag: 'AuthService', result: 'error');
     }
   }
 
   /// Login with identifier (email, username, or phone) and password
   Future<AuthResult> login(String identifier, String password) async {
+    AppLogger.methodEntry('login', tag: 'AuthService', params: {'identifier': identifier});
+    AppLogger.userAction('User attempting login', tag: 'AuthService', 
+        context: {'identifier': identifier, 'identifierType': _getIdentifierType(identifier)});
+    
     try {
+      AppLogger.info('Starting login process', tag: 'AuthService');
       _currentState = AuthState.loading();
       _authStateController.add(_currentState);
+      AppLogger.stateChange('unauthenticated', 'loading', tag: 'AuthService');
 
       // Simulate network delay in debug mode
       if (kDebugMode) {
+        AppLogger.debug('Debug mode: Adding network delay', tag: 'AuthService');
         await Future.delayed(const Duration(seconds: 1));
       }
 
       // Ensure test users are loaded
       if (!_testUsersLoaded) {
+        AppLogger.debug('Test users not loaded, loading now', tag: 'AuthService');
         await _loadTestUsers();
       }
 
       // Check for test users first
       if (_testUsers.containsKey(identifier)) {
+        AppLogger.info('Found test user for identifier', tag: 'AuthService');
         final testUser = _testUsers[identifier]!;
         if (testUser.password == password) {
+          AppLogger.info('Test user authentication successful for user: ${testUser.email} (ID: ${testUser.id})', tag: 'AuthService');
+          
           final user = User(
             id: testUser.id,
             email: testUser.email,
@@ -124,19 +163,28 @@ class AuthService {
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'authenticated', tag: 'AuthService');
+          AppLogger.userAction('User login successful', tag: 'AuthService', 
+              context: {'userId': user.id, 'userEmail': user.email});
+          AppLogger.methodExit('login', tag: 'AuthService', result: 'success');
 
           return AuthResult.success();
         } else {
+          AppLogger.warning('Invalid password for test user', tag: 'AuthService');
           _currentState = AuthState.error('Invalid password');
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'invalid_password');
+          AppLogger.methodExit('login', tag: 'AuthService', result: 'failure');
           return AuthResult.failure('Invalid password');
         }
       }
 
       // Always use demo mode in debug builds to avoid network errors
       if (kDebugMode) {
+        AppLogger.debug('Debug mode: Attempting demo authentication', tag: 'AuthService');
         // If not a test user but contains 'test', also allow login
         if (identifier.contains('test')) {
+          AppLogger.info('Debug mode: Creating demo user for test identifier', tag: 'AuthService');
           final user = User(
             id: '999',
             email: identifier.contains('@') ? identifier : 'test@example.com',
@@ -149,35 +197,53 @@ class AuthService {
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'authenticated', tag: 'AuthService', event: 'demo_mode');
+          AppLogger.userAction('Demo user login successful', tag: 'AuthService');
+          AppLogger.methodExit('login', tag: 'AuthService', result: 'success');
 
           return AuthResult.success();
         }
 
+        AppLogger.warning('Debug mode: Invalid credentials for non-test identifier', tag: 'AuthService');
         _currentState = AuthState.error('Invalid credentials');
         _authStateController.add(_currentState);
+        AppLogger.stateChange('loading', 'error', tag: 'AuthService');
+        AppLogger.methodExit('login', tag: 'AuthService', result: 'failure');
         return AuthResult.failure('Invalid credentials');
       }
 
       // In production, make actual API call
+      AppLogger.info('Production mode: Making API call for authentication', tag: 'AuthService');
       try {
         // Determine login type (email, username, or phone)
         final Map<String, String> requestBody = {'password': password};
+        String identifierType;
 
         if (identifier.contains('@')) {
           requestBody['email'] = identifier;
+          identifierType = 'email';
         } else if (identifier.startsWith('+')) {
           requestBody['phone'] = identifier;
+          identifierType = 'phone';
         } else {
           requestBody['username'] = identifier;
+          identifierType = 'username';
         }
+        
+        AppLogger.debug('API request prepared for $identifierType to $_baseUrl/auth/login', tag: 'AuthService');
 
+        AppLogger.apiRequest('POST', '$_baseUrl/auth/login', tag: 'AuthService');
+        
         final response = await http.post(
           Uri.parse('$_baseUrl/auth/login'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(requestBody),
         );
 
+        AppLogger.apiResponse('POST', '$_baseUrl/auth/login', response.statusCode, tag: 'AuthService');
+
         if (response.statusCode == 200) {
+          AppLogger.info('API authentication successful', tag: 'AuthService');
           final data = jsonDecode(response.body);
           final user = User.fromJson(data['user']);
           final token = data['token'];
@@ -185,29 +251,51 @@ class AuthService {
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'authenticated', tag: 'AuthService', event: 'api_success');
+          AppLogger.userAction('API user login successful', tag: 'AuthService', 
+              context: {'userId': user.id, 'userEmail': user.email});
+          AppLogger.methodExit('login', tag: 'AuthService', result: 'success');
 
           return AuthResult.success();
         } else {
           final error = _parseErrorResponse(response);
+          AppLogger.warning('API authentication failed: $error (Status: ${response.statusCode})', tag: 'AuthService');
           _currentState = AuthState.error(error);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'api_failure');
+          AppLogger.methodExit('login', tag: 'AuthService', result: 'failure');
 
           return AuthResult.failure(error);
         }
       } catch (e) {
         final error = 'Network error: Unable to connect to server';
+        AppLogger.error('Network error during login API call', tag: 'AuthService', 
+            error: e, stackTrace: StackTrace.current);
         _currentState = AuthState.error(error);
         _authStateController.add(_currentState);
+        AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'network_error');
+        AppLogger.methodExit('login', tag: 'AuthService', result: 'network_error');
 
         return AuthResult.failure(error);
       }
     } catch (e) {
       final error = 'Login failed: ${e.toString()}';
+      AppLogger.error('Unexpected error during login', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
       _currentState = AuthState.error(error);
       _authStateController.add(_currentState);
+      AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'unexpected_error');
+      AppLogger.methodExit('login', tag: 'AuthService', result: 'unexpected_error');
 
       return AuthResult.failure(error);
     }
+  }
+  
+  /// Helper method to determine identifier type for logging
+  String _getIdentifierType(String identifier) {
+    if (identifier.contains('@')) return 'email';
+    if (identifier.startsWith('+')) return 'phone';
+    return 'username';
   }
 
   /// Register a new user
@@ -218,17 +306,26 @@ class AuthService {
     String? username,
     String? phone,
   }) async {
+    AppLogger.methodEntry('register', tag: 'AuthService', 
+        params: {'name': name, 'email': email, 'username': username, 'phone': phone});
+    AppLogger.userAction('User attempting registration', tag: 'AuthService', 
+        context: {'email': email, 'name': name});
+    
     try {
+      AppLogger.info('Starting registration process', tag: 'AuthService');
       _currentState = AuthState.loading();
       _authStateController.add(_currentState);
+      AppLogger.stateChange('unauthenticated', 'loading', tag: 'AuthService');
 
       // Simulate network delay in debug mode
       if (kDebugMode) {
+        AppLogger.debug('Debug mode: Adding network delay', tag: 'AuthService');
         await Future.delayed(const Duration(seconds: 1));
       }
 
       // Always use demo mode in debug builds to avoid network errors
       if (kDebugMode) {
+        AppLogger.info('Debug mode: Creating demo user for registration', tag: 'AuthService');
         final user = User(
           id: '456',
           email: email,
@@ -241,11 +338,16 @@ class AuthService {
         await _saveAuthData(user, token);
         _currentState = AuthState.authenticated(user, token);
         _authStateController.add(_currentState);
+        AppLogger.stateChange('loading', 'authenticated', tag: 'AuthService', event: 'demo_registration');
+        AppLogger.userAction('Demo user registration successful', tag: 'AuthService', 
+            context: {'userId': user.id, 'userEmail': user.email});
+        AppLogger.methodExit('register', tag: 'AuthService', result: 'success');
 
         return AuthResult.success();
       }
 
       // In production, make actual API call
+      AppLogger.info('Production mode: Making API call for registration', tag: 'AuthService');
       try {
         final requestBody = {
           'name': name,
@@ -261,13 +363,18 @@ class AuthService {
           requestBody['phone'] = phone;
         }
 
+        AppLogger.apiRequest('POST', '$_baseUrl/auth/register', tag: 'AuthService');
+        
         final response = await http.post(
           Uri.parse('$_baseUrl/auth/register'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(requestBody),
         );
+        
+        AppLogger.apiResponse('POST', '$_baseUrl/auth/register', response.statusCode, tag: 'AuthService');
 
         if (response.statusCode == 201) {
+          AppLogger.info('API registration successful', tag: 'AuthService');
           final data = jsonDecode(response.body);
           final user = User.fromJson(data['user']);
           final token = data['token'];
@@ -275,26 +382,41 @@ class AuthService {
           await _saveAuthData(user, token);
           _currentState = AuthState.authenticated(user, token);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'authenticated', tag: 'AuthService', event: 'api_registration');
+          AppLogger.userAction('API user registration successful', tag: 'AuthService', 
+              context: {'userId': user.id, 'userEmail': user.email});
+          AppLogger.methodExit('register', tag: 'AuthService', result: 'success');
 
           return AuthResult.success();
         } else {
           final error = _parseErrorResponse(response);
+          AppLogger.warning('API registration failed: $error (Status: ${response.statusCode})', tag: 'AuthService');
           _currentState = AuthState.error(error);
           _authStateController.add(_currentState);
+          AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'api_registration_failure');
+          AppLogger.methodExit('register', tag: 'AuthService', result: 'failure');
 
           return AuthResult.failure(error);
         }
       } catch (e) {
         final error = 'Network error: Unable to connect to server';
+        AppLogger.error('Network error during registration API call', tag: 'AuthService', 
+            error: e, stackTrace: StackTrace.current);
         _currentState = AuthState.error(error);
         _authStateController.add(_currentState);
+        AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'network_error');
+        AppLogger.methodExit('register', tag: 'AuthService', result: 'network_error');
 
         return AuthResult.failure(error);
       }
     } catch (e) {
       final error = 'Registration failed: ${e.toString()}';
+      AppLogger.error('Unexpected error during registration', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
       _currentState = AuthState.error(error);
       _authStateController.add(_currentState);
+      AppLogger.stateChange('loading', 'error', tag: 'AuthService', event: 'unexpected_error');
+      AppLogger.methodExit('register', tag: 'AuthService', result: 'unexpected_error');
 
       return AuthResult.failure(error);
     }
@@ -302,31 +424,64 @@ class AuthService {
 
   /// Logout the current user
   Future<void> logout() async {
+    AppLogger.methodEntry('logout', tag: 'AuthService');
+    AppLogger.userAction('User logging out', tag: 'AuthService');
+    
     try {
+      AppLogger.info('Clearing authentication data', tag: 'AuthService');
       await _clearAuthData();
       _currentState = AuthState.unauthenticated();
       _authStateController.add(_currentState);
+      AppLogger.stateChange('authenticated', 'unauthenticated', tag: 'AuthService');
+      AppLogger.info('User logout successful', tag: 'AuthService');
+      AppLogger.methodExit('logout', tag: 'AuthService', result: 'success');
     } catch (e) {
-      debugPrint('Error during logout: $e');
+      AppLogger.error('Error during logout', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
       // Still clear local state even if API call fails
       await _clearAuthData();
       _currentState = AuthState.unauthenticated();
       _authStateController.add(_currentState);
+      AppLogger.stateChange('authenticated', 'unauthenticated', tag: 'AuthService', event: 'force_logout');
+      AppLogger.methodExit('logout', tag: 'AuthService', result: 'error_but_cleared');
     }
   }
 
   /// Save authentication data to persistent storage
   Future<void> _saveAuthData(User user, String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
-    await prefs.setString(_userKey, jsonEncode(user.toJson()));
+    AppLogger.methodEntry('_saveAuthData', tag: 'AuthService', 
+        params: {'userId': user.id, 'userEmail': user.email});
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_tokenKey, token);
+      await prefs.setString(_userKey, jsonEncode(user.toJson()));
+      AppLogger.debug('Authentication data saved to persistent storage', tag: 'AuthService');
+      AppLogger.methodExit('_saveAuthData', tag: 'AuthService', result: 'success');
+    } catch (e) {
+      AppLogger.error('Failed to save authentication data', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('_saveAuthData', tag: 'AuthService', result: 'error');
+      rethrow;
+    }
   }
 
   /// Clear authentication data from persistent storage
   Future<void> _clearAuthData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_userKey);
+    AppLogger.methodEntry('_clearAuthData', tag: 'AuthService');
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_tokenKey);
+      await prefs.remove(_userKey);
+      AppLogger.debug('Authentication data cleared from persistent storage', tag: 'AuthService');
+      AppLogger.methodExit('_clearAuthData', tag: 'AuthService', result: 'success');
+    } catch (e) {
+      AppLogger.error('Failed to clear authentication data', tag: 'AuthService', 
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('_clearAuthData', tag: 'AuthService', result: 'error');
+      rethrow;
+    }
   }
 
   /// Parse error response from API

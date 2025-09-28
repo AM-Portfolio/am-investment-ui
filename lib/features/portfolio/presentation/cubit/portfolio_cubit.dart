@@ -2,27 +2,46 @@
 import 'portfolio_state.dart';
 import '../../internal/domain/entities/portfolio_summary.dart';
 import '../../internal/domain/entities/portfolio_holding.dart';
+import '../../../../core/utils/logger.dart';
 
 class PortfolioCubit extends Cubit<PortfolioState> {
   PortfolioCubit() : super(PortfolioInitial());
 
   Future<void> loadPortfolio(String userId) async {
+    AppLogger.methodEntry('loadPortfolio', tag: 'PortfolioCubit', params: {'userId': userId});
+    AppLogger.stateChange('${state.runtimeType}', 'PortfolioLoading', tag: 'PortfolioCubit');
+    
     emit(PortfolioLoading());
     
     try {
+      AppLogger.info('Starting portfolio data fetch', tag: 'PortfolioCubit');
+      
       // Mock implementation for now - replace with actual service calls
       await Future.delayed(const Duration(milliseconds: 500));
+      
+      AppLogger.debug('Creating mock portfolio data', tag: 'PortfolioCubit');
       
       // Create mock data
       final summary = PortfolioSummary.empty(userId);
       final holdings = <PortfolioHolding>[];
       
+      AppLogger.stateChange('PortfolioLoading', 'PortfolioLoaded', tag: 'PortfolioCubit');
+      AppLogger.info('Portfolio data loaded successfully (${holdings.length} holdings)', tag: 'PortfolioCubit');
+      
       emit(PortfolioLoaded(
         summary: summary,
         holdings: holdings,
       ));
+      
+      AppLogger.methodExit('loadPortfolio', tag: 'PortfolioCubit', result: 'success');
     } catch (error) {
+      AppLogger.stateChange('PortfolioLoading', 'PortfolioError', tag: 'PortfolioCubit', event: error.toString());
+      AppLogger.error('Failed to load portfolio', tag: 'PortfolioCubit', 
+          error: error, stackTrace: StackTrace.current);
+      
       emit(PortfolioError(error.toString()));
+      
+      AppLogger.methodExit('loadPortfolio', tag: 'PortfolioCubit', result: 'error');
     }
   }
 

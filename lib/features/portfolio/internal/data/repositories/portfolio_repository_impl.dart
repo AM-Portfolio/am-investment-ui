@@ -3,7 +3,8 @@ import '../../domain/entities/portfolio_holding.dart';
 import '../../domain/entities/portfolio_summary.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 import '../datasources/portfolio_remote_data_source.dart';
-import '../models/portfolio_dto.dart';
+import '../dtos/portfolio_dto.dart';
+import '../../../../../core/utils/logger.dart';
 
 /// Implementation of PortfolioRepository
 class PortfolioRepositoryImpl implements PortfolioRepository {
@@ -17,15 +18,32 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
 
   @override
   Future<PortfolioHoldings> getPortfolioHoldings(String userId) async {
-    final dto = await _remoteDataSource.getPortfolioHoldings(userId);
-    final domain = dto.toDomain();
+    AppLogger.methodEntry('getPortfolioHoldings', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
     
-    // Update stream if exists
-    if (_holdingsControllers.containsKey(userId)) {
-      _holdingsControllers[userId]!.add(domain);
+    try {
+      AppLogger.info('Fetching portfolio holdings from data source', tag: 'PortfolioRepository');
+      final dto = await _remoteDataSource.getPortfolioHoldings(userId);
+      
+      AppLogger.debug('Converting DTO to domain entity', tag: 'PortfolioRepository');
+      final domain = dto.toDomain();
+      
+      // Update stream if exists
+      if (_holdingsControllers.containsKey(userId)) {
+        AppLogger.debug('Updating holdings stream for user', tag: 'PortfolioRepository');
+        _holdingsControllers[userId]!.add(domain);
+      }
+      
+      AppLogger.info('Portfolio holdings retrieved successfully (${domain.holdings.length} holdings)', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioRepository', result: 'success');
+      
+      return domain;
+    } catch (e) {
+      AppLogger.error('Failed to get portfolio holdings', tag: 'PortfolioRepository', 
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
     }
-    
-    return domain;
   }
 
   @override

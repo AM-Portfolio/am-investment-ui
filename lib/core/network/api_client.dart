@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dtos/exception/exception_dtos.dart';
+import '../utils/logger.dart';
 
 /// Base API client for handling HTTP requests
 class ApiClient {
@@ -68,16 +69,28 @@ class ApiClient {
     Map<String, dynamic>? queryParams,
     required T Function(dynamic data) parser,
   }) async {
+    final stopwatch = Stopwatch()..start();
     try {
       final uri = Uri.parse(
         '$baseUrl/$endpoint',
       ).replace(queryParameters: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
+      
+      AppLogger.apiRequest('GET', uri.toString(), tag: 'ApiClient', headers: requestHeaders);
 
       final response = await _client.get(uri, headers: requestHeaders);
+      stopwatch.stop();
+      
+      AppLogger.apiResponse('GET', uri.toString(), response.statusCode, 
+          tag: 'ApiClient', duration: stopwatch.elapsedMilliseconds);
+      
       return _handleResponse(response, parser);
     } catch (e) {
+      stopwatch.stop();
+      AppLogger.error('GET request failed: $endpoint', 
+          tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
+      
       if (e is ApiException) {
         rethrow;
       }
@@ -93,21 +106,33 @@ class ApiClient {
     dynamic body,
     required T Function(dynamic data) parser,
   }) async {
+    final stopwatch = Stopwatch()..start();
     try {
       final uri = Uri.parse(
         '$baseUrl/$endpoint',
       ).replace(queryParameters: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
+      
+      AppLogger.apiRequest('POST', uri.toString(), tag: 'ApiClient', 
+          headers: requestHeaders, body: body);
 
       final response = await _client.post(
         uri,
         headers: requestHeaders,
         body: body != null ? jsonEncode(body) : null,
       );
+      
+      stopwatch.stop();
+      AppLogger.apiResponse('POST', uri.toString(), response.statusCode, 
+          tag: 'ApiClient', duration: stopwatch.elapsedMilliseconds);
 
       return _handleResponse(response, parser);
     } catch (e) {
+      stopwatch.stop();
+      AppLogger.error('POST request failed: $endpoint', 
+          tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
+      
       if (e is ApiException) {
         rethrow;
       }

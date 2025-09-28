@@ -4,6 +4,7 @@ import '../domain/usecases/get_portfolio_holdings.dart';
 import '../domain/usecases/get_portfolio_summary.dart';
 import '../domain/usecases/refresh_portfolio_data.dart';
 import '../domain/usecases/search_portfolio_holdings.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Portfolio orchestration service for complex workflows.
 /// 
@@ -35,25 +36,38 @@ class PortfolioService {
   /// 3. Calculates performance analytics
   /// 4. Returns success/failure result
   Future<bool> syncPortfolioWithAnalytics(String userId) async {
+    AppLogger.methodEntry('syncPortfolioWithAnalytics', tag: 'PortfolioService', 
+        params: {'userId': userId});
+    
     try {
+      AppLogger.info('Starting portfolio sync with analytics workflow', tag: 'PortfolioService');
+      
       // Step 1: Refresh data from remote source
+      AppLogger.debug('Step 1: Refreshing portfolio data from remote source', tag: 'PortfolioService');
       await _refreshPortfolioData(userId);
       
       // Step 2: Get updated holdings and summary in parallel to verify sync
+      AppLogger.debug('Step 2: Getting updated holdings and summary in parallel', tag: 'PortfolioService');
       await Future.wait([
         _getPortfolioHoldings(userId),
         _getPortfolioSummary(userId),
       ]);
       
       // Step 3: Update performance analytics
+      AppLogger.debug('Step 3: Updating performance analytics', tag: 'PortfolioService');
       await Future.wait([
         _analyzePortfolioPerformance.getTopPerformers(userId),
         _analyzePortfolioPerformance.getSectorAllocation(userId),
       ]);
       
+      AppLogger.info('Portfolio sync with analytics completed successfully', tag: 'PortfolioService');
+      AppLogger.methodExit('syncPortfolioWithAnalytics', tag: 'PortfolioService', result: 'success');
+      
       return true;
     } catch (error) {
-      // Log error in real implementation
+      AppLogger.error('Portfolio sync with analytics failed', tag: 'PortfolioService', 
+          error: error, stackTrace: StackTrace.current);
+      AppLogger.methodExit('syncPortfolioWithAnalytics', tag: 'PortfolioService', result: 'error');
       return false;
     }
   }

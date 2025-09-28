@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Portfolio holdings widget showing detailed holdings list
 class PortfolioHoldingsWidget extends StatelessWidget {
@@ -15,11 +16,19 @@ class PortfolioHoldingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.debug('Building PortfolioHoldingsWidget for userId: $userId', tag: 'PortfolioHoldingsWidget');
+    
     return BlocBuilder<PortfolioCubit, PortfolioState>(
       builder: (context, state) {
+        AppLogger.debug('Portfolio state changed in holdings widget: ${state.runtimeType}', 
+            tag: 'PortfolioHoldingsWidget');
+        
         if (state is PortfolioLoading) {
+          AppLogger.debug('Showing loading indicator for portfolio holdings', tag: 'PortfolioHoldingsWidget');
           return const Center(child: CircularProgressIndicator());
         } else if (state is PortfolioError) {
+          AppLogger.warning('Showing error state in portfolio holdings: ${state.message}', 
+              tag: 'PortfolioHoldingsWidget');
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

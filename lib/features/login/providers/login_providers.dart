@@ -12,6 +12,7 @@ import '../internal/data/repositories/login_repository_impl.dart';
 import '../internal/data/datasources/login_remote_data_source.dart';
 import '../internal/services/login_service.dart';
 import '../../../di/app_providers.dart';
+import '../../../core/utils/logger.dart';
 
 part 'login_providers.g.dart';
 
@@ -81,29 +82,61 @@ class AuthStateNotifier extends _$AuthStateNotifier {
 
   /// Login user
   Future<void> login(String email, String password) async {
+    AppLogger.methodEntry('login', tag: 'AuthStateNotifier', params: {'email': email});
+    AppLogger.stateChange('idle', 'loading', tag: 'AuthStateNotifier');
+    
     state = state.copyWith(isLoading: true, errorMessage: null);
     
     try {
       final loginService = ref.read(loginServiceProvider);
+      AppLogger.info('Calling login service', tag: 'AuthStateNotifier');
+      
       final authState = await loginService.loginWithValidation(email, password);
+      
+      AppLogger.stateChange('loading', 'authenticated', tag: 'AuthStateNotifier');
+      AppLogger.info('Login successful, updating state', tag: 'AuthStateNotifier');
+      
       state = authState;
+      
+      AppLogger.methodExit('login', tag: 'AuthStateNotifier', result: 'success');
     } catch (error) {
+      AppLogger.stateChange('loading', 'error', tag: 'AuthStateNotifier', event: error.toString());
+      AppLogger.error('Login failed in AuthStateNotifier', tag: 'AuthStateNotifier', 
+          error: error, stackTrace: StackTrace.current);
+      
       state = state.copyWith(
         isLoading: false,
         errorMessage: error.toString(),
       );
+      
+      AppLogger.methodExit('login', tag: 'AuthStateNotifier', result: 'error');
     }
   }
 
   /// Logout user
   Future<void> logout() async {
+    AppLogger.methodEntry('logout', tag: 'AuthStateNotifier');
+    AppLogger.stateChange('authenticated', 'logging-out', tag: 'AuthStateNotifier');
+    
     try {
       final loginService = ref.read(loginServiceProvider);
+      AppLogger.info('Calling logout service', tag: 'AuthStateNotifier');
+      
       await loginService.secureLogout();
+      
+      AppLogger.stateChange('logging-out', 'logged-out', tag: 'AuthStateNotifier');
+      AppLogger.info('Logout successful, clearing state', tag: 'AuthStateNotifier');
+      
       state = const AuthState();
+      
+      AppLogger.methodExit('logout', tag: 'AuthStateNotifier', result: 'success');
     } catch (error) {
+      AppLogger.warning('Logout service failed, forcing logout', tag: 'AuthStateNotifier', error: error);
+      
       // Force logout even if server call fails
       state = const AuthState();
+      
+      AppLogger.methodExit('logout', tag: 'AuthStateNotifier', result: 'forced');
     }
   }
 

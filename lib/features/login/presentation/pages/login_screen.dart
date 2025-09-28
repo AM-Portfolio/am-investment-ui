@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/platform_utils.dart';
 import '../../providers/login_providers.dart';
+import '../../../../core/utils/logger.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   final Function(String userId)? onLogin;
@@ -28,20 +29,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    AppLogger.userAction('Login attempt', tag: 'LoginScreen', context: {
+      'email': _emailController.text,
+      'hasPassword': _passwordController.text.isNotEmpty
+    });
+    
+    if (!_formKey.currentState!.validate()) {
+      AppLogger.info('Login validation failed', tag: 'LoginScreen');
+      return;
+    }
 
     try {
+      AppLogger.info('Starting login process', tag: 'LoginScreen');
       // Use Riverpod authentication provider
       await ref.read(authStateNotifierProvider.notifier).login(
         _emailController.text,
         _passwordController.text,
       );
       
+      AppLogger.info('Login successful for user: ${_emailController.text}', tag: 'LoginScreen');
+      
       // Call the optional callback for compatibility
       if (widget.onLogin != null) {
         widget.onLogin!(_emailController.text);
       }
     } catch (error) {
+      AppLogger.error('Login failed', tag: 'LoginScreen', error: error, 
+          stackTrace: StackTrace.current);
+      
       // Error handling is managed by the provider, but show a snackbar for user feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -55,18 +70,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleDemoLogin() async {
+    AppLogger.userAction('Demo login attempt', tag: 'LoginScreen');
+    
     try {
+      AppLogger.info('Starting demo login process', tag: 'LoginScreen');
       // Demo login with predefined credentials
       await ref.read(authStateNotifierProvider.notifier).login(
         "ssd2658",
         "password",
       );
       
+      AppLogger.info('Demo login successful', tag: 'LoginScreen');
+      
       // Call the optional callback for compatibility
       if (widget.onLogin != null) {
         widget.onLogin!("ssd2658");
       }
     } catch (error) {
+      AppLogger.error('Demo login failed', tag: 'LoginScreen', error: error);
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

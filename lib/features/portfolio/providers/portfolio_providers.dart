@@ -12,6 +12,7 @@ import '../internal/data/repositories/portfolio_repository_impl.dart';
 import '../internal/data/datasources/portfolio_remote_data_source.dart';
 import '../internal/services/portfolio_service.dart';
 import '../../../di/app_providers.dart';
+import '../../../core/utils/logger.dart';
 
 part 'portfolio_providers.g.dart';
 
@@ -27,6 +28,7 @@ PortfolioRemoteDataSource portfolioRemoteDataSource(PortfolioRemoteDataSourceRef
 
 @riverpod
 PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
+  AppLogger.debug('Creating PortfolioRepository instance', tag: 'PortfolioProviders');
   final remoteDataSource = ref.watch(portfolioRemoteDataSourceProvider);
   return PortfolioRepositoryImpl(remoteDataSource: remoteDataSource);
 }
@@ -34,12 +36,14 @@ PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
 /// Use case providers
 @riverpod
 GetPortfolioHoldings getPortfolioHoldings(GetPortfolioHoldingsRef ref) {
+  AppLogger.debug('Creating GetPortfolioHoldings use case', tag: 'PortfolioProviders');
   final repository = ref.watch(portfolioRepositoryProvider);
   return GetPortfolioHoldings(repository);
 }
 
 @riverpod
 GetPortfolioSummary getPortfolioSummary(GetPortfolioSummaryRef ref) {
+  AppLogger.debug('Creating GetPortfolioSummary use case', tag: 'PortfolioProviders');
   final repository = ref.watch(portfolioRepositoryProvider);
   return GetPortfolioSummary(repository);
 }
@@ -65,6 +69,7 @@ SearchPortfolioHoldings searchPortfolioHoldings(SearchPortfolioHoldingsRef ref) 
 /// Service layer providers
 @riverpod
 PortfolioService portfolioService(PortfolioServiceRef ref) {
+  AppLogger.debug('Creating PortfolioService instance', tag: 'PortfolioProviders');
   final getHoldings = ref.watch(getPortfolioHoldingsProvider);
   final getSummary = ref.watch(getPortfolioSummaryProvider);
   final refreshData = ref.watch(refreshPortfolioDataProvider);

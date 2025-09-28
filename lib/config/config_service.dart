@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'app_config.dart';
 import 'app_properties.dart';
 import '../core/constants/constants.dart';
+import '../core/utils/logger.dart';
 
 /// Configuration service that loads and manages application configuration
 /// Similar to Spring Boot's configuration management
@@ -52,6 +53,9 @@ class ConfigService with PropertyInjection {
       ),
     );
 
+    // Initialize logger after configuration is loaded
+    AppLogger.initialize();
+    
     _isInitialized = true;
 
     if (kDebugMode) {

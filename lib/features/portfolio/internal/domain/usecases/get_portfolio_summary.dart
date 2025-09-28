@@ -1,5 +1,6 @@
 import '../entities/portfolio_summary.dart';
 import '../repositories/portfolio_repository.dart';
+import '../../../../../core/utils/logger.dart';
 
 /// Use case for getting portfolio summary
 class GetPortfolioSummary {
@@ -9,11 +10,28 @@ class GetPortfolioSummary {
 
   /// Execute the use case
   Future<PortfolioSummary> call(String userId) async {
+    AppLogger.methodEntry('GetPortfolioSummary.call', tag: 'GetPortfolioSummary', 
+        params: {'userId': userId});
+    
     if (userId.isEmpty) {
+      AppLogger.error('User ID validation failed - empty userId', tag: 'GetPortfolioSummary');
       throw ArgumentError('User ID cannot be empty');
     }
 
-    return await _repository.getPortfolioSummary(userId);
+    try {
+      AppLogger.info('Executing get portfolio summary use case', tag: 'GetPortfolioSummary');
+      final result = await _repository.getPortfolioSummary(userId);
+      
+      AppLogger.info('Portfolio summary use case completed successfully', tag: 'GetPortfolioSummary');
+      AppLogger.methodExit('GetPortfolioSummary.call', tag: 'GetPortfolioSummary', result: 'success');
+      
+      return result;
+    } catch (e) {
+      AppLogger.error('Portfolio summary use case failed', tag: 'GetPortfolioSummary', 
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('GetPortfolioSummary.call', tag: 'GetPortfolioSummary', result: 'error');
+      rethrow;
+    }
   }
 
   /// Execute with stream for real-time updates

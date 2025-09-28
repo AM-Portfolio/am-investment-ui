@@ -10,6 +10,7 @@ import '../../../../config/config_service.dart';
 import '../../../network/document_client.dart';
 import '../../../network/dtos/document/document_dtos.dart';
 import '../../../errors/exception.dart';
+import '../../utils/logger.dart';
 
 /// Concrete implementation of DocumentRepository
 /// Handles API calls and data transformation for document uploads
@@ -31,6 +32,15 @@ class DocumentRepositoryImpl implements DocumentRepository {
     String? description,
     Map<String, String>? metadata,
   }) async {
+    AppLogger.methodEntry('uploadDocument', tag: 'DocumentRepository', params: {
+      'fileName': fileName,
+      'category': category.toString(),
+      'portfolioId': portfolioId,
+      'userId': userId,
+      'description': description,
+      'platform': kIsWeb ? 'web' : 'mobile'
+    });
+    
     try {
       DocumentUploadResponse apiResponse;
 

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../shared/core/filters/filter_models.dart';
 import 'portfolio_filter_provider.dart';
+import '../../../core/utils/logger.dart';
 
 /// State for portfolio filter functionality
 abstract class PortfolioFilterState extends Equatable {
@@ -93,11 +94,21 @@ class PortfolioFilterCubit extends Cubit<PortfolioFilterState> {
   
   /// Initialize filters with portfolio items
   void initializeFilters(List<dynamic> items) {
+    AppLogger.methodEntry('initializeFilters', tag: 'PortfolioFilterCubit', 
+        params: {'itemCount': items.length});
+    
     try {
+      AppLogger.stateChange(state.runtimeType.toString(), 'PortfolioFilterLoading', 
+          tag: 'PortfolioFilterCubit');
       emit(PortfolioFilterLoading());
       
+      AppLogger.debug('Getting filter criteria and extracting options', tag: 'PortfolioFilterCubit');
       final filterCriteria = _filterProvider.getFilterCriteria();
       final filterOptions = _filterProvider.extractFilterOptions(items);
+      
+      AppLogger.stateChange('PortfolioFilterLoading', 'PortfolioFilterSuccess', 
+          tag: 'PortfolioFilterCubit');
+      AppLogger.info('Filter initialization completed (${filterCriteria.length} criteria)', tag: 'PortfolioFilterCubit');
       
       emit(PortfolioFilterSuccess(
         originalItems: items,
@@ -106,17 +117,30 @@ class PortfolioFilterCubit extends Cubit<PortfolioFilterState> {
         activeFilterCount: 0,
         filterOptions: filterOptions,
       ));
+      
+      AppLogger.methodExit('initializeFilters', tag: 'PortfolioFilterCubit', result: 'success');
     } catch (e) {
+      AppLogger.error('Failed to initialize filters', tag: 'PortfolioFilterCubit', 
+          error: e, stackTrace: StackTrace.current);
       emit(PortfolioFilterError(message: 'Failed to initialize filters: $e'));
     }
   }
   
   /// Apply filters to the portfolio items
   void applyFilters(List<FilterCriteria> filters) {
+    AppLogger.methodEntry('applyFilters', tag: 'PortfolioFilterCubit', 
+        params: {'filterCount': filters.length});
+    
     final currentState = state;
-    if (currentState is! PortfolioFilterSuccess) return;
+    if (currentState is! PortfolioFilterSuccess) {
+      AppLogger.warning('Cannot apply filters - invalid state: ${currentState.runtimeType}', 
+          tag: 'PortfolioFilterCubit');
+      return;
+    }
     
     try {
+      AppLogger.stateChange('PortfolioFilterSuccess', 'PortfolioFilterLoading', 
+          tag: 'PortfolioFilterCubit', event: 'applying filters');
       emit(PortfolioFilterLoading());
       
       final filteredItems = _filterProvider.applyFilters(
