@@ -14,7 +14,23 @@ enum DocumentProcessingStatus {
   @JsonValue('FAILED')
   failed,
   @JsonValue('CANCELLED')
-  cancelled,
+  cancelled;
+
+  /// Get the JSON value for this enum
+  String get value {
+    switch (this) {
+      case DocumentProcessingStatus.queued:
+        return 'QUEUED';
+      case DocumentProcessingStatus.processing:
+        return 'PROCESSING';
+      case DocumentProcessingStatus.completed:
+        return 'COMPLETED';
+      case DocumentProcessingStatus.failed:
+        return 'FAILED';
+      case DocumentProcessingStatus.cancelled:
+        return 'CANCELLED';
+    }
+  }
 }
 
 /// Supported document categories
@@ -34,7 +50,29 @@ enum DocumentCategory {
   @JsonValue('TRADE_FNO')
   tradeFno,
   @JsonValue('TRADE_EQ')
-  tradeEq,
+  tradeEq;
+
+  /// Get the JSON value for this enum
+  String get value {
+    switch (this) {
+      case DocumentCategory.brokerPortfolio:
+        return 'BROKER_PORTFOLIO';
+      case DocumentCategory.mutualFund:
+        return 'MUTUAL_FUND';
+      case DocumentCategory.npsStatement:
+        return 'NPS_STATEMENT';
+      case DocumentCategory.companyFinancialReport:
+        return 'COMPANY_FINANCIAL_REPORT';
+      case DocumentCategory.stockPortfolio:
+        return 'STOCK_PORTFOLIO';
+      case DocumentCategory.nseIndices:
+        return 'NSE_INDICES';
+      case DocumentCategory.tradeFno:
+        return 'TRADE_FNO';
+      case DocumentCategory.tradeEq:
+        return 'TRADE_EQ';
+    }
+  }
 }
 
 /// Main document upload entity

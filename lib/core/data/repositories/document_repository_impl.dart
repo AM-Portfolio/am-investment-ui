@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 
@@ -6,6 +7,7 @@ import '../../domain/entities/document/document_upload.dart';
 import '../../domain/repositories/document_repository.dart';
 import '../api/models/api_document_upload.dart';
 import '../mappers/document_mapper.dart';
+import '../../config/config_service.dart';
 import '../../../core/services/api/document_client.dart';
 import '../../../core/services/api/api_exception.dart';
 
@@ -38,7 +40,21 @@ class DocumentRepositoryImpl implements DocumentRepository {
           throw ArgumentError('On web platform, file must be Uint8List');
         }
         
-        throw UnsupportedError('MultipartFile upload temporarily disabled due to Retrofit issue');
+        // Create a temporary file for web uploads using MultipartFile.fromBytes
+        final multipartFile = MultipartFile.fromBytes(
+          file,
+          filename: fileName,
+        );
+        
+        // Use direct Dio call for web uploads since Retrofit doesn't handle Uint8List well
+        apiResponse = await _uploadDocumentWeb(
+          multipartFile,
+          _mapCategoryToApiString(category),
+          portfolioId,
+          userId,
+          fileName,
+          description: description,
+        );
       } else {
         // Mobile/Desktop platform - handle File
         if (file is! File) {
@@ -69,11 +85,67 @@ class DocumentRepositoryImpl implements DocumentRepository {
     }
   }
 
+  /// Upload document for web platform using direct Dio call
+  /// This method bypasses Retrofit limitations with Uint8List handling
+  Future<DocumentUploadResponse> _uploadDocumentWeb(
+    MultipartFile multipartFile,
+    String documentType,
+    String portfolioId,
+    String userId,
+    String fileName, {
+    String? description,
+  }) async {
+    try {
+      // Get the base Dio instance from the client to maintain configuration
+      final dio = Dio();
+      
+      // Copy configuration from the document client
+      final config = ConfigService.config;
+      final documentApiConfig = config?.api?.document;
+      
+      dio.options = BaseOptions(
+        baseUrl: documentApiConfig?.baseUrl ?? 'http://localhost:8070',
+        connectTimeout: Duration(seconds: documentApiConfig?.connectTimeout ?? 30),
+        receiveTimeout: Duration(seconds: documentApiConfig?.receiveTimeout ?? 60),
+        sendTimeout: Duration(seconds: documentApiConfig?.sendTimeout ?? 60),
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
 
+      // Create form data
+      final formData = FormData.fromMap({
+        'file': multipartFile,
+        'documentType': documentType,
+        'portfolioId': portfolioId,
+        'userId': userId,
+        if (description != null) 'description': description,
+      });
+
+      // Make the API call
+      final response = await dio.post(
+        '/api/v1/documents/process',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      // Parse response to DocumentUploadResponse
+      return DocumentUploadResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      debugPrint('Error in web document upload: $e');
+      throw ApiException('Failed to upload document via web: $e');
+    }
+  }
 
   /// Map DocumentCategory to API string
   String _mapCategoryToApiString(DocumentCategory category) {
-    return category.name.toUpperCase();
+    return category.value.toUpperCase();
   }
 
   /// Handle Dio errors and convert to ApiException
