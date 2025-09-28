@@ -101,33 +101,43 @@ class PortfolioNotifier extends _$PortfolioNotifier {
 }
 ```
 
-#### Dependency Injection - Use @Injectable
+#### Dependency Injection - Use Riverpod Providers
 ```dart
-// lib/features/portfolio/internal/services/portfolio_service.dart
-@Injectable(as: PortfolioService)
-class PortfolioServiceImpl implements PortfolioService {
+// lib/features/portfolio/internal/services/portfolio_service.dart (Service class)
+class PortfolioService {
   final PortfolioRepository _repository;
   
-  PortfolioService(this._repository);
+  const PortfolioService(this._repository);
   
   Future<Portfolio> getPortfolio(String userId) async {
     return _repository.getPortfolio(userId);
   }
 }
+
+// lib/features/portfolio/providers/portfolio_providers.dart (Provider)
+@riverpod
+PortfolioService portfolioService(PortfolioServiceRef ref) {
+  final repository = ref.watch(portfolioRepositoryProvider);
+  return PortfolioService(repository);
+}
 ```
 
-#### API Calls - Use @retrofit
+#### API Calls - Use @retrofit with Riverpod
 ```dart
-// lib/core/network/clients/portfolio_client.dart (if global)
-// OR lib/features/portfolio/internal/data/clients/portfolio_client.dart (if feature-specific)
+// lib/core/network/clients/portfolio_client.dart (Client definition)
 @RestApi()
-@injectable
 abstract class PortfolioClient {
-  @factoryMethod
-  factory PortfolioClient(Dio dio, {@Named('baseUrl') String? baseUrl}) = _PortfolioClient;
+  factory PortfolioClient(Dio dio, {String? baseUrl}) = _PortfolioClient;
 
   @GET('/portfolios/{userId}')
   Future<ApiPortfolioResponse> getPortfolio(@Path('userId') String userId);
+
+// Provider (in lib/di/app_providers.dart or feature providers)
+@riverpod
+PortfolioClient portfolioClient(PortfolioClientRef ref) {
+  final dio = ref.watch(dioProvider);
+  return PortfolioClient(dio, baseUrl: 'https://api.example.com');
+}
 }
 ```
 

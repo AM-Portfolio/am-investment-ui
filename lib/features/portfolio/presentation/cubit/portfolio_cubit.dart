@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../domain/entities/portfolio_holding.dart';
-import '../../domain/entities/portfolio_summary.dart';
-import '../../domain/usecases/get_portfolio_holdings.dart';
-import '../../domain/usecases/get_portfolio_summary.dart';
-import '../../domain/usecases/analyze_portfolio_performance.dart';
-import '../../domain/usecases/refresh_portfolio_data.dart';
-import '../../domain/usecases/search_portfolio_holdings.dart';
+import '../../internal/domain/entities/portfolio_holding.dart';
+import '../../internal/domain/entities/portfolio_summary.dart';
+import '../../internal/domain/usecases/get_portfolio_holdings.dart';
+import '../../internal/domain/usecases/get_portfolio_summary.dart';
+import '../../internal/domain/usecases/analyze_portfolio_performance.dart';
+import '../../internal/domain/usecases/refresh_portfolio_data.dart';
+import '../../internal/domain/usecases/search_portfolio_holdings.dart';
 
 part 'portfolio_state.dart';
 part 'portfolio_cubit.freezed.dart';

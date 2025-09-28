@@ -1,38 +1,45 @@
 # Portfolio Feature - Clean Architecture Implementation
 
 ## Overview
-The portfolio feature has been refactored to follow Clean Architecture principles with clear separation of concerns across data, domain, and presentation layers.
+The portfolio feature follows Clean Architecture principles with clear separation of concerns. All feature-specific logic is contained within the `internal/` package to enforce feature isolation.
 
 ## Architecture Structure
 
-### Domain Layer (`lib/features/portfolio/domain/`)
+### Feature Internal Structure (`lib/features/portfolio/internal/`)
+**Purpose**: Contains ALL feature-specific business logic, isolated from other features
+
+#### Domain Layer (`internal/domain/`)
 **Purpose**: Contains business logic, entities, and interfaces - independent of external frameworks
 
-#### Entities (`entities/`)
+##### Entities (`internal/domain/entities/`)
 - `portfolio_holding.dart` - Core holding data with business rules
 - `portfolio_summary.dart` - Portfolio summary with calculations and formatting
 
-#### Repositories (`repositories/`)
+##### Repositories (`internal/domain/repositories/`)
 - `portfolio_repository.dart` - Interface defining portfolio data operations
 
-#### Use Cases (`usecases/`)
+##### Use Cases (`internal/domain/usecases/`)
 - `get_portfolio_holdings.dart` - Retrieve portfolio holdings
 - `get_portfolio_summary.dart` - Retrieve portfolio summary
 - `analyze_portfolio_performance.dart` - Performance analysis operations
 - `search_portfolio_holdings.dart` - Search and filter holdings
 - `refresh_portfolio_data.dart` - Data refresh operations
 
-### Data Layer (`lib/features/portfolio/data/`)
+#### Data Layer (`internal/data/`)
 **Purpose**: Handles external data sources and implements domain interfaces
 
-#### Models (`models/`)
+##### DTOs (`internal/data/dtos/`)
 - `portfolio_dto.dart` - Data Transfer Objects with JSON serialization and domain conversion
 
-#### Data Sources (`datasources/`)
+##### Data Sources (`internal/data/datasources/`)
 - `portfolio_remote_data_source.dart` - API data source (currently mocked)
 
-#### Repositories (`repositories/`)
+##### Repositories (`internal/data/repositories/`)
 - `portfolio_repository_impl.dart` - Implementation of domain repository interface
+
+#### Services Layer (`internal/services/`)
+**Purpose**: Complex business workflows that combine multiple use cases
+- `portfolio_service.dart` - Orchestration service for complex workflows like sync + analytics
 
 ### Presentation Layer (`lib/features/portfolio/presentation/`)
 **Purpose**: UI components and state management

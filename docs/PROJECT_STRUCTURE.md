@@ -90,12 +90,11 @@ lib/
 │   │           └── modern_login_form.dart # Modern login form component.
 │   │
 │   ├── portfolio/                 # 📊 Portfolio holdings and performance.
-│   │   │                          # Example of complete clean architecture implementation.
+│   │   │                          # ✅ Complete clean architecture implementation.
 │   │   ├── internal/              # 🧠 ALL feature-specific logic (data, domain, services).
 │   │   │   ├── data/              # Portfolio data sources and repository implementations.
 │   │   │   │   ├── datasources/   # Remote and local data sources.
 │   │   │   │   ├── dtos/          # Data transfer objects for API communication.
-│   │   │   │   ├── mappers/       # Data transformation between layers.
 │   │   │   │   └── repositories/  # Repository implementations.
 │   │   │   │
 │   │   │   ├── domain/            # Portfolio entities, use cases, abstract repositories.
@@ -122,16 +121,16 @@ lib/
 │   │   │   └── widgets/           # Portfolio-specific UI components.
 │   │   │       └── portfolio_sidebar.dart  # Portfolio navigation sidebar.
 │   │   │
-│   │   ├── data/                  # Legacy data layer (to be moved to internal/).
-│   │   ├── domain/                # Legacy domain layer (to be moved to internal/).
-│   │   ├── portfolio_screen.dart  # Legacy screen file (to be removed).
+│   │   ├── providers/             # 🔗 Portfolio feature providers (Riverpod).
+│   │   │   └── portfolio_providers.dart  # Feature-specific dependency injection.
+│   │   │
 │   │   └── README.md              # Portfolio feature documentation.
 │   │
 │   └── web_app_entry.dart         # Web application entry point and routing.
 │
-├── di/                            # ⚙️ Dependency Injection setup (get_it + injectable).
-│   ├── injection.dart             # Main DI configuration (registers all dependencies).
-│   └── injection.config.dart      # Generated DI file (do not edit).
+├── di/                            # ⚙️ Dependency Injection setup (Riverpod providers).
+│   ├── app_providers.dart         # Main DI configuration (app-wide providers).
+│   └── app_providers.g.dart       # Generated Riverpod file (do not edit).
 │
 ├── config/                        # ⚙️ App configuration (reads from environment or properties).
 │   └── app_config.dart            # Base URL, mock mode, feature flags, etc.
@@ -156,18 +155,18 @@ lib/
 ### Files & Required Annotations
 - **API Models**: `api_[feature].dart` → `@freezed` + `@JsonSerializable`
 - **Domain Entities**: `[feature].dart` → `@freezed`
-- **Services**: `[feature]_service.dart` → `@injectable`
-- **Clients**: `[feature]_client.dart` → `@RestApi` + `@injectable`
-- **Repositories**: `[feature]_repository.dart` → `@Injectable(as: Interface)`
+- **Services**: `[feature]_service.dart` → Plain class, provider in `[feature]_providers.dart`
+- **Clients**: `[feature]_client.dart` → `@RestApi` + provider in `app_providers.dart`
+- **Repositories**: `[feature]_repository.dart` → Plain class + interface, provider in `[feature]_providers.dart`
 - **Providers**: `[feature]_providers.dart` → `@riverpod`
 - **Screens**: `[feature]_screen.dart` → `ConsumerWidget`
 
 ### Classes & Annotations
 - **API Models**: `Api[Feature]Response` → `@freezed`
 - **Domain Entities**: `[Feature]` → `@freezed`
-- **Services**: `[Feature]Service` → `@injectable`
-- **Clients**: `[Feature]Client` → `@RestApi` + `@injectable`
-- **Repositories**: `[Feature]Repository` → `@Injectable(as: I[Feature]Repository)`
+- **Services**: `[Feature]Service` → Plain class with provider
+- **Clients**: `[Feature]Client` → `@RestApi` with provider
+- **Repositories**: `[Feature]Repository` → Plain class implementing interface, with provider
 
 ## Riverpod Provider Organization
 

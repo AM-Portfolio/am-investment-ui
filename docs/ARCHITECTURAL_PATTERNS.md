@@ -48,7 +48,6 @@ presentation/
 ### Repository Interface Design
 ```dart
 // lib/features/portfolio/internal/domain/repositories/portfolio_repository.dart
-@injectable
 abstract class PortfolioRepository {
   Future<Portfolio> getPortfolio(String userId);
   Future<List<Holding>> getHoldings(String userId);
@@ -56,11 +55,17 @@ abstract class PortfolioRepository {
 }
 
 // lib/features/portfolio/internal/data/repositories/portfolio_repository_impl.dart
-@Injectable(as: PortfolioRepository)
 class PortfolioRepositoryImpl implements PortfolioRepository {
   final PortfolioDataSource _dataSource;
   
-  PortfolioRepositoryImpl(this._dataSource);
+  const PortfolioRepositoryImpl(this._dataSource);
+
+// Provider in lib/features/portfolio/providers/portfolio_providers.dart
+@riverpod
+PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
+  final dataSource = ref.watch(portfolioDataSourceProvider);
+  return PortfolioRepositoryImpl(dataSource);
+}
   
   @override
   Future<Portfolio> getPortfolio(String userId) async {
@@ -88,19 +93,25 @@ Services should focus on business logic, not API concerns:
 
 ```dart
 // lib/features/portfolio/internal/services/portfolio_service.dart
-@injectable
 abstract class PortfolioService {
   Future<Portfolio> getPortfolio(String userId);
   Future<void> refreshPortfolio(String userId);
   Stream<Portfolio> watchPortfolio(String userId);
 }
 
-@Injectable(as: PortfolioService)
 class PortfolioServiceImpl implements PortfolioService {
   final PortfolioRepository _repository;
   final CacheService _cache;
   
-  PortfolioServiceImpl(this._repository, this._cache);
+  const PortfolioServiceImpl(this._repository, this._cache);
+
+// Provider in lib/features/portfolio/providers/portfolio_providers.dart
+@riverpod
+PortfolioService portfolioService(PortfolioServiceRef ref) {
+  final repository = ref.watch(portfolioRepositoryProvider);
+  final cache = ref.watch(cacheServiceProvider);
+  return PortfolioServiceImpl(repository, cache);
+}
 
   @override
   Future<Portfolio> getPortfolio(String userId) async {
