@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../constants/asset_constants.dart';
 
 /// Authentication service for handling user login, registration, and session management.
 class AuthService {
@@ -36,7 +37,7 @@ class AuthService {
   Future<void> _loadTestUsers() async {
     try {
       final String jsonString = await rootBundle.loadString(
-        'assets/test_users.json',
+        AssetPaths.testUsers,
       );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       final List<dynamic> usersList = jsonData['users'];
@@ -51,28 +52,20 @@ class AuthService {
 
       _testUsersLoaded = true;
       debugPrint('Loaded ${usersList.length} test users');
-    } catch (e) {
-      debugPrint('Error loading test users: $e');
-      // Fallback to hardcoded test user if JSON loading fails
-      _addFallbackTestUser();
+    } catch (e, stackTrace) {
+      // Log detailed error information
+      debugPrint('Error loading test users from ${AssetPaths.testUsers}: $e');
+      debugPrint('Stack trace: $stackTrace');
+    
+      // Throw meaningful error with context
+      if (e.toString().contains('Unable to load asset')) {
+        throw Exception('Failed to load test users: Asset file ${AssetPaths.testUsers} not found. Ensure the file exists and is properly listed in pubspec.yaml assets section.');
+      } else if (e.toString().contains('FormatException')) {
+        throw Exception('Failed to load test users: Invalid JSON format in ${AssetPaths.testUsers}. Please check the file syntax.');
+      } else {
+        throw Exception('Failed to load test users from ${AssetPaths.testUsers}: ${e.toString()}');
+      }
     }
-  }
-
-  /// Add a fallback test user if JSON loading fails
-  void _addFallbackTestUser() {
-    final testUser = TestUser(
-      id: '123',
-      email: 'demo@example.com',
-      username: 'demouser',
-      phone: '+1234567890',
-      name: 'Demo User',
-      password: 'password123',
-    );
-
-    _testUsers[testUser.email] = testUser;
-    _testUsers[testUser.username] = testUser;
-    _testUsers[testUser.phone] = testUser;
-    _testUsersLoaded = true;
   }
 
   /// Initialize the auth service and restore session if available
