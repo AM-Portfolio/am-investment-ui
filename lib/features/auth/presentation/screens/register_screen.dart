@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import '../../../../core/widgets/app_button.dart';
+import '../../../../shared/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../core/services/auth_service.dart';
+import '../../../../core/network/service/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

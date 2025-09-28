@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/shared/layouts/web_layout.dart';
-import '../core/services/auth_service.dart';
+import '../shared/widgets/layouts/web_layout.dart';
+import '../core/network/service/auth_service.dart';
 
 /// Main entry point for the web application
 /// Uses the WebLayout to handle navigation without full page reloads

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/shared/ui/enhanced_portfolio_quick_actions.dart';
-import '../../../core/providers/app_providers.dart';
+import '../../../di/app_providers.dart';
 
 /// Example integration of portfolio quick actions in an existing screen
 class PortfolioScreenWithQuickActions extends ConsumerStatefulWidget {

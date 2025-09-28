@@ -5,11 +5,11 @@ import 'package:dio/dio.dart';
 
 import '../../domain/entities/document/document_upload.dart';
 import '../../domain/repositories/document_repository.dart';
-import '../api/models/api_document_upload.dart';
+import '../../domain/entities/document/document_upload.dart';
 import '../mappers/document_mapper.dart';
-import '../../config/config_service.dart';
-import '../../../core/services/api/document_client.dart';
-import '../../../core/services/api/api_exception.dart';
+import '../../../config/config_service.dart';
+import '../../network/document_client.dart';
+import '../../errors/exception.dart';
 
 /// Concrete implementation of DocumentRepository
 /// Handles API calls and data transformation for document uploads

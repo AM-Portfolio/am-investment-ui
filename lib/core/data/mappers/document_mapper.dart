@@ -1,4 +1,4 @@
-import '../api/models/api_document_upload.dart';
+import '../../network/dtos/document/document_dtos.dart';
 import '../../domain/entities/document/document_upload.dart';
 
 /// Mapper to convert between API models and domain entities for documents

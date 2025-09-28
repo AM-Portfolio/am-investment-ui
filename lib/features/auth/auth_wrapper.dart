@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../portfolio/portfolio_screen.dart';
-import '../../widgets/shared/layouts/web_layout.dart';
+import '../../shared/widgets/layouts/web_layout.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});

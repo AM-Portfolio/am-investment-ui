@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/portfolio/portfolio_screen.dart';
-import 'core/config/config_service.dart';
+import 'config/config_service.dart';
 import 'features/auth/auth_wrapper.dart';
 
 void main() async {

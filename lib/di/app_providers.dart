@@ -1,18 +1,18 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
-import '../data/repositories/portfolio_repository_impl.dart';
-import '../data/repositories/document_repository_impl.dart';
-import '../domain/repositories/portfolio_repository.dart';
-import '../domain/repositories/document_repository.dart';
-import '../domain/entities/portfolio/portfolio_holdings.dart';
-import '../domain/entities/portfolio/portfolio_summary.dart';
-import '../services/api/portfolio_client.dart';
-import '../services/api/document_client.dart';
-import '../../config/app_config.dart';
-import '../../config/config_service.dart';
-import '../../config/environment_config.dart' as env_config;
+import '../core/data/repositories/portfolio_repository_impl.dart';
+import '../core/data/repositories/document_repository_impl.dart';
+import '../core/domain/repositories/portfolio_repository.dart';
+import '../core/domain/repositories/document_repository.dart';
+import '../core/domain/entities/portfolio/portfolio_holdings.dart';
+import '../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../core/network/portfolio_client.dart';
+import '../core/network/document_client.dart';
+import '../config/app_config.dart';
+import '../config/config_service.dart';
+import '../config/environment_config.dart' as env_config;
 
-part '../providers/app_providers.g.dart';
+part '../core/di/app_providers.g.dart';
 
 // Configuration Providers - Keep alive (singleton instances)
 @riverpod
@@ -51,8 +51,10 @@ Future<PortfolioRepository> portfolioRepository(PortfolioRepositoryRef ref) asyn
   final apiClient = await ref.watch(portfolioClientProvider.future);
   return PortfolioRepositoryImpl(apiClient: apiClient);
 }
-
-@riverpod
+/// Provider for DocumentClient
+/// Configures Dio client with proper error handling, timeouts, and logging
+/// Note: Only baseUrl and client configuration can be dynamic with Retrofit
+@Riverpod()
 DocumentClient documentClient(DocumentClientRef ref) {
   final dio = Dio();
   
@@ -72,8 +74,105 @@ DocumentClient documentClient(DocumentClientRef ref) {
     },
   );
 
+  // Add interceptors
+  _addInterceptors(dio);
+
   return DocumentClient(dio);
 }
+
+/// Add interceptors to Dio client
+void _addInterceptors(Dio dio) {
+  // Add authentication interceptor
+  dio.interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) async {
+      // Add auth token if available
+      final token = await _getAuthToken();
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+      handler.next(options);
+    },
+    onError: (error, handler) {
+      // Transform DioException to ApiException
+      final apiException = _handleDioError(error);
+      debugPrint('Document API Error: ${apiException.message}');
+      handler.next(error);
+    },
+  ));
+
+  // Add logging interceptor in debug mode
+  if (kDebugMode) {
+    dio.interceptors.add(LogInterceptor(
+      request: true,
+      requestBody: false, // Don't log file bodies for uploads
+      responseBody: true,
+      error: true,
+      logPrint: (obj) => debugPrint('[DocumentClient] $obj'),
+    ));
+  }
+
+  // Add retry interceptor for network failures
+  dio.interceptors.add(InterceptorsWrapper(
+    onError: (error, handler) async {
+      if (_shouldRetry(error) && error.requestOptions.extra['retryCount'] == null) {
+        error.requestOptions.extra['retryCount'] = 1;
+        
+        // Wait before retry
+        await Future.delayed(const Duration(seconds: 2));
+        
+        try {
+          final response = await dio.fetch(error.requestOptions);
+          handler.resolve(response);
+          return;
+        } catch (e) {
+          // Retry failed, continue with original error
+        }
+      }
+      handler.next(error);
+    },
+  ));
+}
+
+/// Get authentication token from storage
+Future<String?> _getAuthToken() async {
+  try {
+    // This would integrate with your auth service
+    // For now, return null - implement based on your auth pattern
+    return null;
+  } catch (e) {
+    debugPrint('Error getting auth token: $e');
+    return null;
+  }
+}
+
+/// Handle Dio errors and convert to ApiException
+ApiException _handleDioError(DioException e) {
+  switch (e.type) {
+    case DioExceptionType.connectionTimeout:
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+      return ApiException('Request timeout. Please check your connection.');
+    case DioExceptionType.badResponse:
+      final statusCode = e.response?.statusCode;
+      final message = e.response?.data?['message'] ?? 'Unknown error occurred';
+      return ApiException('Server error ($statusCode): $message');
+    case DioExceptionType.connectionError:
+      return ApiException('Connection error. Please check your internet connection.');
+    case DioExceptionType.cancel:
+      return ApiException('Request was cancelled');
+    default:
+      return ApiException('Network error: ${e.message}');
+  }
+}
+
+/// Check if request should be retried
+bool _shouldRetry(DioException error) {
+  return error.type == DioExceptionType.connectionError ||
+         error.type == DioExceptionType.connectionTimeout ||
+         (error.response?.statusCode != null && 
+          error.response!.statusCode! >= 500);
+}
+
 
 @riverpod
 DocumentRepository documentRepository(DocumentRepositoryRef ref) {
