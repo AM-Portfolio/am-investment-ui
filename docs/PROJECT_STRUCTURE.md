@@ -8,198 +8,123 @@
 ```
 lib/
 │
-├── core/                          # ✅ App-wide infrastructure
+├── core/                          # 🧱 App-wide infrastructure used by ALL features.
+│   │                              # Contains non-feature-specific utilities, network layer, and shared logic.
 │   │
-│   ├── app_logic/                 # 🧠 App-level shared logic (used by multiple features)
-│   │   ├── data/
-│   │   │   ├── datasources/
-│   │   │   │   ├── auth_remote_data_source.dart
-│   │   │   │   └── user_prefs_local_data_source.dart
-│   │   │   │
-│   │   │   └── repositories/
-│   │   │       ├── auth_repository_impl.dart
-│   │   │       └── user_prefs_repository_impl.dart
+│   ├── app_logic/                 # 🧠 App-level shared business logic (used across multiple features).
+│   │   │                          # Examples: User, Auth, AppConfig, Session.
 │   │   │
-│   │   ├── domain/
-│   │   │   ├── entities/
-│   │   │   │   ├── user.dart
-│   │   │   │   ├── session.dart
-│   │   │   │   └── app_config.dart
-│   │   │   │
-│   │   │   ├── repositories/
-│   │   │   │   ├── auth_repository.dart          # abstract
-│   │   │   │   └── user_prefs_repository.dart    # abstract
-│   │   │   │
-│   │   │   └── usecases/
-│   │   │       ├── login_use_case.dart
-│   │   │       ├── logout_use_case.dart
-│   │   │       └── get_app_config_use_case.dart
+│   │   ├── data/                  # App-wide data sources and repository implementations.
+│   │   │   ├── datasources/       # Remote (API) and local (DB, SharedPrefs) data sources.
+│   │   │   └── repositories/      # Concrete implementations of app-level repositories (e.g., AuthRepositoryImpl).
 │   │   │
-│   │   └── services/
-│   │       ├── auth_service.dart
-│   │       └── notification_service.dart
+│   │   ├── domain/                # Pure app-level business logic (no Flutter or platform dependencies).
+│   │   │   ├── entities/          # Core app entities (e.g., User, Session, AppConfig).
+│   │   │   ├── repositories/      # Abstract interfaces for app repositories (e.g., abstract AuthRepository).
+│   │   │   └── usecases/          # Single-purpose app use cases (e.g., LoginUseCase, GetAppConfig).
+│   │   │
+│   │   └── services/              # App-level orchestration services (multi-step workflows).
+│   │                              # Example: AuthService (login + analytics + session setup).
 │   │
-│   ├── constants/
-│   │   ├── app_routes.dart        # '/login', '/home', '/portfolio', etc.
-│   │   └── api_endpoints.dart     # '/api/v1/auth', '/api/v1/documents', etc.
+│   ├── constants/                 # 📏 App-wide constants (routes, API paths, keys, enums).
+│   │   ├── app_routes.dart        # Named routes (e.g., '/login', '/portfolio').
+│   │   └── api_endpoints.dart     # Backend API paths (e.g., '/api/v1/auth/login').
 │   │
-│   ├── errors/
-│   │   ├── failures.dart
-│   │   └── exception_mapper.dart
+│   ├── errors/                    # ❌ Failure types and error handling utilities.
+│   │   ├── failures.dart          # Domain failures (NetworkFailure, AuthFailure).
+│   │   └── exception_mapper.dart  # Maps Dio/HTTP errors to domain failures.
 │   │
-│   ├── network/
-│   │   ├── api_client.dart
-│   │   └── dtos/
-│   │       ├── auth_dtos.dart
-│   │       ├── user_dtos.dart
+│   ├── network/                   # 🌐 Global API layer (shared by all features).
+│   │   ├── api_client.dart        # Retrofit-style API client (uses dio + retrofit.dart).
+│   │   └── dtos/                  # Backend-matching Data Transfer Objects (DTOs).
+│   │       ├── auth_dtos.dart     # LoginRequest, TokenResponse.
+│   │       ├── user_dtos.dart     # UserResponse from API.
 │   │       ├── portfolio_dtos.dart
 │   │       ├── trade_dtos.dart
 │   │       └── document_dtos.dart
 │   │
-│   └── utils/
-│       ├── date_utils.dart
-│       ├── string_utils.dart
-│       └── filter_sort_utils.dart
+│   └── utils/                     # 🛠️ Pure, stateless helper functions (no side effects).
+│       ├── date_utils.dart        # Date formatting, parsing.
+│       ├── string_utils.dart      # Validation, sanitization.
+│       └── filter_sort_utils.dart # Reusable filtering/sorting logic (stateless).
 │
-├── shared/                        # ✅ Reusable across features & platforms
-│   ├── models/                    # (optional: UI-safe copies of core/app_logic entities)
-│   │   └── user.dart
+├── shared/                        # ♻️ Reusable components shared across features AND platforms (web, Android, iOS).
+│   │                              # Contains ONLY UI/widgets and cross-feature models.
 │   │
-│   └── widgets/                   # Shared UI components
-│       ├── inputs/
-│       ├── buttons/
-│       ├── data_table/
-│       └── animations/
+│   ├── models/                    # UI-safe copies of domain models (optional; avoid if using core/app_logic/entities directly).
+│   │   └── user.dart              # Example: simplified User for UI display.
+│   │
+│   └── widgets/                   # ✨ Shared UI components used in multiple features.
+│       ├── inputs/                # Form controls (AppTextField, AppDropdown).
+│       ├── buttons/               # Action buttons (PrimaryButton, IconButton).
+│       ├── data_table/            # Smart, responsive, sortable table.
+│       └── animations/            # Motion design (FadeIn, SkeletonLoader).
 │
-├── platform/                      # Platform-specific services
-│   ├── android/
+├── platform/                      # 📱 Platform-specific implementations (Android/iOS only).
+│   │                              # NEVER used directly by features — injected via DI.
+│   │
+│   ├── android/                   # 🤖 Android-only service implementations.
 │   │   ├── android_biometric_auth.dart
 │   │   ├── android_file_picker.dart
 │   │   └── android_deep_link_handler.dart
 │   │
-│   └── ios/
+│   └── ios/                       # 🍏 iOS-only service implementations.
 │       ├── ios_biometric_auth.dart
 │       ├── ios_file_picker.dart
 │       └── ios_universal_link_handler.dart
 │
-├── features/                      # ✅ Feature modules
+├── features/                      # 📦 Feature modules — each is a self-contained vertical slice.
+│   │                              # Features do NOT depend on each other.
 │   │
-│   ├── auth/                      # 🔑 Authentication (Login, Signup, Forgot Password)
-│   │   ├── internal/
-│   │   │   ├── data/
-│   │   │   ├── domain/
-│   │   │   └── services/
-│   │   │       └── auth_workflow_service.dart  # Handles login + analytics + session
+│   ├── auth/                      # 🔑 Authentication feature (login, signup, forgot password).
+│   │   ├── internal/              # 🧠 ALL feature-specific logic (data, domain, services).
+│   │   │   ├── data/              # Auth data sources and repository implementations.
+│   │   │   ├── domain/            # Auth entities, use cases, abstract repositories.
+│   │   │   └── services/          # Auth complex workflows (e.g., login + analytics).
 │   │   │
-│   │   └── presentation/
-│   │       ├── cubit/
-│   │       │   └── auth_cubit.dart
-│   │       ├── common/
-│   │       │   └── widgets/
-│   │       ├── mobile/
-│   │       │   └── login_screen.dart
-│   │       ├── android/
-│   │       │   └── login_screen.dart
-│   │       └── ios/
-│   │           └── login_screen.dart
+│   │   └── presentation/          # 🎨 UI layer for auth (web + mobile).
+│   │       ├── cubit/             # AuthCubit (state management for auth screens).
+│   │       ├── common/            # Widgets reused across web/mobile for auth.
+│   │       ├── mobile/            # Default mobile UI (used by both Android & iOS).
+│   │       ├── android/           # 🤖 Android-specific UI overrides (if needed).
+│   │       └── ios/               # 🍏 iOS-specific UI overrides (if needed).
 │   │
-│   ├── home/                      # 🏠 Main Dashboard (Overview, Quick Actions)
-│   │   ├── internal/
-│   │   │   ├── data/
-│   │   │   ├── domain/
-│   │   │   └── services/
-│   │   │       └── home_dashboard_service.dart
-│   │   │
-│   │   └── presentation/
-│   │       ├── cubit/
-│   │       │   └── home_cubit.dart
-│   │       ├── common/
-│   │       │   └── widgets/
-│   │       │       ├── portfolio_summary_card.dart
-│   │       │       └── trade_activity_card.dart
-│   │       ├── mobile/
-│   │       │   └── home_screen.dart
-│   │       ├── android/
-│   │       │   └── home_screen.dart
-│   │       └── ios/
-│   │           └── home_screen.dart
+│   ├── home/                      # 🏠 Main dashboard (overview, quick actions).
+│   │   ├── internal/              # Home feature logic.
+│   │   └── presentation/          # Home UI (adaptive for web/mobile).
 │   │
-│   ├── portfolio/                 # 📊 Portfolio Holdings & Performance
-│   │   ├── internal/
-│   │   │   ├── data/
-│   │   │   ├── domain/
-│   │   │   └── services/
-│   │   │       └── portfolio_sync_service.dart
-│   │   │
-│   │   └── presentation/
-│   │       ├── cubit/
-│   │       │   └── portfolio_cubit.dart
-│   │       ├── common/
-│   │       │   └── widgets/
-│   │       ├── mobile/
-│   │       │   └── portfolio_screen.dart
-│   │       ├── android/
-│   │       │   └── portfolio_screen.dart
-│   │       └── ios/
-│   │           └── portfolio_screen.dart
+│   ├── portfolio/                 # 📊 Portfolio holdings and performance.
+│   │   ├── internal/              # Portfolio logic.
+│   │   └── presentation/          # Portfolio UI.
 │   │
-│   ├── trade_management/          # 💹 Trade History, Orders, Execution
-│   │   ├── internal/
-│   │   │   ├── data/
-│   │   │   ├── domain/
-│   │   │   └── services/
-│   │   │       └── trade_execution_service.dart
-│   │   │
-│   │   └── presentation/
-│   │       ├── cubit/
-│   │       │   └── trade_cubit.dart
-│   │       ├── common/
-│   │       │   └── widgets/
-│   │       ├── mobile/
-│   │       │   └── trade_screen.dart
-│   │       ├── android/
-│   │       │   └── trade_screen.dart
-│   │       └── ios/
-│   │           └── trade_screen.dart
+│   ├── trade_management/          # 💹 Trade history, orders, execution.
+│   │   ├── internal/              # Trade logic.
+│   │   └── presentation/          # Trade UI.
 │   │
-│   └── document_processing/       # 📄 Upload, Parse, Verify Documents (KYC, etc.)
-│       ├── internal/
-│       │   ├── data/
-│       │   ├── domain/
-│       │   └── services/
-│       │       └── document_upload_service.dart
-│       │
-│       └── presentation/
-│           ├── cubit/
-│           │   └── document_cubit.dart
-│           ├── common/
-│           │   └── widgets/
-│           │       ├── document_upload_card.dart
-│           │       └── verification_status_badge.dart
-│           ├── mobile/
-│           │   └── document_screen.dart
-│           ├── android/
-│           │   └── document_screen.dart        # Uses Android file picker
-│           └── ios/
-│               └── document_screen.dart        # Uses iOS document picker
+│   └── document_processing/       # 📄 Document upload, parsing, verification (e.g., KYC).
+│       ├── internal/              # Document logic.
+│       └── presentation/          # Document UI (uses platform file pickers via DI).
 │
-├── di/                            # Dependency Injection
-│   ├── injection.dart
-│   └── injection.config.dart
+├── di/                            # ⚙️ Dependency Injection setup (get_it + injectable).
+│   ├── injection.dart             # Main DI configuration (registers all dependencies).
+│   └── injection.config.dart      # Generated DI file (do not edit).
 │
-├── config/
-│   └── app_config.dart            # Reads from env (mock mode, base URL)
+├── config/                        # ⚙️ App configuration (reads from environment or properties).
+│   └── app_config.dart            # Base URL, mock mode, feature flags, etc.
 │
-├── assets/
-│   └── mock/
+├── assets/                        # 🖼️ Static resources (images, fonts, JSON).
+│   └── mock/                      # 🧪 Fallback JSON files for offline/mock mode.
 │       ├── auth.json
 │       ├── home.json
 │       ├── portfolio.json
 │       ├── trade.json
 │       └── document.json
 │
-├── main.dart                      # ✅ Single entry point (Android, iOS, Web)
-└── app.dart                       # Root app widget (adaptive navigation)
+├── main.dart                      # 🚀 SINGLE entry point for Android, iOS, and Web.
+│                                  # Flutter handles platform detection automatically.
+│
+└── app.dart                       # 🏗️ Root app widget (sets up DI, router, theme).
+                                   # Uses adaptive navigation if needed (e.g., sidebar on web).
 ```
 
 ## Naming Conventions & Annotations
