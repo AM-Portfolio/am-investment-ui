@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import '../core/constants/constants.dart';
 
 /// Properties loader similar to Spring's @Value concept
 class AppProperties {
@@ -9,40 +10,45 @@ class AppProperties {
   final Map<String, String> _properties = {};
   bool _isLoaded = false;
 
-  /// Load properties from assets/application.properties
-  /// @param environment - Optional environment name to load specific properties
+  /// Load properties from lib/assets/application.properties
+  /// Uses constants for all file paths and environment detection
   Future<void> loadProperties({String? environment}) async {
     if (_isLoaded) return;
 
-    // Try to load from assets/application.properties
+    // Try to load from main properties file using constants
     try {
-      final propertiesContent = await rootBundle.loadString('assets/application.properties');
+      final propertiesContent = await rootBundle.loadString(AssetPaths.applicationProperties);
       _parseProperties(propertiesContent);
-      print('Loaded main properties file: application.properties');
+      print('Loaded main properties file: ${AssetPaths.applicationProperties}');
     } catch (e) {
       print('Error loading main properties file: $e');
       throw Exception('Failed to load application.properties: $e');
     }
     
-    // Determine environment - priority: parameter > environment variable > default
+    // Determine environment using constants
     String env = environment ?? 
-                const String.fromEnvironment('ENV', defaultValue: '') ??
-                const String.fromEnvironment('FLUTTER_ENV', defaultValue: '');
+                const String.fromEnvironment(EnvironmentKeys.env, defaultValue: '');
     
-    // Use default if env is empty
+    // Try FLUTTER_ENV if ENV is empty
     if (env.isEmpty) {
-      env = 'dev';
+      env = const String.fromEnvironment(EnvironmentKeys.flutterEnv, defaultValue: '');
+    }
+    
+    // Use default environment from constants if env is empty
+    if (env.isEmpty) {
+      env = AppConstants.defaultEnvironment;
     }
     
     print('Using environment: $env');
     
     // Override with environment-specific properties if they exist
     try {
-      final envPropertiesContent = await rootBundle.loadString('assets/application-$env.properties');
+      final envPropertiesPath = AssetPaths.getEnvironmentPropertiesPath(env);
+      final envPropertiesContent = await rootBundle.loadString(envPropertiesPath);
       _parseProperties(envPropertiesContent);
-      print('Loaded environment-specific properties: application-$env.properties');
+      print('Loaded environment-specific properties: $envPropertiesPath');
     } catch (e) {
-      print('Environment-specific properties file not found: application-$env.properties');
+      print('Environment-specific properties file not found for environment: $env');
       // This is not an error - environment-specific files are optional
     }
     
@@ -69,8 +75,8 @@ class AppProperties {
 
   /// Get property value (similar to Spring's @Value)
   String getValue(String key, {String? defaultValue}) {
-    // First check environment variables
-    final envValue = const String.fromEnvironment('DEFAULT_ENV_VAR');
+    // First check environment variables using constants
+    final envValue = const String.fromEnvironment(EnvironmentKeys.defaultEnvVar);
     if (envValue.isNotEmpty) {
       return envValue;
     }
@@ -118,7 +124,7 @@ class AppProperties {
   /// Check if property exists
   bool hasProperty(String key) {
     return _properties.containsKey(key) || 
-           const String.fromEnvironment('DEFAULT_ENV_VAR').isNotEmpty;
+           const String.fromEnvironment(EnvironmentKeys.defaultEnvVar).isNotEmpty;
   }
 
   /// Get all properties

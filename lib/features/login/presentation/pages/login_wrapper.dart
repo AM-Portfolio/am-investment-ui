@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import '../../../../shared/widgets/layouts/web_layout.dart';
+import '../../../../shared/widgets/layouts/mobile_layout.dart';
+import '../../../../core/utils/platform_utils.dart';
 
 class LoginWrapper extends StatefulWidget {
   const LoginWrapper({super.key});
@@ -83,14 +85,26 @@ class _LoginWrapperState extends State<LoginWrapper> {
   @override
   Widget build(BuildContext context) {
     if (_isAuthenticated) {
-      return WebLayout(
-        title: 'AM Investment',
-        activeNavItem: _currentPage,
-        onLogout: _handleLogout,
-        onNavigate: _handleNavigation,
-        child: _getCurrentScreen(),
-      );
+      // For mobile platforms, use mobile layout, for web/desktop use web layout
+      if (PlatformUtils.isMobile) {
+        return MobileLayout(
+          title: 'AM Investment',
+          activeNavItem: _currentPage,
+          onLogout: _handleLogout,
+          onNavigate: _handleNavigation,
+          child: _getCurrentScreen(),
+        );
+      } else {
+        return WebLayout(
+          title: 'AM Investment',
+          activeNavItem: _currentPage,
+          onLogout: _handleLogout,
+          onNavigate: _handleNavigation,
+          child: _getCurrentScreen(),
+        );
+      }
     } else {
+      // Always show login screen regardless of platform when not authenticated
       return LoginScreen(onLogin: _handleLogin);
     }
   }

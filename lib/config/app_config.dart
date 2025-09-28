@@ -1,3 +1,5 @@
+import '../core/constants/constants.dart';
+
 /// Application configuration
 class AppConfig {
   final String appName;
@@ -8,10 +10,10 @@ class AppConfig {
   final EnvironmentConfig environment;
 
   const AppConfig({
-    this.appName = 'AM Investment',
-    this.version = '1.0.0',
-    this.debugMode = true,
-    this.defaultPort = 3000,
+    this.appName = AppConstants.appName,
+    this.version = AppConstants.appVersion,
+    this.debugMode = AppConstants.defaultDebugMode,
+    this.defaultPort = AppConstants.defaultPort,
     required this.api,
     required this.environment,
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'app_config.dart';
 import 'app_properties.dart';
+import '../core/constants/constants.dart';
 
 /// Configuration service that loads and manages application configuration
 /// Similar to Spring Boot's configuration management
@@ -23,31 +24,31 @@ class ConfigService with PropertyInjection {
 
     final properties = AppProperties();
 
-    // Create config from properties
+    // Create config from properties using constants for keys and defaults
     _config = AppConfig(
-      defaultPort: properties.getIntValue('app.default.port', defaultValue: 3000),
+      defaultPort: properties.getIntValue(PropertyKeys.appDefaultPort, defaultValue: AppConstants.defaultPort),
       api: ApiConfig(
-        baseUrl: properties.getValue('api.baseUrl'),
-        timeout: properties.getIntValue('api.timeout'),
-        useMockData: properties.getBoolValue('mock.data.enabled'),
+        baseUrl: properties.getValue(PropertyKeys.apiBaseUrl, defaultValue: AppConstants.defaultBaseUrl),
+        timeout: properties.getIntValue(PropertyKeys.apiTimeout, defaultValue: AppConstants.defaultTimeout),
+        useMockData: properties.getBoolValue(PropertyKeys.mockDataEnabled, defaultValue: AppConstants.defaultUseMockData),
         portfolio: PortfolioApiConfig(
-          baseUrl: properties.getValue('api.portfolio.baseUrl'),
-          holdingsResource: properties.getValue('api.portfolio.holdingsResource'),
-          summaryResource: properties.getValue('api.portfolio.summaryResource'),
-          transactionsResource: properties.getValue('api.portfolio.transactionsResource'),
+          baseUrl: properties.getValue(PropertyKeys.apiPortfolioBaseUrl, defaultValue: AppConstants.defaultPortfolioBaseUrl),
+          holdingsResource: properties.getValue(PropertyKeys.apiPortfolioHoldingsResource, defaultValue: AppConstants.defaultHoldingsResource),
+          summaryResource: properties.getValue(PropertyKeys.apiPortfolioSummaryResource, defaultValue: AppConstants.defaultSummaryResource),
+          transactionsResource: properties.getValue(PropertyKeys.apiPortfolioTransactionsResource, defaultValue: AppConstants.defaultTransactionsResource),
         ),
         document: DocumentApiConfig(
-          baseUrl: properties.getValue('api.document.baseUrl', defaultValue: 'http://localhost:8070'),
-          connectTimeout: properties.getIntValue('api.document.connectTimeout', defaultValue: 30),
-          receiveTimeout: properties.getIntValue('api.document.receiveTimeout', defaultValue: 60),
-          sendTimeout: properties.getIntValue('api.document.sendTimeout', defaultValue: 60),
-          enabled: properties.getBoolValue('api.document.enabled', defaultValue: true),
+          baseUrl: properties.getValue(PropertyKeys.apiDocumentBaseUrl, defaultValue: AppConstants.defaultDocumentBaseUrl),
+          connectTimeout: properties.getIntValue(PropertyKeys.apiDocumentConnectTimeout, defaultValue: AppConstants.defaultConnectTimeout),
+          receiveTimeout: properties.getIntValue(PropertyKeys.apiDocumentReceiveTimeout, defaultValue: AppConstants.defaultReceiveTimeout),
+          sendTimeout: properties.getIntValue(PropertyKeys.apiDocumentSendTimeout, defaultValue: AppConstants.defaultSendTimeout),
+          enabled: properties.getBoolValue(PropertyKeys.apiDocumentEnabled, defaultValue: AppConstants.defaultDocumentEnabled),
         ),
       ),
       environment: EnvironmentConfig(
-        name: properties.getValue('environment.name'),
-        debugMode: properties.getBoolValue('environment.debugMode'),
-        logLevel: properties.getValue('environment.logLevel'),
+        name: properties.getValue(PropertyKeys.environmentName, defaultValue: AppConstants.defaultEnvironmentName),
+        debugMode: properties.getBoolValue(PropertyKeys.environmentDebugMode, defaultValue: AppConstants.defaultDebugMode),
+        logLevel: properties.getValue(PropertyKeys.environmentLogLevel, defaultValue: AppConstants.defaultLogLevel),
       ),
     );
 
