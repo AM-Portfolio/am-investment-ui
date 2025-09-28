@@ -7,6 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dtos/document/document_dtos.dart';
 import 'dtos/exception/exception_dtos.dart';
 
+part 'document_client.g.dart';
+
 /// Retrofit client for document upload and processing API
 /// Note: Retrofit requires static endpoints, so configuration is limited to baseUrl and timeouts
 @RestApi()

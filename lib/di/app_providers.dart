@@ -281,35 +281,35 @@ class CacheManager {
   }
 }
 
-// Use case providers for BLoC pattern
-@riverpod
-Future<GetPortfolioSummary> getPortfolioSummary(GetPortfolioSummaryRef ref) async {
-  final repository = await ref.watch(portfolioRepositoryProvider.future);
-  return GetPortfolioSummary(repository);
-}
+// Use case providers for BLoC pattern - TEMPORARILY COMMENTED OUT
+// @riverpod
+// Future<GetPortfolioSummary> getPortfolioSummary(GetPortfolioSummaryRef ref) async {
+//   final repository = await ref.watch(portfolioRepositoryProvider.future);
+//   return GetPortfolioSummary(repository);
+// }
 
-@riverpod
-Future<GetPortfolioHoldings> getPortfolioHoldings(GetPortfolioHoldingsRef ref) async {
-  final repository = await ref.watch(portfolioRepositoryProvider.future);
-  return GetPortfolioHoldings(repository);
-}
+// @riverpod
+// Future<GetPortfolioHoldings> getPortfolioHoldings(GetPortfolioHoldingsRef ref) async {
+//   final repository = await ref.watch(portfolioRepositoryProvider.future);
+//   return GetPortfolioHoldings(repository);
+// }
 
-@riverpod
-Future<SearchPortfolioHoldings> searchPortfolioHoldings(SearchPortfolioHoldingsRef ref) async {
-  final repository = await ref.watch(portfolioRepositoryProvider.future);
-  return SearchPortfolioHoldings(repository);
-}
+// @riverpod
+// Future<SearchPortfolioHoldings> searchPortfolioHoldings(SearchPortfolioHoldingsRef ref) async {
+//   final repository = await ref.watch(portfolioRepositoryProvider.future);
+//   return SearchPortfolioHoldings(repository);
+// }
 
-// BLoC/Cubit providers
-@riverpod
-Future<PortfolioCubit> portfolioCubit(PortfolioCubitRef ref) async {
-  final getPortfolioSummary = await ref.watch(getPortfolioSummaryProvider.future);
-  final getPortfolioHoldings = await ref.watch(getPortfolioHoldingsProvider.future);
-  final searchPortfolioHoldings = await ref.watch(searchPortfolioHoldingsProvider.future);
-  
-  return PortfolioCubit(
-    getPortfolioSummary,
-    getPortfolioHoldings,
-    searchPortfolioHoldings,
-  );
-}
+// BLoC/Cubit providers - TEMPORARILY COMMENTED OUT
+// @riverpod
+// Future<PortfolioCubit> portfolioCubit(PortfolioCubitRef ref) async {
+//   final getPortfolioSummary = await ref.watch(getPortfolioSummaryProvider.future);
+//   final getPortfolioHoldings = await ref.watch(getPortfolioHoldingsProvider.future);
+//   final searchPortfolioHoldings = await ref.watch(searchPortfolioHoldingsProvider.future);
+//   
+//   return PortfolioCubit(
+//     getPortfolioSummary,
+//     getPortfolioHoldings,
+//     searchPortfolioHoldings,
+//   );
+// }

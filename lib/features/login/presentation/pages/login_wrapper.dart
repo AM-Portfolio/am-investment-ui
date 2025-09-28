@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import '../../../../shared/widgets/layouts/web_layout.dart';
@@ -16,15 +17,64 @@ class _LoginWrapperState extends State<LoginWrapper> {
   bool _isAuthenticated = false;
   String _userId = '';
   String _currentPage = 'Portfolio';
-
-  void _handleLogin(String userId) {
-    setState(() {
-      _isAuthenticated = true;
-      _userId = userId;
-    });
+  bool _isInitialized = false;
+  
+  // SharedPreferences keys
+  static const String _authKey = 'is_authenticated';
+  static const String _userIdKey = 'user_id';
+  
+  @override
+  void initState() {
+    super.initState();
+    _initializeAuth();
+  }
+  
+  Future<void> _initializeAuth() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isAuth = prefs.getBool(_authKey) ?? false;
+      final userId = prefs.getString(_userIdKey) ?? '';
+      
+      setState(() {
+        _isAuthenticated = isAuth;
+        _userId = userId;
+        _isInitialized = true;
+      });
+    } catch (error) {
+      setState(() {
+        _isInitialized = true;
+      });  
+    }
   }
 
-  void _handleLogout() {
+  void _handleLogin(String userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_authKey, true);
+      await prefs.setString(_userIdKey, userId);
+      
+      setState(() {
+        _isAuthenticated = true;
+        _userId = userId;
+      });
+    } catch (error) {
+      // Fallback to local state if SharedPreferences fails
+      setState(() {
+        _isAuthenticated = true;
+        _userId = userId;
+      });
+    }
+  }
+
+  void _handleLogout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_authKey);
+      await prefs.remove(_userIdKey);
+    } catch (error) {
+      // Continue with logout even if SharedPreferences fails
+    }
+    
     setState(() {
       _isAuthenticated = false;
       _userId = '';
@@ -84,6 +134,15 @@ class _LoginWrapperState extends State<LoginWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // Show loading screen while initializing authentication state
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    
     if (_isAuthenticated) {
       // For mobile platforms, use mobile layout, for web/desktop use web layout
       if (PlatformUtils.isMobile) {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_state.dart';
 import '../../domain/repositories/login_repository.dart';
@@ -22,7 +24,7 @@ class LoginRepositoryImpl implements LoginRepository {
         lastName: data['user']['lastName'] ?? 'User',
       );
 
-      return AuthState(
+      final authState = AuthState(
         isAuthenticated: true,
         isLoading: false,
         currentUser: user,
@@ -32,6 +34,11 @@ class LoginRepositoryImpl implements LoginRepository {
           ? DateTime.parse(data['expiresAt'])
           : DateTime.now().add(const Duration(hours: 1)),
       );
+
+      // Store authentication data for persistence
+      await _saveAuthData(user, data['accessToken']);
+
+      return authState;
     } catch (error) {
       return AuthState(
         isAuthenticated: false,
@@ -66,9 +73,15 @@ class LoginRepositoryImpl implements LoginRepository {
 
   @override
   Future<void> logout() async {
-    // For now, just simulate logout
-    // In real app, get current token and call remoteDataSource.logout(token)
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // Clear stored authentication data
+      await _clearAuthData();
+      
+      // For now, just simulate logout - in real app, call remoteDataSource.logout(token)
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (error) {
+      rethrow;
+    }
   }
 
   @override
@@ -97,14 +110,15 @@ class LoginRepositoryImpl implements LoginRepository {
   @override
   Future<User?> getCurrentUser() async {
     try {
-      // For now, return mock user
-      // In real app, get current token and call remoteDataSource.getCurrentUser(token)
-      return const User(
-        id: '1',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User',
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString('user_data');
+      
+      if (userData != null) {
+        final userJson = jsonDecode(userData) as Map<String, dynamic>;
+        return User.fromJson(userJson);
+      }
+      
+      return null;
     } catch (error) {
       return null;
     }
@@ -112,9 +126,17 @@ class LoginRepositoryImpl implements LoginRepository {
 
   @override
   Future<bool> isAuthenticated() async {
-    // For now, always return false for demo
-    // In real app, check stored token validity
-    return false;
+    try {
+      // Check if we have stored authentication data
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final userData = prefs.getString('user_data');
+      
+      // Return true if both token and user data exist
+      return token != null && userData != null;
+    } catch (error) {
+      return false;
+    }
   }
 
   @override
@@ -132,5 +154,19 @@ class LoginRepositoryImpl implements LoginRepository {
   Future<void> changePassword(String oldPassword, String newPassword) async {
     // TODO: Implement password change
     throw UnimplementedError('Password change not implemented yet');
+  }
+
+  /// Save authentication data to persistent storage
+  Future<void> _saveAuthData(User user, String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', token);
+    await prefs.setString('user_data', jsonEncode(user.toJson()));
+  }
+
+  /// Clear authentication data from persistent storage
+  Future<void> _clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_data');
   }
 }

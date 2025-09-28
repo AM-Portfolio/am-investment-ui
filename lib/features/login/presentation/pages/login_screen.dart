@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/platform_utils.dart';
+import '../../providers/login_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  final Function(String userId) onLogin;
+  final Function(String userId)? onLogin;
   
   const LoginScreen({
     super.key,
-    required this.onLogin,
+    this.onLogin,
   });
 
   @override
@@ -18,7 +19,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,18 +30,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      // Perform login logic here
-      // For now, simulate successful login
-      await Future.delayed(const Duration(seconds: 2));
+      // Use Riverpod authentication provider
+      await ref.read(authStateNotifierProvider.notifier).login(
+        _emailController.text,
+        _passwordController.text,
+      );
       
-      // Call the login callback with user ID
-      widget.onLogin(_emailController.text);
+      // Call the optional callback for compatibility
+      if (widget.onLogin != null) {
+        widget.onLogin!(_emailController.text);
+      }
     } catch (error) {
+      // Error handling is managed by the provider, but show a snackbar for user feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -50,26 +51,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
   Future<void> _handleDemoLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      // Simulate demo login with predefined credentials
-      await Future.delayed(const Duration(seconds: 1));
+      // Demo login with predefined credentials
+      await ref.read(authStateNotifierProvider.notifier).login(
+        "ssd2658",
+        "password",
+      );
       
-      // Call the login callback with demo user ID
-      widget.onLogin("ssd2658");
+      // Call the optional callback for compatibility
+      if (widget.onLogin != null) {
+        widget.onLogin!("ssd2658");
+      }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,17 +75,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authStateNotifierProvider);
+    final isLoading = authState.isLoading;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
@@ -172,7 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleLogin,
+                        onPressed: isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           foregroundColor: Colors.white,
@@ -180,7 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: _isLoading
+                        child: isLoading
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
@@ -203,7 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       width: double.infinity,
                       height: 48,
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : _handleDemoLogin,
+                        onPressed: isLoading ? null : _handleDemoLogin,
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Theme.of(context).primaryColor),
                           shape: RoundedRectangleBorder(

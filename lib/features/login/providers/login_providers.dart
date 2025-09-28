@@ -143,15 +143,27 @@ class AuthStateNotifier extends _$AuthStateNotifier {
     }
   }
 
-  /// Validate current session
+  /// Validate current session and restore user data if valid
   Future<void> validateSession() async {
     try {
-      final loginService = ref.read(loginServiceProvider);
-      final isValid = await loginService.validateAndRefreshSession();
+      final loginRepository = ref.read(loginRepositoryProvider);
+      final isAuthenticated = await loginRepository.isAuthenticated();
       
-      if (!isValid) {
-        state = const AuthState();
+      if (isAuthenticated) {
+        final currentUser = await loginRepository.getCurrentUser();
+        if (currentUser != null) {
+          state = state.copyWith(
+            isAuthenticated: true,
+            isLoading: false,
+            currentUser: currentUser,
+            errorMessage: null,
+          );
+          return;
+        }
       }
+      
+      // If not authenticated or unable to get user data, clear state
+      state = const AuthState();
     } catch (error) {
       state = const AuthState();
     }
