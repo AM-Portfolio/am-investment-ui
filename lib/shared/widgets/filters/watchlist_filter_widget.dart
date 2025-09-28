@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'generic_filter_widget.dart';
-import '../../../features/portfolio/filters/portfolio_filter_provider.dart';
+import '../../../shared/widgets/filters/generic_filter_widget.dart';
+import 'watchlist_filter_provider.dart';
 
-/// Portfolio-specific filter widget that uses the generic filter architecture
-/// This provides portfolio-specific filtering with reusable components
-class PortfolioFilterWidget extends StatelessWidget {
-  /// The list of portfolio holdings to filter
-  final List<dynamic> holdings;
+/// Watchlist-specific filter widget that uses the generic filter architecture
+/// This demonstrates how the same filter structure can be reused across features
+class WatchlistFilterWidget extends StatelessWidget {
+  /// The list of watchlist items to filter
+  final List<dynamic> watchlistItems;
   
   /// Callback when filters are applied
   final Function(List<dynamic>) onFiltersApplied;
@@ -18,9 +18,9 @@ class PortfolioFilterWidget extends StatelessWidget {
   final bool initiallyExpanded;
   
   /// Constructor
-  const PortfolioFilterWidget({
+  const WatchlistFilterWidget({
     super.key,
-    required this.holdings,
+    required this.watchlistItems,
     required this.onFiltersApplied,
     this.onFiltersReset,
     this.initiallyExpanded = false,
@@ -29,13 +29,13 @@ class PortfolioFilterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericFilterWidget<dynamic>(
-      items: holdings,
-      filterProvider: PortfolioFilterProvider(),
+      items: watchlistItems,
+      filterProvider: WatchlistFilterProvider(),
       onFiltersApplied: onFiltersApplied,
       onFiltersReset: onFiltersReset,
       initiallyExpanded: initiallyExpanded,
-      title: 'Portfolio Filters',
-      icon: Icons.business_center_outlined,
+      title: 'Watchlist Filters',
+      icon: Icons.visibility_outlined,
     );
   }
 }
