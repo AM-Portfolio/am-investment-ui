@@ -1,18 +1,21 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
-import '../core/data/repositories/portfolio_repository_impl.dart';
-import '../core/data/repositories/document_repository_impl.dart';
-import '../core/domain/repositories/portfolio_repository.dart';
-import '../core/domain/repositories/document_repository.dart';
-import '../core/domain/entities/portfolio/portfolio_holdings.dart';
-import '../core/domain/entities/portfolio/portfolio_summary.dart';
+import '../core/app_logic/data/repositories/portfolio_repository_impl.dart';
+import '../core/app_logic/data/repositories/document_repository_impl.dart';
+import '../core/app_logic/domain/repositories/portfolio_repository.dart';
+import '../core/app_logic/domain/repositories/document_repository.dart';
+import '../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
+import '../core/app_logic/domain/entities/portfolio/portfolio_summary.dart';
 import '../core/network/portfolio_client.dart';
 import '../core/network/document_client.dart';
+import '../core/errors/exception.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
 
-part '../core/di/app_providers.g.dart';
+part 'app_providers.g.dart';
 
 // Configuration Providers - Keep alive (singleton instances)
 @riverpod
@@ -60,7 +63,7 @@ DocumentClient documentClient(DocumentClientRef ref) {
   
   // Get configuration from ConfigService
   final config = ConfigService.config;
-  final documentApiConfig = config?.api?.document;
+  final documentApiConfig = config.api.document;
   
   // Configure Dio with base options
   dio.options = BaseOptions(

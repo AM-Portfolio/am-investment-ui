@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/domain/entities/document/document_upload.dart';
-import '../ui/portfolio_quick_actions.dart';
+import '../../../core/app_logic/domain/entities/document/document_upload.dart';
+import 'portfolio_quick_actions.dart';
 
 /// Service to handle portfolio creation from uploaded documents
 class PortfolioCreationService {

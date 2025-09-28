@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../domain/entities/document/document_upload.dart';
-import '../../domain/repositories/document_repository.dart';
+import '../domain/entities/document/document_upload.dart';
+import '../domain/repositories/document_repository.dart';
 import '../../../config/config_service.dart';
 import '../../../di/app_providers.dart';
 
-part '../../services/document_upload_service.g.dart';
+part '../../network/service/document_upload_service.g.dart';
 
 /// Service for handling document upload operations
 /// Uses repository pattern and provides business logic layer

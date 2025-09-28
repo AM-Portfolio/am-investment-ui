@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/import_data/import_data_models.dart';
-import '../import_data_widgets.dart';
+import '../../../widgets/import_data/import_data_widgets.dart';
 import '../../../core/app_logic/services/document_upload_service.dart';
 import '../../../core/app_logic/domain/entities/document/document_upload.dart';
 

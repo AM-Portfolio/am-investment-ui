@@ -1,5 +1,5 @@
-import '../../domain/entities/portfolio/portfolio_holdings.dart';
-import '../../domain/entities/portfolio/portfolio_summary.dart';
+import '../entities/portfolio/portfolio_holdings.dart';
+import '../entities/portfolio/portfolio_summary.dart';
 
 /// Repository interface for portfolio data
 /// Defines the contract for portfolio data access

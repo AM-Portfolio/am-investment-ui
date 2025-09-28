@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/domain/entities/portfolio/portfolio_holdings.dart';
+import '../../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
 
 /// Filter type enum to define different types of filters
 enum FilterType {

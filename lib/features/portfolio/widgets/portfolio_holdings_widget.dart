@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../di/app_providers.dart';
+import '../../../../di/app_providers.dart';
 
 /// Widget for displaying portfolio holdings
 class PortfolioHoldingsWidget extends ConsumerWidget {

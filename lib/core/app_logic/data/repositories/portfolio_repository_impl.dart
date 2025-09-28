@@ -3,7 +3,7 @@ import '../../domain/entities/portfolio/portfolio_summary.dart';
 import '../../domain/repositories/portfolio_repository.dart';
 import '../mappers/portfolio_holdings_mapper.dart';
 import '../mappers/portfolio_summary_mapper.dart';
-import '../../network/portfolio_client.dart';
+import '../../../network/portfolio_client.dart';
 
 /// Concrete implementation of PortfolioRepository
 /// Handles API calls, caching, and data transformation

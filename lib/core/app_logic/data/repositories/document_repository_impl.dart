@@ -5,11 +5,11 @@ import 'package:dio/dio.dart';
 
 import '../../domain/entities/document/document_upload.dart';
 import '../../domain/repositories/document_repository.dart';
-import '../../domain/entities/document/document_upload.dart';
 import '../mappers/document_mapper.dart';
-import '../../../config/config_service.dart';
-import '../../network/document_client.dart';
-import '../../errors/exception.dart';
+import '../../../../config/config_service.dart';
+import '../../../network/document_client.dart';
+import '../../../network/dtos/document/document_dtos.dart';
+import '../../../errors/exception.dart';
 
 /// Concrete implementation of DocumentRepository
 /// Handles API calls and data transformation for document uploads
@@ -101,7 +101,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
       
       // Copy configuration from the document client
       final config = ConfigService.config;
-      final documentApiConfig = config?.api?.document;
+      final documentApiConfig = config.api.document;
       
       dio.options = BaseOptions(
         baseUrl: documentApiConfig?.baseUrl ?? 'http://localhost:8070',

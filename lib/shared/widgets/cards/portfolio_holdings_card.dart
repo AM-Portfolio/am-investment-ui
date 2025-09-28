@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../core/domain/entities/portfolio/portfolio_holdings.dart';
+import '../../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
 import '../table/sortable_table.dart';
 
 /// A widget to display portfolio holdings in a card format

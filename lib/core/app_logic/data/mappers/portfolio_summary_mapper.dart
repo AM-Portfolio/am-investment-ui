@@ -1,5 +1,5 @@
-import '../../network/dtos/portfolio/portfolio_summary_dtos.dart';
-import '../../network/dtos/portfolio/broker_holding_dtos.dart';
+import '../../../network/dtos/portfolio/portfolio_summary_dtos.dart';
+import '../../../network/dtos/portfolio/broker_holding_dtos.dart';
 import '../../domain/entities/portfolio/portfolio_summary.dart';
 
 /// Mapper to convert between API models and domain entities for portfolio summary

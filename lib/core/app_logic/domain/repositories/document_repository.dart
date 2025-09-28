@@ -1,4 +1,4 @@
-import '../../domain/entities/document/document_upload.dart';
+import '../entities/document/document_upload.dart';
 
 /// Repository interface for document upload operations
 /// Defines the contract for document data access and processing

@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/document_upload_service.dart';
-import '../../../core/domain/entities/document/document_upload.dart';
+import '../../../core/app_logic/domain/entities/document/document_upload.dart';
 
 /// Types of portfolio actions available
 enum PortfolioActionType {

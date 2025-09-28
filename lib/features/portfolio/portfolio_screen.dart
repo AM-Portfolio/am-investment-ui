@@ -4,12 +4,12 @@ import '../../core/utils/platform_utils.dart';
 import '../../di/app_providers.dart';
 import '../../config/environment_config.dart';
 import '../../shared/widgets/navigation/portfolio_sidebar.dart';
-import '../../widgets/shared/ui/right_floating_quick_actions.dart';
-import '../../widgets/shared/ui/enhanced_portfolio_quick_actions.dart';
+import '../../shared/widgets/portfolio/right_floating_quick_actions.dart';
+import '../../shared/widgets/portfolio/enhanced_portfolio_quick_actions.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../shared/widgets/cards/portfolio_holdings_card.dart';
 import '../../shared/widgets/filters/portfolio_filter_widget.dart';
-import '../../core/domain/entities/portfolio/portfolio_holdings.dart';
+import '../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
 
 /// Screen to display portfolio information with sidebar navigation and quick actions
 class PortfolioScreen extends ConsumerStatefulWidget {

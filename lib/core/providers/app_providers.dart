@@ -1,11 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
-import '../data/repositories/portfolio_repository_impl.dart';
-import '../data/repositories/document_repository_impl.dart';
-import '../domain/repositories/portfolio_repository.dart';
-import '../domain/repositories/document_repository.dart';
-import '../domain/entities/portfolio/portfolio_holdings.dart';
-import '../domain/entities/portfolio/portfolio_summary.dart';
+import '../app_logic/data/repositories/portfolio_repository_impl.dart';
+import '../app_logic/data/repositories/document_repository_impl.dart';
+import '../app_logic/domain/repositories/portfolio_repository.dart';
+import '../app_logic/domain/repositories/document_repository.dart';
+import '../app_logic/domain/entities/portfolio/portfolio_holdings.dart';
+import '../app_logic/domain/entities/portfolio/portfolio_summary.dart';
 import '../services/api/portfolio_client.dart';
 import '../services/api/document_client.dart';
 import '../../config/app_config.dart';

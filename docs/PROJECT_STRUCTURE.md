@@ -8,109 +8,148 @@
 ```
 lib/
 │
-├── core/                          # Infrastructure & cross-cutting concerns
-│   ├── constants/                 # App-wide constants
-│   │   ├── app_routes.dart        # Route names (e.g., '/portfolio')
-│   │   └── api_endpoints.dart     # API paths (e.g., '/api/v1/portfolios')
+├── core/                          # ✅ App-wide infrastructure
 │   │
-│   ├── errors/                    # Failure types & error handling
-│   │   ├── failures.dart          # NetworkFailure, AuthFailure, CacheFailure
-│   │   └── exception_mapper.dart  # Maps Dio/HTTP errors to domain failures
-│   │
-│   ├── network/                   # API layer (100% shared)
-│   │   ├── api_client.dart        # Global Retrofit-style client (dio + retrofit.dart)
-│   │   └── dtos/                  # ✅ All backend-matching DTOs (Spring Boot contracts)
-│   │       ├── auth_dtos.dart     # LoginRequest, TokenResponse
-│   │       ├── user_dtos.dart     # UserResponse
-│   │       ├── portfolio_dtos.dart
-│   │       └── trade_dtos.dart
-│   │
-│   └── utils/                     # Pure, stateless helpers
-│       ├── date_utils.dart        # Formatting, parsing
-│       ├── string_utils.dart      # Validation, sanitization
-│       └── filter_sort_utils.dart # ✅ Reusable filtering/sorting (stateless)
-│
-├── shared/                        # Reusable across features & platforms
-│   │
-│   ├── models/                    # Pure domain models (no JSON, no annotations)
-│   │   └── user.dart              # Used in portfolio, trade, profile, etc.
-│   │
-│   ├── widgets/                   # ✅ Cross-feature, cross-platform UI
-│   │   │
-│   │   ├── inputs/                # Form controls
-│   │   │   ├── app_dropdown.dart
-│   │   │   ├── app_text_field.dart
-│   │   │   └── app_date_picker.dart
-│   │   │
-│   │   ├── buttons/               # Action buttons
-│   │   │   ├── primary_button.dart
-│   │   │   └── icon_button.dart
-│   │   │
-│   │   ├── data_table/            # ✅ Smart, sortable, responsive table
-│   │   │   ├── adaptive_data_table.dart
-│   │   │   ├── table_header.dart
-│   │   │   └── table_row.dart
-│   │   │
-│   │   └── animations/            # ✅ Shared motion design
-│   │       ├── fade_in_animation.dart
-│   │       ├── slide_route.dart
-│   │       └── skeleton_loader.dart
-│   │
-│   └── cubits/                    # ✅ Stateful shared logic (optional)
-│       └── filter_sort_cubit.dart # Reusable for portfolio, trade, analysis
-│
-├── platform/                      # ✅ Platform-specific services (Android/iOS only)
-│   ├── android/                   # 🤖 Android-only implementations
-│   │   ├── android_biometric_auth.dart
-│   │   ├── android_deep_link_handler.dart
-│   │   └── android_share_service.dart
-│   │
-│   └── ios/                       # 🍏 iOS-only implementations
-│       ├── ios_biometric_auth.dart
-│       ├── ios_universal_link_handler.dart
-│       └── ios_share_service.dart
-│
-├── features/                      # Vertical slices — each is self-contained
-│   │
-│   ├── auth/                      # Feature: Authentication
+│   ├── app_logic/                 # 🧠 App-level shared logic (used by multiple features)
 │   │   ├── data/
 │   │   │   ├── datasources/
-│   │   │   ├── models/            # Auth-specific data models (if any)
+│   │   │   │   ├── auth_remote_data_source.dart
+│   │   │   │   └── user_prefs_local_data_source.dart
+│   │   │   │
 │   │   │   └── repositories/
+│   │   │       ├── auth_repository_impl.dart
+│   │   │       └── user_prefs_repository_impl.dart
+│   │   │
 │   │   ├── domain/
 │   │   │   ├── entities/
-│   │   │   ├── repositories/      # abstract AuthRepository
-│   │   │   └── usecases/          # Login, Logout, RefreshToken
+│   │   │   │   ├── user.dart
+│   │   │   │   ├── session.dart
+│   │   │   │   └── app_config.dart
+│   │   │   │
+│   │   │   ├── repositories/
+│   │   │   │   ├── auth_repository.dart          # abstract
+│   │   │   │   └── user_prefs_repository.dart    # abstract
+│   │   │   │
+│   │   │   └── usecases/
+│   │   │       ├── login_use_case.dart
+│   │   │       ├── logout_use_case.dart
+│   │   │       └── get_app_config_use_case.dart
+│   │   │
+│   │   └── services/
+│   │       ├── auth_service.dart
+│   │       └── notification_service.dart
+│   │
+│   ├── constants/
+│   │   ├── app_routes.dart        # '/login', '/home', '/portfolio', etc.
+│   │   └── api_endpoints.dart     # '/api/v1/auth', '/api/v1/documents', etc.
+│   │
+│   ├── errors/
+│   │   ├── failures.dart
+│   │   └── exception_mapper.dart
+│   │
+│   ├── network/
+│   │   ├── api_client.dart
+│   │   └── dtos/
+│   │       ├── auth_dtos.dart
+│   │       ├── user_dtos.dart
+│   │       ├── portfolio_dtos.dart
+│   │       ├── trade_dtos.dart
+│   │       └── document_dtos.dart
+│   │
+│   └── utils/
+│       ├── date_utils.dart
+│       ├── string_utils.dart
+│       └── filter_sort_utils.dart
+│
+├── shared/                        # ✅ Reusable across features & platforms
+│   ├── models/                    # (optional: UI-safe copies of core/app_logic entities)
+│   │   └── user.dart
+│   │
+│   └── widgets/                   # Shared UI components
+│       ├── inputs/
+│       ├── buttons/
+│       ├── data_table/
+│       └── animations/
+│
+├── platform/                      # Platform-specific services
+│   ├── android/
+│   │   ├── android_biometric_auth.dart
+│   │   ├── android_file_picker.dart
+│   │   └── android_deep_link_handler.dart
+│   │
+│   └── ios/
+│       ├── ios_biometric_auth.dart
+│       ├── ios_file_picker.dart
+│       └── ios_universal_link_handler.dart
+│
+├── features/                      # ✅ Feature modules
+│   │
+│   ├── auth/                      # 🔑 Authentication (Login, Signup, Forgot Password)
+│   │   ├── internal/
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   └── services/
+│   │   │       └── auth_workflow_service.dart  # Handles login + analytics + session
+│   │   │
 │   │   └── presentation/
 │   │       ├── cubit/
 │   │       │   └── auth_cubit.dart
-│   │       ├── common/            # Shared login UI (email/password form)
+│   │       ├── common/
 │   │       │   └── widgets/
-│   │       ├── mobile/            # Default mobile login screen
+│   │       ├── mobile/
 │   │       │   └── login_screen.dart
-│   │       ├── android/           # 🤖 Only if Android-specific (e.g., biometric prompt)
+│   │       ├── android/
 │   │       │   └── login_screen.dart
-│   │       └── ios/               # 🍏 Only if iOS-specific (e.g., Face ID flow)
+│   │       └── ios/
 │   │           └── login_screen.dart
 │   │
-│   ├── portfolio/                 # Feature: Portfolio Holdings
-│   │   ├── data/
-│   │   ├── domain/
+│   ├── home/                      # 🏠 Main Dashboard (Overview, Quick Actions)
+│   │   ├── internal/
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   └── services/
+│   │   │       └── home_dashboard_service.dart
+│   │   │
+│   │   └── presentation/
+│   │       ├── cubit/
+│   │       │   └── home_cubit.dart
+│   │       ├── common/
+│   │       │   └── widgets/
+│   │       │       ├── portfolio_summary_card.dart
+│   │       │       └── trade_activity_card.dart
+│   │       ├── mobile/
+│   │       │   └── home_screen.dart
+│   │       ├── android/
+│   │       │   └── home_screen.dart
+│   │       └── ios/
+│   │           └── home_screen.dart
+│   │
+│   ├── portfolio/                 # 📊 Portfolio Holdings & Performance
+│   │   ├── internal/
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   └── services/
+│   │   │       └── portfolio_sync_service.dart
+│   │   │
 │   │   └── presentation/
 │   │       ├── cubit/
 │   │       │   └── portfolio_cubit.dart
 │   │       ├── common/
 │   │       │   └── widgets/
-│   │       ├── mobile/            # Default mobile UI
+│   │       ├── mobile/
 │   │       │   └── portfolio_screen.dart
-│   │       ├── android/           # 🤖 Only if needed (e.g., Android share intent)
+│   │       ├── android/
 │   │       │   └── portfolio_screen.dart
-│   │       └── ios/               # 🍏 Only if needed (e.g., iOS share sheet)
+│   │       └── ios/
 │   │           └── portfolio_screen.dart
 │   │
-│   ├── trade_management/          # Feature: Trade History & Orders
-│   │   ├── data/
-│   │   ├── domain/
+│   ├── trade_management/          # 💹 Trade History, Orders, Execution
+│   │   ├── internal/
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   └── services/
+│   │   │       └── trade_execution_service.dart
+│   │   │
 │   │   └── presentation/
 │   │       ├── cubit/
 │   │       │   └── trade_cubit.dart
@@ -123,36 +162,43 @@ lib/
 │   │       └── ios/
 │   │           └── trade_screen.dart
 │   │
-│   └── analysis/                  # Feature: Portfolio Analysis
-│       ├── data/
-│       ├── domain/
+│   └── document_processing/       # 📄 Upload, Parse, Verify Documents (KYC, etc.)
+│       ├── internal/
+│       │   ├── data/
+│       │   ├── domain/
+│       │   └── services/
+│       │       └── document_upload_service.dart
+│       │
 │       └── presentation/
 │           ├── cubit/
-│           │   └── analysis_cubit.dart
+│           │   └── document_cubit.dart
 │           ├── common/
 │           │   └── widgets/
+│           │       ├── document_upload_card.dart
+│           │       └── verification_status_badge.dart
 │           ├── mobile/
-│           │   └── analysis_screen.dart
+│           │   └── document_screen.dart
 │           ├── android/
-│           │   └── analysis_screen.dart
+│           │   └── document_screen.dart        # Uses Android file picker
 │           └── ios/
-│               └── analysis_screen.dart
+│               └── document_screen.dart        # Uses iOS document picker
 │
-├── di/                            # Dependency Injection (get_it + injectable)
-│   ├── injection.dart             # Main DI setup
-│   └── injection.config.dart      # Generated file
+├── di/                            # Dependency Injection
+│   ├── injection.dart
+│   └── injection.config.dart
 │
-├── config/                        # App configuration
-│   └── app_config.dart            # Reads from env (mock mode, base URL, feature flags)
+├── config/
+│   └── app_config.dart            # Reads from env (mock mode, base URL)
 │
-├── assets/                        # Static resources
-│   └── mock/                      # Fallback JSON for offline/mock mode
+├── assets/
+│   └── mock/
 │       ├── auth.json
+│       ├── home.json
 │       ├── portfolio.json
 │       ├── trade.json
-│       └── user.json
+│       └── document.json
 │
-├── main.dart                      # ✅ SINGLE entry point (Android, iOS, Web)
+├── main.dart                      # ✅ Single entry point (Android, iOS, Web)
 └── app.dart                       # Root app widget (adaptive navigation)
 ```
 

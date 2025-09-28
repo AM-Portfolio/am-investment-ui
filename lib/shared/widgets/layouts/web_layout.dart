@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/network/service/auth_service.dart';
+import '../../../core/app_logic/services/auth_service.dart';
 
 /// A layout component specifically designed for web interfaces
 /// Includes header navigation and footer

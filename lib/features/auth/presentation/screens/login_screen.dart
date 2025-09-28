@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import '../../../../core/network/service/auth_service.dart';
+import '../../../../core/app_logic/services/auth_service.dart';
 import '../widgets/modern_login_form.dart';
 import '../widgets/animated_login_elements.dart';
 import '../widgets/login_background.dart';

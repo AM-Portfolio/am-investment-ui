@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../network/dtos/portfolio/portfolio_holdings_dtos.dart';
 import '../network/dtos/portfolio/portfolio_summary_dtos.dart';
 import '../network/dtos/portfolio/broker_holding_dtos.dart';
-import '../services/api/api_exception.dart';
+import '../errors/exception.dart';
 
 /// Service for providing mock portfolio data
 /// Handles loading and transformation of mock data for development and testing
