@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_logic/services/auth_service.dart';
+import '../common/user_dropdown_menu.dart';
 
 /// A layout component specifically designed for web interfaces
 /// Includes header navigation and footer
@@ -182,14 +183,25 @@ class WebLayout extends StatelessWidget {
 
                   const SizedBox(width: 16),
 
-                  // User profile
-                  InkWell(
-                    onTap: () {
-                      _showUserMenu(context);
+                  // User profile with dropdown
+                  UserDropdownMenu(
+                    userName: user?.name ?? 'User',
+                    userEmail: user?.email,
+                    onLogout: onLogout,
+                    onProfile: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Profile page coming soon'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                     },
-                    borderRadius: BorderRadius.circular(24),
-                    child: Padding(
+                    child: Container(
                       padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        color: Colors.transparent,
+                      ),
                       child: Row(
                         children: [
                           CircleAvatar(
@@ -197,7 +209,7 @@ class WebLayout extends StatelessWidget {
                             backgroundColor: theme.colorScheme.onPrimary,
                             child: Text(
                               user?.name.isNotEmpty == true
-                                  ? user!.name[0].toUpperCase()
+                                  ? _getInitials(user!.name)
                                   : 'U',
                               style: TextStyle(
                                 color: theme.colorScheme.primary,
@@ -207,7 +219,7 @@ class WebLayout extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            user?.name ?? 'User',
+                            _getFirstName(user?.name ?? 'User'),
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.w500,
@@ -217,6 +229,7 @@ class WebLayout extends StatelessWidget {
                           Icon(
                             Icons.arrow_drop_down,
                             color: theme.colorScheme.onPrimary,
+                            size: 20,
                           ),
                         ],
                       ),
@@ -338,158 +351,23 @@ class WebLayout extends StatelessWidget {
     );
   }
 
-  /// Show company information dialog
-  void _showCompanyInfo(BuildContext context) {
-    final theme = Theme.of(context);
 
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'About AM Investment',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'A leading investment platform for modern investors',
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Legal Information',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text('License: SEBI Registration No. INZ000031633'),
-              const SizedBox(height: 4),
-              Text('CIN: U67190MH2018PTC307971'),
-              const SizedBox(height: 4),
-              Text('GSTIN: 27AAHCA1996R1ZP'),
-              const SizedBox(height: 24),
-              Text(
-                'Quick Links',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 16,
-                runSpacing: 8,
-                children: [
-                  _buildInfoLink(context, 'About Us'),
-                  _buildInfoLink(context, 'Contact'),
-                  _buildInfoLink(context, 'Help Center'),
-                  _buildInfoLink(context, 'Privacy Policy'),
-                  _buildInfoLink(context, 'Terms of Service'),
-                  _buildInfoLink(context, 'Careers'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+
+  /// Get user initials for avatar
+  String _getInitials(String name) {
+    if (name.isEmpty) return 'U';
+    
+    final names = name.trim().split(' ');
+    if (names.length == 1) {
+      return names[0][0].toUpperCase();
+    }
+    
+    return '${names[0][0]}${names[1][0]}'.toUpperCase();
   }
 
-  /// Build info link for company info dialog
-  Widget _buildInfoLink(BuildContext context, String label) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$label coming soon')));
-      },
-      child: Chip(
-        label: Text(label),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-    );
-  }
-
-  /// Show user menu
-  void _showUserMenu(BuildContext context) {
-    final theme = Theme.of(context);
-
-    showDialog(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text('User Menu', style: theme.textTheme.titleMedium),
-        children: [
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to profile
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile coming soon')),
-              );
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.person),
-                SizedBox(width: 12),
-                Text('Profile'),
-              ],
-            ),
-          ),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to settings
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings coming soon')),
-              );
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.settings),
-                SizedBox(width: 12),
-                Text('Settings'),
-              ],
-            ),
-          ),
-          const Divider(),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              if (onLogout != null) {
-                onLogout!();
-              }
-            },
-            child: Row(
-              children: [
-                Icon(Icons.logout, color: theme.colorScheme.error),
-                const SizedBox(width: 12),
-                Text(
-                  'Logout',
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  /// Get first name from full name
+  String _getFirstName(String fullName) {
+    if (fullName.isEmpty) return 'User';
+    return fullName.trim().split(' ')[0];
   }
 }
