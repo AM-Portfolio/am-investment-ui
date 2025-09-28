@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'features/auth/auth_wrapper.dart';
+import 'features/login/presentation/pages/login_wrapper.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -22,7 +22,7 @@ class App extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: const AuthWrapper(),
+      home: const LoginWrapper(),
       // Add error handling
       builder: (context, child) {
         return _AppErrorBoundary(child: child ?? const SizedBox.shrink());

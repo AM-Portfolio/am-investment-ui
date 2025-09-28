@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-import '../portfolio/presentation/pages/portfolio_screen.dart';
-import '../../shared/widgets/layouts/web_layout.dart';
+import '../../../portfolio/presentation/pages/portfolio_screen.dart';
+import '../../../../shared/widgets/layouts/web_layout.dart';
 
-class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({super.key});
+class LoginWrapper extends StatefulWidget {
+  const LoginWrapper({super.key});
 
   @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
+  State<LoginWrapper> createState() => _LoginWrapperState();
 }
 
-class _AuthWrapperState extends State<AuthWrapper> {
+class _LoginWrapperState extends State<LoginWrapper> {
   bool _isAuthenticated = false;
   String _userId = '';
   String _currentPage = 'Portfolio';
