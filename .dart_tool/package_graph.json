@@ -11,6 +11,7 @@
         "dio",
         "file_picker",
         "flutter",
+        "flutter_bloc",
         "flutter_hot_reload",
         "flutter_riverpod",
         "freezed_annotation",
@@ -287,6 +288,15 @@
         "meta",
         "mime",
         "path"
+      ]
+    },
+    {
+      "name": "flutter_bloc",
+      "version": "8.1.6",
+      "dependencies": [
+        "bloc",
+        "flutter",
+        "provider"
       ]
     },
     {
@@ -1082,6 +1092,22 @@
       ]
     },
     {
+      "name": "provider",
+      "version": "6.1.5+1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "nested"
+      ]
+    },
+    {
+      "name": "bloc",
+      "version": "8.1.4",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
       "name": "state_notifier",
       "version": "1.0.0",
       "dependencies": [
@@ -1330,6 +1356,13 @@
         "rxdart",
         "uuid",
         "yaml"
+      ]
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {

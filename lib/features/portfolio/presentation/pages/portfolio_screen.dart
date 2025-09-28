@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubit/portfolio_cubit.dart';
 import '../widgets/portfolio_overview_widget.dart';
 import '../widgets/portfolio_holdings_widget.dart';
 import '../widgets/portfolio_analysis_widget.dart';
 import '../widgets/portfolio_sidebar.dart';
+import '../cubit/portfolio_cubit.dart';
+import '../cubit/portfolio_state.dart';
 
-/// Main portfolio screen with clean architecture
+/// Main portfolio screen with clean architecture using BLoC
 class PortfolioScreen extends StatelessWidget {
   final String userId;
 
@@ -19,14 +20,19 @@ class PortfolioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => context.read<PortfolioCubit>()..loadPortfolio(userId),
+      create: (context) => PortfolioCubit(
+        // TODO: Get dependencies from DI container
+        null!, // GetPortfolioSummary
+        null!, // GetPortfolioHoldings  
+        null!, // SearchPortfolioHoldings
+      )..loadPortfolio(userId),
       child: PortfolioView(userId: userId),
     );
   }
 }
 
 /// Internal portfolio view widget
-class PortfolioView extends StatelessWidget {
+class PortfolioView extends StatefulWidget {
   final String userId;
 
   const PortfolioView({
@@ -35,117 +41,112 @@ class PortfolioView extends StatelessWidget {
   });
 
   @override
+  State<PortfolioView> createState() => _PortfolioViewState();
+}
+
+class _PortfolioViewState extends State<PortfolioView> {
+
+  @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
     
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Portfolio'),
-        actions: [
-          BlocBuilder<PortfolioCubit, PortfolioState>(
-            builder: (context, state) {
-              return IconButton(
-                icon: state.isRefreshing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.refresh),
-                onPressed: state.isRefreshing
-                    ? null
-                    : () => context.read<PortfolioCubit>().refreshPortfolio(userId),
-              );
-            },
-          ),
-        ],
+    return BlocListener<PortfolioCubit, PortfolioState>(
+      listener: (context, state) {
+        // Handle any state changes like showing errors, etc.
+        if (state is PortfolioError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${state.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Portfolio'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                // Refresh portfolio data using cubit
+                context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+              },
+            ),
+          ],
+        ),
+        body: isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
       ),
-      body: isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
     );
   }
 
   Widget _buildDesktopLayout() {
-    return Row(
-      children: [
-        // Sidebar
-        Container(
-          width: 250,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            border: Border(
-              right: BorderSide(color: Colors.grey.shade300),
+    return BlocBuilder<PortfolioCubit, PortfolioState>(
+      builder: (context, state) {
+        return Row(
+          children: [
+            // Sidebar
+            Container(
+              width: 250,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                border: Border(
+                  right: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              child: PortfolioSidebar(
+                selectedView: state is PortfolioLoaded ? state.currentView : PortfolioViewType.overview,
+                onViewChanged: (view) {
+                  context.read<PortfolioCubit>().changeView(view);
+                },
+              ),
             ),
-          ),
-          child: const PortfolioSidebar(),
-        ),
-        // Main content
-        Expanded(
-          child: _buildMainContent(),
-        ),
-      ],
+            // Main content
+            Expanded(
+              child: _buildMainContent(),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildMobileLayout() {
-    return Scaffold(
-      drawer: const Drawer(
-        child: PortfolioSidebar(),
-      ),
-      body: _buildMainContent(),
+    return BlocBuilder<PortfolioCubit, PortfolioState>(
+      builder: (context, state) {
+        return Scaffold(
+          drawer: Drawer(
+            child: PortfolioSidebar(
+              selectedView: state is PortfolioLoaded ? state.currentView : PortfolioViewType.overview,
+              onViewChanged: (view) {
+                context.read<PortfolioCubit>().changeView(view);
+                Navigator.of(context).pop(); // Close drawer
+              },
+            ),
+          ),
+          body: _buildMainContent(),
+        );
+      },
     );
   }
 
   Widget _buildMainContent() {
     return BlocBuilder<PortfolioCubit, PortfolioState>(
       builder: (context, state) {
-        return state.when(
-          initial: () => const Center(child: Text('Welcome to Portfolio')),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          loaded: (holdings, summary, selectedView, isRefreshing, searchQuery, 
-                  searchResults, sectorAllocation, topPerformers) {
-            return _buildLoadedContent(selectedView);
-          },
-          error: (message) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red.shade400,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error Loading Portfolio',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  message,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.read<PortfolioCubit>().loadPortfolio(userId),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        );
+        final currentView = state is PortfolioLoaded ? state.currentView : PortfolioViewType.overview;
+        return _buildLoadedContent(currentView);
       },
     );
   }
 
-  Widget _buildLoadedContent(PortfolioView selectedView) {
+  Widget _buildLoadedContent(PortfolioViewType selectedView) {
     switch (selectedView) {
-      case PortfolioView.overview:
-        return PortfolioOverviewWidget(userId: userId);
-      case PortfolioView.holdings:
-        return PortfolioHoldingsWidget(userId: userId);
-      case PortfolioView.analysis:
-        return PortfolioAnalysisWidget(userId: userId);
+      case PortfolioViewType.overview:
+        return PortfolioOverviewWidget(userId: widget.userId);
+      case PortfolioViewType.holdings:
+        return PortfolioHoldingsWidget(userId: widget.userId);
+      case PortfolioViewType.analysis:
+        return PortfolioAnalysisWidget(userId: widget.userId);
     }
   }
 }

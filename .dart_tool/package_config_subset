@@ -42,6 +42,10 @@ async
 3.4
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0/
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0/lib/
+bloc
+2.12
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/bloc-8.1.4/
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/bloc-8.1.4/lib/
 boolean_selector
 3.1
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.2/
@@ -178,6 +182,10 @@ fixnum
 3.1
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1/
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1/lib/
+flutter_bloc
+2.12
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_bloc-8.1.6/
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_bloc-8.1.6/lib/
 flutter_hot_reload
 3.0
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_hot_reload-0.1.0/
@@ -302,6 +310,10 @@ mockito
 3.6
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/mockito-5.4.5/
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/mockito-5.4.5/lib/
+nested
+2.12
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0/
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0/lib/
 node_preamble
 2.12
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/node_preamble-2.0.2/
@@ -342,6 +354,10 @@ protobuf
 2.19
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/protobuf-3.1.0/
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/protobuf-3.1.0/lib/
+provider
+2.12
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.5+1/
+file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.5+1/lib/
 pub_semver
 3.4
 file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.2.0/

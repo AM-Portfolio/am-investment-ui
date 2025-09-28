@@ -14,6 +14,10 @@ import '../core/errors/exception.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
+import '../features/portfolio/presentation/cubit/portfolio_cubit.dart';
+import '../features/portfolio/internal/domain/usecases/get_portfolio_summary.dart';
+import '../features/portfolio/internal/domain/usecases/get_portfolio_holdings.dart';
+import '../features/portfolio/internal/domain/usecases/search_portfolio_holdings.dart';
 
 part 'app_providers.g.dart';
 
@@ -275,4 +279,37 @@ class CacheManager {
   Future<void> clearDocumentHistoryCache(String userId) async {
     // No-op as document repository doesn't have cache methods yet
   }
+}
+
+// Use case providers for BLoC pattern
+@riverpod
+Future<GetPortfolioSummary> getPortfolioSummary(GetPortfolioSummaryRef ref) async {
+  final repository = await ref.watch(portfolioRepositoryProvider.future);
+  return GetPortfolioSummary(repository);
+}
+
+@riverpod
+Future<GetPortfolioHoldings> getPortfolioHoldings(GetPortfolioHoldingsRef ref) async {
+  final repository = await ref.watch(portfolioRepositoryProvider.future);
+  return GetPortfolioHoldings(repository);
+}
+
+@riverpod
+Future<SearchPortfolioHoldings> searchPortfolioHoldings(SearchPortfolioHoldingsRef ref) async {
+  final repository = await ref.watch(portfolioRepositoryProvider.future);
+  return SearchPortfolioHoldings(repository);
+}
+
+// BLoC/Cubit providers
+@riverpod
+Future<PortfolioCubit> portfolioCubit(PortfolioCubitRef ref) async {
+  final getPortfolioSummary = await ref.watch(getPortfolioSummaryProvider.future);
+  final getPortfolioHoldings = await ref.watch(getPortfolioHoldingsProvider.future);
+  final searchPortfolioHoldings = await ref.watch(searchPortfolioHoldingsProvider.future);
+  
+  return PortfolioCubit(
+    getPortfolioSummary,
+    getPortfolioHoldings,
+    searchPortfolioHoldings,
+  );
 }

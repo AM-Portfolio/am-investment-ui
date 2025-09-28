@@ -38,6 +38,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "bloc",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/bloc-8.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
@@ -248,6 +254,12 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "flutter_bloc",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_bloc-8.1.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_hot_reload",
       "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_hot_reload-0.1.0",
       "packageUri": "lib/",
@@ -446,6 +458,12 @@
       "languageVersion": "3.6"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "node_preamble",
       "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/node_preamble-2.0.2",
       "packageUri": "lib/",
@@ -504,6 +522,12 @@
       "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/protobuf-3.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.5+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "pub_semver",
