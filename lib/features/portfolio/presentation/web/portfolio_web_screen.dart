@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../di/app_providers.dart';
-import '../../widgets/portfolio_holdings_widget.dart';
+import 'portfolio_holdings_widget.dart';
 
 /// Web-specific portfolio screen implementation
 class PortfolioWebScreen extends ConsumerWidget {

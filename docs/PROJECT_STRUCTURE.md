@@ -1,7 +1,4 @@
-```markdown
 # File Organization Rules
-
-> **Related Documentation:** For development workflow and build rules, see [DEVELOPMENT_RULES.md](./DEVELOPMENT_RULES.md)
 
 ## Directory Structure
 
@@ -77,33 +74,60 @@ lib/
 │   │                              # Features do NOT depend on each other.
 │   │
 │   ├── auth/                      # 🔑 Authentication feature (login, signup, forgot password).
-│   │   ├── internal/              # 🧠 ALL feature-specific logic (data, domain, services).
-│   │   │   ├── data/              # Auth data sources and repository implementations.
-│   │   │   ├── domain/            # Auth entities, use cases, abstract repositories.
-│   │   │   └── services/          # Auth complex workflows (e.g., login + analytics).
+│   │   │                          # Note: Currently transitioning to clean architecture structure.
+│   │   ├── auth_wrapper.dart      # Authentication state wrapper component.
+│   │   ├── login_screen.dart      # Legacy login screen (to be moved to presentation/).
 │   │   │
 │   │   └── presentation/          # 🎨 UI layer for auth (web + mobile).
-│   │       ├── cubit/             # AuthCubit (state management for auth screens).
-│   │       ├── common/            # Widgets reused across web/mobile for auth.
-│   │       ├── mobile/            # Default mobile UI (used by both Android & iOS).
-│   │       ├── android/           # 🤖 Android-specific UI overrides (if needed).
-│   │       └── ios/               # 🍏 iOS-specific UI overrides (if needed).
-│   │
-│   ├── home/                      # 🏠 Main dashboard (overview, quick actions).
-│   │   ├── internal/              # Home feature logic.
-│   │   └── presentation/          # Home UI (adaptive for web/mobile).
+│   │       ├── screens/           # Auth screen implementations.
+│   │       │   ├── login_screen.dart      # Login screen implementation.
+│   │       │   └── register_screen.dart   # Registration screen implementation.
+│   │       │
+│   │       └── widgets/           # Auth-specific UI components.
+│   │           ├── app_logo.dart          # Application logo widget.
+│   │           ├── animated_login_elements.dart  # Login animations.
+│   │           ├── login_background.dart  # Login background styling.
+│   │           └── modern_login_form.dart # Modern login form component.
 │   │
 │   ├── portfolio/                 # 📊 Portfolio holdings and performance.
-│   │   ├── internal/              # Portfolio logic.
-│   │   └── presentation/          # Portfolio UI.
+│   │   │                          # Example of complete clean architecture implementation.
+│   │   ├── internal/              # 🧠 ALL feature-specific logic (data, domain, services).
+│   │   │   ├── data/              # Portfolio data sources and repository implementations.
+│   │   │   │   ├── datasources/   # Remote and local data sources.
+│   │   │   │   ├── dtos/          # Data transfer objects for API communication.
+│   │   │   │   ├── mappers/       # Data transformation between layers.
+│   │   │   │   └── repositories/  # Repository implementations.
+│   │   │   │
+│   │   │   ├── domain/            # Portfolio entities, use cases, abstract repositories.
+│   │   │   │   ├── entities/      # Domain entities (PortfolioHolding, PortfolioSummary).
+│   │   │   │   ├── repositories/  # Abstract repository interfaces.
+│   │   │   │   └── usecases/      # Business use cases (GetPortfolioHoldings, etc.).
+│   │   │   │
+│   │   │   └── services/          # Portfolio complex workflows (e.g., sync + analytics).
+│   │   │
+│   │   ├── presentation/          # 🎨 UI layer for portfolio (web + mobile).
+│   │   │   ├── cubit/             # PortfolioCubit (state management for portfolio screens).
+│   │   │   │   ├── portfolio_cubit.dart  # State management logic.
+│   │   │   │   └── portfolio_state.dart  # State definitions.
+│   │   │   │
+│   │   │   ├── common/            # Widgets reused across web/mobile for portfolio.
+│   │   │   ├── mobile/            # Default mobile UI (used by both Android & iOS).
+│   │   │   ├── pages/             # Portfolio page implementations.
+│   │   │   │   └── portfolio_screen.dart  # Main portfolio screen.
+│   │   │   │
+│   │   │   ├── web/               # Web-specific portfolio UI.
+│   │   │   │   ├── portfolio_holdings_widget.dart  # Holdings display widget.
+│   │   │   │   └── portfolio_web_screen.dart       # Web portfolio screen.
+│   │   │   │
+│   │   │   └── widgets/           # Portfolio-specific UI components.
+│   │   │       └── portfolio_sidebar.dart  # Portfolio navigation sidebar.
+│   │   │
+│   │   ├── data/                  # Legacy data layer (to be moved to internal/).
+│   │   ├── domain/                # Legacy domain layer (to be moved to internal/).
+│   │   ├── portfolio_screen.dart  # Legacy screen file (to be removed).
+│   │   └── README.md              # Portfolio feature documentation.
 │   │
-│   ├── trade_management/          # 💹 Trade history, orders, execution.
-│   │   ├── internal/              # Trade logic.
-│   │   └── presentation/          # Trade UI.
-│   │
-│   └── document_processing/       # 📄 Document upload, parsing, verification (e.g., KYC).
-│       ├── internal/              # Document logic.
-│       └── presentation/          # Document UI (uses platform file pickers via DI).
+│   └── web_app_entry.dart         # Web application entry point and routing.
 │
 ├── di/                            # ⚙️ Dependency Injection setup (get_it + injectable).
 │   ├── injection.dart             # Main DI configuration (registers all dependencies).

@@ -74,6 +74,8 @@ class PortfolioClient {
 
 ### Retrofit Style Client with Static Endpoints
 ```dart
+// lib/core/network/clients/portfolio_client.dart (global client)
+// OR lib/features/portfolio/internal/data/clients/portfolio_client.dart (feature-specific)
 @RestApi()
 abstract class PortfolioClient {
   factory PortfolioClient(Dio dio, {String baseUrl}) = _PortfolioClient;
@@ -115,6 +117,7 @@ PortfolioClient portfolioClient(PortfolioClientRef ref) {
 
 ### Repository Pattern Implementation
 ```dart
+// lib/features/portfolio/internal/data/repositories/portfolio_repository_impl.dart
 @Injectable(as: PortfolioRepository)
 class PortfolioRepositoryImpl implements PortfolioRepository {
   final PortfolioClient _client;
@@ -137,8 +140,9 @@ PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
 
 ### Service Layer Pattern
 ```dart
-@injectable
-class PortfolioService {
+// lib/features/portfolio/internal/services/portfolio_service.dart
+@Injectable(as: PortfolioService)
+class PortfolioServiceImpl implements PortfolioService {
   final PortfolioRepository _repository;
   
   PortfolioService(this._repository);
@@ -186,6 +190,7 @@ class PortfolioScreen extends StatelessWidget {
 }
 
 // ✅ Good - Use Riverpod providers
+// lib/features/portfolio/presentation/pages/portfolio_screen.dart
 class PortfolioScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -212,6 +217,7 @@ Future<PortfolioHoldings> portfolioHoldings(
 
 ### API Response Model
 ```dart
+// lib/features/portfolio/internal/data/dtos/api_portfolio_response.dart
 @freezed
 class ApiPortfolioResponse with _$ApiPortfolioResponse {
   const factory ApiPortfolioResponse({
@@ -225,6 +231,7 @@ class ApiPortfolioResponse with _$ApiPortfolioResponse {
 
 ### Domain Entity
 ```dart
+// lib/features/portfolio/internal/domain/entities/portfolio_holdings.dart
 @freezed
 class PortfolioHoldings with _$PortfolioHoldings {
   const factory PortfolioHoldings({
@@ -239,6 +246,7 @@ class PortfolioHoldings with _$PortfolioHoldings {
 
 ### Mapper Implementation
 ```dart
+// lib/features/portfolio/internal/data/mappers/portfolio_mapper.dart
 class PortfolioMapper {
   static PortfolioHoldings fromApi(ApiPortfolioResponse response) {
     return PortfolioHoldings(
@@ -339,6 +347,8 @@ class PortfolioService {
 
 ### Document Upload Client
 ```dart
+// lib/core/network/clients/document_client.dart (if shared)
+// OR lib/features/document_processing/internal/data/clients/document_client.dart (if feature-specific)
 @RestApi()
 abstract class DocumentClient {
   factory DocumentClient(Dio dio, {String baseUrl}) = _DocumentClient;
@@ -360,8 +370,9 @@ abstract class DocumentClient {
 
 ### File Upload Service Implementation
 ```dart
-@injectable
-class DocumentUploadService {
+// lib/features/document_processing/internal/services/document_upload_service.dart
+@Injectable(as: DocumentUploadService)
+class DocumentUploadServiceImpl implements DocumentUploadService {
   final DocumentRepository _repository;
   
   DocumentUploadService(this._repository);

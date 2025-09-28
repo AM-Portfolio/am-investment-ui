@@ -99,13 +99,26 @@ dev_dependencies:
 ### Test File Organization
 ```
 test/
-├── services/                    # Service layer tests
-│   ├── auth_service_test.dart
-│   └── document_upload_service_test.dart
-├── repositories/                # Repository layer tests
-├── mappers/                    # Mapper tests
-├── widgets/                    # Widget tests
-└── utils/                      # Utility tests
+├── features/                   # Feature-specific tests (mirror lib/features structure)
+│   ├── portfolio/
+│   │   ├── internal/
+│   │   │   ├── data/
+│   │   │   │   ├── repositories/  # Repository tests
+│   │   │   │   └── mappers/       # Mapper tests
+│   │   │   ├── domain/            # Domain logic tests
+│   │   │   └── services/          # Service layer tests
+│   │   └── presentation/
+│   │       ├── cubit/             # State management tests
+│   │       └── widgets/           # Widget tests
+│   └── auth/
+│       └── presentation/
+│           └── widgets/           # Auth widget tests
+├── core/                       # Core infrastructure tests
+│   ├── utils/                  # Utility tests
+│   ├── network/                # Network layer tests
+│   └── providers/              # Provider tests
+└── shared/                     # Shared component tests
+    └── widgets/                # Shared widget tests
 ```
 
 ### Testing Standards
@@ -189,6 +202,8 @@ const LoadingIndicator(message: 'Loading...');
 /// This service provides business logic layer between UI and repository,
 /// handles validation, error management, and environment-specific behavior.
 /// 
+/// Location: lib/features/document_processing/internal/services/document_upload_service.dart
+/// 
 /// Example usage:
 /// ```dart
 /// final service = ref.read(documentUploadServiceProvider);
@@ -200,7 +215,8 @@ const LoadingIndicator(message: 'Loading...');
 ///   userId: 'user-456',
 /// );
 /// ```
-class DocumentUploadService {
+@Injectable(as: DocumentUploadService)
+class DocumentUploadServiceImpl implements DocumentUploadService {
   // Implementation...
 }
 ```

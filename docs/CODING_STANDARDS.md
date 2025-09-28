@@ -73,6 +73,7 @@ import '../config/app_config.dart';
 
 #### Data Classes - Use @freezed
 ```dart
+// lib/features/portfolio/internal/data/dtos/api_portfolio_response.dart
 @freezed
 class ApiPortfolioResponse with _$ApiPortfolioResponse {
   const factory ApiPortfolioResponse({
@@ -89,6 +90,7 @@ class ApiPortfolioResponse with _$ApiPortfolioResponse {
 
 #### State Management - Use @riverpod
 ```dart
+// lib/features/portfolio/presentation/cubit/portfolio_cubit.dart
 @riverpod
 class PortfolioNotifier extends _$PortfolioNotifier {
   @override
@@ -101,8 +103,9 @@ class PortfolioNotifier extends _$PortfolioNotifier {
 
 #### Dependency Injection - Use @Injectable
 ```dart
-@injectable
-class PortfolioService {
+// lib/features/portfolio/internal/services/portfolio_service.dart
+@Injectable(as: PortfolioService)
+class PortfolioServiceImpl implements PortfolioService {
   final PortfolioRepository _repository;
   
   PortfolioService(this._repository);
@@ -115,6 +118,8 @@ class PortfolioService {
 
 #### API Calls - Use @retrofit
 ```dart
+// lib/core/network/clients/portfolio_client.dart (if global)
+// OR lib/features/portfolio/internal/data/clients/portfolio_client.dart (if feature-specific)
 @RestApi()
 @injectable
 abstract class PortfolioClient {
@@ -211,7 +216,7 @@ class ValidationUtils {
 Design small, configurable widgets that can be used in multiple contexts.
 
 ```dart
-// lib/widgets/shared/loading_indicator.dart
+// lib/shared/widgets/loading_indicator.dart
 class LoadingIndicator extends StatelessWidget {
   final String? message;
   final double size;
@@ -241,7 +246,7 @@ class LoadingIndicator extends StatelessWidget {
   }
 }
 
-// lib/widgets/shared/currency_display.dart
+// lib/shared/widgets/currency_display.dart
 class CurrencyDisplay extends StatelessWidget {
   final double amount;
   final TextStyle? style;
@@ -384,7 +389,7 @@ class PortfolioCalculations {
 
 ### Test File Conventions
 ```dart
-// test/services/portfolio_service_test.dart
+// test/features/portfolio/internal/services/portfolio_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';

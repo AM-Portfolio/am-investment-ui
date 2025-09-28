@@ -6,7 +6,7 @@ import '../../config/environment_config.dart';
 import '../../shared/widgets/navigation/portfolio_sidebar.dart';
 import '../../shared/widgets/portfolio/right_floating_quick_actions.dart';
 import '../../shared/widgets/portfolio/enhanced_portfolio_quick_actions.dart';
-import 'widgets/portfolio_holdings_widget.dart';
+import 'presentation/web/portfolio_holdings_widget.dart';
 import '../../shared/widgets/cards/portfolio_holdings_card.dart';
 import '../../shared/widgets/filters/portfolio_filter_widget.dart';
 import '../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
