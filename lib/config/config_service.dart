@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'app_config.dart';
 import 'app_properties.dart';
+import 'environment.dart' as env;
 import '../core/constants/constants.dart';
 import '../core/utils/logger.dart';
 
@@ -14,6 +15,32 @@ class ConfigService with PropertyInjection {
   static AppConfig? _config;
   static bool _isInitialized = false;
 
+  /// Map environment string to Environment enum and set it
+  static void _setEnvironmentFromString(String environmentName) {
+    env.Environment targetEnv;
+    switch (environmentName.toLowerCase()) {
+      case 'development':
+      case 'dev':
+        targetEnv = env.Environment.development;
+        break;
+      case 'preprod':
+      case 'staging':
+        targetEnv = env.Environment.preprod;
+        break;
+      case 'production':
+      case 'prod':
+        targetEnv = env.Environment.production;
+        break;
+      default:
+        print('Unknown environment: $environmentName, defaulting to development');
+        targetEnv = env.Environment.development;
+        break;
+    }
+    
+    env.EnvironmentConfig.environment = targetEnv;
+    print('Environment set to: ${targetEnv.name}');
+  }
+
   /// Initialize configuration from properties
   /// @param environment - Optional environment name (dev, prod, test, etc.)
   /// If not provided, will use ENV environment variable or default to 'dev'
@@ -24,6 +51,10 @@ class ConfigService with PropertyInjection {
     await AppProperties().loadProperties(environment: environment);
 
     final properties = AppProperties();
+
+    // Set the environment in EnvironmentConfig based on properties
+    final environmentName = properties.getValue(PropertyKeys.environmentName, defaultValue: AppConstants.defaultEnvironmentName);
+    _setEnvironmentFromString(environmentName);
 
     // Create config from properties using constants for keys and defaults
     _config = AppConfig(
