@@ -1,13 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:dio/dio.dart';
 import '../core/network/api_client.dart';
-import '../core/network/errors/exception.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
-import '../features/portfolio/presentation/cubit/portfolio_cubit.dart';
 
 
 part 'app_providers.g.dart';
