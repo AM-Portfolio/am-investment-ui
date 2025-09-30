@@ -1,12 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../features/portfolio/internal/domain/entities/portfolio_holding.dart';
-import '../table/sortable_table.dart';
+import '../../../internal/domain/entities/portfolio_holding.dart';
+import '../../../../../shared/widgets/table/sortable_table.dart';
 
-/// A widget to display portfolio holdings in a card format
-/// Works on both Android and web platforms
-class PortfolioHoldingsCard extends StatefulWidget {
+/// Web-optimized card widget to display portfolio holdings
+/// Features advanced sorting, pagination, and responsive design for web platforms
+class PortfolioHoldingsWebCard extends StatefulWidget {
   /// Portfolio holdings data
   final PortfolioHoldings holdings;
 
@@ -26,7 +26,7 @@ class PortfolioHoldingsCard extends StatefulWidget {
   final double? rowHeight;
 
   /// Constructor
-  const PortfolioHoldingsCard({
+  const PortfolioHoldingsWebCard({
     super.key,
     required this.holdings,
     this.showDetails = false,
@@ -37,10 +37,10 @@ class PortfolioHoldingsCard extends StatefulWidget {
   });
 
   @override
-  State<PortfolioHoldingsCard> createState() => _PortfolioHoldingsCardState();
+  State<PortfolioHoldingsWebCard> createState() => _PortfolioHoldingsWebCardState();
 }
 
-class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
+class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
   int _currentPage = 0;
   List<PortfolioHolding> _sortedHoldings = [];
   int _totalPages = 1;
@@ -52,7 +52,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
   }
 
   @override
-  void didUpdateWidget(PortfolioHoldingsCard oldWidget) {
+  void didUpdateWidget(PortfolioHoldingsWebCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.holdings != widget.holdings) {
       _sortHoldingsByAllocation();
@@ -155,12 +155,12 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
                           size: cardConstraints.maxWidth * 0.02,
                         ),
                         SizedBox(width: cardConstraints.maxWidth * 0.01),
-                        // Text(
-                        //   'Portfolio Holdings',
-                        //   style: theme.textTheme.titleSmall?.copyWith(
-                        //     fontWeight: FontWeight.bold,
-                        //   ),
-                        // ),
+                        Text(
+                          'Portfolio Holdings',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
 

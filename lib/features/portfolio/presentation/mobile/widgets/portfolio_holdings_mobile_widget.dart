@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/portfolio_providers.dart';
+import '../../../providers/portfolio_providers.dart';
 
-/// Widget for displaying portfolio holdings
-class PortfolioHoldingsWidget extends ConsumerWidget {
+/// Mobile-optimized widget for displaying portfolio holdings
+/// Uses simple DataTable layout suitable for mobile apps
+class PortfolioHoldingsMobileWidget extends ConsumerWidget {
   final String userId;
   final EdgeInsets padding;
 
-  const PortfolioHoldingsWidget({
+  const PortfolioHoldingsMobileWidget({
     super.key,
     required this.userId,
     this.padding = const EdgeInsets.all(16),

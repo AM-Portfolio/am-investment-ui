@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../di/app_providers.dart';
-import 'portfolio_holdings_widget.dart';
+import 'widgets/portfolio_holdings_web_card.dart';
+import '../../providers/portfolio_providers.dart';
 
 /// Web-specific portfolio screen implementation
 class PortfolioWebScreen extends ConsumerWidget {
@@ -24,8 +24,8 @@ class PortfolioWebScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.refresh(portfolioSummaryProvider(userId));
-              ref.refresh(portfolioHoldingsProvider(userId));
+              ref.invalidate(portfolioSummaryProvider(userId));
+              ref.invalidate(portfolioHoldingsProvider(userId));
             },
           ),
         ],
@@ -56,9 +56,49 @@ class PortfolioWebScreen extends ConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: PortfolioHoldingsWidget(
-                    userId: userId,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final holdingsAsync = ref.watch(portfolioHoldingsProvider(userId));
+                      return holdingsAsync.when(
+                        data: (portfolioHoldings) => PortfolioHoldingsWebCard(
+                          holdings: portfolioHoldings,
+                          showDetails: true,
+                          maxHoldings: 50,
+                          onHoldingTap: (holding) {
+                            // Handle holding tap - could show details dialog
+                          },
+                        ),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Error loading holdings',
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '$error',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () => ref.invalidate(portfolioHoldingsProvider(userId)),
+                                child: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
