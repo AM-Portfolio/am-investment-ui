@@ -22,18 +22,13 @@ class AuthStateNotifier extends _$AuthStateNotifier {
       final authService = ref.read(authServiceProvider);
       final result = await authService.login(identifier, password);
       
-      if (result.success) {
-        state = state.copyWith(
-          isLoading: false,
-          isAuthenticated: true,
-          currentUser: result.user,
-          accessToken: result.token,
-          errorMessage: null,
-        );
+      if (result.isSuccess) {
+        // Sync with the auth service state
+        _syncWithAuthService(authService);
       } else {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: result.errorMessage,
+          errorMessage: result.errorMessage ?? 'Login failed',
         );
       }
     } catch (error) {
@@ -42,6 +37,22 @@ class AuthStateNotifier extends _$AuthStateNotifier {
         errorMessage: error.toString(),
       );
     }
+  }
+  
+  void _syncWithAuthService(AuthService authService) {
+    final serviceState = authService.currentState;
+    
+    // The AuthService.currentState already returns the domain AuthState
+    // so we can just sync the data directly
+    state = state.copyWith(
+      isLoading: false,
+      isAuthenticated: serviceState.isAuthenticated,
+      currentUser: serviceState.currentUser,
+      accessToken: serviceState.accessToken,
+      refreshToken: serviceState.refreshToken,
+      tokenExpiresAt: serviceState.tokenExpiresAt,
+      errorMessage: serviceState.errorMessage,
+    );
   }
 
   Future<void> logout() async {

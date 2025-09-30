@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'services/auth_service_clean.dart';
+import 'services/auth_service.dart';
 import '../utils/logger.dart';
 
 /// Test integration for the clean architecture auth system

@@ -16,7 +16,7 @@ export 'data/datasources/auth_storage_data_source.dart';
 export 'data/repositories/auth_repository_impl.dart';
 
 // Service layer exports
-export 'services/auth_service_clean.dart';
+export 'services/auth_service.dart';
 
 // Re-export feature entities for convenience
 export 'domain/entities/auth_state.dart';
