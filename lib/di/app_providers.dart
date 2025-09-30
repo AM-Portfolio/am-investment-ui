@@ -10,14 +10,14 @@ import '../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
 import '../core/app_logic/domain/entities/portfolio/portfolio_summary.dart';
 import '../core/network/portfolio_client.dart';
 import '../core/network/document_client.dart';
-import '../core/errors/exception.dart';
+import '../core/network/errors/exception.dart';
 import '../config/app_config.dart';
 import '../config/config_service.dart';
 import '../config/environment_config.dart' as env_config;
 import '../features/portfolio/presentation/cubit/portfolio_cubit.dart';
-import '../features/portfolio/internal/domain/usecases/get_portfolio_summary.dart';
-import '../features/portfolio/internal/domain/usecases/get_portfolio_holdings.dart';
-import '../features/portfolio/internal/domain/usecases/search_portfolio_holdings.dart';
+import '../features/portfolio/internal/usecases/get_portfolio_summary.dart';
+import '../features/portfolio/internal/usecases/get_portfolio_holdings.dart';
+import '../features/portfolio/internal/usecases/search_portfolio_holdings.dart';
 
 part 'app_providers.g.dart';
 

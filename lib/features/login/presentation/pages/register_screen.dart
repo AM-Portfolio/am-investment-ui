@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../shared/widgets/buttons/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import '../../../../shared/widgets/inputs/app_text_field.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/app_logic/services/auth_service.dart';
 

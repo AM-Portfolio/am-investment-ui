@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/buttons/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import '../../../../shared/widgets/inputs/app_text_field.dart';
 import '../../../../core/utils/validators.dart';
 
 /// A modern styled login form with improved UI/UX

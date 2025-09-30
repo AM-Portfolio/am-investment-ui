@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../network/dtos/portfolio/portfolio_holdings_dtos.dart';
 import '../network/dtos/portfolio/portfolio_summary_dtos.dart';
 import '../network/dtos/portfolio/broker_holding_dtos.dart';
-import '../errors/exception.dart';
+import '../network/errors/exception.dart';
 
 /// Service for providing mock portfolio data
 /// Handles loading and transformation of mock data for development and testing
@@ -14,7 +14,7 @@ class PortfolioMockDataProvider {
   static Map<String, dynamic>? _cachedHoldingsData;
 
   /// Load mock portfolio summary data from JSON and convert to domain model
-  static Future<ApiPortfolioSummaryResponse> getMockPortfolioSummary() async {
+  static Future<PortfolioSummaryDtos> getMockPortfolioSummary() async {
     try {
       final summaryData = await _loadMockSummaryData();
       
@@ -30,7 +30,7 @@ class PortfolioMockDataProvider {
   }
 
   /// Load mock portfolio holdings data from JSON and convert to domain model
-  static Future<ApiPortfolioHoldingsResponse> getMockPortfolioHoldings() async {
+  static Future<PortfolioHoldingsDto> getMockPortfolioHoldings() async {
     try {
       final holdingsData = await _loadMockHoldingsData();
       
@@ -78,8 +78,8 @@ class PortfolioMockDataProvider {
   }
 
   /// Convert summary JSON data to API model
-  static ApiPortfolioSummaryResponse _convertSummaryJsonToApiModel(Map<String, dynamic> json) {
-    return ApiPortfolioSummaryResponse(
+  static PortfolioSummaryDtos _convertSummaryJsonToApiModel(Map<String, dynamic> json) {
+    return PortfolioSummaryDtos(
       totalValue: (json['currentValue'] as num?)?.toDouble() ?? 0.0,
       investmentValue: (json['investmentValue'] as num?)?.toDouble() ?? 0.0,
       todaysGain: (json['todayGainLoss'] as num?)?.toDouble() ?? 0.0,
@@ -94,9 +94,9 @@ class PortfolioMockDataProvider {
   }
 
   /// Convert holdings JSON data to API model
-  static ApiPortfolioHoldingsResponse _convertHoldingsJsonToApiModel(Map<String, dynamic> json) {
+  static PortfolioHoldingsDto _convertHoldingsJsonToApiModel(Map<String, dynamic> json) {
     final equityHoldings = (json['equityHoldings'] as List? ?? [])
-        .map((holding) => ApiEquityHolding(
+        .map((holding) => EquityHoldingDto(
               isin: holding['isin'] as String? ?? '',
               symbol: holding['symbol'] as String? ?? '',
               sector: holding['sector'] as String? ?? '',
@@ -113,7 +113,7 @@ class PortfolioMockDataProvider {
               currentPrice: (holding['currentPrice'] as num?)?.toDouble() ?? 0.0,
               percentageChange: (holding['percentageChange'] as num?)?.toDouble() ?? 0.0,
               brokerPortfolios: (holding['brokerPortfolios'] as List? ?? [])
-                  .map((broker) => ApiBrokerHolding(
+                  .map((broker) => BrokerHoldingDto(
                         brokerType: broker['brokerType'] as String? ?? '',
                         quantity: (broker['quantity'] as num?)?.toDouble() ?? 0.0,
                       ))
@@ -121,19 +121,19 @@ class PortfolioMockDataProvider {
             ))
         .toList();
 
-    return ApiPortfolioHoldingsResponse(equityHoldings: equityHoldings);
+    return PortfolioHoldingsDto(equityHoldings: equityHoldings);
   }
 
   /// Convert market cap holdings from JSON to API model
-  static Map<String, List<ApiMarketCapHolding>> _convertToApiMarketCapHoldings(dynamic value) {
+  static Map<String, List<MarketCapHoldingDto>> _convertToApiMarketCapHoldings(dynamic value) {
     if (value == null) return {};
     
-    final Map<String, List<ApiMarketCapHolding>> result = {};
+    final Map<String, List<MarketCapHoldingDto>> result = {};
     final map = value as Map<String, dynamic>;
     
     for (final entry in map.entries) {
       final holdings = (entry.value as List? ?? [])
-          .map((h) => ApiMarketCapHolding(
+          .map((h) => MarketCapHoldingDto(
                 isin: h['isin'] as String? ?? '',
                 symbol: h['symbol'] as String? ?? '',
                 sector: h['sector'] as String? ?? '',
@@ -142,7 +142,7 @@ class PortfolioMockDataProvider {
                 quantity: (h['quantity'] as num?)?.toDouble() ?? 0.0,
                 investmentCost: (h['investmentCost'] as num?)?.toDouble() ?? 0.0,
                 brokerPortfolios: (h['brokerPortfolios'] as List? ?? [])
-                    .map((b) => ApiBrokerHolding(
+                    .map((b) => BrokerHoldingDto(
                           brokerType: b['brokerType'] as String? ?? '',
                           quantity: (b['quantity'] as num?)?.toDouble() ?? 0.0,
                         ))

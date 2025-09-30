@@ -4,7 +4,7 @@ import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../../shared/widgets/layouts/mobile_layout.dart';
 import '../../../../core/utils/platform_utils.dart';
-import '../../providers/login_providers.dart';
+import '../../../../di/login_providers.dart';
 import 'login_screen.dart';
 
 /// Authentication-aware wrapper that manages authentication state

@@ -1,0 +1,270 @@
+import '../../../../core/network/dtos/portfolio/portfolio_summary_dtos.dart';
+import '../../../../core/network/dtos/portfolio/broker_holding_dtos.dart';
+import '../../../../core/app_logic/domain/entities/portfolio/portfolio_summary.dart';
+
+/// Mapper to convert between API models and domain entities for portfolio summary
+/// This provides isolation between external API structure and internal business logic
+class PortfolioSummaryMapper {
+  /// Convert API response to domain entity
+  static PortfolioSummary fromApiModel(PortfolioSummaryDtos apiModel) {
+    // Create portfolio value
+    final portfolioValue = PortfolioValue(
+      current: apiModel.totalValue,
+      invested: apiModel.investmentValue,
+      currency: 'USD', // Default currency, could come from API
+    );
+
+    // Create performance metrics
+    final performance = PortfolioPerformance(
+      totalGain: apiModel.totalGain,
+      totalGainPercentage: apiModel.totalGainPercentage,
+      todayGain: apiModel.todaysGain,
+      todayGainPercentage: apiModel.todaysGainPercentage,
+    );
+
+    // Create allocation breakdown
+    final allocation = PortfolioAllocation(
+      marketCapBreakdown: _mapMarketCapBreakdown(apiModel.marketCapHoldings),
+      sectorBreakdown: apiModel.sectorAllocation,
+    );
+
+    // Create insights
+    final insights = PortfolioInsights(
+      topPerformers: apiModel.topPerformers
+          .map((api) => _mapTopPerformer(api))
+          .toList(),
+      topLosers: apiModel.topLosers
+          .map((api) => _mapTopLoser(api))
+          .toList(),
+      recommendations: _generateRecommendations(apiModel),
+    );
+
+    // Create metadata
+    final metadata = PortfolioSummaryMetadata(
+      lastUpdated: DateTime.now(),
+      currency: 'USD',
+      totalHoldings: _calculateTotalHoldings(apiModel.marketCapHoldings),
+      dataSource: DataSource.api,
+    );
+
+    return PortfolioSummary(
+      userId: 'default-user', // Default userId since it's not provided
+      totalValue: portfolioValue.current,
+      dailyChange: performance.todayGain,
+      holdings: [], // Will be populated from holdings data
+    );
+  }
+
+  /// Convert domain entity to API model (for updates/requests)
+  static PortfolioSummaryDtos toApiModel(PortfolioSummary domainModel) {
+    return PortfolioSummaryDtos(
+      totalValue: domainModel.totalValue,
+      investmentValue: 0.0, // Default value since not available in simplified model
+      todaysGain: domainModel.dailyChange,
+      totalGain: 0.0, // Default value since not available in simplified model
+      totalGainPercentage: 0.0, // Default value since not available in simplified model
+      todaysGainPercentage: 0.0, // Default value since not available in simplified model
+      marketCapHoldings: const {}, // Empty since not available in simplified model
+      sectorAllocation: const {}, // Empty since not available in simplified model
+      topPerformers: const [], // Empty since not available in simplified model
+      topLosers: const [], // Empty since not available in simplified model
+    );
+  }
+
+  /// Map market cap breakdown from API to domain
+  static Map<MarketCapCategory, List<MarketCapHolding>> _mapMarketCapBreakdown(
+      Map<String, List<MarketCapHoldingDto>> apiBreakdown) {
+    final Map<MarketCapCategory, List<MarketCapHolding>> result = {};
+
+    for (final entry in apiBreakdown.entries) {
+      final category = MarketCapCategory.fromString(entry.key);
+      final holdings = entry.value
+          .map((apiHolding) => _mapMarketCapHolding(apiHolding))
+          .toList();
+      result[category] = holdings;
+    }
+
+    return result;
+  }
+
+  /// Map individual market cap holding from API to domain
+  static MarketCapHolding _mapMarketCapHolding(MarketCapHoldingDto apiHolding) {
+    // Create identity
+    final identity = HoldingIdentity(
+      isin: apiHolding.isin,
+      symbol: apiHolding.symbol,
+      companyName: _extractCompanyName(apiHolding.symbol),
+      sector: apiHolding.sector,
+      industry: apiHolding.industry,
+      marketCap: MarketCapCategory.fromString(apiHolding.marketCap),
+    );
+
+    // Map broker allocations with calculated percentages
+    final brokerAllocations = apiHolding.brokerPortfolios
+        .map((apiBroker) => BrokerAllocation(
+              brokerName: _formatBrokerName(apiBroker.brokerType),
+              quantity: apiBroker.quantity,
+              percentage: apiHolding.quantity > 0 
+                  ? (apiBroker.quantity / apiHolding.quantity) * 100 
+                  : 0.0,
+            ))
+        .toList();
+
+    return MarketCapHolding(
+      identity: identity,
+      quantity: apiHolding.quantity,
+      investedAmount: apiHolding.investmentCost,
+      brokerAllocations: brokerAllocations,
+    );
+  }
+
+  /// Map top performer from API to domain
+  static TopPerformer _mapTopPerformer(ApiTopPerformer apiPerformer) {
+    return TopPerformer(
+      symbol: apiPerformer.symbol,
+      displayName: _extractCompanyName(apiPerformer.symbol),
+      gainPercentage: apiPerformer.gainPercentage,
+      gainAmount: apiPerformer.gainAmount,
+    );
+  }
+
+  /// Map top loser from API to domain
+  static TopLoser _mapTopLoser(ApiTopLoser apiLoser) {
+    return TopLoser(
+      symbol: apiLoser.symbol,
+      displayName: _extractCompanyName(apiLoser.symbol),
+      lossPercentage: apiLoser.lossPercentage,
+      lossAmount: apiLoser.lossAmount,
+    );
+  }
+
+  /// Generate recommendations based on API data
+  static List<String> _generateRecommendations(PortfolioSummaryDtos apiModel) {
+    final List<String> recommendations = [];
+
+    // Diversification recommendations
+    final dominantSector = _findDominantSector(apiModel.sectorAllocation);
+    if (dominantSector != null && dominantSector.value > 40.0) {
+      recommendations.add(
+        'Consider reducing exposure to ${dominantSector.key} sector (${dominantSector.value.toStringAsFixed(1)}% of portfolio)'
+      );
+    }
+
+    // Performance recommendations
+    if (apiModel.totalGainPercentage < 0) {
+      recommendations.add('Review underperforming holdings and consider rebalancing');
+    } else if (apiModel.totalGainPercentage > 25) {
+      recommendations.add('Excellent performance! Consider taking some profits');
+    }
+
+    // Market cap diversity
+    if (apiModel.marketCapHoldings.length < 2) {
+      recommendations.add('Consider diversifying across different market cap categories');
+    }
+
+    return recommendations;
+  }
+
+  /// Calculate total holdings across all market caps
+  static int _calculateTotalHoldings(Map<String, List<MarketCapHoldingDto>> marketCapHoldings) {
+    return marketCapHoldings.values
+        .fold(0, (sum, holdings) => sum + holdings.length);
+  }
+
+  /// Find the sector with highest allocation
+  static MapEntry<String, double>? _findDominantSector(Map<String, double> sectorAllocation) {
+    if (sectorAllocation.isEmpty) return null;
+    return sectorAllocation.entries
+        .reduce((a, b) => a.value > b.value ? a : b);
+  }
+
+  /// Convert domain market cap holding back to API model
+  static MarketCapHoldingDto _mapToApiMarketCapHolding(MarketCapHolding domainHolding) {
+    final apiBrokers = domainHolding.brokerAllocations
+        .map((broker) => BrokerHoldingDto(
+              brokerType: broker.brokerName,
+              quantity: broker.quantity,
+            ))
+        .toList();
+
+    return MarketCapHoldingDto(
+      isin: domainHolding.identity.isin,
+      symbol: domainHolding.identity.symbol,
+      sector: domainHolding.identity.sector,
+      industry: domainHolding.identity.industry,
+      marketCap: domainHolding.identity.marketCap.displayName,
+      quantity: domainHolding.quantity,
+      investmentCost: domainHolding.investedAmount,
+      brokerPortfolios: apiBrokers,
+    );
+  }
+
+  /// Convert domain top performer back to API model
+  static ApiTopPerformer _mapToApiTopPerformer(TopPerformer domainPerformer) {
+    return ApiTopPerformer(
+      symbol: domainPerformer.symbol,
+      gainPercentage: domainPerformer.gainPercentage,
+      gainAmount: domainPerformer.gainAmount,
+    );
+  }
+
+  /// Convert domain top loser back to API model
+  static ApiTopLoser _mapToApiTopLoser(TopLoser domainLoser) {
+    return ApiTopLoser(
+      symbol: domainLoser.symbol,
+      lossPercentage: domainLoser.lossPercentage,
+      lossAmount: domainLoser.lossAmount,
+    );
+  }
+
+  /// Helper to extract company name from symbol or other sources
+  static String _extractCompanyName(String symbol) {
+    // This could be enhanced with a mapping service or API call
+    // For now, return symbol as placeholder
+    return symbol;
+  }
+
+  /// Helper to format broker names consistently
+  static String _formatBrokerName(String brokerType) {
+    // Standardize broker names for UI display
+    switch (brokerType.toLowerCase()) {
+      case 'zerodha':
+      case 'ZERODHA':
+        return 'Zerodha';
+      case 'upstox':
+      case 'UPSTOX':
+        return 'Upstox';
+      case 'groww':
+      case 'GROWW':
+        return 'Groww';
+      case 'angelone':
+      case 'ANGELONE':
+      case 'angel one':
+        return 'Angel One';
+      default:
+        return brokerType;
+    }
+  }
+
+  /// Create empty portfolio summary for error states
+  static PortfolioSummary createEmpty() {
+    return PortfolioSummary.empty();
+  }
+
+  /// Create mock portfolio summary with sample data
+  static PortfolioSummary createMock({String userId = 'mock-user'}) {
+    return PortfolioSummary(
+      userId: userId,
+      totalValue: 125000.0,
+      dailyChange: 1500.0,
+      holdings: const [],
+    );
+  }
+
+  /// Validation helper
+  static bool isValidApiResponse(PortfolioSummaryDtos? apiModel) {
+    return apiModel != null && 
+           apiModel.totalValue >= 0 && 
+           apiModel.investmentValue >= 0;
+  }
+}

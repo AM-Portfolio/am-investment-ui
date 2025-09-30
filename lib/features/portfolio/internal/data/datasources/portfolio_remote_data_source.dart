@@ -1,4 +1,6 @@
-import '../dtos/portfolio_dto.dart';
+import '../dtos/portfolio_holdings_dto.dart';
+import '../dtos/portfolio_summary_dto.dart';
+import '../../../../../core/network/api_client.dart';
 import '../../../../../core/utils/logger.dart';
 
 /// Abstract data source for portfolio data
@@ -13,10 +15,11 @@ abstract class PortfolioRemoteDataSource {
 /// Concrete implementation of portfolio remote data source
 class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
   // We'll use the existing API client from core
-  // final PortfolioClient _apiClient;
+   final ApiClient _apiClient;
   
-  // For now, we'll use mock data until API client is properly integrated
-  // const PortfolioRemoteDataSourceImpl(this._apiClient);
+   const PortfolioRemoteDataSourceImpl(this._apiClient);
+
+
 
   @override
   Future<PortfolioHoldingsDto> getPortfolioHoldings(String userId) async {
@@ -25,10 +28,9 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
     
     try {
       AppLogger.info('Fetching portfolio holdings from remote API', tag: 'PortfolioRemoteDataSource');
-      
-      // TODO: Replace with actual API call
-      // return await _apiClient.getPortfolioHoldings(userId);
-      
+
+       return await _apiClient.post<PortfolioHoldingsDto>('/portfolio/holdings', body: {'userId': userId});
+
       // For now, return mock data
       AppLogger.debug('Using mock data for portfolio holdings', tag: 'PortfolioRemoteDataSource');
       await Future.delayed(const Duration(milliseconds: 500));
@@ -49,6 +51,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioRemoteDataSource', result: 'error');
       rethrow;
     }
+  }
 
   @override
   Future<PortfolioSummaryDto> getPortfolioSummary(String userId) async {

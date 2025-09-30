@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../../core/widgets/platform_widget.dart';
+import '../../../shared/widgets/platform_widget.dart';
 
 /// Button types for different visual styles
 enum AppButtonType { primary, secondary, text }
