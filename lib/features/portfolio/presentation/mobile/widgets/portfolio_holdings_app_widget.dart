@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubit/portfolio_cubit.dart';
-import '../cubit/portfolio_state.dart';
-import '../../../../core/utils/logger.dart';
+import '../../cubit/portfolio_cubit.dart';
+import '../../cubit/portfolio_state.dart';
+import '../../../../../core/utils/logger.dart';
 
 /// Portfolio holdings widget showing detailed holdings list
 class PortfolioHoldingsWidget extends StatelessWidget {

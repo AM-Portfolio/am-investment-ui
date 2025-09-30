@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../../providers/portfolio_providers.dart';
-import 'widgets/portfolio_holdings_mobile_widget.dart';
+import 'widgets/portfolio_holdings_app_widget.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation
@@ -189,7 +189,7 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
       return _buildErrorWidget(state.message);
     }
     
-    return PortfolioHoldingsMobileWidget(userId: widget.userId);
+    return PortfolioHoldingsWidget(userId: widget.userId);
   }
 
   Widget _buildAnalysisTab(PortfolioState state) {

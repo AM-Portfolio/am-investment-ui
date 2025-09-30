@@ -141,9 +141,9 @@ class PortfolioWebScreen extends ConsumerWidget {
         _buildSummaryCard(
           context,
           'Today\'s Change',
-          '\$${summary.dailyChange.toStringAsFixed(2)}',
-          summary.dailyChange >= 0 ? Icons.trending_up : Icons.trending_down,
-          summary.dailyChange >= 0 ? Colors.green : Colors.red,
+          '\$${summary.todayChange.toStringAsFixed(2)}',
+          summary.todayChange >= 0 ? Icons.trending_up : Icons.trending_down,
+          summary.todayChange >= 0 ? Colors.green : Colors.red,
         ),
         const SizedBox(height: 12),
         _buildSummaryCard(
