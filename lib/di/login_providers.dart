@@ -62,6 +62,19 @@ class AuthStateNotifier extends _$AuthStateNotifier {
     } catch (_) {}
     state = const AuthState();
   }
+
+  Future<void> validateSession() async {
+    try {
+      final authService = ref.read(authServiceProvider);
+      await authService.initialize();
+      _syncWithAuthService(authService);
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: error.toString(),
+      );
+    }
+  }
 }
 
 @riverpod

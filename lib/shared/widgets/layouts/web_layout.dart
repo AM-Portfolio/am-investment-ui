@@ -51,7 +51,7 @@ class WebLayout extends StatelessWidget {
   /// Build the header with navigation
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final user = AuthService().currentState.user;
+    final user = AuthService().currentState.currentUser;
 
     return Container(
       color: theme.colorScheme.primary,
@@ -185,7 +185,7 @@ class WebLayout extends StatelessWidget {
 
                   // User profile with dropdown
                   UserDropdownMenu(
-                    userName: user?.name ?? 'User',
+                    userName: user?.fullName ?? 'User',
                     userEmail: user?.email,
                     onLogout: onLogout,
                     onProfile: () {
@@ -208,8 +208,8 @@ class WebLayout extends StatelessWidget {
                             radius: 16,
                             backgroundColor: theme.colorScheme.onPrimary,
                             child: Text(
-                              user?.name.isNotEmpty == true
-                                  ? _getInitials(user!.name)
+                              user?.fullName.isNotEmpty == true
+                                  ? _getInitials(user!.fullName)
                                   : 'U',
                               style: TextStyle(
                                 color: theme.colorScheme.primary,
@@ -219,7 +219,7 @@ class WebLayout extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _getFirstName(user?.name ?? 'User'),
+                            _getFirstName(user?.fullName ?? 'User'),
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.w500,
