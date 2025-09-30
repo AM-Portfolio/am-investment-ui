@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/portfolio_overview_widget.dart';
 import '../widgets/portfolio_holdings_widget.dart';
@@ -7,10 +8,11 @@ import '../widgets/portfolio_analysis_widget.dart';
 import '../widgets/portfolio_sidebar.dart';
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
+import '../../providers/portfolio_providers.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Main portfolio screen with clean architecture using BLoC
-class PortfolioScreen extends StatelessWidget {
+class PortfolioScreen extends ConsumerWidget {
   final String userId;
 
   const PortfolioScreen({
@@ -19,16 +21,49 @@ class PortfolioScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     AppLogger.info('Building PortfolioScreen for userId: $userId', tag: 'PortfolioScreen');
     AppLogger.userAction('Navigate to Portfolio', tag: 'PortfolioScreen', context: {'userId': userId});
     
-    return BlocProvider(
-      create: (context) {
-        AppLogger.debug('Creating PortfolioCubit and loading portfolio', tag: 'PortfolioScreen');
-        return PortfolioCubit()..loadPortfolio(userId);
+    // Watch the portfolio service provider
+    final portfolioServiceAsync = ref.watch(portfolioServiceProvider);
+    
+    return portfolioServiceAsync.when(
+      data: (portfolioService) {
+        AppLogger.debug('Portfolio service loaded, creating cubit', tag: 'PortfolioScreen');
+        return BlocProvider(
+          create: (context) => PortfolioCubit(portfolioService)..loadPortfolio(userId),
+          child: PortfolioView(userId: userId),
+        );
       },
-      child: PortfolioView(userId: userId),
+      loading: () {
+        AppLogger.debug('Portfolio service loading', tag: 'PortfolioScreen');
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+      error: (error, stack) {
+        AppLogger.error('Failed to load portfolio service', tag: 'PortfolioScreen', error: error);
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Failed to load portfolio: $error'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(portfolioServiceProvider),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

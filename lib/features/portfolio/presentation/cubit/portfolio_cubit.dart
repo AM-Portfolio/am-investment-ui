@@ -2,10 +2,13 @@
 import 'portfolio_state.dart';
 import '../../internal/domain/entities/portfolio_summary.dart';
 import '../../internal/domain/entities/portfolio_holding.dart';
+import '../../internal/services/portfolio_service.dart';
 import '../../../../core/utils/logger.dart';
 
 class PortfolioCubit extends Cubit<PortfolioState> {
-  PortfolioCubit() : super(PortfolioInitial());
+  final PortfolioService _portfolioService;
+  
+  PortfolioCubit(this._portfolioService) : super(PortfolioInitial());
 
   Future<void> loadPortfolio(String userId) async {
     AppLogger.methodEntry('loadPortfolio', tag: 'PortfolioCubit', params: {'userId': userId});
@@ -14,29 +17,29 @@ class PortfolioCubit extends Cubit<PortfolioState> {
     emit(PortfolioLoading());
     
     try {
-      AppLogger.info('Starting portfolio data fetch', tag: 'PortfolioCubit');
+      AppLogger.info('Starting portfolio data fetch via service', tag: 'PortfolioCubit');
       
-      // Mock implementation for now - replace with actual service calls
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Use portfolio service to fetch data concurrently
+      final results = await Future.wait([
+        _portfolioService.getPortfolioHoldings(userId),
+        _portfolioService.getPortfolioSummary(userId),
+      ]);
       
-      AppLogger.debug('Creating mock portfolio data', tag: 'PortfolioCubit');
-      
-      // Create mock data
-      final summary = PortfolioSummary.empty(userId);
-      final holdings = <PortfolioHolding>[];
+      final holdings = results[0] as PortfolioHoldings;
+      final summary = results[1] as PortfolioSummary;
       
       AppLogger.stateChange('PortfolioLoading', 'PortfolioLoaded', tag: 'PortfolioCubit');
-      AppLogger.info('Portfolio data loaded successfully (${holdings.length} holdings)', tag: 'PortfolioCubit');
+      AppLogger.info('Portfolio data loaded successfully via service (${holdings.holdings.length} holdings)', tag: 'PortfolioCubit');
       
       emit(PortfolioLoaded(
         summary: summary,
-        holdings: holdings,
+        holdings: holdings.holdings,
       ));
       
       AppLogger.methodExit('loadPortfolio', tag: 'PortfolioCubit', result: 'success');
     } catch (error) {
       AppLogger.stateChange('PortfolioLoading', 'PortfolioError', tag: 'PortfolioCubit', event: error.toString());
-      AppLogger.error('Failed to load portfolio', tag: 'PortfolioCubit', 
+      AppLogger.error('Failed to load portfolio via service', tag: 'PortfolioCubit', 
           error: error, stackTrace: StackTrace.current);
       
       emit(PortfolioError(error.toString()));
@@ -56,53 +59,33 @@ class PortfolioCubit extends Cubit<PortfolioState> {
     final currentState = state;
     if (currentState is PortfolioLoaded) {
       try {
+        AppLogger.info('Refreshing portfolio data via service', tag: 'PortfolioCubit');
+        
         // Keep current state while refreshing, set refreshing to true
         emit(currentState.copyWith(isRefreshing: true));
         
-        // Mock delay
-        await Future.delayed(const Duration(seconds: 1));
+        // Use portfolio service to refresh data
+        final results = await Future.wait([
+          _portfolioService.getPortfolioHoldings(userId),
+          _portfolioService.getPortfolioSummary(userId),
+        ]);
         
-        // Create mock refreshed data
-        final summary = PortfolioSummary.empty(userId);
-        final holdings = <PortfolioHolding>[];
+        final holdings = results[0] as PortfolioHoldings;
+        final summary = results[1] as PortfolioSummary;
         
         emit(currentState.copyWith(
           summary: summary,
-          holdings: holdings,
+          holdings: holdings.holdings,
           isRefreshing: false,
         ));
+        
+        AppLogger.info('Portfolio data refreshed successfully via service', tag: 'PortfolioCubit');
       } catch (error) {
+        AppLogger.error('Failed to refresh portfolio via service', tag: 'PortfolioCubit', error: error);
         emit(PortfolioError(error.toString()));
       }
     } else {
       loadPortfolio(userId);
-    }
-  }
-
-  Future<void> searchHoldings(String userId, String query) async {
-    final currentState = state;
-    if (currentState is PortfolioLoaded) {
-      try {
-        if (query.isEmpty) {
-          emit(currentState.copyWith(
-            searchQuery: '',
-            searchResults: [],
-          ));
-        } else {
-          // Mock search - in real implementation, call search service
-          final searchResults = <PortfolioHolding>[];
-          emit(currentState.copyWith(
-            searchQuery: query,
-            searchResults: searchResults,
-          ));
-        }
-      } catch (error) {
-        // Keep current state but clear search on error
-        emit(currentState.copyWith(
-          searchQuery: '',
-          searchResults: [],
-        ));
-      }
     }
   }
 }

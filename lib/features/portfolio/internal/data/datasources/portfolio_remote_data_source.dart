@@ -35,18 +35,15 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         params: {'userId': userId});
     
     try {
-      // Use mapper to create request body
-      final requestBody = PortfolioMapper.portfolioHoldingsRequestToJson(userId);
+      AppLogger.debug('API request prepared for portfolio holdings with userId query param', tag: 'PortfolioRemoteDataSource');
       
-      AppLogger.debug('API request prepared for portfolio holdings', tag: 'PortfolioRemoteDataSource');
-      
-      // Construct full URI from portfolio config
-      final fullUri = '${_portfolioConfig.baseUrl}${_portfolioConfig.holdingsResource}';
+      // Construct full URI from portfolio config with userId query parameter
+      final baseUri = '${_portfolioConfig.baseUrl}${_portfolioConfig.holdingsResource}';
+      final fullUri = '$baseUri?userId=$userId';
       
       // Use ApiClient for consistent error handling and logging
-      final holdingsResponse = await _apiClient.post<PortfolioHoldingsDto>(
+      final holdingsResponse = await _apiClient.get<PortfolioHoldingsDto>(
         fullUri,
-        body: requestBody,
         parser: (data) => PortfolioMapper.portfolioHoldingsFromJson(data as Map<String, dynamic>),
       );
 
@@ -68,18 +65,15 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         params: {'userId': userId});
     
     try {
-      // Use mapper to create request body
-      final requestBody = PortfolioMapper.portfolioSummaryRequestToJson(userId);
+      AppLogger.debug('API request prepared for portfolio summary with userId query param', tag: 'PortfolioRemoteDataSource');
       
-      AppLogger.debug('API request prepared for portfolio summary', tag: 'PortfolioRemoteDataSource');
-      
-      // Construct full URI from portfolio config
-      final fullUri = '${_portfolioConfig.baseUrl}${_portfolioConfig.summaryResource}';
+      // Construct full URI from portfolio config with userId query parameter
+      final baseUri = '${_portfolioConfig.baseUrl}${_portfolioConfig.summaryResource}';
+      final fullUri = '$baseUri?userId=$userId';
       
       // Use ApiClient for consistent error handling and logging
-      final summaryResponse = await _apiClient.post<PortfolioSummaryDto>(
+      final summaryResponse = await _apiClient.get<PortfolioSummaryDto>(
         fullUri,
-        body: requestBody,
         parser: (data) => PortfolioMapper.portfolioSummaryFromJson(data as Map<String, dynamic>),
       );
 
