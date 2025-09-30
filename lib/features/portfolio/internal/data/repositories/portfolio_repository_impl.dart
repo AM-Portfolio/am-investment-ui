@@ -1,0 +1,351 @@
+import 'dart:async';
+
+import '../../domain/entities/portfolio_holding.dart';
+import '../../domain/entities/portfolio_summary.dart';
+import '../../domain/repositories/portfolio_repository.dart';
+import '../datasources/portfolio_remote_data_source.dart';
+import '../mappers/portfolio_holdings_mapper.dart';
+import '../mappers/portfolio_summary_mapper.dart';
+import '../../../../../core/utils/logger.dart';
+
+/// Repository implementation for portfolio data operations
+/// 
+/// Handles portfolio data operations following clean architecture principles
+/// - Coordinates between data sources (remote, local cache)
+/// - Maps DTOs to domain entities
+/// - Provides streams for real-time updates
+/// - Implements caching and error handling
+class PortfolioRepositoryImpl implements PortfolioRepository {
+  final PortfolioRemoteDataSource _remoteDataSource;
+  
+  // Stream controllers for real-time updates
+  final StreamController<PortfolioHoldings> _holdingsController = 
+      StreamController<PortfolioHoldings>.broadcast();
+  final StreamController<PortfolioSummary> _summaryController = 
+      StreamController<PortfolioSummary>.broadcast();
+  
+  // Cache for the latest data
+  PortfolioHoldings? _cachedHoldings;
+  PortfolioSummary? _cachedSummary;
+  String? _lastUserId;
+
+  PortfolioRepositoryImpl({
+    required PortfolioRemoteDataSource remoteDataSource,
+  }) : _remoteDataSource = remoteDataSource;
+
+  @override
+  Future<PortfolioHoldings> getPortfolioHoldings(String userId) async {
+    AppLogger.methodEntry('getPortfolioHoldings', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    try {
+      // Fetch data from remote source
+      final holdingsDto = await _remoteDataSource.getPortfolioHoldings(userId);
+      
+      // Map DTO to domain entity using holdings mapper
+      final holdings = PortfolioHoldingsMapper.fromApiModel(holdingsDto);
+      
+      // Cache the result
+      _cachedHoldings = holdings;
+      _lastUserId = userId;
+      
+      // Emit to stream for real-time updates
+      _holdingsController.add(holdings);
+      
+      AppLogger.info('Portfolio holdings fetched successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioRepository', result: 'success');
+      
+      return holdings;
+    } catch (e) {
+      AppLogger.error('Failed to fetch portfolio holdings', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioRepository', result: 'error');
+      
+      // Return cached data if available, otherwise rethrow
+      if (_cachedHoldings != null && _lastUserId == userId) {
+        AppLogger.info('Returning cached portfolio holdings due to error', tag: 'PortfolioRepository');
+        return _cachedHoldings!;
+      }
+      
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PortfolioSummary> getPortfolioSummary(String userId) async {
+    AppLogger.methodEntry('getPortfolioSummary', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    try {
+      // Fetch data from remote source
+      final summaryDto = await _remoteDataSource.getPortfolioSummary(userId);
+      
+      // Map DTO to domain entity using summary mapper
+      final summary = PortfolioSummaryMapper.fromApiModel(summaryDto);
+      
+      // Cache the result
+      _cachedSummary = summary;
+      _lastUserId = userId;
+      
+      // Emit to stream for real-time updates
+      _summaryController.add(summary);
+      
+      AppLogger.info('Portfolio summary fetched successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getPortfolioSummary', tag: 'PortfolioRepository', result: 'success');
+      
+      return summary;
+    } catch (e) {
+      AppLogger.error('Failed to fetch portfolio summary', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getPortfolioSummary', tag: 'PortfolioRepository', result: 'error');
+      
+      // Return cached data if available, otherwise rethrow
+      if (_cachedSummary != null && _lastUserId == userId) {
+        AppLogger.info('Returning cached portfolio summary due to error', tag: 'PortfolioRepository');
+        return _cachedSummary!;
+      }
+      
+      rethrow;
+    }
+  }
+
+  @override
+  Stream<PortfolioHoldings> watchPortfolioHoldings(String userId) {
+    AppLogger.methodEntry('watchPortfolioHoldings', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    // Return existing stream
+    // In a real implementation, you might want to:
+    // 1. Set up periodic refresh
+    // 2. Listen to WebSocket updates
+    // 3. Handle connection state changes
+    
+    // Emit cached data immediately if available
+    if (_cachedHoldings != null && _lastUserId == userId) {
+      Future.microtask(() => _holdingsController.add(_cachedHoldings!));
+    } else {
+      // Fetch initial data
+      getPortfolioHoldings(userId).catchError((error) {
+        AppLogger.error('Failed to fetch initial holdings for stream', 
+            tag: 'PortfolioRepository', error: error);
+        return PortfolioHoldings.empty(userId);
+      });
+    }
+    
+    return _holdingsController.stream;
+  }
+
+  @override
+  Stream<PortfolioSummary> watchPortfolioSummary(String userId) {
+    AppLogger.methodEntry('watchPortfolioSummary', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    // Emit cached data immediately if available
+    if (_cachedSummary != null && _lastUserId == userId) {
+      Future.microtask(() => _summaryController.add(_cachedSummary!));
+    } else {
+      // Fetch initial data
+      getPortfolioSummary(userId).catchError((error) {
+        AppLogger.error('Failed to fetch initial summary for stream', 
+            tag: 'PortfolioRepository', error: error);
+        return PortfolioSummary.empty(userId);
+      });
+    }
+    
+    return _summaryController.stream;
+  }
+
+  @override
+  Future<void> refreshPortfolioData(String userId) async {
+    AppLogger.methodEntry('refreshPortfolioData', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    try {
+      // Call remote data source refresh
+      await _remoteDataSource.refreshPortfolioData(userId, forceRefresh: true);
+      
+      // Refresh cached data by fetching fresh data
+      await Future.wait([
+        getPortfolioHoldings(userId),
+        getPortfolioSummary(userId),
+      ]);
+      
+      AppLogger.info('Portfolio data refreshed successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRepository', result: 'success');
+    } catch (e) {
+      AppLogger.error('Failed to refresh portfolio data', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PortfolioHolding?> getHoldingDetails(String userId, String symbol) async {
+    AppLogger.methodEntry('getHoldingDetails', tag: 'PortfolioRepository', 
+        params: {'userId': userId, 'symbol': symbol});
+    
+    try {
+      // First try to get from cached holdings
+      if (_cachedHoldings != null && _lastUserId == userId) {
+        final holding = _cachedHoldings!.holdings
+            .where((h) => h.symbol.toLowerCase() == symbol.toLowerCase())
+            .firstOrNull;
+        
+        if (holding != null) {
+          AppLogger.info('Found holding in cache', tag: 'PortfolioRepository');
+          AppLogger.methodExit('getHoldingDetails', tag: 'PortfolioRepository', result: 'cache_hit');
+          return holding;
+        }
+      }
+      
+      // If not in cache, fetch fresh holdings
+      final holdings = await getPortfolioHoldings(userId);
+      final holding = holdings.holdings
+          .where((h) => h.symbol.toLowerCase() == symbol.toLowerCase())
+          .firstOrNull;
+      
+      AppLogger.methodExit('getHoldingDetails', tag: 'PortfolioRepository', 
+          result: holding != null ? 'success' : 'not_found');
+      
+      return holding;
+    } catch (e) {
+      AppLogger.error('Failed to get holding details', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getHoldingDetails', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<SectorAllocation>> getSectorAllocation(String userId) async {
+    AppLogger.methodEntry('getSectorAllocation', tag: 'PortfolioRepository', 
+        params: {'userId': userId});
+    
+    try {
+      // Get portfolio summary which contains sector allocation
+      final summary = await getPortfolioSummary(userId);
+      
+      AppLogger.info('Sector allocation retrieved successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getSectorAllocation', tag: 'PortfolioRepository', result: 'success');
+      
+      return summary.sectorAllocation;
+    } catch (e) {
+      AppLogger.error('Failed to get sector allocation', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getSectorAllocation', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<TopPerformer>> getTopPerformers(String userId, {int limit = 5}) async {
+    AppLogger.methodEntry('getTopPerformers', tag: 'PortfolioRepository', 
+        params: {'userId': userId, 'limit': limit});
+    
+    try {
+      // Get portfolio summary which contains top performers
+      final summary = await getPortfolioSummary(userId);
+      
+      // Return limited results
+      final topPerformers = summary.topPerformers.take(limit).toList();
+      
+      AppLogger.info('Top performers retrieved successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getTopPerformers', tag: 'PortfolioRepository', result: 'success');
+      
+      return topPerformers;
+    } catch (e) {
+      AppLogger.error('Failed to get top performers', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getTopPerformers', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<TopPerformer>> getWorstPerformers(String userId, {int limit = 5}) async {
+    AppLogger.methodEntry('getWorstPerformers', tag: 'PortfolioRepository', 
+        params: {'userId': userId, 'limit': limit});
+    
+    try {
+      // Get portfolio summary which contains worst performers
+      final summary = await getPortfolioSummary(userId);
+      
+      // Return limited results
+      final worstPerformers = summary.worstPerformers.take(limit).toList();
+      
+      AppLogger.info('Worst performers retrieved successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('getWorstPerformers', tag: 'PortfolioRepository', result: 'success');
+      
+      return worstPerformers;
+    } catch (e) {
+      AppLogger.error('Failed to get worst performers', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getWorstPerformers', tag: 'PortfolioRepository', result: 'error');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<PortfolioHolding>> searchHoldings(String userId, String query) async {
+    AppLogger.methodEntry('searchHoldings', tag: 'PortfolioRepository', 
+        params: {'userId': userId, 'query': query});
+    
+    try {
+      // Use remote data source search functionality
+      final holdingsDto = await _remoteDataSource.searchPortfolioHoldings(
+        userId,
+        searchTerm: query,
+      );
+      
+      // Map DTO to domain entity
+      final holdings = PortfolioHoldingsMapper.fromApiModel(holdingsDto);
+      
+      AppLogger.info('Portfolio search completed successfully', tag: 'PortfolioRepository');
+      AppLogger.methodExit('searchHoldings', tag: 'PortfolioRepository', result: 'success');
+      
+      return holdings.holdings;
+    } catch (e) {
+      AppLogger.error('Failed to search holdings', tag: 'PortfolioRepository',
+          error: e, stackTrace: StackTrace.current);
+      AppLogger.methodExit('searchHoldings', tag: 'PortfolioRepository', result: 'error');
+      
+      // Fallback to local search in cached data
+      if (_cachedHoldings != null && _lastUserId == userId) {
+        AppLogger.info('Falling back to cached data search', tag: 'PortfolioRepository');
+        final filteredHoldings = _cachedHoldings!.holdings.where((holding) =>
+            holding.symbol.toLowerCase().contains(query.toLowerCase()) ||
+            holding.companyName.toLowerCase().contains(query.toLowerCase())
+        ).toList();
+        
+        return filteredHoldings;
+      }
+      
+      rethrow;
+    }
+  }
+
+  /// Dispose method to clean up resources
+  void dispose() {
+    AppLogger.methodEntry('dispose', tag: 'PortfolioRepository');
+    
+    _holdingsController.close();
+    _summaryController.close();
+    _cachedHoldings = null;
+    _cachedSummary = null;
+    _lastUserId = null;
+    
+    AppLogger.info('PortfolioRepository disposed', tag: 'PortfolioRepository');
+  }
+}
+
+/// Extension to provide firstOrNull functionality
+extension IterableExtensions<T> on Iterable<T> {
+  T? get firstOrNull {
+    final iterator = this.iterator;
+    if (iterator.moveNext()) {
+      return iterator.current;
+    }
+    return null;
+  }
+}

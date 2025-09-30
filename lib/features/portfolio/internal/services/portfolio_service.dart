@@ -1,4 +1,4 @@
-import '../../../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
+import '../entities/portfolio_holding.dart';
 import '../usecases/analyze_portfolio_performance.dart';
 import '../usecases/get_portfolio_holdings.dart';
 import '../usecases/get_portfolio_summary.dart';
