@@ -1,17 +1,18 @@
-import '../entities/portfolio_holding.dart';
-import '../usecases/get_portfolio_holdings.dart';
-import '../usecases/get_portfolio_summary.dart';
+import '../domain/entities/portfolio_holding.dart';
+import '../domain/entities/portfolio_summary.dart';
+import '../domain/usecases/get_portfolio_holdings.dart';
+import '../domain/usecases/get_portfolio_summary.dart';
 import '../../../../core/utils/logger.dart';
 
-/// Portfolio orchestration service for complex workflows.
+/// Portfolio orchestration service for core workflows.
 /// 
-/// Combines multiple use cases and coordinates complex operations like:
-/// - Portfolio sync + analytics
-/// - Performance calculation + data refresh
-/// - Search + filtering + sorting operations
+/// Combines core use cases and coordinates essential operations like:
+/// - Portfolio data retrieval
+/// - Summary information access
+/// - Holdings management
 /// 
-/// This service acts as a facade that combines multiple use cases
-/// to perform complex business workflows that span multiple domain operations.
+/// This service acts as a facade that combines core use cases
+/// to perform essential portfolio operations.
 class PortfolioService {
   final GetPortfolioHoldings _getPortfolioHoldings;
   final GetPortfolioSummary _getPortfolioSummary;
@@ -21,83 +22,47 @@ class PortfolioService {
     this._getPortfolioSummary,
   );
 
-  /// Performs complete portfolio synchronization workflow:
-  /// 1. Refreshes portfolio data from remote source
-  /// 2. Retrieves updated holdings and summary
-  /// 3. Calculates performance analytics
-  /// 4. Returns success/failure result
-  Future<bool> syncPortfolioWithAnalytics(String userId) async {
-    AppLogger.methodEntry('syncPortfolioWithAnalytics', tag: 'PortfolioService', 
+  /// Retrieves portfolio holdings for the specified user
+  /// Returns holdings data or throws an exception if retrieval fails
+  Future<PortfolioHoldings> getPortfolioHoldings(String userId) async {
+    AppLogger.methodEntry('getPortfolioHoldings', tag: 'PortfolioService', 
         params: {'userId': userId});
     
     try {
-      AppLogger.info('Starting portfolio sync with analytics workflow', tag: 'PortfolioService');
+      AppLogger.info('Getting portfolio holdings', tag: 'PortfolioService');
+      final holdings = await _getPortfolioHoldings(userId);
       
-      // Step 1: Refresh data from remote source
-      AppLogger.debug('Step 1: Refreshing portfolio data from remote source', tag: 'PortfolioService');
-      await _refreshPortfolioData(userId);
+      AppLogger.info('Portfolio holdings retrieved successfully', tag: 'PortfolioService');
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioService', result: 'success');
       
-      // Step 2: Get updated holdings and summary in parallel to verify sync
-      AppLogger.debug('Step 2: Getting updated holdings and summary in parallel', tag: 'PortfolioService');
-      await Future.wait([
-        _getPortfolioHoldings(userId),
-        _getPortfolioSummary(userId),
-      ]);
-      
-      // Step 3: Update performance analytics
-      AppLogger.debug('Step 3: Updating performance analytics', tag: 'PortfolioService');
-      await Future.wait([
-        _analyzePortfolioPerformance.getTopPerformers(userId),
-        _analyzePortfolioPerformance.getSectorAllocation(userId),
-      ]);
-      
-      AppLogger.info('Portfolio sync with analytics completed successfully', tag: 'PortfolioService');
-      AppLogger.methodExit('syncPortfolioWithAnalytics', tag: 'PortfolioService', result: 'success');
-      
-      return true;
+      return holdings;
     } catch (error) {
-      AppLogger.error('Portfolio sync with analytics failed', tag: 'PortfolioService', 
+      AppLogger.error('Failed to get portfolio holdings', tag: 'PortfolioService', 
           error: error, stackTrace: StackTrace.current);
-      AppLogger.methodExit('syncPortfolioWithAnalytics', tag: 'PortfolioService', result: 'error');
-      return false;
+      AppLogger.methodExit('getPortfolioHoldings', tag: 'PortfolioService', result: 'error');
+      rethrow;
     }
   }
 
-  /// Performs intelligent portfolio search with enhanced results:
-  /// 1. Searches holdings based on query
-  /// 2. Returns search results with metadata
-  Future<List<PortfolioHolding>> searchWithAnalytics(String userId, String query) async {
+  /// Retrieves portfolio summary for the specified user
+  /// Returns summary data or throws an exception if retrieval fails
+  Future<PortfolioSummary> getPortfolioSummary(String userId) async {
+    AppLogger.methodEntry('getPortfolioSummary', tag: 'PortfolioService', 
+        params: {'userId': userId});
+    
     try {
-      // Search holdings
-      final searchResults = await _searchPortfolioHoldings(userId, query);
+      AppLogger.info('Getting portfolio summary', tag: 'PortfolioService');
+      final summary = await _getPortfolioSummary(userId);
       
-      // Return results - in a real implementation, this could be enriched
-      // with additional performance data or analytics
-      return searchResults;
+      AppLogger.info('Portfolio summary retrieved successfully', tag: 'PortfolioService');
+      AppLogger.methodExit('getPortfolioSummary', tag: 'PortfolioService', result: 'success');
+      
+      return summary;
     } catch (error) {
-      // Log error in real implementation
-      return [];
-    }
-  }
-
-  /// Performs comprehensive portfolio refresh and analysis
-  /// This is a high-level workflow that combines multiple operations
-  Future<bool> refreshAndAnalyzePortfolio(String userId) async {
-    try {
-      // Step 1: Refresh all portfolio data
-      await _refreshPortfolioData(userId);
-      
-      // Step 2: Analyze performance metrics
-      await Future.wait([
-        _analyzePortfolioPerformance.getTopPerformers(userId, limit: 10),
-        _analyzePortfolioPerformance.getWorstPerformers(userId, limit: 5),
-        _analyzePortfolioPerformance.getSectorAllocation(userId),
-      ]);
-      
-      return true;
-    } catch (error) {
-      // Log error in real implementation
-      return false;
+      AppLogger.error('Failed to get portfolio summary', tag: 'PortfolioService', 
+          error: error, stackTrace: StackTrace.current);
+      AppLogger.methodExit('getPortfolioSummary', tag: 'PortfolioService', result: 'error');
+      rethrow;
     }
   }
 

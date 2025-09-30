@@ -43,7 +43,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       final holdingsDto = await _remoteDataSource.getPortfolioHoldings(userId);
       
       // Map DTO to domain entity using holdings mapper
-      final holdings = PortfolioHoldingsMapper.fromApiModel(holdingsDto);
+      final holdings = PortfolioHoldingsMapper.fromApiModel(holdingsDto, userId);
       
       // Cache the result
       _cachedHoldings = holdings;
@@ -81,7 +81,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       final summaryDto = await _remoteDataSource.getPortfolioSummary(userId);
       
       // Map DTO to domain entity using summary mapper
-      final summary = PortfolioSummaryMapper.fromApiModel(summaryDto);
+      final summary = PortfolioSummaryMapper.fromApiModel(summaryDto, userId);
       
       // Cache the result
       _cachedSummary = summary;

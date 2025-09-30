@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
+import '../../../features/portfolio/internal/domain/entities/portfolio_holding.dart';
 import '../table/sortable_table.dart';
 
 /// A widget to display portfolio holdings in a card format
@@ -42,7 +42,7 @@ class PortfolioHoldingsCard extends StatefulWidget {
 
 class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
   int _currentPage = 0;
-  List<EquityHolding> _sortedHoldings = [];
+  List<PortfolioHolding> _sortedHoldings = [];
   int _totalPages = 1;
 
   @override
@@ -61,9 +61,9 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
 
   void _sortHoldingsByAllocation() {
     // Sort holdings by weight in portfolio (allocation percentage) in descending order
-    _sortedHoldings = List.from(widget.holdings.holdings ?? []);
+    _sortedHoldings = List.from(widget.holdings.holdings);
     _sortedHoldings.sort(
-      (a, b) => (b.portfolioWeight).compareTo(a.portfolioWeight),
+      (a, b) => b.portfolioWeight.compareTo(a.portfolioWeight),
     );
 
     // Calculate total pages correctly
@@ -114,8 +114,8 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
         );
 
         // Get holdings for current page
-        final List<EquityHolding> displayHoldings = _sortedHoldings.isEmpty
-            ? <EquityHolding>[]
+        final List<PortfolioHolding> displayHoldings = _sortedHoldings.isEmpty
+            ? <PortfolioHolding>[]
             : _sortedHoldings.sublist(startIndex, endIndex);
 
         // Responsive row height based on text size and scale factor
@@ -172,7 +172,7 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
 
                     // Sortable table for holdings - fill remaining space and scroll
                     Expanded(
-                      child: SortableTable<EquityHolding>(
+                      child: SortableTable<PortfolioHolding>(
                         items: displayHoldings,
                         columns: _buildColumns(),
                         initialSortColumnIndex: 2, // Sort by current value initially
@@ -372,27 +372,27 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
   }
 
   /// Build columns for the sortable table with fixed sizing
-  List<SortableColumn<EquityHolding>> _buildColumns() {
+  List<SortableColumn<PortfolioHolding>> _buildColumns() {
     final theme = Theme.of(context);
 
     return [
       // Symbol column
-      SortableColumn<EquityHolding>(
+      SortableColumn<PortfolioHolding>(
         title: 'Symbol',
         flex: 1,
-        sortBy: (holding) => holding.symbol ?? '',
+        sortBy: (holding) => holding.symbol,
         builder: (holding) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              holding.symbol ?? '',
+              holding.symbol,
               style: const TextStyle(fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
             ),
             if (widget.showDetails)
               Text(
-                holding.sector ?? '',
+                holding.sector,
                 style: TextStyle(
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 11,
@@ -404,22 +404,22 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
       ),
 
       // Quantity column
-      SortableColumn<EquityHolding>(
+      SortableColumn<PortfolioHolding>(
         title: 'Qty',
         flex: 1,
-        sortBy: (holding) => holding.shares,
+        sortBy: (holding) => holding.quantity,
         builder: (holding) =>
-            Text(holding.shares.toString(), overflow: TextOverflow.ellipsis),
+            Text(holding.quantity.toString(), overflow: TextOverflow.ellipsis),
       ),
 
       // Current Value column
-      SortableColumn<EquityHolding>(
+      SortableColumn<PortfolioHolding>(
         title: 'Curr Value',
         flex: 1,
         textAlign: TextAlign.end,
-        sortBy: (holding) => holding.currentValue ?? 0,
+        sortBy: (holding) => holding.currentValue,
         builder: (holding) => Text(
-          formatCurrency(holding.currentValue ?? 0),
+          formatCurrency(holding.currentValue),
           textAlign: TextAlign.end,
           style: const TextStyle(fontWeight: FontWeight.w500),
           overflow: TextOverflow.ellipsis,
@@ -427,14 +427,14 @@ class _PortfolioHoldingsCardState extends State<PortfolioHoldingsCard> {
       ),
 
       // Gain/Loss column
-      SortableColumn<EquityHolding>(
+      SortableColumn<PortfolioHolding>(
         title: 'Gain/Loss',
         flex: 1,
         textAlign: TextAlign.end,
-        sortBy: (holding) => holding.performance.totalGainLoss,
+        sortBy: (holding) => holding.totalGainLoss,
         builder: (holding) {
-          final gainLoss = holding.performance.totalGainLoss;
-          final gainLossPercentage = holding.performance.totalGainLossPercentage;
+          final gainLoss = holding.totalGainLoss;
+          final gainLossPercentage = holding.totalGainLossPercentage;
           final isPositive = gainLoss >= 0;
           final valueColor = isPositive
               ? Colors.green.shade700

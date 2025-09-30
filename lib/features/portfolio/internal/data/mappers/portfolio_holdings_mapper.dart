@@ -1,26 +1,20 @@
-import '../dtos/portfolio_summary_dto.dart';
+import '../dtos/portfolio_holdings_dto.dart';
 import '../dtos/broker_holding_dto.dart';
-import '../dtos/portfolio_summary_dto.dart';
 import '../../domain/entities/portfolio_holding.dart';
 
 /// Mapper to convert between API models and domain entities
 /// This provides isolation between external API structure and internal business logic
 class PortfolioHoldingsMapper {
   /// Convert API response to domain entity
-  static PortfolioHoldings fromApiModel(PortfolioHoldingsDto apiModel) {
+  static PortfolioHoldings fromApiModel(PortfolioHoldingsDto apiModel, String userId) {
     final holdings = apiModel.equityHoldings
         .map((apiHolding) => _mapEquityHolding(apiHolding))
         .toList();
 
-    final metadata = PortfolioMetadata(
-      lastUpdated: DateTime.now(),
-      currency: 'USD', // Default currency, could come from API
-      totalHoldings: holdings.length,
-    );
-
     return PortfolioHoldings(
+      userId: userId,
       holdings: holdings,
-      metadata: metadata,
+      lastUpdated: DateTime.now(),
     );
   }
 
@@ -36,61 +30,47 @@ class PortfolioHoldingsMapper {
   }
 
   /// Map individual equity holding from API to domain
-  static EquityHolding _mapEquityHolding(EquityHoldingDto apiHolding) {
-    // Create identity value object
-    final identity = HoldingIdentity(
-      isin: apiHolding.isin,
-      symbol: apiHolding.symbol,
-      companyName: _extractCompanyName(apiHolding.symbol), // Could be enhanced
-      sector: apiHolding.sector,
-      industry: apiHolding.industry,
-      marketCap: MarketCapCategory.fromString(apiHolding.marketCap),
-    );
-
-    // Create investment details value object
-    final investment = InvestmentDetails(
-      quantity: apiHolding.quantity,
-      averageCost: apiHolding.quantity > 0 
-          ? apiHolding.investmentCost / apiHolding.quantity 
-          : 0.0,
-      totalInvested: apiHolding.investmentCost,
-      currentPrice: apiHolding.currentPrice,
-      currentValue: apiHolding.currentValue,
-      portfolioWeight: apiHolding.weightInPortfolio,
-    );
-
-    // Create performance metrics value object
-    final performance = PerformanceMetrics(
-      totalGainLoss: apiHolding.gainLoss,
-      totalGainLossPercentage: apiHolding.gainLossPercentage,
-      todayGainLoss: apiHolding.todayGainLoss,
-      todayGainLossPercentage: apiHolding.todayGainLossPercentage,
-      priceChange: apiHolding.percentageChange,
-      priceChangePercentage: apiHolding.percentageChange,
-    );
-
-    // Map broker holdings with calculated percentages
+  static PortfolioHolding _mapEquityHolding(EquityHoldingDto apiHolding) {
+    // Map broker holdings
     final brokerHoldings = apiHolding.brokerPortfolios
         .map((apiBroker) => BrokerHolding(
+              brokerId: apiBroker.brokerType,
               brokerName: _formatBrokerName(apiBroker.brokerType),
               quantity: apiBroker.quantity,
-              percentage: apiHolding.quantity > 0 
-                  ? (apiBroker.quantity / apiHolding.quantity) * 100 
+              avgPrice: apiHolding.quantity > 0 
+                  ? apiHolding.investmentCost / apiHolding.quantity 
                   : 0.0,
-              brokerType: apiBroker.brokerType,
+              investedAmount: apiHolding.quantity > 0 
+                  ? (apiBroker.quantity / apiHolding.quantity) * apiHolding.investmentCost
+                  : 0.0,
+              lastUpdated: DateTime.now(),
             ))
         .toList();
 
-    return EquityHolding(
-      identity: identity,
-      investment: investment,
-      performance: performance,
+    return PortfolioHolding(
+      id: apiHolding.isin,
+      symbol: apiHolding.symbol,
+      companyName: _extractCompanyName(apiHolding.symbol),
+      sector: apiHolding.sector,
+      industry: apiHolding.industry,
+      quantity: apiHolding.quantity,
+      avgPrice: apiHolding.quantity > 0 
+          ? apiHolding.investmentCost / apiHolding.quantity 
+          : 0.0,
+      currentPrice: apiHolding.currentPrice,
+      investedAmount: apiHolding.investmentCost,
+      currentValue: apiHolding.currentValue,
+      todayChange: apiHolding.todayGainLoss,
+      todayChangePercentage: apiHolding.todayGainLossPercentage,
+      totalGainLoss: apiHolding.gainLoss,
+      totalGainLossPercentage: apiHolding.gainLossPercentage,
+      portfolioWeight: apiHolding.weightInPortfolio,
       brokerHoldings: brokerHoldings,
     );
   }
 
   /// Map domain entity back to API model
-  static EquityHoldingDto _mapToApiEquityHolding(EquityHolding domainHolding) {
+  static EquityHoldingDto _mapToApiEquityHolding(PortfolioHolding domainHolding) {
     final apiBrokers = domainHolding.brokerHoldings
         .map((broker) => BrokerHoldingDto(
               brokerType: broker.brokerName,
@@ -99,21 +79,21 @@ class PortfolioHoldingsMapper {
         .toList();
 
     return EquityHoldingDto(
-      isin: domainHolding.identity.isin,
-      symbol: domainHolding.identity.symbol,
-      sector: domainHolding.identity.sector,
-      industry: domainHolding.identity.industry,
-      marketCap: domainHolding.identity.marketCap.displayName,
-      quantity: domainHolding.investment.quantity,
-      investmentCost: domainHolding.investment.totalInvested,
-      currentValue: domainHolding.investment.currentValue,
-      weightInPortfolio: domainHolding.investment.portfolioWeight,
-      gainLoss: domainHolding.performance.totalGainLoss,
-      gainLossPercentage: domainHolding.performance.totalGainLossPercentage,
-      todayGainLoss: domainHolding.performance.todayGainLoss,
-      todayGainLossPercentage: domainHolding.performance.todayGainLossPercentage,
-      currentPrice: domainHolding.investment.currentPrice,
-      percentageChange: domainHolding.performance.priceChangePercentage,
+      isin: domainHolding.id,
+      symbol: domainHolding.symbol,
+      sector: domainHolding.sector,
+      industry: domainHolding.industry,
+      marketCap: 'Unknown', // Default value since not available in simplified model
+      quantity: domainHolding.quantity,
+      investmentCost: domainHolding.investedAmount,
+      currentValue: domainHolding.currentValue,
+      weightInPortfolio: domainHolding.portfolioWeight,
+      gainLoss: domainHolding.totalGainLoss,
+      gainLossPercentage: domainHolding.totalGainLossPercentage,
+      todayGainLoss: domainHolding.todayChange,
+      todayGainLossPercentage: domainHolding.todayChangePercentage,
+      currentPrice: domainHolding.currentPrice,
+      percentageChange: domainHolding.todayChangePercentage,
       brokerPortfolios: apiBrokers,
     );
   }
@@ -148,8 +128,8 @@ class PortfolioHoldingsMapper {
   }
 
   /// Create empty portfolio for error states
-  static PortfolioHoldings createEmpty() {
-    return PortfolioHoldings.empty();
+  static PortfolioHoldings createEmpty(String userId) {
+    return PortfolioHoldings.empty(userId);
   }
 
   /// Validation helper

@@ -132,12 +132,12 @@ class WatchlistFilterProvider implements FilterProvider<dynamic> {
       availableSectors: sectors.toList()..sort(),
       availableIndustries: industries.toList()..sort(),
       availableMarketCaps: exchanges.toList()..sort(), // Using this field for exchanges
-      priceRange: minPrice != double.infinity && maxPrice != double.negativeInfinity 
-          ? FilterRange(min: minPrice, max: maxPrice)
-          : null,
-      valueRange: minMarketCap != double.infinity && maxMarketCap != double.negativeInfinity
-          ? FilterRange(min: minMarketCap, max: maxMarketCap)
-          : null,
+      minCurrentValue: minPrice != double.infinity ? minPrice : 0,
+      maxCurrentValue: maxPrice != double.negativeInfinity ? maxPrice : 0,
+      minInvestment: minMarketCap != double.infinity ? minMarketCap : 0,
+      maxInvestment: maxMarketCap != double.negativeInfinity ? maxMarketCap : 0,
+      minQuantity: minVolume != double.infinity ? minVolume : 0,
+      maxQuantity: maxVolume != double.negativeInfinity ? maxVolume : 0,
     );
   }
 

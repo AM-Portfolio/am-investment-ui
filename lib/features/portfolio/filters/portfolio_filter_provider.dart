@@ -129,12 +129,10 @@ class PortfolioFilterProvider implements FilterProvider<dynamic> {
       availableSectors: sectors.toList()..sort(),
       availableIndustries: industries.toList()..sort(),
       availableMarketCaps: marketCaps.toList(),
-      priceRange: minPrice != double.infinity && maxPrice != double.negativeInfinity 
-          ? FilterRange(min: minPrice, max: maxPrice)
-          : null,
-      valueRange: minValue != double.infinity && maxValue != double.negativeInfinity
-          ? FilterRange(min: minValue, max: maxValue)
-          : null,
+      minCurrentValue: minPrice != double.infinity ? minPrice : 0,
+      maxCurrentValue: maxPrice != double.negativeInfinity ? maxPrice : 0,
+      minInvestment: minValue != double.infinity ? minValue : 0,
+      maxInvestment: maxValue != double.negativeInfinity ? maxValue : 0,
     );
   }
 
