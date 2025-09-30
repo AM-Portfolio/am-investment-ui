@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../network/errors/exception.dart';
@@ -30,15 +32,30 @@ class ApiClient {
   }
 
   /// Build URI from endpoint, handling both complete URLs and relative paths
+  /// Automatically replaces localhost with 10.0.2.2 for Android emulator compatibility
   Uri _buildUri(String endpoint, {Map<String, dynamic>? queryParams}) {
+    String finalEndpoint = endpoint;
+    String finalBaseUrl = baseUrl;
+    
+    // Replace localhost with 10.0.2.2 for Android platform (mobile/emulator)
+    if (!kIsWeb && Platform.isAndroid) {
+      finalEndpoint = _replaceLocalhostForAndroid(finalEndpoint);
+      finalBaseUrl = _replaceLocalhostForAndroid(finalBaseUrl);
+    }
+    
     // Check if endpoint is already a complete URL (contains protocol)
-    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
-      return Uri.parse(endpoint).replace(queryParameters: queryParams);
+    if (finalEndpoint.startsWith('http://') || finalEndpoint.startsWith('https://')) {
+      return Uri.parse(finalEndpoint).replace(queryParameters: queryParams);
     }
     
     // For relative endpoints, combine with base URL
-    final cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
-    return Uri.parse('$baseUrl/$cleanEndpoint').replace(queryParameters: queryParams);
+    final cleanEndpoint = finalEndpoint.startsWith('/') ? finalEndpoint.substring(1) : finalEndpoint;
+    return Uri.parse('$finalBaseUrl/$cleanEndpoint').replace(queryParameters: queryParams);
+  }
+  
+  /// Replace localhost with 10.0.2.2 for Android emulator compatibility
+  String _replaceLocalhostForAndroid(String url) {
+    return url.replaceAll('localhost', '10.0.2.2');
   }
 
   /// Create headers with authentication token
