@@ -12,18 +12,6 @@ abstract class PortfolioRemoteDataSource {
   
   /// Get portfolio summary from remote API
   Future<PortfolioSummaryDto> getPortfolioSummary(String userId);
-  
-  /// Refresh portfolio data from remote API
-  Future<bool> refreshPortfolioData(String userId, {bool forceRefresh = false});
-  
-  /// Search/filter portfolio holdings
-  Future<PortfolioHoldingsDto> searchPortfolioHoldings(
-    String userId, {
-    String? searchTerm,
-    List<String>? sectors,
-    Map<String, double>? priceRange,
-    Map<String, double>? valueRange,
-  });
 }
 
 /// Concrete implementation of portfolio remote data source
@@ -107,85 +95,5 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
     }
   }
 
-  @override
-  Future<bool> refreshPortfolioData(String userId, {bool forceRefresh = false}) async {
-    AppLogger.methodEntry('refreshPortfolioData', tag: 'PortfolioRemoteDataSource',
-        params: {'userId': userId, 'forceRefresh': forceRefresh});
-    
-    try {
-      // Use mapper to create request body
-      final requestBody = PortfolioMapper.refreshPortfolioRequestToJson(userId, forceRefresh: forceRefresh);
 
-      AppLogger.debug('API request prepared for portfolio refresh', tag: 'PortfolioRemoteDataSource');
-      
-      // Construct full URI from portfolio config (using base URL + custom endpoint for refresh)
-      final fullUri = '${_portfolioConfig.baseUrl}/portfolio/refresh';
-      
-      // Use ApiClient for consistent error handling and logging
-      await _apiClient.post<Map<String, dynamic>>(
-        fullUri,
-        body: requestBody,
-        parser: (data) => data as Map<String, dynamic>,
-      );
-
-      AppLogger.info('Portfolio data refresh successful', tag: 'PortfolioRemoteDataSource');
-      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRemoteDataSource', result: 'success');
-      return true;
-    } catch (e) {
-      AppLogger.error('Failed to refresh portfolio data', tag: 'PortfolioRemoteDataSource',
-          error: e, stackTrace: StackTrace.current);
-      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRemoteDataSource', result: 'error');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<PortfolioHoldingsDto> searchPortfolioHoldings(
-    String userId, {
-    String? searchTerm,
-    List<String>? sectors,
-    Map<String, double>? priceRange,
-    Map<String, double>? valueRange,
-  }) async {
-    AppLogger.methodEntry('searchPortfolioHoldings', tag: 'PortfolioRemoteDataSource',
-        params: {
-          'userId': userId,
-          'searchTerm': searchTerm,
-          'sectors': sectors?.length,
-          'hasFilters': priceRange != null || valueRange != null,
-        });
-    
-    try {
-      // Use mapper to create request body
-      final requestBody = PortfolioMapper.portfolioSearchRequestToJson(
-        userId,
-        searchTerm: searchTerm,
-        sectors: sectors,
-        priceRange: priceRange,
-        valueRange: valueRange,
-      );
-
-      AppLogger.debug('API request prepared for portfolio search', tag: 'PortfolioRemoteDataSource');
-      
-      // Construct full URI from portfolio config (using base URL + custom endpoint for search)
-      final fullUri = '${_portfolioConfig.baseUrl}/portfolio/search';
-      
-      // Use ApiClient for consistent error handling and logging
-      final searchResponse = await _apiClient.post<PortfolioHoldingsDto>(
-        fullUri,
-        body: requestBody,
-        parser: (data) => PortfolioMapper.portfolioHoldingsFromJson(data as Map<String, dynamic>),
-      );
-
-      AppLogger.info('Portfolio search completed successfully', tag: 'PortfolioRemoteDataSource');
-      AppLogger.methodExit('searchPortfolioHoldings', tag: 'PortfolioRemoteDataSource', result: 'success');
-
-      return searchResponse;
-    } catch (e) {
-      AppLogger.error('Failed to search portfolio holdings', tag: 'PortfolioRemoteDataSource',
-          error: e, stackTrace: StackTrace.current);
-      AppLogger.methodExit('searchPortfolioHoldings', tag: 'PortfolioRemoteDataSource', result: 'error');
-      rethrow;
-    }
-  }
 }

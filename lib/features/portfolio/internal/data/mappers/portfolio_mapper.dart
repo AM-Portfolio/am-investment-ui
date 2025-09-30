@@ -45,45 +45,4 @@ class PortfolioMapper {
   }
   
   // Note: Error parsing is now handled by ApiClient's built-in exception system
-  
-  /// Create request body for portfolio data refresh
-  static Map<String, dynamic> refreshPortfolioRequestToJson(String userId, {
-    bool forceRefresh = false,
-  }) {
-    return {
-      'userId': userId,
-      'forceRefresh': forceRefresh,
-    };
-  }
-  
-  /// Create request body for portfolio search/filter
-  static Map<String, dynamic> portfolioSearchRequestToJson(
-    String userId, {
-    String? searchTerm,
-    List<String>? sectors,
-    Map<String, double>? priceRange,
-    Map<String, double>? valueRange,
-  }) {
-    final Map<String, dynamic> request = {
-      'userId': userId,
-    };
-    
-    if (searchTerm != null && searchTerm.isNotEmpty) {
-      request['searchTerm'] = searchTerm;
-    }
-    
-    if (sectors != null && sectors.isNotEmpty) {
-      request['sectors'] = sectors;
-    }
-    
-    if (priceRange != null) {
-      request['priceRange'] = priceRange;
-    }
-    
-    if (valueRange != null) {
-      request['valueRange'] = valueRange;
-    }
-    
-    return request;
-  }
 }

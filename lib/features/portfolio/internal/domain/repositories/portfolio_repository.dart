@@ -15,9 +15,6 @@ abstract class PortfolioRepository {
   /// Get summary stream for real-time updates
   Stream<PortfolioSummary> watchPortfolioSummary(String userId);
   
-  /// Refresh portfolio data
-  Future<void> refreshPortfolioData(String userId);
-  
   /// Get holding details by symbol
   Future<PortfolioHolding?> getHoldingDetails(String userId, String symbol);
   
@@ -29,7 +26,4 @@ abstract class PortfolioRepository {
   
   /// Get worst performers
   Future<List<TopPerformer>> getWorstPerformers(String userId, {int limit = 5});
-  
-  /// Search holdings by symbol or company name
-  Future<List<PortfolioHolding>> searchHoldings(String userId, String query);
 }

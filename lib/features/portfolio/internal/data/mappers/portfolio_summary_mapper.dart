@@ -1,59 +1,144 @@
 import '../dtos/portfolio_summary_dto.dart';
-import '../dtos/broker_holding_dto.dart';
-import '../dtos/portfolio_summary_dto.dart';
 import '../../domain/entities/portfolio_summary.dart';
+import '../../../../../core/utils/logger.dart';
 
 /// Mapper to convert between API models and domain entities for portfolio summary
 /// This provides isolation between external API structure and internal business logic
 class PortfolioSummaryMapper {
   /// Convert API response to domain entity
   static PortfolioSummary fromApiModel(PortfolioSummaryDto apiModel) {
-    // Create portfolio value
-    final portfolioValue = PortfolioValue(
-      current: apiModel.totalValue,
-      invested: apiModel.investmentValue,
-      currency: 'USD', // Default currency, could come from API
-    );
+    try {
+      // Map sector allocations
+      final sectorAllocations = apiModel.sectorAllocation.entries
+          .map((entry) => SectorAllocation(
+                sector: entry.key,
+                value: 0.0, // Would need actual value from API
+                percentage: entry.value,
+                holdings: 0, // Would need actual count from API
+              ))
+          .toList();
 
-    // Create performance metrics
-    final performance = PortfolioPerformance(
-      totalGain: apiModel.totalGain,
-      totalGainPercentage: apiModel.totalGainPercentage,
-      todayGain: apiModel.todaysGain,
-      todayGainPercentage: apiModel.todaysGainPercentage,
-    );
+      // Map top performers
+      final topPerformers = apiModel.topPerformers
+          .map((api) => TopPerformer(
+                symbol: api.symbol,
+                companyName: api.symbol, // Using symbol as company name
+                gainLoss: api.gainAmount,
+                gainLossPercentage: api.gainPercentage,
+                currentValue: 0.0, // Default value, would need from API
+              ))
+          .toList();
 
-    // Create allocation breakdown
-    final allocation = PortfolioAllocation(
-      marketCapBreakdown: _mapMarketCapBreakdown(apiModel.marketCapHoldings),
-      sectorBreakdown: apiModel.sectorAllocation,
-    );
+      // Map worst performers (using top losers)
+      final worstPerformers = apiModel.topLosers
+          .map((api) => TopPerformer(
+                symbol: api.symbol,
+                companyName: api.symbol, // Using symbol as company name
+                gainLoss: -api.lossAmount, // Negative for losses
+                gainLossPercentage: -api.lossPercentage, // Negative for losses
+                currentValue: 0.0, // Default value, would need from API
+              ))
+          .toList();
 
-    // Create insights
-    final insights = PortfolioInsights(
-      topPerformers: apiModel.topPerformers
-          .map((api) => _mapTopPerformer(api))
-          .toList(),
-      topLosers: apiModel.topLosers
-          .map((api) => _mapTopLoser(api))
-          .toList(),
-      recommendations: _generateRecommendations(apiModel),
-    );
+      return PortfolioSummary(
+        userId: 'api-user', // Default userId since not provided in DTO
+        totalValue: apiModel.totalValue,
+        totalInvested: apiModel.investmentValue,
+        totalGainLoss: apiModel.totalGain,
+        totalGainLossPercentage: apiModel.totalGainPercentage,
+        todayChange: apiModel.todaysGain,
+        todayChangePercentage: apiModel.todaysGainPercentage,
+        totalHoldings: _calculateTotalHoldings(apiModel.marketCapHoldings),
+        lastUpdated: DateTime.now(),
+        sectorAllocation: sectorAllocations,
+        topPerformers: topPerformers,
+        worstPerformers: worstPerformers,
+      );
+    } catch (e) {
+      AppLogger.error('Failed to map portfolio summary from API', 
+          tag: 'PortfolioSummaryMapper', error: e);
+      rethrow;
+    }
+  }
 
-    // Create metadata
-    final metadata = PortfolioSummaryMetadata(
-      lastUpdated: DateTime.now(),
-      currency: 'USD',
-      totalHoldings: _calculateTotalHoldings(apiModel.marketCapHoldings),
-      dataSource: DataSource.api,
+  /// Convert domain entity to API model (for updates/requests)
+  static PortfolioSummaryDto toApiModel(PortfolioSummary domainModel) {
+    return PortfolioSummaryDto(
+      totalValue: domainModel.totalValue,
+      investmentValue: domainModel.totalInvested,
+      todaysGain: domainModel.todayChange,
+      totalGain: domainModel.totalGainLoss,
+      totalGainPercentage: domainModel.totalGainLossPercentage,
+      todaysGainPercentage: domainModel.todayChangePercentage,
+      marketCapHoldings: const {}, // Empty since not available in simplified model
+      sectorAllocation: _mapSectorAllocation(domainModel.sectorAllocation),
+      topPerformers: _mapTopPerformers(domainModel.topPerformers),
+      topLosers: _mapWorstPerformers(domainModel.worstPerformers),
     );
+  }
 
+  /// Calculate total holdings across all market caps
+  static int _calculateTotalHoldings(Map<String, List<MarketCapHoldingDto>> marketCapHoldings) {
+    return marketCapHoldings.values
+        .fold(0, (sum, holdings) => sum + holdings.length);
+  }
+
+  /// Map sector allocation from domain to API
+  static Map<String, double> _mapSectorAllocation(List<SectorAllocation> sectorAllocation) {
+    final Map<String, double> result = {};
+    for (final sector in sectorAllocation) {
+      result[sector.sector] = sector.percentage;
+    }
+    return result;
+  }
+
+  /// Map top performers from domain to API
+  static List<ApiTopPerformer> _mapTopPerformers(List<TopPerformer> topPerformers) {
+    return topPerformers
+        .map((performer) => ApiTopPerformer(
+              symbol: performer.symbol,
+              gainPercentage: performer.gainLossPercentage,
+              gainAmount: performer.gainLoss,
+            ))
+        .toList();
+  }
+
+  /// Map worst performers from domain to API
+  static List<ApiTopLoser> _mapWorstPerformers(List<TopPerformer> worstPerformers) {
+    return worstPerformers
+        .map((performer) => ApiTopLoser(
+              symbol: performer.symbol,
+              lossPercentage: -performer.gainLossPercentage, // Convert to positive loss
+              lossAmount: -performer.gainLoss, // Convert to positive loss
+            ))
+        .toList();
+  }
+
+  /// Create empty portfolio summary for error states
+  static PortfolioSummary createEmpty(String userId) {
+    return PortfolioSummary.empty(userId);
+  }
+
+  /// Create mock portfolio summary with sample data
+  static PortfolioSummary createMock({String userId = 'mock-user'}) {
     return PortfolioSummary(
-      userId: 'default-user', // Default userId since it's not provided
-      totalValue: portfolioValue.current,
-      dailyChange: performance.todayGain,
-      holdings: [], // Will be populated from holdings data
+      userId: userId,
+      totalValue: 125000.0,
+      totalInvested: 100000.0,
+      totalGainLoss: 25000.0,
+      totalGainLossPercentage: 25.0,
+      todayChange: 1500.0,
+      todayChangePercentage: 1.2,
+      totalHoldings: 10,
+      lastUpdated: DateTime.now(),
     );
+  }
+
+  /// Validation helper
+  static bool isValidApiResponse(PortfolioSummaryDto? apiModel) {
+    return apiModel != null && 
+           apiModel.totalValue >= 0 && 
+           apiModel.investmentValue >= 0;
   }
 
   /// Convert domain entity to API model (for updates/requests)

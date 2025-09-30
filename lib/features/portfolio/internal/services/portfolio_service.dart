@@ -1,9 +1,6 @@
 import '../entities/portfolio_holding.dart';
-import '../usecases/analyze_portfolio_performance.dart';
 import '../usecases/get_portfolio_holdings.dart';
 import '../usecases/get_portfolio_summary.dart';
-import '../usecases/refresh_portfolio_data.dart';
-import '../usecases/search_portfolio_holdings.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Portfolio orchestration service for complex workflows.
@@ -18,16 +15,10 @@ import '../../../../core/utils/logger.dart';
 class PortfolioService {
   final GetPortfolioHoldings _getPortfolioHoldings;
   final GetPortfolioSummary _getPortfolioSummary;
-  final RefreshPortfolioData _refreshPortfolioData;
-  final AnalyzePortfolioPerformance _analyzePortfolioPerformance;
-  final SearchPortfolioHoldings _searchPortfolioHoldings;
 
   const PortfolioService(
     this._getPortfolioHoldings,
     this._getPortfolioSummary,
-    this._refreshPortfolioData,
-    this._analyzePortfolioPerformance,
-    this._searchPortfolioHoldings,
   );
 
   /// Performs complete portfolio synchronization workflow:

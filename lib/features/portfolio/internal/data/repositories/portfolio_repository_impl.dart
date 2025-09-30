@@ -155,30 +155,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
     return _summaryController.stream;
   }
 
-  @override
-  Future<void> refreshPortfolioData(String userId) async {
-    AppLogger.methodEntry('refreshPortfolioData', tag: 'PortfolioRepository', 
-        params: {'userId': userId});
-    
-    try {
-      // Call remote data source refresh
-      await _remoteDataSource.refreshPortfolioData(userId, forceRefresh: true);
-      
-      // Refresh cached data by fetching fresh data
-      await Future.wait([
-        getPortfolioHoldings(userId),
-        getPortfolioSummary(userId),
-      ]);
-      
-      AppLogger.info('Portfolio data refreshed successfully', tag: 'PortfolioRepository');
-      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRepository', result: 'success');
-    } catch (e) {
-      AppLogger.error('Failed to refresh portfolio data', tag: 'PortfolioRepository',
-          error: e, stackTrace: StackTrace.current);
-      AppLogger.methodExit('refreshPortfolioData', tag: 'PortfolioRepository', result: 'error');
-      rethrow;
-    }
-  }
+
 
   @override
   Future<PortfolioHolding?> getHoldingDetails(String userId, String symbol) async {
@@ -286,44 +263,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
     }
   }
 
-  @override
-  Future<List<PortfolioHolding>> searchHoldings(String userId, String query) async {
-    AppLogger.methodEntry('searchHoldings', tag: 'PortfolioRepository', 
-        params: {'userId': userId, 'query': query});
-    
-    try {
-      // Use remote data source search functionality
-      final holdingsDto = await _remoteDataSource.searchPortfolioHoldings(
-        userId,
-        searchTerm: query,
-      );
-      
-      // Map DTO to domain entity
-      final holdings = PortfolioHoldingsMapper.fromApiModel(holdingsDto);
-      
-      AppLogger.info('Portfolio search completed successfully', tag: 'PortfolioRepository');
-      AppLogger.methodExit('searchHoldings', tag: 'PortfolioRepository', result: 'success');
-      
-      return holdings.holdings;
-    } catch (e) {
-      AppLogger.error('Failed to search holdings', tag: 'PortfolioRepository',
-          error: e, stackTrace: StackTrace.current);
-      AppLogger.methodExit('searchHoldings', tag: 'PortfolioRepository', result: 'error');
-      
-      // Fallback to local search in cached data
-      if (_cachedHoldings != null && _lastUserId == userId) {
-        AppLogger.info('Falling back to cached data search', tag: 'PortfolioRepository');
-        final filteredHoldings = _cachedHoldings!.holdings.where((holding) =>
-            holding.symbol.toLowerCase().contains(query.toLowerCase()) ||
-            holding.companyName.toLowerCase().contains(query.toLowerCase())
-        ).toList();
-        
-        return filteredHoldings;
-      }
-      
-      rethrow;
-    }
-  }
+
 
   /// Dispose method to clean up resources
   void dispose() {
