@@ -5,6 +5,7 @@ import '../network/dtos/portfolio/portfolio_holdings_dtos.dart';
 import '../network/dtos/portfolio/portfolio_summary_dtos.dart';
 import '../network/dtos/portfolio/broker_holding_dtos.dart';
 import '../network/errors/exception.dart';
+import '../constants/asset_constants.dart';
 
 /// Service for providing mock portfolio data
 /// Handles loading and transformation of mock data for development and testing
@@ -52,7 +53,7 @@ class PortfolioMockDataProvider {
     }
 
     try {
-      final mockDataString = await rootBundle.loadString('assets/mock_data/portfolio_summary.json');
+      final mockDataString = await rootBundle.loadString(AssetPaths.mockPortfolioSummary);
       _cachedSummaryData = jsonDecode(mockDataString) as Map<String, dynamic>;
       return _cachedSummaryData!;
     } catch (e) {
@@ -68,7 +69,7 @@ class PortfolioMockDataProvider {
     }
 
     try {
-      final mockDataString = await rootBundle.loadString('assets/mock_data/portfolio_holdings.json');
+      final mockDataString = await rootBundle.loadString(AssetPaths.mockPortfolioHoldings);
       _cachedHoldingsData = jsonDecode(mockDataString) as Map<String, dynamic>;
       return _cachedHoldingsData!;
     } catch (e) {

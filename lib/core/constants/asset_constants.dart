@@ -1,30 +1,33 @@
 /// Asset path constants
+/// Note: These paths are for use with rootBundle.loadString() and should match pubspec.yaml assets
 class AssetPaths {
-  /// Root asset directory
+  /// Root asset directory (as defined in pubspec.yaml)
   static const String assetsRoot = 'lib/assets';
   
   /// Images directory
   static const String images = '$assetsRoot/images';
   
-  /// Mock data directory
-  static const String mockData = '$assetsRoot/mock_data';
+  /// Mock data directory (compatible with rootBundle.loadString)
+  static const String mockData = 'lib/assets/mock_data';
   
-  /// Configuration files
-  static const String applicationProperties = '$assetsRoot/application.properties';
-  static const String applicationDevProperties = '$assetsRoot/application-dev.properties';
-  static const String applicationProdProperties = '$assetsRoot/application-prod.properties';
-  static const String applicationTestProperties = '$assetsRoot/application-test.properties';
-  static const String applicationStagingProperties = '$assetsRoot/application-staging.properties';
+  /// Configuration files (compatible with rootBundle.loadString)
+  static const String applicationProperties = 'lib/assets/application.properties';
+  static const String applicationDevProperties = 'lib/assets/application-dev.properties';
+  static const String applicationProdProperties = 'lib/assets/application-prod.properties';
+  static const String applicationTestProperties = 'lib/assets/application-test.properties';
+  static const String applicationStagingProperties = 'lib/assets/application-staging.properties';
   
-  /// Test data
-  static const String testUsers = '$assetsRoot/test_users.json';
+  /// Test data (compatible with rootBundle.loadString)
+  static const String testUsers = 'lib/assets/test_users.json';
   
   /// Image assets
   static const String appLogo = '$images/app_logo.png';
   static const String defaultBrokerLogo = '$images/default_broker_logo.png';
   static const String placeholderImage = '$images/placeholder.png';
   
-  /// Mock data files
+  /// Mock data files (compatible with rootBundle.loadString)
+  static const String mockPortfolioSummary = 'lib/assets/mock_data/portfolio_summary.json';
+  static const String mockPortfolioHoldings = 'lib/assets/mock_data/portfolio_holdings.json';
   static const String mockPortfolioData = '$mockData/portfolio_data.json';
   static const String mockHoldingsData = '$mockData/holdings_data.json';
   static const String mockTransactionsData = '$mockData/transactions_data.json';
