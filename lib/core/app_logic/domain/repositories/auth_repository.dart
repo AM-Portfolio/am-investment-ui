@@ -1,6 +1,6 @@
 import '../entities/auth_result.dart';
 import '../entities/user.dart';
-import '../../../../features/login/internal/domain/entities/auth_state.dart';
+import '../entities/auth_state.dart';
 
 /// Abstract repository interface for authentication operations
 /// 

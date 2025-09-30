@@ -1,7 +1,7 @@
-import '../../../../features/login/internal/domain/entities/auth_state.dart';
+import '../entities/auth_state.dart';
 import '../repositories/auth_repository.dart';
 
-/// Use case for getting authentication state
+/// Use case for getting authentication state 
 /// 
 /// Handles the business logic for retrieving current authentication status
 /// and listening to authentication state changes

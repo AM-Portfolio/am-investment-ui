@@ -1,4 +1,4 @@
-// Core domain exports
+// Core domain exportimport 'domain/entities/auth_state.dart';
 export 'domain/entities/auth_result.dart';
 export 'domain/entities/user.dart';
 export 'domain/repositories/auth_repository.dart';
@@ -19,4 +19,4 @@ export 'data/repositories/auth_repository_impl.dart';
 export 'services/auth_service_clean.dart';
 
 // Re-export feature entities for convenience
-export '../../features/login/internal/domain/entities/auth_state.dart';
+export 'domain/entities/auth_state.dart';

@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dtos/exception/exception_dtos.dart';
+import '../network/errors/exception.dart';
 import '../utils/logger.dart';
 
 /// Base API client for handling HTTP requests
 class ApiClient {
+  /// Default base URL for API requests
+  static const String _defaultBaseUrl = 'http://localhost:8080';
+
   /// Base URL for API requests
   final String baseUrl;
 
@@ -16,13 +19,26 @@ class ApiClient {
   static const String _tokenKey = 'auth_token';
 
   /// Constructor
-  ApiClient({required this.baseUrl, http.Client? client})
-    : _client = client ?? http.Client();
+  ApiClient({String? baseUrl, http.Client? client})
+    : baseUrl = baseUrl ?? _defaultBaseUrl,
+      _client = client ?? http.Client();
 
   /// Get authentication token from shared preferences
   Future<String?> _getAuthToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  /// Build URI from endpoint, handling both complete URLs and relative paths
+  Uri _buildUri(String endpoint, {Map<String, dynamic>? queryParams}) {
+    // Check if endpoint is already a complete URL (contains protocol)
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      return Uri.parse(endpoint).replace(queryParameters: queryParams);
+    }
+    
+    // For relative endpoints, combine with base URL
+    final cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+    return Uri.parse('$baseUrl/$cleanEndpoint').replace(queryParameters: queryParams);
   }
 
   /// Create headers with authentication token
@@ -71,9 +87,7 @@ class ApiClient {
   }) async {
     final stopwatch = Stopwatch()..start();
     try {
-      final uri = Uri.parse(
-        '$baseUrl/$endpoint',
-      ).replace(queryParameters: queryParams);
+      final uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
       
@@ -108,9 +122,7 @@ class ApiClient {
   }) async {
     final stopwatch = Stopwatch()..start();
     try {
-      final uri = Uri.parse(
-        '$baseUrl/$endpoint',
-      ).replace(queryParameters: queryParams);
+      final uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
       
@@ -149,9 +161,7 @@ class ApiClient {
     required T Function(dynamic data) parser,
   }) async {
     try {
-      final uri = Uri.parse(
-        '$baseUrl/$endpoint',
-      ).replace(queryParameters: queryParams);
+      final uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
 
@@ -179,9 +189,7 @@ class ApiClient {
     required T Function(dynamic data) parser,
   }) async {
     try {
-      final uri = Uri.parse(
-        '$baseUrl/$endpoint',
-      ).replace(queryParameters: queryParams);
+      final uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
 

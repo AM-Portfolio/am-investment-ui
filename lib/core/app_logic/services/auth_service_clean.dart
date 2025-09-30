@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 import 'package:http/http.dart' as http;
 import '../domain/entities/auth_result.dart';
 import '../domain/entities/user.dart';
@@ -12,7 +12,7 @@ import '../data/repositories/auth_repository_impl.dart';
 import '../data/datasources/auth_local_data_source.dart';
 import '../data/datasources/auth_remote_data_source.dart';
 import '../data/datasources/auth_storage_data_source.dart';
-import '../../../features/login/internal/domain/entities/auth_state.dart';
+import '../domain/entities/auth_state.dart';
 import '../../utils/logger.dart';
 
 /// Clean architecture authentication service

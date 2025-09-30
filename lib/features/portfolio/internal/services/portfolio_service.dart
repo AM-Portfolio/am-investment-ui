@@ -1,9 +1,9 @@
-import '../domain/entities/portfolio_holding.dart';
-import '../domain/usecases/analyze_portfolio_performance.dart';
-import '../domain/usecases/get_portfolio_holdings.dart';
-import '../domain/usecases/get_portfolio_summary.dart';
-import '../domain/usecases/refresh_portfolio_data.dart';
-import '../domain/usecases/search_portfolio_holdings.dart';
+import '../../../../core/app_logic/domain/entities/portfolio/portfolio_holdings.dart';
+import '../usecases/analyze_portfolio_performance.dart';
+import '../usecases/get_portfolio_holdings.dart';
+import '../usecases/get_portfolio_summary.dart';
+import '../usecases/refresh_portfolio_data.dart';
+import '../usecases/search_portfolio_holdings.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Portfolio orchestration service for complex workflows.

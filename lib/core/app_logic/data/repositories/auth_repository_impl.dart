@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:todo_app/core/app_logic/domain/entities/user.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/auth_state.dart';
 import '../../domain/repositories/auth_repository.dart';
