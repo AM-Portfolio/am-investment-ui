@@ -9,6 +9,7 @@ import '../../providers/portfolio_providers.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../../../core/utils/logger.dart';
 import '../widgets/portfolio_summary_widget.dart';
+import 'portfolio_analysis_widget.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation
 class PortfolioMobileScreen extends ConsumerWidget {
@@ -366,21 +367,8 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   }
 
   Widget _buildAnalysisContent(PortfolioState state) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.analytics_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Portfolio Analysis',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text('Coming soon...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
+    // Use userId as portfolioId since that's how the system is structured
+    return PortfolioAnalysisWidget(portfolioId: widget.userId);
   }
 
   Widget _buildErrorWidget(String message) {
