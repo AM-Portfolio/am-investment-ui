@@ -6,11 +6,7 @@ class FileList extends StatelessWidget {
   final List<PlatformFile> files;
   final Function(PlatformFile)? onRemoveFile;
 
-  const FileList({
-    super.key,
-    required this.files,
-    this.onRemoveFile,
-  });
+  const FileList({super.key, required this.files, this.onRemoveFile});
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +15,7 @@ class FileList extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 20,
-            ),
+            const Icon(Icons.check_circle, color: Colors.green, size: 20),
             const SizedBox(width: 8),
             Text(
               '${files.length} file(s) selected',
@@ -44,7 +36,7 @@ class FileList extends StatelessWidget {
   Widget _buildFileItem(PlatformFile file) {
     final sizeInKB = (file.size / 1024).round();
     final extension = file.extension?.toUpperCase() ?? '';
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final screenWidth = MediaQuery.of(context).size.width;
@@ -52,7 +44,7 @@ class FileList extends StatelessWidget {
         final fontSize = (screenWidth * 0.025).clamp(12.0, 16.0);
         final smallFontSize = (screenWidth * 0.02).clamp(10.0, 14.0);
         final padding = (screenWidth * 0.02).clamp(8.0, 16.0);
-        
+
         return Container(
           margin: EdgeInsets.only(bottom: screenWidth * 0.015),
           padding: EdgeInsets.all(padding),
@@ -95,7 +87,7 @@ class FileList extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '${sizeInKB} KB',
+                      '$sizeInKB KB',
                       style: TextStyle(
                         fontSize: smallFontSize,
                         color: Colors.grey[600],

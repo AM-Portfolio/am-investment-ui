@@ -5,44 +5,55 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../../providers/portfolio_providers.dart';
-import 'widgets/portfolio_holdings_app_widget.dart';
+import 'widgets/portfolio_holdings_widget.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation
 class PortfolioMobileScreen extends ConsumerWidget {
   final String userId;
 
-  const PortfolioMobileScreen({
-    super.key,
-    required this.userId,
-  });
+  const PortfolioMobileScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    AppLogger.info('Building PortfolioMobileScreen for userId: $userId', tag: 'PortfolioMobileScreen');
-    AppLogger.userAction('Navigate to Mobile Portfolio', tag: 'PortfolioMobileScreen', context: {'userId': userId});
-    
+    AppLogger.info(
+      'Building PortfolioMobileScreen for userId: $userId',
+      tag: 'PortfolioMobileScreen',
+    );
+    AppLogger.userAction(
+      'Navigate to Mobile Portfolio',
+      tag: 'PortfolioMobileScreen',
+      context: {'userId': userId},
+    );
+
     // Watch the portfolio service provider
     final portfolioServiceAsync = ref.watch(portfolioServiceProvider);
-    
+
     return portfolioServiceAsync.when(
       data: (portfolioService) {
-        AppLogger.debug('Portfolio service loaded, creating mobile cubit', tag: 'PortfolioMobileScreen');
+        AppLogger.debug(
+          'Portfolio service loaded, creating mobile cubit',
+          tag: 'PortfolioMobileScreen',
+        );
         return BlocProvider(
-          create: (context) => PortfolioCubit(portfolioService)..loadPortfolio(userId),
+          create: (context) =>
+              PortfolioCubit(portfolioService)..loadPortfolio(userId),
           child: PortfolioMobileView(userId: userId),
         );
       },
       loading: () {
-        AppLogger.debug('Portfolio service loading', tag: 'PortfolioMobileScreen');
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
+        AppLogger.debug(
+          'Portfolio service loading',
+          tag: 'PortfolioMobileScreen',
         );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
       error: (error, stack) {
-        AppLogger.error('Failed to load portfolio service', tag: 'PortfolioMobileScreen', error: error);
+        AppLogger.error(
+          'Failed to load portfolio service',
+          tag: 'PortfolioMobileScreen',
+          error: error,
+        );
         return Scaffold(
           body: Center(
             child: Column(
@@ -69,16 +80,14 @@ class PortfolioMobileScreen extends ConsumerWidget {
 class PortfolioMobileView extends StatefulWidget {
   final String userId;
 
-  const PortfolioMobileView({
-    super.key,
-    required this.userId,
-  });
+  const PortfolioMobileView({super.key, required this.userId});
 
   @override
   State<PortfolioMobileView> createState() => _PortfolioMobileViewState();
 }
 
-class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerProviderStateMixin {
+class _PortfolioMobileViewState extends State<PortfolioMobileView>
+    with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -95,14 +104,24 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
 
   @override
   Widget build(BuildContext context) {
-    AppLogger.debug('Building PortfolioMobileView - userId: ${widget.userId}', tag: 'PortfolioMobileView');
-    
+    AppLogger.debug(
+      'Building PortfolioMobileView - userId: ${widget.userId}',
+      tag: 'PortfolioMobileView',
+    );
+
     return BlocListener<PortfolioCubit, PortfolioState>(
       listener: (context, state) {
-        AppLogger.stateChange('Previous', state.runtimeType.toString(), tag: 'PortfolioMobileView');
-        
+        AppLogger.stateChange(
+          'Previous',
+          state.runtimeType.toString(),
+          tag: 'PortfolioMobileView',
+        );
+
         if (state is PortfolioError) {
-          AppLogger.error('Portfolio error occurred: ${state.message}', tag: 'PortfolioMobileView');
+          AppLogger.error(
+            'Portfolio error occurred: ${state.message}',
+            tag: 'PortfolioMobileView',
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.message}'),
@@ -110,7 +129,10 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
             ),
           );
         } else if (state is PortfolioLoaded) {
-          AppLogger.info('Portfolio loaded successfully - ${state.holdings.length} holdings', tag: 'PortfolioMobileView');
+          AppLogger.info(
+            'Portfolio loaded successfully - ${state.holdings.length} holdings',
+            tag: 'PortfolioMobileView',
+          );
         }
       },
       child: Scaffold(
@@ -121,8 +143,11 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
-                AppLogger.userAction('Refresh Portfolio', tag: 'PortfolioMobileView', 
-                    context: {'userId': widget.userId});
+                AppLogger.userAction(
+                  'Refresh Portfolio',
+                  tag: 'PortfolioMobileView',
+                  context: {'userId': widget.userId},
+                );
                 context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
               },
             ),
@@ -133,18 +158,12 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
             unselectedLabelColor: Colors.grey,
             indicatorColor: Theme.of(context).primaryColor,
             tabs: const [
-              Tab(
-                icon: Icon(Icons.dashboard_outlined),
-                text: 'Overview',
-              ),
+              Tab(icon: Icon(Icons.dashboard_outlined), text: 'Overview'),
               Tab(
                 icon: Icon(Icons.account_balance_wallet_outlined),
                 text: 'Holdings',
               ),
-              Tab(
-                icon: Icon(Icons.analytics_outlined),
-                text: 'Analysis',
-              ),
+              Tab(icon: Icon(Icons.analytics_outlined), text: 'Analysis'),
             ],
           ),
         ),
@@ -168,15 +187,15 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
     if (state is PortfolioLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (state is PortfolioError) {
       return _buildErrorWidget(state.message);
     }
-    
+
     if (state is PortfolioLoaded) {
       return _buildOverviewContent(state);
     }
-    
+
     return const Center(child: Text('Loading portfolio...'));
   }
 
@@ -184,29 +203,29 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
     if (state is PortfolioLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (state is PortfolioError) {
       return _buildErrorWidget(state.message);
     }
 
-    return PortfolioHoldingsAppWidget(userId: widget.userId);
+    return PortfolioHoldingsWidget(userId: widget.userId);
   }
 
   Widget _buildAnalysisTab(PortfolioState state) {
     if (state is PortfolioLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (state is PortfolioError) {
       return _buildErrorWidget(state.message);
     }
-    
+
     return _buildAnalysisContent(state);
   }
 
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -230,11 +249,13 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
           _buildSummaryCard(
             'Total Return',
             '₹${summary.totalGainLoss.toStringAsFixed(2)}',
-            summary.totalGainLoss >= 0 ? Icons.trending_up : Icons.trending_down,
+            summary.totalGainLoss >= 0
+                ? Icons.trending_up
+                : Icons.trending_down,
             summary.totalGainLoss >= 0 ? Colors.green : Colors.red,
           ),
           const SizedBox(height: 24),
-          
+
           // Quick Actions
           Text(
             'Quick Actions',
@@ -277,16 +298,18 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 8),
-          Text(
-            'Coming soon...',
-            style: TextStyle(color: Colors.grey),
-          ),
+          Text('Coming soon...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -308,9 +331,9 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -343,9 +366,9 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
               const SizedBox(height: 8),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -362,10 +385,7 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
         children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
-          Text(
-            'Error',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Error', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -377,7 +397,8 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => context.read<PortfolioCubit>().refreshPortfolio(widget.userId),
+            onPressed: () =>
+                context.read<PortfolioCubit>().refreshPortfolio(widget.userId),
             child: const Text('Retry'),
           ),
         ],

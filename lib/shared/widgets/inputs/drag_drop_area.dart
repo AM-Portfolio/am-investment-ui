@@ -24,15 +24,15 @@ class DragDropArea extends StatelessWidget {
       builder: (context, constraints) {
         final screenWidth = MediaQuery.of(context).size.width;
         final screenHeight = MediaQuery.of(context).size.height;
-        
+
         final iconSize = (screenWidth * 0.1).clamp(48.0, 80.0);
         final titleFontSize = (screenWidth * 0.032).clamp(16.0, 22.0);
         final subtitleFontSize = (screenWidth * 0.025).clamp(12.0, 16.0);
         final verticalPadding = (screenHeight * 0.05).clamp(20.0, 50.0);
-        
+
         return DragTarget<List<String>>(
-          onWillAccept: (data) => true,
-          onAccept: (data) => callbacks.onDropFiles?.call(data),
+          onWillAcceptWithDetails: (data) => true,
+          onAcceptWithDetails: (data) => callbacks.onDropFiles?.call(data),
           builder: (context, candidateData, rejectedData) {
             return GestureDetector(
               onTap: callbacks.onPickFiles,
@@ -46,26 +46,26 @@ class DragDropArea extends StatelessWidget {
                       width: iconSize,
                       height: iconSize,
                       decoration: BoxDecoration(
-                        color: state.isDragOver 
+                        color: state.isDragOver
                             ? const Color(0xFFFF9800).withOpacity(0.2)
                             : const Color(0xFFFF9800).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(iconSize / 2),
                       ),
                       child: Icon(
-                        state.isDragOver ? Icons.cloud_download : Icons.cloud_upload,
+                        state.isDragOver
+                            ? Icons.cloud_download
+                            : Icons.cloud_upload,
                         size: iconSize * 0.5,
                         color: const Color(0xFFFF9800),
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     Text(
-                      state.isDragOver 
-                          ? 'Drop your files here'
-                          : title,
+                      state.isDragOver ? 'Drop your files here' : title,
                       style: TextStyle(
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.w600,
-                        color: state.isDragOver 
+                        color: state.isDragOver
                             ? const Color(0xFFFF9800)
                             : Colors.black87,
                       ),

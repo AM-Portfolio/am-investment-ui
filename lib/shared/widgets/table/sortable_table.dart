@@ -124,10 +124,12 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
 
           // Handle null values
           if (aValue == null && bValue == null) return 0;
-          if (aValue == null)
+          if (aValue == null) {
             return _sortDirection == SortDirection.ascending ? -1 : 1;
-          if (bValue == null)
+          }
+          if (bValue == null) {
             return _sortDirection == SortDirection.ascending ? 1 : -1;
+          }
 
           // Compare values based on their type
           int result;

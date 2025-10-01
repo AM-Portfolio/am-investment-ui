@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -24,7 +21,7 @@ void main() async {
   ];
 
   print('Creating placeholder broker logos...');
-  
+
   for (final broker in brokers) {
     await createPlaceholderLogo(
       broker['name'] as String,
@@ -32,12 +29,16 @@ void main() async {
       broker['file'] as String,
     );
   }
-  
+
   print('Placeholder logos created successfully!');
   print('Replace them with actual broker logos from their websites.');
 }
 
-Future<void> createPlaceholderLogo(String name, Color color, String filename) async {
+Future<void> createPlaceholderLogo(
+  String name,
+  Color color,
+  String filename,
+) async {
   // This is a conceptual implementation
   // In practice, you would use image generation libraries or create the images manually
   print('Created placeholder for $name -> $filename');

@@ -22,10 +22,12 @@ class RightFloatingQuickActions extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<RightFloatingQuickActions> createState() => _RightFloatingQuickActionsState();
+  ConsumerState<RightFloatingQuickActions> createState() =>
+      _RightFloatingQuickActionsState();
 }
 
-class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickActions>
+class _RightFloatingQuickActionsState
+    extends ConsumerState<RightFloatingQuickActions>
     with TickerProviderStateMixin {
   bool _isExpanded = false;
   bool _isProcessing = false;
@@ -57,19 +59,19 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
   @override
   void initState() {
     super.initState();
-    
+
     // Main flying animation controller
     _flyController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     // Icon rotation controller
     _iconController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     // Stagger animation controller for individual actions
     _staggerController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -77,40 +79,31 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
     );
 
     // Slide animation from right to left
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.2, 0.0), // Start from right side
-      end: Offset.zero, // End at normal position
-    ).animate(CurvedAnimation(
-      parent: _flyController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(1.2, 0.0), // Start from right side
+          end: Offset.zero, // End at normal position
+        ).animate(
+          CurvedAnimation(parent: _flyController, curve: Curves.easeOutBack),
+        );
 
     // Fade animation
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _flyController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _flyController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
 
     // Scale animation for entrance effect
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _flyController,
-      curve: Curves.easeOutBack,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _flyController, curve: Curves.easeOutBack),
+    );
 
     // Icon rotation
-    _iconRotation = Tween<double>(
-      begin: 0.0,
-      end: 0.75,
-    ).animate(CurvedAnimation(
-      parent: _iconController,
-      curve: Curves.easeInOut,
-    ));
+    _iconRotation = Tween<double>(begin: 0.0, end: 0.75).animate(
+      CurvedAnimation(parent: _iconController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -123,7 +116,7 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
 
   void _toggleActions() {
     HapticFeedback.lightImpact();
-    
+
     setState(() {
       _isExpanded = !_isExpanded;
     });
@@ -148,12 +141,10 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
           Positioned.fill(
             child: GestureDetector(
               onTap: _toggleActions,
-              child: Container(
-                color: Colors.black.withOpacity(0.1),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.1)),
             ),
           ),
-        
+
         // Flying actions panel
         if (_isExpanded)
           Positioned(
@@ -170,13 +161,9 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
               ),
             ),
           ),
-        
+
         // Floating action button (trigger)
-        Positioned(
-          right: 16,
-          top: 16,
-          child: _buildFloatingTrigger(),
-        ),
+        Positioned(right: 16, top: 16, child: _buildFloatingTrigger()),
       ],
     );
   }
@@ -255,10 +242,7 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
               SizedBox(height: 16),
               Text(
                 'Processing...',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
@@ -317,20 +301,22 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 20),
-            
+
             // Actions list with staggered animation
             ..._quickActions.asMap().entries.map((entry) {
               final index = entry.key;
               final action = entry.value;
-              
+
               return AnimatedBuilder(
                 animation: _staggerController,
                 builder: (context, child) {
                   final delay = index * 0.1;
-                  final animationValue = ((_staggerController.value - delay) / (1.0 - delay)).clamp(0.0, 1.0);
-                  
+                  final animationValue =
+                      ((_staggerController.value - delay) / (1.0 - delay))
+                          .clamp(0.0, 1.0);
+
                   return Transform.translate(
                     offset: Offset((1 - animationValue) * 50, 0),
                     child: Opacity(
@@ -343,7 +329,7 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
                   );
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -355,10 +341,7 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: action.color.withOpacity(0.08),
-        border: Border.all(
-          color: action.color.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: action.color.withOpacity(0.2), width: 1),
       ),
       child: Material(
         color: Colors.transparent,
@@ -377,15 +360,11 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
                     color: action.color.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    action.icon,
-                    color: action.color,
-                    size: 24,
-                  ),
+                  child: Icon(action.icon, color: action.color, size: 24),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // Text content
                 Expanded(
                   child: Column(
@@ -404,13 +383,15 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
                         action.description,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Arrow indicator
                 Container(
                   width: 32,
@@ -436,10 +417,10 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
   void _handleQuickAction(String actionId) async {
     // Close the actions panel first
     _toggleActions();
-    
+
     // Add a small delay for smooth transition
     await Future.delayed(const Duration(milliseconds: 200));
-    
+
     setState(() {
       _isProcessing = true;
     });
@@ -452,14 +433,17 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
           await AddStockDialog.show(context);
           break;
         case 'view_analysis':
-          _showSnackBar('Analysis feature coming soon!', const Color(0xFF4CAF50));
+          _showSnackBar(
+            'Analysis feature coming soon!',
+            const Color(0xFF4CAF50),
+          );
           break;
         case 'import_data':
           final result = await ImportDataDialog.show(context);
           if (result != null) {
             final docType = result.documentType?.label ?? 'Document';
             final broker = result.brokerType?.label ?? '';
-            final message = broker.isNotEmpty 
+            final message = broker.isNotEmpty
                 ? '$docType import from $broker coming soon!'
                 : '$docType import feature coming soon!';
             _showSnackBar(message, const Color(0xFFFF9800));
@@ -469,7 +453,10 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
           await _performRefresh();
           break;
         case 'settings':
-          _showSnackBar('Settings feature coming soon!', const Color(0xFF607D8B));
+          _showSnackBar(
+            'Settings feature coming soon!',
+            const Color(0xFF607D8B),
+          );
           break;
       }
     } catch (e) {
@@ -483,14 +470,10 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
     }
   }
 
-
-
-
-
-
-
   Future<void> _performRefresh() async {
-    await Future.delayed(const Duration(milliseconds: 2000)); // Simulate refresh
+    await Future.delayed(
+      const Duration(milliseconds: 2000),
+    ); // Simulate refresh
     _showSnackBar('Portfolio refreshed successfully!', const Color(0xFF4CAF50));
   }
 
@@ -503,19 +486,14 @@ class _RightFloatingQuickActionsState extends ConsumerState<RightFloatingQuickAc
             Icon(Icons.check_circle, color: Colors.white, size: 22),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(fontSize: 16),
-              ),
+              child: Text(message, style: const TextStyle(fontSize: 16)),
             ),
           ],
         ),
         backgroundColor: color,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.all(16),
       ),
     );

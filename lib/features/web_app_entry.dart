@@ -12,11 +12,9 @@ class WebAppEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use WebLayout to handle navigation without full page reloads
     return WebLayout(
-      child: Container(
-        child: Text('Welcome to AM Investment'),
-      ),
       title: 'AM Investment',
       activeNavItem: 'Dashboard',
+      child: Container(child: Text('Welcome to AM Investment')),
     );
   }
 }

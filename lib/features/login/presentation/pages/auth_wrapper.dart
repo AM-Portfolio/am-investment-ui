@@ -58,7 +58,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   Widget _getCurrentScreen() {
     final user = ref.watch(currentUserProvider);
     final userId = user?.id ?? '';
-    
+
     switch (_currentPage) {
       case 'Portfolio':
         return PortfolioScreen(userId: userId);
@@ -106,11 +106,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   Widget build(BuildContext context) {
     // Show loading while initializing authentication
     if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
@@ -118,11 +114,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
 
     // Show loading while authentication is in progress
     if (authState.isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // Show login screen if not authenticated
@@ -133,11 +125,11 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     // Show main app if authenticated
     return PlatformUtils.isWeb
         ? WebLayout(
-            child: _getCurrentScreen(),
             title: _currentPage,
             activeNavItem: _currentPage,
             onLogout: _handleLogout,
             onNavigate: _handleNavigation,
+            child: _getCurrentScreen(),
           )
         : MobileLayout(
             title: 'AM Investment',
