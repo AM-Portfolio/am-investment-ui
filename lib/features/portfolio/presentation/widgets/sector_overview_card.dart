@@ -1,5 +1,19 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../../internal/domain/entities/portfolio_analytics.dart';
+
+/// Data class for sector tile information
+class SectorTileData {
+  final Sector sector;
+  final double weightage;
+  final double performance;
+
+  SectorTileData({
+    required this.sector,
+    required this.weightage,
+    required this.performance,
+  });
+}
 
 /// Widget displaying sector allocation overview with visual heatmap
 /// Shows sector performance with color-coded rectangles representing sector weightage
@@ -190,56 +204,146 @@ class SectorOverviewCard extends StatelessWidget {
         return bValue.compareTo(aValue);
       });
 
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: sortedSectors.map((sector) {
-          // Use the same calculation logic as totalValue
-          double sectorValue = sector.totalValue > 0
-              ? sector.totalValue
-              : sector.stocks.fold(0.0, (sum, stock) {
-                  if (stock.marketValue != null && stock.marketValue! > 0) {
-                    return sum + stock.marketValue!;
-                  }
-                  if (stock.quantity != null && stock.quantity! > 0) {
-                    return sum + (stock.quantity! * stock.lastPrice);
-                  }
-                  return sum;
-                });
+    // Create sector data with calculations
+    List<SectorTileData> sectorData = sortedSectors.map((sector) {
+      // Use the same calculation logic as totalValue
+      double sectorValue = sector.totalValue > 0
+          ? sector.totalValue
+          : sector.stocks.fold(0.0, (sum, stock) {
+              if (stock.marketValue != null && stock.marketValue! > 0) {
+                return sum + stock.marketValue!;
+              }
+              if (stock.quantity != null && stock.quantity! > 0) {
+                return sum + (stock.quantity! * stock.lastPrice);
+              }
+              return sum;
+            });
 
-          // Use sector.weightage if available, otherwise calculate
-          double weightage = sector.weightage > 0
-              ? sector.weightage
-              : (totalValue > 0 ? (sectorValue / totalValue) * 100 : 0);
+      // Use sector.weightage if available, otherwise calculate
+      double weightage = sector.weightage > 0
+          ? sector.weightage
+          : (totalValue > 0 ? (sectorValue / totalValue) * 100 : 0);
 
-          double avgPerformance = _calculateSectorPerformance(sector);
+      double avgPerformance = _calculateSectorPerformance(sector);
 
-          return _buildSectorTile(context, sector, weightage, avgPerformance);
-        }).toList(),
-      ),
+      return SectorTileData(
+        sector: sector,
+        weightage: weightage,
+        performance: avgPerformance,
+      );
+    }).toList();
+
+    return _buildTreemapLayout(context, sectorData);
+  }
+
+  Widget _buildTreemapLayout(
+    BuildContext context,
+    List<SectorTileData> sectorData,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final availableHeight = constraints.maxHeight;
+
+        return Stack(
+          children: _calculateTreemapPositions(
+            context,
+            sectorData,
+            availableWidth,
+            availableHeight,
+          ).map((positioned) => positioned).toList(),
+        );
+      },
     );
   }
 
-  Widget _buildSectorTile(
+  List<Widget> _calculateTreemapPositions(
     BuildContext context,
-    Sector sector,
-    double weightage,
-    double performance,
+    List<SectorTileData> sectorData,
+    double width,
+    double height,
   ) {
-    final performanceColor = _getPerformanceColor(performance);
-    final size = _getSectorSize(weightage);
+    List<Widget> widgets = [];
+    double currentX = 0;
+    double currentY = 0;
+    double rowHeight = 0;
+
+    // Sort by weightage descending for better layout
+    sectorData.sort((a, b) => b.weightage.compareTo(a.weightage));
+
+    for (int i = 0; i < sectorData.length; i++) {
+      final data = sectorData[i];
+
+      // Calculate tile dimensions based on weightage
+      double tileWidth = _calculateTileWidth(data.weightage, width);
+      double tileHeight = _calculateTileHeight(data.weightage, height);
+
+      // Check if we need to move to next row
+      if (currentX + tileWidth > width && currentX > 0) {
+        currentX = 0;
+        currentY += rowHeight;
+        rowHeight = 0;
+      }
+
+      // Ensure we don't exceed bounds
+      if (currentY + tileHeight > height) {
+        tileHeight = height - currentY;
+      }
+      if (currentX + tileWidth > width) {
+        tileWidth = width - currentX;
+      }
+
+      rowHeight = math.max(rowHeight, tileHeight);
+
+      widgets.add(
+        Positioned(
+          left: currentX,
+          top: currentY,
+          width: tileWidth,
+          height: tileHeight,
+          child: _buildTreemapTile(context, data, tileWidth, tileHeight),
+        ),
+      );
+
+      currentX += tileWidth;
+    }
+
+    return widgets;
+  }
+
+  double _calculateTileWidth(double weightage, double containerWidth) {
+    // Base width calculation - larger sectors get more width
+    double baseWidth = (weightage / 100) * containerWidth;
+
+    // Ensure minimum and maximum widths
+    return baseWidth.clamp(containerWidth * 0.15, containerWidth * 0.45);
+  }
+
+  double _calculateTileHeight(double weightage, double containerHeight) {
+    // Base height calculation
+    double baseHeight = (weightage / 100) * containerHeight;
+
+    // Ensure minimum and maximum heights
+    return baseHeight.clamp(containerHeight * 0.15, containerHeight * 0.4);
+  }
+
+  Widget _buildTreemapTile(
+    BuildContext context,
+    SectorTileData data,
+    double width,
+    double height,
+  ) {
+    final performanceColor = _getPerformanceColor(data.performance);
     final textColor = _getTextColor(performanceColor);
 
     return Container(
-      width: size.width,
-      height: size.height,
+      margin: const EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: performanceColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-          width: 1,
+          width: 0.5,
         ),
       ),
       child: Padding(
@@ -249,35 +353,39 @@ class SectorOverviewCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
-              child: Text(
-                _getSectorDisplayName(sector.sectorName),
-                style: TextStyle(
-                  fontSize: size.width > 120 ? 12 : 10,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+            if (height > 40)
+              Flexible(
+                child: Text(
+                  _getSectorDisplayName(data.sector.sectorName),
+                  style: TextStyle(
+                    fontSize: width > 80 ? 10 : 8,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: height > 60 ? 2 : 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${weightage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: size.width > 120 ? 14 : 12,
-                fontWeight: FontWeight.w600,
-                color: textColor,
+            if (height > 25)
+              Padding(
+                padding: EdgeInsets.only(top: height > 40 ? 2 : 0),
+                child: Text(
+                  '${data.weightage.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    fontSize: width > 80 ? 12 : 10,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
               ),
-            ),
-            if (size.height > 65)
+            if (height > 50)
               Padding(
                 padding: const EdgeInsets.only(top: 1),
                 child: Text(
-                  '${performance >= 0 ? '+' : ''}${performance.toStringAsFixed(2)}%',
+                  '${data.performance >= 0 ? '+' : ''}${data.performance.toStringAsFixed(2)}%',
                   style: TextStyle(
-                    fontSize: size.width > 120 ? 10 : 8,
+                    fontSize: width > 80 ? 8 : 7,
                     fontWeight: FontWeight.w500,
                     color: textColor.withOpacity(0.9),
                   ),
@@ -313,15 +421,6 @@ class SectorOverviewCard extends StatelessWidget {
     } else {
       return Colors.grey.shade300;
     }
-  }
-
-  Size _getSectorSize(double weightage) {
-    // Size rectangles based on sector weightage
-    if (weightage > 20) return const Size(140, 100);
-    if (weightage > 15) return const Size(120, 90);
-    if (weightage > 10) return const Size(100, 80);
-    if (weightage > 5) return const Size(90, 70);
-    return const Size(80, 65);
   }
 
   String _getSectorDisplayName(String sectorName) {
