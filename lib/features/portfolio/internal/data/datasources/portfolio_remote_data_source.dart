@@ -213,7 +213,17 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
             );
           }
 
-          return PortfolioAnalyticsMapper.responseFromJson(rawData);
+          try {
+                return PortfolioAnalyticsMapper.responseFromJson(rawData);
+              } catch (e) {
+                AppLogger.error(
+                  '🔍 PortfolioAnalyticsMapper.responseFromJson failed - Raw data: ${rawData.toString()}',
+                  tag: 'PortfolioRemoteDataSource',
+                  error: e,
+                  stackTrace: StackTrace.current,
+                );
+                rethrow;
+              }
         },
       );
 

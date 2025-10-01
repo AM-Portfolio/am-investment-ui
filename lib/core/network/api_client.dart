@@ -37,20 +37,41 @@ class ApiClient {
     String finalEndpoint = endpoint;
     String finalBaseUrl = baseUrl;
     
+    AppLogger.debug(
+      '🌐 URI Building - Original endpoint: $endpoint, baseUrl: $baseUrl',
+      tag: 'ApiClient',
+    );
+    
     // Replace localhost with 10.0.2.2 for Android platform (mobile/emulator)
     if (!kIsWeb && Platform.isAndroid) {
       finalEndpoint = _replaceLocalhostForAndroid(finalEndpoint);
       finalBaseUrl = _replaceLocalhostForAndroid(finalBaseUrl);
+      AppLogger.debug(
+        '🌐 Android detected - Transformed endpoint: $finalEndpoint, baseUrl: $finalBaseUrl',
+        tag: 'ApiClient',
+      );
     }
     
+    Uri finalUri;
     // Check if endpoint is already a complete URL (contains protocol)
     if (finalEndpoint.startsWith('http://') || finalEndpoint.startsWith('https://')) {
-      return Uri.parse(finalEndpoint).replace(queryParameters: queryParams);
+      finalUri = Uri.parse(finalEndpoint).replace(queryParameters: queryParams);
+      AppLogger.debug(
+        '🌐 Complete URL detected - Final URI: $finalUri',
+        tag: 'ApiClient',
+      );
+    } else {
+      // For relative endpoints, combine with base URL
+      final cleanEndpoint = finalEndpoint.startsWith('/') ? finalEndpoint.substring(1) : finalEndpoint;
+      final combinedUrl = '$finalBaseUrl/$cleanEndpoint';
+      finalUri = Uri.parse(combinedUrl).replace(queryParameters: queryParams);
+      AppLogger.debug(
+        '🌐 Relative endpoint - Combined URL: $combinedUrl, Final URI: $finalUri',
+        tag: 'ApiClient',
+      );
     }
     
-    // For relative endpoints, combine with base URL
-    final cleanEndpoint = finalEndpoint.startsWith('/') ? finalEndpoint.substring(1) : finalEndpoint;
-    return Uri.parse('$finalBaseUrl/$cleanEndpoint').replace(queryParameters: queryParams);
+    return finalUri;
   }
   
   /// Replace localhost with 10.0.2.2 for Android emulator compatibility
@@ -76,9 +97,27 @@ class ApiClient {
     http.Response response,
     T Function(dynamic data) parser,
   ) {
+    AppLogger.debug(
+      '📥 Response received - Status: ${response.statusCode}, Body length: ${response.body.length}',
+      tag: 'ApiClient',
+    );
+    
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic data = jsonDecode(response.body);
-      return parser(data);
+      try {
+        final dynamic data = jsonDecode(response.body);
+        AppLogger.debug(
+          '✅ Response parsed successfully - Data type: ${data.runtimeType}',
+          tag: 'ApiClient',
+        );
+        return parser(data);
+      } catch (e) {
+        AppLogger.error(
+          '❌ JSON parsing failed - Response body: ${response.body}',
+          tag: 'ApiClient',
+          error: e,
+        );
+        rethrow;
+      }
     } else {
       try {
         final errorData = jsonDecode(response.body);
@@ -102,12 +141,14 @@ class ApiClient {
     Map<String, dynamic>? queryParams,
     required T Function(dynamic data) parser,
   }) async {
+    late Uri uri; // Declare uri outside try block for catch block access
     final stopwatch = Stopwatch()..start();
     try {
-      final uri = _buildUri(endpoint, queryParams: queryParams);
+      uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
       
+      AppLogger.info('🚀 GET Request - Full endpoint: ${uri.toString()}', tag: 'ApiClient');
       AppLogger.apiRequest('GET', uri.toString(), tag: 'ApiClient', headers: requestHeaders);
 
       final response = await _client.get(uri, headers: requestHeaders);
@@ -119,7 +160,7 @@ class ApiClient {
       return _handleResponse(response, parser);
     } catch (e) {
       stopwatch.stop();
-      AppLogger.error('GET request failed: $endpoint', 
+      AppLogger.error('GET request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}', 
           tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
       
       if (e is ApiException) {
@@ -138,11 +179,13 @@ class ApiClient {
     required T Function(dynamic data) parser,
   }) async {
     final stopwatch = Stopwatch()..start();
+    late Uri uri; // Declare uri outside try block for catch block access
     try {
-      final uri = _buildUri(endpoint, queryParams: queryParams);
+      uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
       
+      AppLogger.info('🚀 POST Request - Full endpoint: ${uri.toString()}', tag: 'ApiClient');
       AppLogger.apiRequest('POST', uri.toString(), tag: 'ApiClient', 
           headers: requestHeaders, body: body);
 
@@ -159,7 +202,7 @@ class ApiClient {
       return _handleResponse(response, parser);
     } catch (e) {
       stopwatch.stop();
-      AppLogger.error('POST request failed: $endpoint', 
+      AppLogger.error('POST request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}', 
           tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
       
       if (e is ApiException) {

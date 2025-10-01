@@ -75,9 +75,9 @@ class PortfolioAnalyticsMapper {
   /// Convert analytics response DTO to entity
   static PortfolioAnalytics responseFromDto(PortfolioAnalyticsResponseDto dto) {
     return PortfolioAnalytics(
-      portfolioId: dto.portfolioId,
-      timestamp: DateTime.parse(dto.timestamp),
-      analytics: _analyticsFromDto(dto.analytics),
+      portfolioId: dto.portfolioId ?? 'Unknown Portfolio',
+      timestamp: dto.timestamp != null ? DateTime.parse(dto.timestamp!) : DateTime.now(),
+      analytics: dto.analytics != null ? _analyticsFromDto(dto.analytics!) : _createEmptyAnalytics(),
     );
   }
 
@@ -97,75 +97,77 @@ class PortfolioAnalyticsMapper {
 
   /// Convert heatmap DTO to entity
   static Heatmap _heatmapFromDto(HeatmapDto dto) {
-    return Heatmap(sectors: dto.sectors.map(_sectorFromDto).toList());
+    return Heatmap(
+      sectors: dto.sectors?.map(_sectorFromDto).toList() ?? [],
+    );
   }
 
   /// Convert sector DTO to entity
   static Sector _sectorFromDto(SectorDto dto) {
     return Sector(
-      sectorName: dto.sectorName,
-      performanceRank: dto.performanceRank,
-      performance: dto.performance,
-      changePercent: dto.changePercent,
-      weightage: dto.weightage,
-      color: dto.color,
-      stockCount: dto.stockCount,
-      totalValue: dto.totalValue,
-      totalReturnAmount: dto.totalReturnAmount,
-      stocks: dto.stocks.map(_stockFromDto).toList(),
+      sectorName: dto.sectorName ?? 'Unknown Sector',
+      performanceRank: dto.performanceRank ?? 0,
+      performance: dto.performance ?? 0.0,
+      changePercent: dto.changePercent ?? 0.0,
+      weightage: dto.weightage ?? 0.0,
+      color: dto.color ?? '#CCCCCC',
+      stockCount: dto.stockCount ?? 0,
+      totalValue: dto.totalValue ?? 0.0,
+      totalReturnAmount: dto.totalReturnAmount ?? 0.0,
+      stocks: dto.stocks?.map(_stockFromDto).toList() ?? [],
     );
   }
 
   /// Convert stock DTO to entity
   static Stock _stockFromDto(StockDto dto) {
     return Stock(
-      symbol: dto.symbol,
-      companyName: dto.companyName,
-      lastPrice: dto.lastPrice,
-      changeAmount: dto.changeAmount,
-      changePercent: dto.changePercent,
-      sector: dto.sector,
-      quantity: dto.quantity,
-      avgPrice: dto.avgPrice,
-      marketValue: dto.marketValue,
-      totalReturn: dto.totalReturn,
+      symbol: dto.symbol ?? 'UNKNOWN',
+      companyName: dto.companyName ?? 'Unknown Company',
+      lastPrice: dto.lastPrice ?? 0.0,
+      changeAmount: dto.changeAmount ?? 0.0,
+      changePercent: dto.changePercent ?? 0.0,
+      sector: dto.sector ?? 'Unknown',
+      quantity: dto.quantity ?? 0.0,
+      avgPrice: dto.avgPrice ?? 0.0,
+      marketValue: dto.marketValue ?? 0.0,
+      totalReturn: dto.totalReturn ?? 0.0,
     );
   }
 
   /// Convert movers DTO to entity
   static Movers _moversFromDto(MoversDto dto) {
     return Movers(
-      topGainers: dto.topGainers.map(_stockFromDto).toList(),
-      topLosers: dto.topLosers.map(_stockFromDto).toList(),
+      topGainers: dto.topGainers?.map(_stockFromDto).toList() ?? [],
+      topLosers: dto.topLosers?.map(_stockFromDto).toList() ?? [],
     );
   }
 
   /// Convert sector allocation DTO to entity
   static SectorAllocation _sectorAllocationFromDto(SectorAllocationDto dto) {
     return SectorAllocation(
-      sectorWeights: dto.sectorWeights.map(_sectorWeightFromDto).toList(),
-      industryWeights: dto.industryWeights.map(_industryWeightFromDto).toList(),
+      sectorWeights: dto.sectorWeights?.map(_sectorWeightFromDto).toList() ?? [],
+      industryWeights: dto.industryWeights?.map(_industryWeightFromDto).toList() ?? [],
     );
   }
 
   /// Convert sector weight DTO to entity
   static SectorWeight _sectorWeightFromDto(SectorWeightDto dto) {
     return SectorWeight(
-      sectorName: dto.sectorName,
-      weightPercentage: dto.weightPercentage,
-      marketCap: dto.marketCap,
-      topStocks: dto.topStocks,
+      sectorName: dto.sectorName ?? 'Unknown Sector',
+      weightPercentage: dto.weightPercentage ?? 0.0,
+      marketCap: dto.marketCap ?? 0.0,
+      topStocks: dto.topStocks ?? [],
     );
   }
 
   /// Convert industry weight DTO to entity
   static IndustryWeight _industryWeightFromDto(IndustryWeightDto dto) {
     return IndustryWeight(
-      industryName: dto.industryName,
-      parentSector: dto.parentSector,
-      weightPercentage: dto.weightPercentage,
-      marketCap: dto.marketCap,
-      topStocks: dto.topStocks,
+      industryName: dto.industryName ?? 'Unknown Industry',
+      parentSector: dto.parentSector ?? 'Unknown Sector',
+      weightPercentage: dto.weightPercentage ?? 0.0,
+      marketCap: dto.marketCap ?? 0.0,
+      topStocks: dto.topStocks ?? [],
     );
   }
 
@@ -174,18 +176,18 @@ class PortfolioAnalyticsMapper {
     MarketCapAllocationDto dto,
   ) {
     return MarketCapAllocation(
-      segments: dto.segments.map(_marketCapSegmentFromDto).toList(),
+      segments: dto.segments?.map(_marketCapSegmentFromDto).toList() ?? [],
     );
   }
 
   /// Convert market cap segment DTO to entity
   static MarketCapSegment _marketCapSegmentFromDto(MarketCapSegmentDto dto) {
     return MarketCapSegment(
-      segmentName: dto.segmentName,
-      weightPercentage: dto.weightPercentage,
-      segmentValue: dto.segmentValue,
-      numberOfStocks: dto.numberOfStocks,
-      topStocks: dto.topStocks,
+      segmentName: dto.segmentName ?? 'Unknown Segment',
+      weightPercentage: dto.weightPercentage ?? 0.0,
+      segmentValue: dto.segmentValue ?? 0.0,
+      numberOfStocks: dto.numberOfStocks ?? 0,
+      topStocks: dto.topStocks ?? [],
     );
   }
 
@@ -209,6 +211,16 @@ class PortfolioAnalyticsMapper {
         sortDirection: 'DESC',
         returnAllData: false,
       ),
+    );
+  }
+
+  /// Create empty analytics when DTO analytics is null
+  static Analytics _createEmptyAnalytics() {
+    return const Analytics(
+      heatmap: null,
+      movers: null,
+      sectorAllocation: null,
+      marketCapAllocation: null,
     );
   }
 }
