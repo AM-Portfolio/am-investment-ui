@@ -1,0 +1,1470 @@
+{
+    "portfolioId": "163d0143-4fcb-480c-ac20-622f14e0e293",
+    "timestamp": "2025-10-01T12:03:58.562884380Z",
+    "analytics": {
+        "heatmap": {
+            "sectors": [
+                {
+                    "sectorName": "Industrials",
+                    "performanceRank": 1,
+                    "performance": 1.71,
+                    "changePercent": 1.89,
+                    "weightage": 10.15,
+                    "color": "#32CD32",
+                    "stockCount": 10,
+                    "totalValue": 43581.990,
+                    "totalReturnAmount": 725.320,
+                    "stocks": [
+                        {
+                            "symbol": "NBCC",
+                            "name": "NBCC",
+                            "price": 109.25,
+                            "change": 2.17,
+                            "changePercent": 2.03,
+                            "quantity": 80.0,
+                            "value": 8740.000,
+                            "weight": 20.05,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "ARE&M",
+                            "name": "ARE&M",
+                            "price": 1859.9,
+                            "change": 70.3,
+                            "changePercent": 3.93,
+                            "quantity": 4.0,
+                            "value": 7439.60,
+                            "weight": 17.07,
+                            "color": "#006400"
+                        },
+                        {
+                            "symbol": "HINDUNILVR",
+                            "name": "HINDUNILVR",
+                            "price": 3513.9,
+                            "change": 67.3,
+                            "changePercent": 1.95,
+                            "quantity": 2.0,
+                            "value": 7027.80,
+                            "weight": 16.13,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "PFIZER",
+                            "name": "PFIZER",
+                            "price": 4789.9,
+                            "change": 43.4,
+                            "changePercent": 0.91,
+                            "quantity": 1.0,
+                            "value": 4789.90,
+                            "weight": 10.99,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "IRFC",
+                            "name": "IRFC",
+                            "price": 406.3,
+                            "change": 2.35,
+                            "changePercent": 0.58,
+                            "quantity": 10.0,
+                            "value": 4063.00,
+                            "weight": 9.32,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "IRCON",
+                            "name": "IRCON",
+                            "price": 172.4,
+                            "change": 1.42,
+                            "changePercent": 0.83,
+                            "quantity": 20.0,
+                            "value": 3448.00,
+                            "weight": 7.91,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "HINDUNILVR",
+                            "name": "HINDUNILVR",
+                            "price": 1516.5,
+                            "change": 23.3,
+                            "changePercent": 1.56,
+                            "quantity": 2.0,
+                            "value": 3033.00,
+                            "weight": 6.96,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "IRB",
+                            "name": "IRB",
+                            "price": 41.21,
+                            "change": 0.02,
+                            "changePercent": 0.05,
+                            "quantity": 50.0,
+                            "value": 2060.500,
+                            "weight": 4.73,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 341.65,
+                            "change": 2.20,
+                            "changePercent": 0.65,
+                            "quantity": 5.0,
+                            "value": 1708.250,
+                            "weight": 3.92,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "PARACABLES",
+                            "name": "PARACABLES",
+                            "price": 43.86,
+                            "change": -0.62,
+                            "changePercent": -1.39,
+                            "quantity": 29.0,
+                            "value": 1271.940,
+                            "weight": 2.92,
+                            "color": "#FF4500"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Healthcare",
+                    "performanceRank": 2,
+                    "performance": 1.32,
+                    "changePercent": 0.78,
+                    "weightage": 9.91,
+                    "color": "#32CD32",
+                    "stockCount": 4,
+                    "totalValue": 42528.900,
+                    "totalReturnAmount": 548.200,
+                    "stocks": [
+                        {
+                            "symbol": "VIPIND",
+                            "name": "VIPIND",
+                            "price": 1506.2,
+                            "change": 2.9,
+                            "changePercent": 0.19,
+                            "quantity": 11.0,
+                            "value": 16568.20,
+                            "weight": 38.96,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "LAURUSLABS",
+                            "name": "LAURUSLABS",
+                            "price": 864.55,
+                            "change": 22.75,
+                            "changePercent": 2.7,
+                            "quantity": 18.0,
+                            "value": 15561.900,
+                            "weight": 36.59,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "ARE&M",
+                            "name": "ARE&M",
+                            "price": 1308.7,
+                            "change": -5.3,
+                            "changePercent": -0.4,
+                            "quantity": 4.0,
+                            "value": 5234.80,
+                            "weight": 12.31,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "PFIZER",
+                            "name": "PFIZER",
+                            "price": 5164.0,
+                            "change": 128.0,
+                            "changePercent": 2.54,
+                            "quantity": 1.0,
+                            "value": 5164.00,
+                            "weight": 12.14,
+                            "color": "#32CD32"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Financial Services",
+                    "performanceRank": 3,
+                    "performance": 0.56,
+                    "changePercent": 0.59,
+                    "weightage": 23.93,
+                    "color": "#90EE90",
+                    "stockCount": 13,
+                    "totalValue": 102745.260,
+                    "totalReturnAmount": 555.520,
+                    "stocks": [
+                        {
+                            "symbol": "KOTAKBANK",
+                            "name": "KOTAKBANK",
+                            "price": 2043.1,
+                            "change": 50.4,
+                            "changePercent": 2.53,
+                            "quantity": 13.0,
+                            "value": 26560.30,
+                            "weight": 25.85,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "PNB",
+                            "name": "PNB",
+                            "price": 112.09,
+                            "change": -0.74,
+                            "changePercent": -0.66,
+                            "quantity": 191.0,
+                            "value": 21409.190,
+                            "weight": 20.84,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "SBIN",
+                            "name": "SBIN",
+                            "price": 2145.1,
+                            "change": 12.6,
+                            "changePercent": 0.59,
+                            "quantity": 6.0,
+                            "value": 12870.60,
+                            "weight": 12.53,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "SBICARD",
+                            "name": "SBICARD",
+                            "price": 857.5,
+                            "change": -19.45,
+                            "changePercent": -2.22,
+                            "quantity": 8.0,
+                            "value": 6860.00,
+                            "weight": 6.68,
+                            "color": "#FF4500"
+                        },
+                        {
+                            "symbol": "SBIN",
+                            "name": "SBIN",
+                            "price": 960.85,
+                            "change": 9.85,
+                            "changePercent": 1.04,
+                            "quantity": 6.0,
+                            "value": 5765.100,
+                            "weight": 5.61,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "IRFC",
+                            "name": "IRFC",
+                            "price": 569.05,
+                            "change": 4.05,
+                            "changePercent": 0.72,
+                            "quantity": 10.0,
+                            "value": 5690.500,
+                            "weight": 5.54,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "SBIN",
+                            "name": "SBIN",
+                            "price": 865.25,
+                            "change": -7.20,
+                            "changePercent": -0.83,
+                            "quantity": 6.0,
+                            "value": 5191.500,
+                            "weight": 5.05,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "PSUBNKBEES",
+                            "name": "PSUBNKBEES",
+                            "price": 83.38,
+                            "change": -0.56,
+                            "changePercent": -0.67,
+                            "quantity": 60.0,
+                            "value": 5002.800,
+                            "weight": 4.87,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 899.3,
+                            "change": -1.05,
+                            "changePercent": -0.12,
+                            "quantity": 5.0,
+                            "value": 4496.50,
+                            "weight": 4.38,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "DELTACORP",
+                            "name": "DELTACORP",
+                            "price": 568.8,
+                            "change": 5.41,
+                            "changePercent": 0.96,
+                            "quantity": 7.0,
+                            "value": 3981.60,
+                            "weight": 3.88,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "NIFTYBEES",
+                            "name": "NIFTYBEES",
+                            "price": 279.13,
+                            "change": 1.61,
+                            "changePercent": 0.58,
+                            "quantity": 9.0,
+                            "value": 2512.170,
+                            "weight": 2.45,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "IRFC",
+                            "name": "IRFC",
+                            "price": 124.77,
+                            "change": 1.26,
+                            "changePercent": 1.02,
+                            "quantity": 10.0,
+                            "value": 1247.700,
+                            "weight": 1.21,
+                            "color": "#32CD32"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 231.46,
+                            "change": 7.83,
+                            "changePercent": 3.5,
+                            "quantity": 5.0,
+                            "value": 1157.300,
+                            "weight": 1.13,
+                            "color": "#006400"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Utilities",
+                    "performanceRank": 4,
+                    "performance": 0.31,
+                    "changePercent": 0.32,
+                    "weightage": 7.23,
+                    "color": "#90EE90",
+                    "stockCount": 2,
+                    "totalValue": 31040.480,
+                    "totalReturnAmount": 96.420,
+                    "stocks": [
+                        {
+                            "symbol": "NHPC",
+                            "name": "NHPC",
+                            "price": 86.56,
+                            "change": 0.24,
+                            "changePercent": 0.28,
+                            "quantity": 308.0,
+                            "value": 26660.480,
+                            "weight": 85.89,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "JPPOWER",
+                            "name": "JPPOWER",
+                            "price": 17.52,
+                            "change": 0.09,
+                            "changePercent": 0.52,
+                            "quantity": 250.0,
+                            "value": 4380.000,
+                            "weight": 14.11,
+                            "color": "#90EE90"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Consumer Discretionary",
+                    "performanceRank": 5,
+                    "performance": 0.19,
+                    "changePercent": 0.16,
+                    "weightage": 30.68,
+                    "color": "#90EE90",
+                    "stockCount": 12,
+                    "totalValue": 131743.580,
+                    "totalReturnAmount": 235.800,
+                    "stocks": [
+                        {
+                            "symbol": "IRFC",
+                            "name": "IRFC",
+                            "price": 3380.9,
+                            "change": 13.9,
+                            "changePercent": 0.41,
+                            "quantity": 10.0,
+                            "value": 33809.00,
+                            "weight": 25.66,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "SBIN",
+                            "name": "SBIN",
+                            "price": 4430.8,
+                            "change": -44.6,
+                            "changePercent": -1.0,
+                            "quantity": 6.0,
+                            "value": 26584.80,
+                            "weight": 20.18,
+                            "color": "#FF4500"
+                        },
+                        {
+                            "symbol": "EICHERMOT",
+                            "name": "EICHERMOT",
+                            "price": 7029.5,
+                            "change": 24.0,
+                            "changePercent": 0.34,
+                            "quantity": 3.0,
+                            "value": 21088.50,
+                            "weight": 16.01,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 2330.6,
+                            "change": -19.4,
+                            "changePercent": -0.83,
+                            "quantity": 5.0,
+                            "value": 11653.00,
+                            "weight": 8.85,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "TATAMOTORS",
+                            "name": "TATAMOTORS",
+                            "price": 701.1,
+                            "change": 20.9,
+                            "changePercent": 3.07,
+                            "quantity": 16.0,
+                            "value": 11217.60,
+                            "weight": 8.51,
+                            "color": "#006400"
+                        },
+                        {
+                            "symbol": "DELTACORP",
+                            "name": "DELTACORP",
+                            "price": 1085.0,
+                            "change": 10.0,
+                            "changePercent": 0.93,
+                            "quantity": 7.0,
+                            "value": 7595.00,
+                            "weight": 5.76,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "DELTACORP",
+                            "name": "DELTACORP",
+                            "price": 699.75,
+                            "change": -0.65,
+                            "changePercent": -0.09,
+                            "quantity": 7.0,
+                            "value": 4898.250,
+                            "weight": 3.72,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "VIPIND",
+                            "name": "VIPIND",
+                            "price": 415.25,
+                            "change": -0.70,
+                            "changePercent": -0.17,
+                            "quantity": 11.0,
+                            "value": 4567.750,
+                            "weight": 3.47,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "ARE&M",
+                            "name": "ARE&M",
+                            "price": 986.7,
+                            "change": -2.65,
+                            "changePercent": -0.27,
+                            "quantity": 4.0,
+                            "value": 3946.80,
+                            "weight": 3.0,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "IRFC",
+                            "name": "IRFC",
+                            "price": 362.9,
+                            "change": 3.0,
+                            "changePercent": 0.83,
+                            "quantity": 10.0,
+                            "value": 3629.00,
+                            "weight": 2.75,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 440.4,
+                            "change": -5.55,
+                            "changePercent": -1.24,
+                            "quantity": 5.0,
+                            "value": 2202.00,
+                            "weight": 1.67,
+                            "color": "#FF4500"
+                        },
+                        {
+                            "symbol": "DELTACORP",
+                            "name": "DELTACORP",
+                            "price": 78.84,
+                            "change": 0.80,
+                            "changePercent": 1.03,
+                            "quantity": 7.0,
+                            "value": 551.880,
+                            "weight": 0.42,
+                            "color": "#32CD32"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "-",
+                    "performanceRank": 6,
+                    "performance": 0.03,
+                    "changePercent": 0.49,
+                    "weightage": 8.15,
+                    "color": "#90EE90",
+                    "stockCount": 6,
+                    "totalValue": 35011.620,
+                    "totalReturnAmount": 9.390,
+                    "stocks": [
+                        {
+                            "symbol": "MAFANG",
+                            "name": "MAFANG",
+                            "price": 169.52,
+                            "change": 0.41,
+                            "changePercent": 0.24,
+                            "quantity": 51.0,
+                            "value": 8645.520,
+                            "weight": 24.69,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "METALIETF",
+                            "name": "METALIETF",
+                            "price": 10.04,
+                            "change": -0.07,
+                            "changePercent": -0.69,
+                            "quantity": 750.0,
+                            "value": 7530.000,
+                            "weight": 21.51,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "FINIETF",
+                            "name": "FINIETF",
+                            "price": 29.9,
+                            "change": 0.0,
+                            "changePercent": 0.0,
+                            "quantity": 201.0,
+                            "value": 6009.90,
+                            "weight": 17.17,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "SMALLCAP",
+                            "name": "SMALLCAP",
+                            "price": 44.68,
+                            "change": 0.10,
+                            "changePercent": 0.22,
+                            "quantity": 125.0,
+                            "value": 5585.000,
+                            "weight": 15.95,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "OILIETF",
+                            "name": "OILIETF",
+                            "price": 11.5,
+                            "change": 0.08,
+                            "changePercent": 0.7,
+                            "quantity": 372.0,
+                            "value": 4278.00,
+                            "weight": 12.22,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "INFRAIETF",
+                            "name": "INFRAIETF",
+                            "price": 92.6,
+                            "change": -0.04,
+                            "changePercent": -0.04,
+                            "quantity": 32.0,
+                            "value": 2963.20,
+                            "weight": 8.46,
+                            "color": "#FFA07A"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Information Technology",
+                    "performanceRank": 7,
+                    "performance": -0.09,
+                    "changePercent": -0.3,
+                    "weightage": 1.99,
+                    "color": "#FFA07A",
+                    "stockCount": 2,
+                    "totalValue": 8524.000,
+                    "totalReturnAmount": -8.550,
+                    "stocks": [
+                        {
+                            "symbol": "SBICARD",
+                            "name": "SBICARD",
+                            "price": 674.45,
+                            "change": 4.95,
+                            "changePercent": 0.74,
+                            "quantity": 8.0,
+                            "value": 5395.600,
+                            "weight": 63.3,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "NIFTYBEES",
+                            "name": "NIFTYBEES",
+                            "price": 347.6,
+                            "change": -5.35,
+                            "changePercent": -1.52,
+                            "quantity": 9.0,
+                            "value": 3128.40,
+                            "weight": 36.7,
+                            "color": "#FF4500"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Commodities",
+                    "performanceRank": 8,
+                    "performance": -0.29,
+                    "changePercent": -0.61,
+                    "weightage": 5.2,
+                    "color": "#FFA07A",
+                    "stockCount": 6,
+                    "totalValue": 22315.200,
+                    "totalReturnAmount": -66.010,
+                    "stocks": [
+                        {
+                            "symbol": "HINDCOPPER",
+                            "name": "HINDCOPPER",
+                            "price": 325.5,
+                            "change": -3.94,
+                            "changePercent": -1.2,
+                            "quantity": 19.0,
+                            "value": 6184.50,
+                            "weight": 27.71,
+                            "color": "#FF4500"
+                        },
+                        {
+                            "symbol": "HINDUNILVR",
+                            "name": "HINDUNILVR",
+                            "price": 2838.5,
+                            "change": 14.9,
+                            "changePercent": 0.53,
+                            "quantity": 2.0,
+                            "value": 5677.00,
+                            "weight": 25.44,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "EICHERMOT",
+                            "name": "EICHERMOT",
+                            "price": 1390.9,
+                            "change": 1.7,
+                            "changePercent": 0.12,
+                            "quantity": 3.0,
+                            "value": 4172.70,
+                            "weight": 18.7,
+                            "color": "#90EE90"
+                        },
+                        {
+                            "symbol": "SBICARD",
+                            "name": "SBICARD",
+                            "price": 374.15,
+                            "change": -0.75,
+                            "changePercent": -0.2,
+                            "quantity": 8.0,
+                            "value": 2993.200,
+                            "weight": 13.41,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 566.6,
+                            "change": -3.35,
+                            "changePercent": -0.59,
+                            "quantity": 5.0,
+                            "value": 2833.00,
+                            "weight": 12.7,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "SBIN",
+                            "name": "SBIN",
+                            "price": 75.8,
+                            "change": -0.55,
+                            "changePercent": -0.72,
+                            "quantity": 6.0,
+                            "value": 454.80,
+                            "weight": 2.04,
+                            "color": "#FFA07A"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Fast Moving Consumer Goods",
+                    "performanceRank": 9,
+                    "performance": -0.43,
+                    "changePercent": -0.46,
+                    "weightage": 1.47,
+                    "color": "#FFA07A",
+                    "stockCount": 2,
+                    "totalValue": 6309.450,
+                    "totalReturnAmount": -27.100,
+                    "stocks": [
+                        {
+                            "symbol": "HINDUNILVR",
+                            "name": "HINDUNILVR",
+                            "price": 2502.6,
+                            "change": -11.8,
+                            "changePercent": -0.47,
+                            "quantity": 2.0,
+                            "value": 5005.20,
+                            "weight": 79.33,
+                            "color": "#FFA07A"
+                        },
+                        {
+                            "symbol": "LICI",
+                            "name": "LICI",
+                            "price": 260.85,
+                            "change": -0.70,
+                            "changePercent": -0.27,
+                            "quantity": 5.0,
+                            "value": 1304.250,
+                            "weight": 20.67,
+                            "color": "#FFA07A"
+                        }
+                    ]
+                },
+                {
+                    "sectorName": "Services",
+                    "performanceRank": 10,
+                    "performance": -0.58,
+                    "changePercent": -0.11,
+                    "weightage": 1.3,
+                    "color": "#FFA07A",
+                    "stockCount": 1,
+                    "totalValue": 5562.00,
+                    "totalReturnAmount": -32.50,
+                    "stocks": [
+                        {
+                            "symbol": "PFIZER",
+                            "name": "PFIZER",
+                            "price": 5562.0,
+                            "change": -32.5,
+                            "changePercent": -0.58,
+                            "quantity": 1.0,
+                            "value": 5562.00,
+                            "weight": 100.0,
+                            "color": "#FFA07A"
+                        }
+                    ]
+                }
+            ]
+        },
+        "movers": {
+            "topGainers": [
+                {
+                    "symbol": "COCHINSHIP",
+                    "companyName": "COCHINSHIP",
+                    "lastPrice": 1859.9,
+                    "changeAmount": 69.9,
+                    "changePercent": 3.91,
+                    "sector": "Industrials"
+                },
+                {
+                    "symbol": "HUDCO",
+                    "companyName": "HUDCO",
+                    "lastPrice": 231.46,
+                    "changeAmount": 6.46,
+                    "changePercent": 2.87,
+                    "sector": "Financial Services"
+                },
+                {
+                    "symbol": "TATAMOTORS",
+                    "companyName": "TATAMOTORS",
+                    "lastPrice": 701.1,
+                    "changeAmount": 20.1,
+                    "changePercent": 2.95,
+                    "sector": "Consumer Discretionary"
+                },
+                {
+                    "symbol": "LAURUSLABS",
+                    "companyName": "LAURUSLABS",
+                    "lastPrice": 864.55,
+                    "changeAmount": 19.55,
+                    "changePercent": 2.31,
+                    "sector": "Healthcare"
+                },
+                {
+                    "symbol": "PFIZER",
+                    "companyName": "PFIZER",
+                    "lastPrice": 5164.0,
+                    "changeAmount": -36.0,
+                    "changePercent": -0.69,
+                    "sector": "Healthcare"
+                },
+                {
+                    "symbol": "KOTAKBANK",
+                    "companyName": "KOTAKBANK",
+                    "lastPrice": 2043.1,
+                    "changeAmount": 57.1,
+                    "changePercent": 2.88,
+                    "sector": "Financial Services"
+                },
+                {
+                    "symbol": "NBCC",
+                    "companyName": "NBCC",
+                    "lastPrice": 109.25,
+                    "changeAmount": 2.85,
+                    "changePercent": 2.68,
+                    "sector": "Industrials"
+                },
+                {
+                    "symbol": "ESCORTS",
+                    "companyName": "ESCORTS",
+                    "lastPrice": 3513.9,
+                    "changeAmount": 67.3,
+                    "changePercent": 1.95,
+                    "sector": "Industrials"
+                },
+                {
+                    "symbol": "BDL",
+                    "companyName": "BDL",
+                    "lastPrice": 1516.5,
+                    "changeAmount": 23.3,
+                    "changePercent": 1.56,
+                    "sector": "Industrials"
+                },
+                {
+                    "symbol": "HDFCBANK",
+                    "companyName": "HDFCBANK",
+                    "lastPrice": 960.85,
+                    "changeAmount": 8.15,
+                    "changePercent": 0.86,
+                    "sector": "Financial Services"
+                }
+            ],
+            "topLosers": [
+                {
+                    "symbol": "SBICARD",
+                    "companyName": "SBICARD",
+                    "lastPrice": 857.5,
+                    "changeAmount": -15.6,
+                    "changePercent": -1.79,
+                    "sector": "Financial Services"
+                },
+                {
+                    "symbol": "BSOFT",
+                    "companyName": "BSOFT",
+                    "lastPrice": 347.6,
+                    "changeAmount": -7.0,
+                    "changePercent": -1.97,
+                    "sector": "Information Technology"
+                },
+                {
+                    "symbol": "PARACABLES",
+                    "companyName": "PARACABLES",
+                    "lastPrice": 43.86,
+                    "changeAmount": -0.63,
+                    "changePercent": -1.42,
+                    "sector": "Industrials"
+                },
+                {
+                    "symbol": "RELAXO",
+                    "companyName": "RELAXO",
+                    "lastPrice": 440.4,
+                    "changeAmount": -5.3,
+                    "changePercent": -1.19,
+                    "sector": "Consumer Discretionary"
+                },
+                {
+                    "symbol": "HINDCOPPER",
+                    "companyName": "HINDCOPPER",
+                    "lastPrice": 325.5,
+                    "changeAmount": -3.5,
+                    "changePercent": -1.06,
+                    "sector": "Commodities"
+                },
+                {
+                    "symbol": "DMART",
+                    "companyName": "DMART",
+                    "lastPrice": 4430.8,
+                    "changeAmount": -44.6,
+                    "changePercent": -1.0,
+                    "sector": "Consumer Discretionary"
+                },
+                {
+                    "symbol": "ASIANPAINT",
+                    "companyName": "ASIANPAINT",
+                    "lastPrice": 2330.6,
+                    "changeAmount": -22.8,
+                    "changePercent": -0.97,
+                    "sector": "Consumer Discretionary"
+                },
+                {
+                    "symbol": "SBIN",
+                    "companyName": "SBIN",
+                    "lastPrice": 865.25,
+                    "changeAmount": -7.05,
+                    "changePercent": -0.81,
+                    "sector": "Financial Services"
+                },
+                {
+                    "symbol": "NMDC",
+                    "companyName": "NMDC",
+                    "lastPrice": 75.8,
+                    "changeAmount": -0.78,
+                    "changePercent": -1.02,
+                    "sector": "Commodities"
+                },
+                {
+                    "symbol": "METALIETF",
+                    "companyName": "METALIETF",
+                    "lastPrice": 10.04,
+                    "changeAmount": 0.19,
+                    "changePercent": 1.93,
+                    "sector": "-"
+                }
+            ]
+        },
+        "sectorAllocation": {
+            "sectorWeights": [
+                {
+                    "sectorName": "Consumer Discretionary",
+                    "weightPercentage": 30.68,
+                    "marketCap": 131743.58,
+                    "topStocks": [
+                        "TITAN",
+                        "DMART",
+                        "EICHERMOT",
+                        "ASIANPAINT",
+                        "TATAMOTORS"
+                    ]
+                },
+                {
+                    "sectorName": "Financial Services",
+                    "weightPercentage": 23.93,
+                    "marketCap": 102745.26,
+                    "topStocks": [
+                        "KOTAKBANK",
+                        "PNB",
+                        "ANGELONE",
+                        "SBICARD",
+                        "HDFCBANK"
+                    ]
+                },
+                {
+                    "sectorName": "Industrials",
+                    "weightPercentage": 10.15,
+                    "marketCap": 43581.99,
+                    "topStocks": [
+                        "NBCC",
+                        "COCHINSHIP",
+                        "ESCORTS",
+                        "HAL",
+                        "BEL"
+                    ]
+                },
+                {
+                    "sectorName": "Healthcare",
+                    "weightPercentage": 9.91,
+                    "marketCap": 42528.9,
+                    "topStocks": [
+                        "CIPLA",
+                        "LAURUSLABS",
+                        "MEDANTA",
+                        "PFIZER"
+                    ]
+                },
+                {
+                    "sectorName": "-",
+                    "weightPercentage": 8.15,
+                    "marketCap": 35011.62,
+                    "topStocks": [
+                        "MAFANG",
+                        "METALIETF",
+                        "FINIETF",
+                        "SMALLCAP",
+                        "OILIETF"
+                    ]
+                },
+                {
+                    "sectorName": "Utilities",
+                    "weightPercentage": 7.23,
+                    "marketCap": 31040.48,
+                    "topStocks": [
+                        "NHPC",
+                        "JPPOWER"
+                    ]
+                },
+                {
+                    "sectorName": "Commodities",
+                    "weightPercentage": 5.2,
+                    "marketCap": 22315.2,
+                    "topStocks": [
+                        "HINDCOPPER",
+                        "SRF",
+                        "BALAMINES",
+                        "AARTIIND",
+                        "AMBUJACEM"
+                    ]
+                },
+                {
+                    "sectorName": "Information Technology",
+                    "weightPercentage": 1.99,
+                    "marketCap": 8524.0,
+                    "topStocks": [
+                        "TATATECH",
+                        "BSOFT"
+                    ]
+                },
+                {
+                    "sectorName": "Fast Moving Consumer Goods",
+                    "weightPercentage": 1.47,
+                    "marketCap": 6309.45,
+                    "topStocks": [
+                        "HINDUNILVR",
+                        "AWL"
+                    ]
+                },
+                {
+                    "sectorName": "Services",
+                    "weightPercentage": 1.3,
+                    "marketCap": 5562.0,
+                    "topStocks": [
+                        "INDIGO"
+                    ]
+                }
+            ],
+            "industryWeights": [
+                {
+                    "industryName": "Pharmaceuticals",
+                    "parentSector": "Healthcare",
+                    "weightPercentage": 8.69,
+                    "marketCap": 37294.1,
+                    "topStocks": [
+                        "CIPLA",
+                        "LAURUSLABS",
+                        "PFIZER"
+                    ]
+                },
+                {
+                    "industryName": "",
+                    "parentSector": "-",
+                    "weightPercentage": 8.15,
+                    "marketCap": 35011.62,
+                    "topStocks": [
+                        "MAFANG",
+                        "METALIETF",
+                        "FINIETF"
+                    ]
+                },
+                {
+                    "industryName": "Gems- Jewellery And Watches",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 7.87,
+                    "marketCap": 33809.0,
+                    "topStocks": [
+                        "TITAN"
+                    ]
+                },
+                {
+                    "industryName": "Private Sector Bank",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 7.53,
+                    "marketCap": 32325.4,
+                    "topStocks": [
+                        "KOTAKBANK",
+                        "HDFCBANK"
+                    ]
+                },
+                {
+                    "industryName": "Power Generation",
+                    "parentSector": "Utilities",
+                    "weightPercentage": 7.23,
+                    "marketCap": 31040.48,
+                    "topStocks": [
+                        "NHPC",
+                        "JPPOWER"
+                    ]
+                },
+                {
+                    "industryName": "Public Sector Bank",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 6.2,
+                    "marketCap": 26600.69,
+                    "topStocks": [
+                        "PNB",
+                        "SBIN"
+                    ]
+                },
+                {
+                    "industryName": "Diversified Retail",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 6.19,
+                    "marketCap": 26584.8,
+                    "topStocks": [
+                        "DMART"
+                    ]
+                },
+                {
+                    "industryName": "2/3 Wheelers",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 4.91,
+                    "marketCap": 21088.5,
+                    "topStocks": [
+                        "EICHERMOT"
+                    ]
+                },
+                {
+                    "industryName": "Civil Construction",
+                    "parentSector": "Industrials",
+                    "weightPercentage": 3.72,
+                    "marketCap": 15956.75,
+                    "topStocks": [
+                        "NBCC",
+                        "IRCON",
+                        "IRB"
+                    ]
+                },
+                {
+                    "industryName": "Stockbroking & Allied",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 3.0,
+                    "marketCap": 12870.6,
+                    "topStocks": [
+                        "ANGELONE"
+                    ]
+                },
+                {
+                    "industryName": "Specialty Chemicals",
+                    "parentSector": "Commodities",
+                    "weightPercentage": 2.99,
+                    "marketCap": 12842.9,
+                    "topStocks": [
+                        "SRF",
+                        "BALAMINES",
+                        "AARTIIND"
+                    ]
+                },
+                {
+                    "industryName": "Aerospace & Defense",
+                    "parentSector": "Industrials",
+                    "weightPercentage": 2.77,
+                    "marketCap": 11885.9,
+                    "topStocks": [
+                        "HAL",
+                        "BEL",
+                        "BDL"
+                    ]
+                },
+                {
+                    "industryName": "Paints",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 2.71,
+                    "marketCap": 11653.0,
+                    "topStocks": [
+                        "ASIANPAINT"
+                    ]
+                },
+                {
+                    "industryName": "Mutual Fund Scheme - ETF",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 2.68,
+                    "marketCap": 11496.57,
+                    "topStocks": [
+                        "PSUBNKBEES",
+                        "BANKBEES",
+                        "NIFTYBEES"
+                    ]
+                },
+                {
+                    "industryName": "Passenger Cars & Utility Vehicles",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 2.61,
+                    "marketCap": 11217.6,
+                    "topStocks": [
+                        "TATAMOTORS"
+                    ]
+                },
+                {
+                    "industryName": "Film Production- Distribution & Exhibition",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 1.77,
+                    "marketCap": 7595.0,
+                    "topStocks": [
+                        "PVRINOX"
+                    ]
+                },
+                {
+                    "industryName": "Ship Building & Allied Services",
+                    "parentSector": "Industrials",
+                    "weightPercentage": 1.73,
+                    "marketCap": 7439.6,
+                    "topStocks": [
+                        "COCHINSHIP"
+                    ]
+                },
+                {
+                    "industryName": "Tractors",
+                    "parentSector": "Industrials",
+                    "weightPercentage": 1.64,
+                    "marketCap": 7027.8,
+                    "topStocks": [
+                        "ESCORTS"
+                    ]
+                },
+                {
+                    "industryName": "Non Banking Financial Company (NBFC)",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 1.6,
+                    "marketCap": 6860.0,
+                    "topStocks": [
+                        "SBICARD"
+                    ]
+                },
+                {
+                    "industryName": "Copper",
+                    "parentSector": "Commodities",
+                    "weightPercentage": 1.44,
+                    "marketCap": 6184.5,
+                    "topStocks": [
+                        "HINDCOPPER"
+                    ]
+                },
+                {
+                    "industryName": "Housing Finance Company",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 1.33,
+                    "marketCap": 5690.5,
+                    "topStocks": [
+                        "LICHSGFIN"
+                    ]
+                },
+                {
+                    "industryName": "Airline",
+                    "parentSector": "Services",
+                    "weightPercentage": 1.3,
+                    "marketCap": 5562.0,
+                    "topStocks": [
+                        "INDIGO"
+                    ]
+                },
+                {
+                    "industryName": "IT Enabled Services",
+                    "parentSector": "Information Technology",
+                    "weightPercentage": 1.26,
+                    "marketCap": 5395.6,
+                    "topStocks": [
+                        "TATATECH"
+                    ]
+                },
+                {
+                    "industryName": "Hospital",
+                    "parentSector": "Healthcare",
+                    "weightPercentage": 1.22,
+                    "marketCap": 5234.8,
+                    "topStocks": [
+                        "MEDANTA"
+                    ]
+                },
+                {
+                    "industryName": "Diversified FMCG",
+                    "parentSector": "Fast Moving Consumer Goods",
+                    "weightPercentage": 1.17,
+                    "marketCap": 5005.2,
+                    "topStocks": [
+                        "HINDUNILVR"
+                    ]
+                },
+                {
+                    "industryName": "Tour, Travel Related Services",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 1.14,
+                    "marketCap": 4898.25,
+                    "topStocks": [
+                        "IRCTC"
+                    ]
+                },
+                {
+                    "industryName": "Plastic Products - Consumer",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 1.06,
+                    "marketCap": 4567.75,
+                    "topStocks": [
+                        "VIPIND"
+                    ]
+                },
+                {
+                    "industryName": "Life Insurance",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 1.05,
+                    "marketCap": 4496.5,
+                    "topStocks": [
+                        "LICI"
+                    ]
+                },
+                {
+                    "industryName": "Auto Components & Equipments",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 0.92,
+                    "marketCap": 3946.8,
+                    "topStocks": [
+                        "ARE&M"
+                    ]
+                },
+                {
+                    "industryName": "Hotels & Resorts",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 0.85,
+                    "marketCap": 3629.0,
+                    "topStocks": [
+                        "EIHOTEL"
+                    ]
+                },
+                {
+                    "industryName": "Computers - Software & Consulting",
+                    "parentSector": "Information Technology",
+                    "weightPercentage": 0.73,
+                    "marketCap": 3128.4,
+                    "topStocks": [
+                        "BSOFT"
+                    ]
+                },
+                {
+                    "industryName": "Cement & Cement Products",
+                    "parentSector": "Commodities",
+                    "weightPercentage": 0.66,
+                    "marketCap": 2833.0,
+                    "topStocks": [
+                        "AMBUJACEM"
+                    ]
+                },
+                {
+                    "industryName": "Financial Institution",
+                    "parentSector": "Financial Services",
+                    "weightPercentage": 0.56,
+                    "marketCap": 2405.0,
+                    "topStocks": [
+                        "IRFC",
+                        "HUDCO"
+                    ]
+                },
+                {
+                    "industryName": "Footwear",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 0.51,
+                    "marketCap": 2202.0,
+                    "topStocks": [
+                        "RELAXO"
+                    ]
+                },
+                {
+                    "industryName": "Edible Oil",
+                    "parentSector": "Fast Moving Consumer Goods",
+                    "weightPercentage": 0.3,
+                    "marketCap": 1304.25,
+                    "topStocks": [
+                        "AWL"
+                    ]
+                },
+                {
+                    "industryName": "Cables - Electricals",
+                    "parentSector": "Industrials",
+                    "weightPercentage": 0.3,
+                    "marketCap": 1271.94,
+                    "topStocks": [
+                        "PARACABLES"
+                    ]
+                },
+                {
+                    "industryName": "Amusement Parks/ Other Recreation",
+                    "parentSector": "Consumer Discretionary",
+                    "weightPercentage": 0.13,
+                    "marketCap": 551.88,
+                    "topStocks": [
+                        "DELTACORP"
+                    ]
+                },
+                {
+                    "industryName": "Industrial Minerals",
+                    "parentSector": "Commodities",
+                    "weightPercentage": 0.11,
+                    "marketCap": 454.8,
+                    "topStocks": [
+                        "NMDC"
+                    ]
+                }
+            ]
+        },
+        "marketCapAllocation": {
+            "segments": [
+                {
+                    "segmentName": "Large Cap",
+                    "weightPercentage": 45.79507971912219,
+                    "segmentValue": 196626.89,
+                    "numberOfStocks": 16,
+                    "topStocks": [
+                        "TITAN",
+                        "DMART",
+                        "KOTAKBANK",
+                        "PNB",
+                        "EICHERMOT"
+                    ]
+                },
+                {
+                    "segmentName": "Mid Cap",
+                    "weightPercentage": 20.446367367730883,
+                    "segmentValue": 87789.03000000001,
+                    "numberOfStocks": 14,
+                    "topStocks": [
+                        "NHPC",
+                        "ANGELONE",
+                        "ESCORTS",
+                        "SBICARD",
+                        "HINDCOPPER"
+                    ]
+                },
+                {
+                    "segmentName": "Small Cap",
+                    "weightPercentage": 17.92619373728232,
+                    "segmentValue": 76968.35000000002,
+                    "numberOfStocks": 14,
+                    "topStocks": [
+                        "LAURUSLABS",
+                        "NBCC",
+                        "PVRINOX",
+                        "COCHINSHIP",
+                        "PFIZER"
+                    ]
+                },
+                {
+                    "segmentName": "Micro Cap",
+                    "weightPercentage": 15.832359175864646,
+                    "segmentValue": 67978.20999999999,
+                    "numberOfStocks": 14,
+                    "topStocks": [
+                        "TATAMOTORS",
+                        "MAFANG",
+                        "METALIETF",
+                        "FINIETF",
+                        "SMALLCAP"
+                    ]
+                }
+            ]
+        }
+    }
+}
