@@ -331,9 +331,9 @@ class PortfolioSummaryWidget extends StatelessWidget {
         const SizedBox(height: 4),
         RichText(
           text: TextSpan(
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             children: [
               TextSpan(
                 text: gainersCount.toString(),
