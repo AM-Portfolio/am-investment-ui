@@ -176,7 +176,7 @@ class SectorOverviewCard extends StatelessWidget {
         return sectorSum;
       });
       return sum + sectorValue;
-    });    // Sort sectors by value for better visualization
+    }); // Sort sectors by value for better visualization
     final sortedSectors = List<Sector>.from(sectors)
       ..sort((a, b) {
         double aValue = a.stocks.fold(
