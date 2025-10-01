@@ -63,18 +63,18 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget> {
         await Future.delayed(const Duration(milliseconds: 500));
       },
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(8.0),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            _buildSectorAllocationSection(context),
-            const SizedBox(height: 24),
-            _buildHeatmapSection(context),
-            const SizedBox(height: 24),
-            _buildMoversSection(context),
-            const SizedBox(height: 24),
             _buildMarketCapAllocationSection(context),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            _buildMoversSection(context),
+            const SizedBox(height: 12),
+            _buildSectorAllocationSection(context),
+            const SizedBox(height: 12),
+            _buildHeatmapSection(context),
+            const SizedBox(height: 12),
           ],
         ),
       ),
