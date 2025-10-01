@@ -62,28 +62,43 @@ class PortfolioSummaryWidget extends StatelessWidget {
     final color = isPositive ? Colors.green : Colors.red;
 
     return Card(
-      elevation: 4,
+      elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
-              Theme.of(context).primaryColor.withOpacity(0.05),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Total value and percentage in same row
+            // Header with last updated
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Portfolio Value',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDateTime(summary.lastUpdated),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Total value and percentage together
+            Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -93,51 +108,63 @@ class PortfolioSummaryWidget extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      isPositive ? Icons.trending_up : Icons.trending_down,
-                      color: color,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '(${summary.totalGainLossPercentage.toStringAsFixed(2)}%)',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPositive ? Icons.trending_up : Icons.trending_down,
                         color: color,
-                        fontWeight: FontWeight.w600,
+                        size: 14,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        '(${summary.totalGainLossPercentage.toStringAsFixed(2)}%)',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            // Investment Overview within main card
+            // Compact Investment Overview
             Row(
               children: [
                 Expanded(
-                  child: _buildOverviewItem(
+                  child: _buildCompactOverviewItem(
                     context,
                     'Invested',
                     '₹${summary.totalInvested.toStringAsFixed(0)}',
                     Colors.blue,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildOverviewItem(
+                  child: _buildCompactOverviewItem(
                     context,
                     'Current',
                     '₹${summary.totalValue.toStringAsFixed(0)}',
                     Colors.orange,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildOverviewItem(
+                  child: _buildCompactOverviewItem(
                     context,
-                    'Total Holdings',
+                    'Holdings',
                     summary.totalHoldings.toString(),
                     Colors.purple,
                   ),
@@ -153,18 +180,18 @@ class PortfolioSummaryWidget extends StatelessWidget {
   /// Build dynamic market data card that changes frequently
   Widget _buildDynamicMarketCard(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Today's Change and Total Returns Row
+            // Performance Row
             Row(
               children: [
                 Expanded(
-                  child: _buildPerformanceItem(
+                  child: _buildCompactPerformanceItem(
                     context,
                     'Today\'s Change',
                     summary.formattedTodayChange,
@@ -173,9 +200,9 @@ class PortfolioSummaryWidget extends StatelessWidget {
                     Icons.today,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildPerformanceItem(
+                  child: _buildCompactPerformanceItem(
                     context,
                     'Total Returns',
                     summary.formattedGainLoss,
@@ -187,11 +214,11 @@ class PortfolioSummaryWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            // Today's Gainers/Losers Row
+            // Gainers/Losers Row
             Row(
               children: [
                 Expanded(
-                  child: _buildSimpleGainerLoserItem(
+                  child: _buildCompactGainerLoserItem(
                     context,
                     'Today',
                     summary.todayGainersCount,
@@ -199,29 +226,15 @@ class PortfolioSummaryWidget extends StatelessWidget {
                     Icons.today,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildSimpleGainerLoserItem(
+                  child: _buildCompactGainerLoserItem(
                     context,
                     'Overall',
                     summary.gainersCount,
                     summary.losersCount,
-                    Icons.trending_up,
+                    Icons.analytics,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Last updated time
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  'Last updated: ${_formatDateTime(summary.lastUpdated)}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -231,8 +244,8 @@ class PortfolioSummaryWidget extends StatelessWidget {
     );
   }
 
-  /// Build individual performance item for dynamic card
-  Widget _buildPerformanceItem(
+  /// Build compact performance item
+  Widget _buildCompactPerformanceItem(
     BuildContext context,
     String title,
     String value,
@@ -248,7 +261,7 @@ class PortfolioSummaryWidget extends StatelessWidget {
         Row(
           children: [
             Icon(icon, color: color, size: 16),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Expanded(
               child: Text(
                 title,
@@ -268,7 +281,6 @@ class PortfolioSummaryWidget extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 2),
         Text(
           percentage,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
@@ -277,8 +289,8 @@ class PortfolioSummaryWidget extends StatelessWidget {
     );
   }
 
-  /// Build individual overview item
-  Widget _buildOverviewItem(
+  /// Build compact overview item
+  Widget _buildCompactOverviewItem(
     BuildContext context,
     String label,
     String value,
@@ -305,8 +317,8 @@ class PortfolioSummaryWidget extends StatelessWidget {
     );
   }
 
-  /// Build simple gainer/loser item with XX/XX format
-  Widget _buildSimpleGainerLoserItem(
+  /// Build compact gainer/loser item
+  Widget _buildCompactGainerLoserItem(
     BuildContext context,
     String label,
     int gainersCount,
@@ -319,7 +331,7 @@ class PortfolioSummaryWidget extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 16, color: Colors.grey[600]),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               label,
               style: Theme.of(
