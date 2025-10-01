@@ -227,6 +227,12 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
 
+    // Debug logging to check the summary data
+    AppLogger.debug(
+      'Building overview with summary - totalValue: ${summary.totalValue}, todayChange: ${summary.todayChange}, totalGainLoss: ${summary.totalGainLoss}',
+      tag: 'PortfolioMobileView',
+    );
+
     return PortfolioSummaryWidget(
       totalValue: summary.totalValue,
       todayChange: summary.todayChange,

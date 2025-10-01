@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Reusable portfolio summary widget that displays key portfolio metrics
 class PortfolioSummaryWidget extends StatelessWidget {
@@ -19,6 +20,12 @@ class PortfolioSummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Debug logging to see what values we're receiving
+    AppLogger.debug(
+      'PortfolioSummaryWidget values - totalValue: $totalValue, todayChange: $todayChange, totalGainLoss: $totalGainLoss',
+      tag: 'PortfolioSummaryWidget',
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(

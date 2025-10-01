@@ -11,6 +11,11 @@ class PortfolioSummaryMapper {
     String userId,
   ) {
     try {
+      // Debug logging to see API values
+      AppLogger.debug(
+        'Mapping API model - totalValue: ${apiModel.totalValue}, todaysGain: ${apiModel.todaysGain}, totalGain: ${apiModel.totalGain}',
+        tag: 'PortfolioSummaryMapper',
+      );
       // Map sector allocations
       final sectorAllocations = apiModel.sectorAllocation.entries
           .map(
