@@ -6,10 +6,10 @@ import '../../cubit/portfolio_state.dart';
 import '../../../../../core/utils/logger.dart';
 
 /// Portfolio holdings widget showing detailed holdings list
-class PortfolioHoldingsWidget extends StatelessWidget {
+class PortfolioHoldingsAppWidget extends StatelessWidget {
   final String userId;
 
-  const PortfolioHoldingsWidget({
+  const PortfolioHoldingsAppWidget({
     super.key,
     required this.userId,
   });

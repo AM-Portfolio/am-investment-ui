@@ -188,8 +188,8 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView> with TickerPr
     if (state is PortfolioError) {
       return _buildErrorWidget(state.message);
     }
-    
-    return PortfolioHoldingsWidget(userId: widget.userId);
+
+    return PortfolioHoldingsAppWidget(userId: widget.userId);
   }
 
   Widget _buildAnalysisTab(PortfolioState state) {
