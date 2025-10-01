@@ -28,19 +28,27 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Hardcoded portfolio ID for testing
+  String get effectivePortfolioId => "163d0143-4fcb-480c-ac20-622f14e0e293";
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-
     AppLogger.info(
-      'Portfolio analysis widget initialized for portfolio: ${widget.portfolioId}',
+      'Portfolio analysis widget initialized for portfolio: $effectivePortfolioId',
       tag: 'PortfolioAnalysisWidget',
     );
 
     // Load analytics data when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PortfolioAnalyticsCubit>().loadAnalytics(widget.portfolioId);
+      AppLogger.debug(
+        '🔍 PortfolioAnalysisWidget: About to call loadAnalytics with portfolioId: $effectivePortfolioId',
+        tag: 'PortfolioAnalysisWidget',
+      );
+      context.read<PortfolioAnalyticsCubit>().loadAnalytics(
+        effectivePortfolioId,
+      );
     });
   }
 
@@ -104,11 +112,11 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
     return IconButton(
       onPressed: () {
         AppLogger.info(
-          'Refreshing portfolio analytics for portfolio: ${widget.portfolioId}',
+          'Refreshing portfolio analytics for portfolio: $effectivePortfolioId',
           tag: 'PortfolioAnalysisWidget',
         );
         context.read<PortfolioAnalyticsCubit>().refreshAnalytics(
-          widget.portfolioId,
+          effectivePortfolioId,
         );
       },
       icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
@@ -147,9 +155,18 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
   Widget _buildSectorAllocationTab() {
     return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
       builder: (context, state) {
+        AppLogger.debug(
+          '🔍 SectorAllocationTab: Current state is ${state.runtimeType}',
+          tag: 'PortfolioAnalysisWidget',
+        );
+
         if (state is PortfolioAnalyticsLoading) {
           return const SectorialAllocationWidget(isLoading: true);
         } else if (state is PortfolioAnalyticsLoaded) {
+          AppLogger.debug(
+            '🔍 SectorAllocationTab: sectorAllocation data = ${state.sectorAllocation != null ? 'available' : 'null'}',
+            tag: 'PortfolioAnalysisWidget',
+          );
           final isLoading = state.isLoadingType(
             AnalyticsDataType.sectorAllocation,
           );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Widget displaying sectorial allocation of the portfolio
 /// Shows distribution of investments across different sectors using bars
@@ -86,7 +87,29 @@ class SectorialAllocationWidget extends StatelessWidget {
       );
     }
 
+    AppLogger.debug(
+      '🔍 SectorialAllocationWidget: sectorAllocation=${sectorAllocation != null ? 'not null' : 'null'}, '
+      'sectorWeights count=${sectorAllocation?.sectorWeights.length ?? 0}',
+      tag: 'SectorialAllocationWidget',
+    );
+
+    // Let's inspect the actual data structure
+    if (sectorAllocation != null) {
+      AppLogger.debug(
+        '🔍 SectorialAllocationWidget: Full sectorAllocation object: $sectorAllocation',
+        tag: 'SectorialAllocationWidget',
+      );
+      AppLogger.debug(
+        '🔍 SectorialAllocationWidget: sectorWeights details: ${sectorAllocation!.sectorWeights}',
+        tag: 'SectorialAllocationWidget',
+      );
+    }
+
     if (sectorAllocation == null || sectorAllocation!.sectorWeights.isEmpty) {
+      AppLogger.debug(
+        '🔍 SectorialAllocationWidget: Showing no data message - sectorAllocation is ${sectorAllocation == null ? 'null' : 'empty'}',
+        tag: 'SectorialAllocationWidget',
+      );
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

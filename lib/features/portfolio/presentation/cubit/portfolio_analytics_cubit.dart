@@ -12,6 +12,10 @@ class PortfolioAnalyticsCubit extends Cubit<PortfolioAnalyticsState> {
 
   /// Load all analytics data for a portfolio
   Future<void> loadAnalytics(String portfolioId) async {
+    AppLogger.debug(
+      '🔍 PortfolioAnalyticsCubit: loadAnalytics called with portfolioId: $portfolioId',
+      tag: 'PortfolioAnalyticsCubit',
+    );
     AppLogger.methodEntry(
       'loadAnalytics',
       tag: 'PortfolioAnalyticsCubit',
@@ -30,26 +34,37 @@ class PortfolioAnalyticsCubit extends Cubit<PortfolioAnalyticsState> {
     );
 
     try {
-      // Load all analytics data concurrently
-      final results = await Future.wait([
-        _analyticsService.getPortfolioAllocations(portfolioId),
-        _analyticsService.getPortfolioHeatmap(portfolioId),
-        _analyticsService.getPortfolioMovers(portfolioId),
-      ], eagerError: false);
+      AppLogger.debug(
+        '🔍 Starting to load analytics data concurrently',
+        tag: 'PortfolioAnalyticsCubit',
+      );
 
-      final allocations = results[0] as AllocationData;
-      final heatmap = results[1] as Heatmap?;
-      final movers = results[2] as Movers?;
+      // Load all analytics data with single API call (more efficient)
+      final analytics = await _analyticsService
+          .getPortfolioAnalyticsWithDefaults(portfolioId);
+
+      AppLogger.debug(
+        '🔍 Analytics service call completed, processing results',
+        tag: 'PortfolioAnalyticsCubit',
+      );
+
+      AppLogger.debug(
+        '🔍 Data received: '
+        'sectorAllocation=${analytics.analytics.sectorAllocation != null ? 'available' : 'null'}, '
+        'marketCapAllocation=${analytics.analytics.marketCapAllocation != null ? 'available' : 'null'}, '
+        'heatmap=${analytics.analytics.heatmap != null ? 'available' : 'null'}, '
+        'movers=${analytics.analytics.movers != null ? 'available' : 'null'}',
+        tag: 'PortfolioAnalyticsCubit',
+      );
 
       emit(
         PortfolioAnalyticsLoaded(
-          sectorAllocation: allocations.sectorAllocation,
-          marketCapAllocation: allocations.marketCapAllocation,
-          heatmap: heatmap,
-          movers: movers,
+          sectorAllocation: analytics.analytics.sectorAllocation,
+          marketCapAllocation: analytics.analytics.marketCapAllocation,
+          heatmap: analytics.analytics.heatmap,
+          movers: analytics.analytics.movers,
         ),
       );
-
       AppLogger.info(
         'Portfolio analytics loaded successfully',
         tag: 'PortfolioAnalyticsCubit',
@@ -176,23 +191,16 @@ class PortfolioAnalyticsCubit extends Cubit<PortfolioAnalyticsState> {
       emit(currentState.copyWith(isRefreshing: true));
 
       try {
-        // Refresh all data concurrently
-        final results = await Future.wait([
-          _analyticsService.getPortfolioAllocations(portfolioId),
-          _analyticsService.getPortfolioHeatmap(portfolioId),
-          _analyticsService.getPortfolioMovers(portfolioId),
-        ], eagerError: false);
-
-        final allocations = results[0] as AllocationData;
-        final heatmap = results[1] as Heatmap?;
-        final movers = results[2] as Movers?;
+        // Refresh all data with single API call (more efficient)
+        final analytics = await _analyticsService
+            .getPortfolioAnalyticsWithDefaults(portfolioId);
 
         emit(
           currentState.copyWith(
-            sectorAllocation: allocations.sectorAllocation,
-            marketCapAllocation: allocations.marketCapAllocation,
-            heatmap: heatmap,
-            movers: movers,
+            sectorAllocation: analytics.analytics.sectorAllocation,
+            marketCapAllocation: analytics.analytics.marketCapAllocation,
+            heatmap: analytics.analytics.heatmap,
+            movers: analytics.analytics.movers,
             isRefreshing: false,
             errors: {}, // Clear errors on successful refresh
           ),

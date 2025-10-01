@@ -203,7 +203,7 @@ class PortfolioAnalyticsMapper {
       ),
       featureConfiguration: const FeatureConfiguration(moversLimit: 10),
       pagination: const Pagination(
-        page: 0,
+        page: 1,
         size: 20,
         sortBy: 'performance',
         sortDirection: 'DESC',

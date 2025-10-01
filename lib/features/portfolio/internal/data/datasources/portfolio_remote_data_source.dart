@@ -166,14 +166,56 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
           '${_portfolioConfig.baseUrl}/api/v1/analytics/portfolio/$portfolioId/advanced';
 
       // Use ApiClient for consistent error handling and logging with POST request
-      final analyticsResponse = await _apiClient
-          .post<PortfolioAnalyticsResponseDto>(
-            baseUri,
-            body: request.toJson(),
-            parser: (data) => PortfolioAnalyticsMapper.responseFromJson(
-              data as Map<String, dynamic>,
-            ),
+      final analyticsResponse = await _apiClient.post<PortfolioAnalyticsResponseDto>(
+        baseUri,
+        body: request.toJson(),
+        parser: (data) {
+          final rawData = data as Map<String, dynamic>;
+
+          // Log raw API response for debugging
+          AppLogger.debug(
+            '🔍 Raw API response keys: ${rawData.keys.toList()}',
+            tag: 'PortfolioRemoteDataSource',
           );
+
+          // Check if sectorAllocation exists in raw response
+          if (rawData.containsKey('analytics')) {
+            final analytics = rawData['analytics'] as Map<String, dynamic>?;
+            if (analytics?.containsKey('sectorAllocation') == true) {
+              final sectorAllocation =
+                  analytics!['sectorAllocation'] as Map<String, dynamic>?;
+              AppLogger.debug(
+                '🔍 Raw sectorAllocation keys: ${sectorAllocation?.keys.toList()}',
+                tag: 'PortfolioRemoteDataSource',
+              );
+              if (sectorAllocation?.containsKey('sectorWeights') == true) {
+                final sectorWeights = sectorAllocation!['sectorWeights'];
+                AppLogger.debug(
+                  '🔍 Raw sectorWeights type: ${sectorWeights.runtimeType}, content: $sectorWeights',
+                  tag: 'PortfolioRemoteDataSource',
+                );
+              } else {
+                AppLogger.debug(
+                  '🔍 sectorWeights field is missing from raw sectorAllocation',
+                  tag: 'PortfolioRemoteDataSource',
+                );
+              }
+            } else {
+              AppLogger.debug(
+                '🔍 sectorAllocation field is missing from raw analytics',
+                tag: 'PortfolioRemoteDataSource',
+              );
+            }
+          } else {
+            AppLogger.debug(
+              '🔍 analytics field is missing from raw response',
+              tag: 'PortfolioRemoteDataSource',
+            );
+          }
+
+          return PortfolioAnalyticsMapper.responseFromJson(rawData);
+        },
+      );
 
       AppLogger.info(
         'Portfolio analytics fetched successfully from API',
