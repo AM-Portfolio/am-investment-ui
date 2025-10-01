@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
+import '../cubit/portfolio_analytics_state.dart';
 import '../../providers/portfolio_providers.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../../../core/utils/logger.dart';
 import '../widgets/portfolio_summary_widget.dart';
+import '../widgets/heatmap_widget.dart';
 import 'portfolio_analysis_widget.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation
@@ -141,7 +143,7 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -225,6 +227,10 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
                             icon: Icon(Icons.analytics_outlined, size: 20),
                             text: 'Analysis',
                           ),
+                          Tab(
+                            icon: Icon(Icons.grid_view, size: 20),
+                            text: 'Heatmap',
+                          ),
                         ],
                       ),
                     ),
@@ -255,6 +261,7 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
                       _buildOverviewTab(state),
                       _buildHoldingsTab(state),
                       _buildAnalysisTab(state),
+                      _buildHeatmapTab(state),
                     ],
                   );
                 },
@@ -383,6 +390,47 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
     );
   }
 
+  Widget _buildHeatmapTab(PortfolioState state) {
+    if (state is PortfolioLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state is PortfolioError) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          AppLogger.userAction(
+            'Pull to Refresh Heatmap',
+            tag: 'PortfolioMobileView',
+            context: {'userId': widget.userId},
+          );
+          context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: _buildErrorWidget(state.message),
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        AppLogger.userAction(
+          'Pull to Refresh Heatmap',
+          tag: 'PortfolioMobileView',
+          context: {'userId': widget.userId},
+        );
+        context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: _buildHeatmapContent(state),
+      ),
+    );
+  }
+
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
 
@@ -414,6 +462,50 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   Widget _buildAnalysisContent(PortfolioState state) {
     // Use userId as portfolioId since that's how the system is structured
     return PortfolioAnalysisWidget(portfolioId: widget.userId);
+  }
+
+  Widget _buildHeatmapContent(PortfolioState state) {
+    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+      builder: (context, analyticsState) {
+        if (analyticsState is PortfolioAnalyticsLoading) {
+          return const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: HeatmapWidget(isLoading: true),
+          );
+        } else if (analyticsState is PortfolioAnalyticsLoaded) {
+          final isLoading = analyticsState.isLoadingType(
+            AnalyticsDataType.heatmap,
+          );
+          final error = analyticsState.getErrorForType(
+            AnalyticsDataType.heatmap,
+          );
+
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HeatmapWidget(
+              heatmap: analyticsState.heatmap,
+              isLoading: isLoading,
+              error: error,
+            ),
+          );
+        } else if (analyticsState is PortfolioAnalyticsError) {
+          AppLogger.error(
+            'Failed to load heatmap',
+            tag: 'PortfolioMobileView',
+            error: analyticsState.message,
+          );
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HeatmapWidget(error: analyticsState.message),
+          );
+        }
+
+        return const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: HeatmapWidget(isLoading: true),
+        );
+      },
+    );
   }
 
   Widget _buildErrorWidget(String message) {

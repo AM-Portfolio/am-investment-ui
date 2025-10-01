@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/sectorial_allocation_widget.dart';
 import '../widgets/market_cap_allocation_widget.dart';
-import '../widgets/heatmap_widget.dart';
 import '../widgets/movers_widget.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_analytics_state.dart';
@@ -12,7 +11,6 @@ import '../../../../core/utils/logger.dart';
 /// This widget provides comprehensive portfolio analysis including:
 /// - Sector allocation visualization
 /// - Market cap allocation breakdown
-/// - Portfolio heatmap
 /// - Top movers (gainers and losers)
 class PortfolioAnalysisWidget extends StatefulWidget {
   final String portfolioId;
@@ -73,8 +71,6 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget> {
             const SizedBox(height: 12),
             _buildSectorAllocationSection(context),
             const SizedBox(height: 12),
-            _buildHeatmapSection(context),
-            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -118,34 +114,6 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget> {
         }
 
         return const SectorialAllocationWidget(isLoading: true);
-      },
-    );
-  }
-
-  Widget _buildHeatmapSection(BuildContext context) {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, state) {
-        if (state is PortfolioAnalyticsLoading) {
-          return const HeatmapWidget(isLoading: true);
-        } else if (state is PortfolioAnalyticsLoaded) {
-          final isLoading = state.isLoadingType(AnalyticsDataType.heatmap);
-          final error = state.getErrorForType(AnalyticsDataType.heatmap);
-
-          return HeatmapWidget(
-            heatmap: state.heatmap,
-            isLoading: isLoading,
-            error: error,
-          );
-        } else if (state is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load heatmap',
-            tag: 'PortfolioAnalysisWidget',
-            error: state.message,
-          );
-          return HeatmapWidget(error: state.message);
-        }
-
-        return const HeatmapWidget(isLoading: true);
       },
     );
   }
