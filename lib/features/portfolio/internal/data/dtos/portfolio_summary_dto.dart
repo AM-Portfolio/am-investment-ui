@@ -1,5 +1,4 @@
 import 'broker_holding_dto.dart';
-import '../../../../../core/utils/logger.dart';
 
 /// API response model for portfolio summary
 /// This model directly maps to the API response structure
@@ -45,25 +44,11 @@ class PortfolioSummaryDto {
   /// Create from JSON response
   factory PortfolioSummaryDto.fromJson(Map<String, dynamic> json) {
     // Debug logging to see raw API response
-    AppLogger.debug(
-      'Parsing JSON: currentValue=${json['currentValue']}, todayGainLoss=${json['todayGainLoss']}, totalGainLoss=${json['totalGainLoss']}',
-      tag: 'PortfolioSummaryDto',
-    );
-
-    final parsedTotalValue = _parseDouble(json['currentValue']);
-    final parsedTodaysGain = _parseDouble(json['todayGainLoss']);
-    final parsedTotalGain = _parseDouble(json['totalGainLoss']);
-
-    AppLogger.debug(
-      'Parsed values: totalValue=$parsedTotalValue, todaysGain=$parsedTodaysGain, totalGain=$parsedTotalGain',
-      tag: 'PortfolioSummaryDto',
-    );
-
     return PortfolioSummaryDto(
-      totalValue: parsedTotalValue,
+      totalValue: _parseDouble(json['currentValue']),
       investmentValue: _parseDouble(json['investmentValue']),
-      todaysGain: parsedTodaysGain,
-      totalGain: parsedTotalGain,
+      todaysGain: _parseDouble(json['todayGainLoss']),
+      totalGain: _parseDouble(json['totalGainLoss']),
       totalGainPercentage: _parseDouble(json['totalGainLossPercentage']),
       todaysGainPercentage: _parseDouble(json['todayGainLossPercentage']),
       todayGainLossPercentage: _parseDouble(json['todayGainLossPercentage']),

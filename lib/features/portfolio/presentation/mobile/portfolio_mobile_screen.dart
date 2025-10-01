@@ -138,8 +138,8 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Portfolio'),
-          centerTitle: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -158,13 +158,20 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
             labelColor: Theme.of(context).primaryColor,
             unselectedLabelColor: Colors.grey,
             indicatorColor: Theme.of(context).primaryColor,
+            labelStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
             tabs: const [
-              Tab(icon: Icon(Icons.dashboard_outlined), text: 'Overview'),
               Tab(
-                icon: Icon(Icons.account_balance_wallet_outlined),
-                text: 'Holdings',
+                icon: Icon(Icons.dashboard_outlined, size: 20),
+                text: 'Overview',
               ),
-              Tab(icon: Icon(Icons.analytics_outlined), text: 'Analysis'),
+              Tab(icon: Icon(Icons.wallet, size: 20), text: 'Holdings'),
+              Tab(
+                icon: Icon(Icons.analytics_outlined, size: 20),
+                text: 'Analysis',
+              ),
             ],
           ),
         ),
@@ -227,16 +234,8 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
 
-    // Debug logging to check the summary data
-    AppLogger.debug(
-      'Building overview with summary - totalValue: ${summary.totalValue}, todayChange: ${summary.todayChange}, totalGainLoss: ${summary.totalGainLoss}',
-      tag: 'PortfolioMobileView',
-    );
-
     return PortfolioSummaryWidget(
-      totalValue: summary.totalValue,
-      todayChange: summary.todayChange,
-      totalGainLoss: summary.totalGainLoss,
+      summary: summary,
       onViewHoldings: () => _tabController.animateTo(1),
       onViewAnalysis: () => _tabController.animateTo(2),
     );
