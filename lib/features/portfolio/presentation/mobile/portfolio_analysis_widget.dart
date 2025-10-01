@@ -24,17 +24,13 @@ class PortfolioAnalysisWidget extends StatefulWidget {
       _PortfolioAnalysisWidgetState();
 }
 
-class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget> {
   // Hardcoded portfolio ID for testing
   String get effectivePortfolioId => "163d0143-4fcb-480c-ac20-622f14e0e293";
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
     AppLogger.info(
       'Portfolio analysis widget initialized for portfolio: $effectivePortfolioId',
       tag: 'PortfolioAnalysisWidget',
@@ -53,231 +49,187 @@ class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          _buildHeader(context),
-          _buildTabBar(context),
-          SizedBox(height: 400, child: _buildTabBarView(context)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          Icon(
-            Icons.analytics,
-            color: Theme.of(context).primaryColor,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Portfolio Analysis',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Comprehensive portfolio insights',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          _buildRefreshButton(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRefreshButton(BuildContext context) {
-    return IconButton(
-      onPressed: () {
+    return RefreshIndicator(
+      onRefresh: () async {
         AppLogger.info(
-          'Refreshing portfolio analytics for portfolio: $effectivePortfolioId',
+          'Auto-refreshing portfolio analytics for portfolio: $effectivePortfolioId',
           tag: 'PortfolioAnalysisWidget',
         );
         context.read<PortfolioAnalyticsCubit>().refreshAnalytics(
           effectivePortfolioId,
         );
+        // Wait a bit for the refresh to complete
+        await Future.delayed(const Duration(milliseconds: 500));
       },
-      icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
-      tooltip: 'Refresh analytics data',
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            _buildSectorAllocationSection(context),
+            const SizedBox(height: 24),
+            _buildHeatmapSection(context),
+            const SizedBox(height: 24),
+            _buildMoversSection(context),
+            const SizedBox(height: 24),
+            _buildMarketCapAllocationSection(context),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildTabBar(BuildContext context) {
-    return TabBar(
-      controller: _tabController,
-      isScrollable: true,
-      tabs: const [
-        Tab(icon: Icon(Icons.donut_small, size: 20), text: 'Sectors'),
-        Tab(icon: Icon(Icons.insights, size: 20), text: 'Market Cap'),
-        Tab(icon: Icon(Icons.grid_view, size: 20), text: 'Heatmap'),
-        Tab(icon: Icon(Icons.trending_up, size: 20), text: 'Movers'),
-      ],
-      labelColor: Theme.of(context).primaryColor,
-      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
-      indicatorColor: Theme.of(context).primaryColor,
+  Widget _buildSectionCard({
+    required Widget child,
+    required BuildContext context,
+  }) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      child: Padding(padding: const EdgeInsets.all(16.0), child: child),
     );
   }
 
-  Widget _buildTabBarView(BuildContext context) {
-    return TabBarView(
-      controller: _tabController,
-      children: [
-        _buildSectorAllocationTab(),
-        _buildMarketCapAllocationTab(),
-        _buildHeatmapTab(),
-        _buildMoversTab(),
-      ],
-    );
-  }
-
-  Widget _buildSectorAllocationTab() {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, state) {
-        AppLogger.debug(
-          '🔍 SectorAllocationTab: Current state is ${state.runtimeType}',
-          tag: 'PortfolioAnalysisWidget',
-        );
-
-        if (state is PortfolioAnalyticsLoading) {
-          return const SectorialAllocationWidget(isLoading: true);
-        } else if (state is PortfolioAnalyticsLoaded) {
+  Widget _buildSectorAllocationSection(BuildContext context) {
+    return _buildSectionCard(
+      context: context,
+      child: BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+        builder: (context, state) {
           AppLogger.debug(
-            '🔍 SectorAllocationTab: sectorAllocation data = ${state.sectorAllocation != null ? 'available' : 'null'}',
+            '🔍 SectorAllocationSection: Current state is ${state.runtimeType}',
             tag: 'PortfolioAnalysisWidget',
           );
-          final isLoading = state.isLoadingType(
-            AnalyticsDataType.sectorAllocation,
-          );
-          final error = state.getErrorForType(
-            AnalyticsDataType.sectorAllocation,
-          );
 
-          return SectorialAllocationWidget(
-            sectorAllocation: state.sectorAllocation,
-            isLoading: isLoading,
-            error: error,
-          );
-        } else if (state is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load sector allocation',
-            tag: 'PortfolioAnalysisWidget',
-            error: state.message,
-          );
-          return SectorialAllocationWidget(error: state.message);
-        }
+          if (state is PortfolioAnalyticsLoading) {
+            return const SectorialAllocationWidget(isLoading: true);
+          } else if (state is PortfolioAnalyticsLoaded) {
+            AppLogger.debug(
+              '🔍 SectorAllocationSection: sectorAllocation data = ${state.sectorAllocation != null ? 'available' : 'null'}',
+              tag: 'PortfolioAnalysisWidget',
+            );
+            final isLoading = state.isLoadingType(
+              AnalyticsDataType.sectorAllocation,
+            );
+            final error = state.getErrorForType(
+              AnalyticsDataType.sectorAllocation,
+            );
 
-        return const SectorialAllocationWidget(isLoading: true);
-      },
+            return SectorialAllocationWidget(
+              sectorAllocation: state.sectorAllocation,
+              isLoading: isLoading,
+              error: error,
+            );
+          } else if (state is PortfolioAnalyticsError) {
+            AppLogger.error(
+              'Failed to load sector allocation',
+              tag: 'PortfolioAnalysisWidget',
+              error: state.message,
+            );
+            return SectorialAllocationWidget(error: state.message);
+          }
+
+          return const SectorialAllocationWidget(isLoading: true);
+        },
+      ),
     );
   }
 
-  Widget _buildMarketCapAllocationTab() {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, state) {
-        if (state is PortfolioAnalyticsLoading) {
-          return const MarketCapAllocationWidget(isLoading: true);
-        } else if (state is PortfolioAnalyticsLoaded) {
-          final isLoading = state.isLoadingType(
-            AnalyticsDataType.marketCapAllocation,
-          );
-          final error = state.getErrorForType(
-            AnalyticsDataType.marketCapAllocation,
-          );
+  Widget _buildHeatmapSection(BuildContext context) {
+    return _buildSectionCard(
+      context: context,
+      child: BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+        builder: (context, state) {
+          if (state is PortfolioAnalyticsLoading) {
+            return const HeatmapWidget(isLoading: true);
+          } else if (state is PortfolioAnalyticsLoaded) {
+            final isLoading = state.isLoadingType(AnalyticsDataType.heatmap);
+            final error = state.getErrorForType(AnalyticsDataType.heatmap);
 
-          return MarketCapAllocationWidget(
-            marketCapAllocation: state.marketCapAllocation,
-            isLoading: isLoading,
-            error: error,
-          );
-        } else if (state is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load market cap allocation',
-            tag: 'PortfolioAnalysisWidget',
-            error: state.message,
-          );
-          return MarketCapAllocationWidget(error: state.message);
-        }
+            return HeatmapWidget(
+              heatmap: state.heatmap,
+              isLoading: isLoading,
+              error: error,
+            );
+          } else if (state is PortfolioAnalyticsError) {
+            AppLogger.error(
+              'Failed to load heatmap',
+              tag: 'PortfolioAnalysisWidget',
+              error: state.message,
+            );
+            return HeatmapWidget(error: state.message);
+          }
 
-        return const MarketCapAllocationWidget(isLoading: true);
-      },
-    );
-  }
-
-  Widget _buildHeatmapTab() {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, state) {
-        if (state is PortfolioAnalyticsLoading) {
           return const HeatmapWidget(isLoading: true);
-        } else if (state is PortfolioAnalyticsLoaded) {
-          final isLoading = state.isLoadingType(AnalyticsDataType.heatmap);
-          final error = state.getErrorForType(AnalyticsDataType.heatmap);
-
-          return HeatmapWidget(
-            heatmap: state.heatmap,
-            isLoading: isLoading,
-            error: error,
-          );
-        } else if (state is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load heatmap',
-            tag: 'PortfolioAnalysisWidget',
-            error: state.message,
-          );
-          return HeatmapWidget(error: state.message);
-        }
-
-        return const HeatmapWidget(isLoading: true);
-      },
+        },
+      ),
     );
   }
 
-  Widget _buildMoversTab() {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, state) {
-        if (state is PortfolioAnalyticsLoading) {
+  Widget _buildMoversSection(BuildContext context) {
+    return _buildSectionCard(
+      context: context,
+      child: BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+        builder: (context, state) {
+          if (state is PortfolioAnalyticsLoading) {
+            return const MoversWidget(isLoading: true);
+          } else if (state is PortfolioAnalyticsLoaded) {
+            final isLoading = state.isLoadingType(AnalyticsDataType.movers);
+            final error = state.getErrorForType(AnalyticsDataType.movers);
+
+            return MoversWidget(
+              movers: state.movers,
+              isLoading: isLoading,
+              error: error,
+            );
+          } else if (state is PortfolioAnalyticsError) {
+            AppLogger.error(
+              'Failed to load movers',
+              tag: 'PortfolioAnalysisWidget',
+              error: state.message,
+            );
+            return MoversWidget(error: state.message);
+          }
+
           return const MoversWidget(isLoading: true);
-        } else if (state is PortfolioAnalyticsLoaded) {
-          final isLoading = state.isLoadingType(AnalyticsDataType.movers);
-          final error = state.getErrorForType(AnalyticsDataType.movers);
+        },
+      ),
+    );
+  }
 
-          return MoversWidget(
-            movers: state.movers,
-            isLoading: isLoading,
-            error: error,
-          );
-        } else if (state is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load movers',
-            tag: 'PortfolioAnalysisWidget',
-            error: state.message,
-          );
-          return MoversWidget(error: state.message);
-        }
+  Widget _buildMarketCapAllocationSection(BuildContext context) {
+    return _buildSectionCard(
+      context: context,
+      child: BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+        builder: (context, state) {
+          if (state is PortfolioAnalyticsLoading) {
+            return const MarketCapAllocationWidget(isLoading: true);
+          } else if (state is PortfolioAnalyticsLoaded) {
+            final isLoading = state.isLoadingType(
+              AnalyticsDataType.marketCapAllocation,
+            );
+            final error = state.getErrorForType(
+              AnalyticsDataType.marketCapAllocation,
+            );
 
-        return const MoversWidget(isLoading: true);
-      },
+            return MarketCapAllocationWidget(
+              marketCapAllocation: state.marketCapAllocation,
+              isLoading: isLoading,
+              error: error,
+            );
+          } else if (state is PortfolioAnalyticsError) {
+            AppLogger.error(
+              'Failed to load market cap allocation',
+              tag: 'PortfolioAnalysisWidget',
+              error: state.message,
+            );
+            return MarketCapAllocationWidget(error: state.message);
+          }
+
+          return const MarketCapAllocationWidget(isLoading: true);
+        },
+      ),
     );
   }
 }
