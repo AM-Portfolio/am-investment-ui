@@ -1,0 +1,242 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'portfolio_analytics_state.dart';
+import '../../internal/domain/entities/portfolio_analytics.dart';
+import '../../internal/services/portfolio_analytics_service.dart';
+import '../../../../core/utils/logger.dart';
+
+class PortfolioAnalyticsCubit extends Cubit<PortfolioAnalyticsState> {
+  final PortfolioAnalyticsService _analyticsService;
+
+  PortfolioAnalyticsCubit(this._analyticsService)
+    : super(PortfolioAnalyticsInitial());
+
+  /// Load all analytics data for a portfolio
+  Future<void> loadAnalytics(String portfolioId) async {
+    AppLogger.methodEntry(
+      'loadAnalytics',
+      tag: 'PortfolioAnalyticsCubit',
+      params: {'portfolioId': portfolioId},
+    );
+
+    emit(
+      const PortfolioAnalyticsLoading(
+        loadingTypes: {
+          AnalyticsDataType.sectorAllocation,
+          AnalyticsDataType.marketCapAllocation,
+          AnalyticsDataType.heatmap,
+          AnalyticsDataType.movers,
+        },
+      ),
+    );
+
+    try {
+      // Load all analytics data concurrently
+      final results = await Future.wait([
+        _analyticsService.getPortfolioAllocations(portfolioId),
+        _analyticsService.getPortfolioHeatmap(portfolioId),
+        _analyticsService.getPortfolioMovers(portfolioId),
+      ], eagerError: false);
+
+      final allocations = results[0] as AllocationData;
+      final heatmap = results[1] as Heatmap?;
+      final movers = results[2] as Movers?;
+
+      emit(
+        PortfolioAnalyticsLoaded(
+          sectorAllocation: allocations.sectorAllocation,
+          marketCapAllocation: allocations.marketCapAllocation,
+          heatmap: heatmap,
+          movers: movers,
+        ),
+      );
+
+      AppLogger.info(
+        'Portfolio analytics loaded successfully',
+        tag: 'PortfolioAnalyticsCubit',
+      );
+
+      AppLogger.methodExit('loadAnalytics', tag: 'PortfolioAnalyticsCubit');
+    } catch (error) {
+      AppLogger.error(
+        'Failed to load portfolio analytics',
+        tag: 'PortfolioAnalyticsCubit',
+        error: error,
+        stackTrace: StackTrace.current,
+      );
+
+      emit(PortfolioAnalyticsError(error.toString()));
+      AppLogger.methodExit(
+        'loadAnalytics',
+        tag: 'PortfolioAnalyticsCubit',
+        result: 'error',
+      );
+    }
+  }
+
+  /// Load specific analytics data type
+  Future<void> loadSpecificAnalytics(
+    String portfolioId,
+    AnalyticsDataType type,
+  ) async {
+    final currentState = state;
+    if (currentState is PortfolioAnalyticsLoaded) {
+      final newLoadingTypes = Set<AnalyticsDataType>.from(
+        currentState.loadingTypes,
+      )..add(type);
+
+      emit(currentState.copyWith(loadingTypes: newLoadingTypes));
+
+      try {
+        switch (type) {
+          case AnalyticsDataType.sectorAllocation:
+          case AnalyticsDataType.marketCapAllocation:
+            final allocations = await _analyticsService.getPortfolioAllocations(
+              portfolioId,
+            );
+            final updatedLoadingTypes =
+                Set<AnalyticsDataType>.from(currentState.loadingTypes)
+                  ..remove(AnalyticsDataType.sectorAllocation)
+                  ..remove(AnalyticsDataType.marketCapAllocation);
+
+            emit(
+              currentState.copyWith(
+                sectorAllocation: allocations.sectorAllocation,
+                marketCapAllocation: allocations.marketCapAllocation,
+                loadingTypes: updatedLoadingTypes,
+              ),
+            );
+            break;
+
+          case AnalyticsDataType.heatmap:
+            final heatmap = await _analyticsService.getPortfolioHeatmap(
+              portfolioId,
+            );
+            emit(
+              currentState.copyWith(
+                heatmap: heatmap,
+                loadingTypes: Set<AnalyticsDataType>.from(
+                  currentState.loadingTypes,
+                )..remove(type),
+              ),
+            );
+            break;
+
+          case AnalyticsDataType.movers:
+            final movers = await _analyticsService.getPortfolioMovers(
+              portfolioId,
+            );
+            emit(
+              currentState.copyWith(
+                movers: movers,
+                loadingTypes: Set<AnalyticsDataType>.from(
+                  currentState.loadingTypes,
+                )..remove(type),
+              ),
+            );
+            break;
+        }
+      } catch (error) {
+        AppLogger.error(
+          'Failed to load specific analytics: $type',
+          tag: 'PortfolioAnalyticsCubit',
+          error: error,
+        );
+
+        final newErrors = Map<AnalyticsDataType, String>.from(
+          currentState.errors,
+        );
+        newErrors[type] = error.toString();
+
+        final newLoadingTypes = Set<AnalyticsDataType>.from(
+          currentState.loadingTypes,
+        )..remove(type);
+
+        emit(
+          currentState.copyWith(
+            errors: newErrors,
+            loadingTypes: newLoadingTypes,
+          ),
+        );
+      }
+    } else {
+      // If not in loaded state, load all analytics
+      await loadAnalytics(portfolioId);
+    }
+  }
+
+  /// Refresh all analytics data
+  Future<void> refreshAnalytics(String portfolioId) async {
+    final currentState = state;
+    if (currentState is PortfolioAnalyticsLoaded) {
+      AppLogger.info(
+        'Refreshing portfolio analytics',
+        tag: 'PortfolioAnalyticsCubit',
+      );
+
+      emit(currentState.copyWith(isRefreshing: true));
+
+      try {
+        // Refresh all data concurrently
+        final results = await Future.wait([
+          _analyticsService.getPortfolioAllocations(portfolioId),
+          _analyticsService.getPortfolioHeatmap(portfolioId),
+          _analyticsService.getPortfolioMovers(portfolioId),
+        ], eagerError: false);
+
+        final allocations = results[0] as AllocationData;
+        final heatmap = results[1] as Heatmap?;
+        final movers = results[2] as Movers?;
+
+        emit(
+          currentState.copyWith(
+            sectorAllocation: allocations.sectorAllocation,
+            marketCapAllocation: allocations.marketCapAllocation,
+            heatmap: heatmap,
+            movers: movers,
+            isRefreshing: false,
+            errors: {}, // Clear errors on successful refresh
+          ),
+        );
+
+        AppLogger.info(
+          'Portfolio analytics refreshed successfully',
+          tag: 'PortfolioAnalyticsCubit',
+        );
+      } catch (error) {
+        AppLogger.error(
+          'Failed to refresh portfolio analytics',
+          tag: 'PortfolioAnalyticsCubit',
+          error: error,
+        );
+
+        emit(currentState.copyWith(isRefreshing: false));
+      }
+    } else {
+      // If not in loaded state, load all analytics
+      await loadAnalytics(portfolioId);
+    }
+  }
+
+  /// Clear all errors for specific analytics type
+  void clearError(AnalyticsDataType type) {
+    final currentState = state;
+    if (currentState is PortfolioAnalyticsLoaded &&
+        currentState.hasErrorForType(type)) {
+      final newErrors = Map<AnalyticsDataType, String>.from(
+        currentState.errors,
+      );
+      newErrors.remove(type);
+
+      emit(currentState.copyWith(errors: newErrors));
+    }
+  }
+
+  /// Clear all errors
+  void clearAllErrors() {
+    final currentState = state;
+    if (currentState is PortfolioAnalyticsLoaded &&
+        currentState.errors.isNotEmpty) {
+      emit(currentState.copyWith(errors: {}));
+    }
+  }
+}

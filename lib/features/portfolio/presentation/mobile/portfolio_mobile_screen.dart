@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
+import '../cubit/portfolio_analytics_cubit.dart';
 import '../../providers/portfolio_providers.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../../../core/utils/logger.dart';
@@ -38,10 +39,54 @@ class PortfolioMobileScreen extends ConsumerWidget {
           'Portfolio service loaded, creating mobile cubit',
           tag: 'PortfolioMobileScreen',
         );
-        return BlocProvider(
-          create: (context) =>
-              PortfolioCubit(portfolioService)..loadPortfolio(userId),
-          child: PortfolioMobileView(userId: userId),
+        // Watch analytics service as well
+        final analyticsServiceAsync = ref.watch(
+          portfolioAnalyticsServiceProvider,
+        );
+
+        return analyticsServiceAsync.when(
+          data: (analyticsService) {
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) =>
+                      PortfolioCubit(portfolioService)..loadPortfolio(userId),
+                ),
+                BlocProvider(
+                  create: (context) =>
+                      PortfolioAnalyticsCubit(analyticsService),
+                ),
+              ],
+              child: PortfolioMobileView(userId: userId),
+            );
+          },
+          loading: () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+          error: (error, stack) {
+            AppLogger.error(
+              'Failed to load analytics service',
+              tag: 'PortfolioMobileScreen',
+              error: error,
+            );
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Failed to load analytics: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          ref.invalidate(portfolioAnalyticsServiceProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
       loading: () {

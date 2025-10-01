@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/sectorial_allocation_widget.dart';
 import '../widgets/market_cap_allocation_widget.dart';
 import '../widgets/heatmap_widget.dart';
 import '../widgets/movers_widget.dart';
-import '../../providers/portfolio_providers.dart';
+import '../cubit/portfolio_analytics_cubit.dart';
+import '../cubit/portfolio_analytics_state.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Main portfolio analysis widget that orchestrates all analytics components
@@ -13,18 +14,17 @@ import '../../../../core/utils/logger.dart';
 /// - Market cap allocation breakdown
 /// - Portfolio heatmap
 /// - Top movers (gainers and losers)
-class PortfolioAnalysisWidget extends ConsumerStatefulWidget {
+class PortfolioAnalysisWidget extends StatefulWidget {
   final String portfolioId;
 
   const PortfolioAnalysisWidget({super.key, required this.portfolioId});
 
   @override
-  ConsumerState<PortfolioAnalysisWidget> createState() =>
+  State<PortfolioAnalysisWidget> createState() =>
       _PortfolioAnalysisWidgetState();
 }
 
-class _PortfolioAnalysisWidgetState
-    extends ConsumerState<PortfolioAnalysisWidget>
+class _PortfolioAnalysisWidgetState extends State<PortfolioAnalysisWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -37,6 +37,11 @@ class _PortfolioAnalysisWidgetState
       'Portfolio analysis widget initialized for portfolio: ${widget.portfolioId}',
       tag: 'PortfolioAnalysisWidget',
     );
+
+    // Load analytics data when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PortfolioAnalyticsCubit>().loadAnalytics(widget.portfolioId);
+    });
   }
 
   @override
@@ -102,10 +107,9 @@ class _PortfolioAnalysisWidgetState
           'Refreshing portfolio analytics for portfolio: ${widget.portfolioId}',
           tag: 'PortfolioAnalysisWidget',
         );
-        ref.invalidate(portfolioAnalyticsWithDefaultsProvider);
-        ref.invalidate(portfolioHeatmapProvider);
-        ref.invalidate(portfolioMoversProvider);
-        ref.invalidate(portfolioAllocationsProvider);
+        context.read<PortfolioAnalyticsCubit>().refreshAnalytics(
+          widget.portfolioId,
+        );
       },
       icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
       tooltip: 'Refresh analytics data',
@@ -141,87 +145,121 @@ class _PortfolioAnalysisWidgetState
   }
 
   Widget _buildSectorAllocationTab() {
-    final allocationsAsync = ref.watch(
-      portfolioAllocationsProvider(widget.portfolioId),
-    );
+    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+      builder: (context, state) {
+        if (state is PortfolioAnalyticsLoading) {
+          return const SectorialAllocationWidget(isLoading: true);
+        } else if (state is PortfolioAnalyticsLoaded) {
+          final isLoading = state.isLoadingType(
+            AnalyticsDataType.sectorAllocation,
+          );
+          final error = state.getErrorForType(
+            AnalyticsDataType.sectorAllocation,
+          );
 
-    return allocationsAsync.when(
-      data: (allocations) => SectorialAllocationWidget(
-        sectorAllocation: allocations.sectorAllocation,
-        isLoading: false,
-      ),
-      loading: () => const SectorialAllocationWidget(isLoading: true),
-      error: (error, stack) {
-        AppLogger.error(
-          'Failed to load sector allocation',
-          tag: 'PortfolioAnalysisWidget',
-          error: error,
-          stackTrace: stack,
-        );
-        return SectorialAllocationWidget(error: error.toString());
+          return SectorialAllocationWidget(
+            sectorAllocation: state.sectorAllocation,
+            isLoading: isLoading,
+            error: error,
+          );
+        } else if (state is PortfolioAnalyticsError) {
+          AppLogger.error(
+            'Failed to load sector allocation',
+            tag: 'PortfolioAnalysisWidget',
+            error: state.message,
+          );
+          return SectorialAllocationWidget(error: state.message);
+        }
+
+        return const SectorialAllocationWidget(isLoading: true);
       },
     );
   }
 
   Widget _buildMarketCapAllocationTab() {
-    final allocationsAsync = ref.watch(
-      portfolioAllocationsProvider(widget.portfolioId),
-    );
+    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+      builder: (context, state) {
+        if (state is PortfolioAnalyticsLoading) {
+          return const MarketCapAllocationWidget(isLoading: true);
+        } else if (state is PortfolioAnalyticsLoaded) {
+          final isLoading = state.isLoadingType(
+            AnalyticsDataType.marketCapAllocation,
+          );
+          final error = state.getErrorForType(
+            AnalyticsDataType.marketCapAllocation,
+          );
 
-    return allocationsAsync.when(
-      data: (allocations) => MarketCapAllocationWidget(
-        marketCapAllocation: allocations.marketCapAllocation,
-        isLoading: false,
-      ),
-      loading: () => const MarketCapAllocationWidget(isLoading: true),
-      error: (error, stack) {
-        AppLogger.error(
-          'Failed to load market cap allocation',
-          tag: 'PortfolioAnalysisWidget',
-          error: error,
-          stackTrace: stack,
-        );
-        return MarketCapAllocationWidget(error: error.toString());
+          return MarketCapAllocationWidget(
+            marketCapAllocation: state.marketCapAllocation,
+            isLoading: isLoading,
+            error: error,
+          );
+        } else if (state is PortfolioAnalyticsError) {
+          AppLogger.error(
+            'Failed to load market cap allocation',
+            tag: 'PortfolioAnalysisWidget',
+            error: state.message,
+          );
+          return MarketCapAllocationWidget(error: state.message);
+        }
+
+        return const MarketCapAllocationWidget(isLoading: true);
       },
     );
   }
 
   Widget _buildHeatmapTab() {
-    final heatmapAsync = ref.watch(
-      portfolioHeatmapProvider(widget.portfolioId),
-    );
+    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+      builder: (context, state) {
+        if (state is PortfolioAnalyticsLoading) {
+          return const HeatmapWidget(isLoading: true);
+        } else if (state is PortfolioAnalyticsLoaded) {
+          final isLoading = state.isLoadingType(AnalyticsDataType.heatmap);
+          final error = state.getErrorForType(AnalyticsDataType.heatmap);
 
-    return heatmapAsync.when(
-      data: (heatmap) => HeatmapWidget(heatmap: heatmap, isLoading: false),
-      loading: () => const HeatmapWidget(isLoading: true),
-      error: (error, stack) {
-        AppLogger.error(
-          'Failed to load heatmap',
-          tag: 'PortfolioAnalysisWidget',
-          error: error,
-          stackTrace: stack,
-        );
-        return HeatmapWidget(error: error.toString());
+          return HeatmapWidget(
+            heatmap: state.heatmap,
+            isLoading: isLoading,
+            error: error,
+          );
+        } else if (state is PortfolioAnalyticsError) {
+          AppLogger.error(
+            'Failed to load heatmap',
+            tag: 'PortfolioAnalysisWidget',
+            error: state.message,
+          );
+          return HeatmapWidget(error: state.message);
+        }
+
+        return const HeatmapWidget(isLoading: true);
       },
     );
   }
 
   Widget _buildMoversTab() {
-    final moversAsync = ref.watch(
-      portfolioMoversProvider(widget.portfolioId, limit: 10),
-    );
+    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
+      builder: (context, state) {
+        if (state is PortfolioAnalyticsLoading) {
+          return const MoversWidget(isLoading: true);
+        } else if (state is PortfolioAnalyticsLoaded) {
+          final isLoading = state.isLoadingType(AnalyticsDataType.movers);
+          final error = state.getErrorForType(AnalyticsDataType.movers);
 
-    return moversAsync.when(
-      data: (movers) => MoversWidget(movers: movers, isLoading: false),
-      loading: () => const MoversWidget(isLoading: true),
-      error: (error, stack) {
-        AppLogger.error(
-          'Failed to load movers',
-          tag: 'PortfolioAnalysisWidget',
-          error: error,
-          stackTrace: stack,
-        );
-        return MoversWidget(error: error.toString());
+          return MoversWidget(
+            movers: state.movers,
+            isLoading: isLoading,
+            error: error,
+          );
+        } else if (state is PortfolioAnalyticsError) {
+          AppLogger.error(
+            'Failed to load movers',
+            tag: 'PortfolioAnalysisWidget',
+            error: state.message,
+          );
+          return MoversWidget(error: state.message);
+        }
+
+        return const MoversWidget(isLoading: true);
       },
     );
   }
