@@ -36,12 +36,12 @@ class ApiClient {
   Uri _buildUri(String endpoint, {Map<String, dynamic>? queryParams}) {
     String finalEndpoint = endpoint;
     String finalBaseUrl = baseUrl;
-    
+
     AppLogger.debug(
       '🌐 URI Building - Original endpoint: $endpoint, baseUrl: $baseUrl',
       tag: 'ApiClient',
     );
-    
+
     // Replace localhost with 10.0.2.2 for Android platform (mobile/emulator)
     if (!kIsWeb && Platform.isAndroid) {
       finalEndpoint = _replaceLocalhostForAndroid(finalEndpoint);
@@ -51,10 +51,11 @@ class ApiClient {
         tag: 'ApiClient',
       );
     }
-    
+
     Uri finalUri;
     // Check if endpoint is already a complete URL (contains protocol)
-    if (finalEndpoint.startsWith('http://') || finalEndpoint.startsWith('https://')) {
+    if (finalEndpoint.startsWith('http://') ||
+        finalEndpoint.startsWith('https://')) {
       finalUri = Uri.parse(finalEndpoint).replace(queryParameters: queryParams);
       AppLogger.debug(
         '🌐 Complete URL detected - Final URI: $finalUri',
@@ -62,7 +63,9 @@ class ApiClient {
       );
     } else {
       // For relative endpoints, combine with base URL
-      final cleanEndpoint = finalEndpoint.startsWith('/') ? finalEndpoint.substring(1) : finalEndpoint;
+      final cleanEndpoint = finalEndpoint.startsWith('/')
+          ? finalEndpoint.substring(1)
+          : finalEndpoint;
       final combinedUrl = '$finalBaseUrl/$cleanEndpoint';
       finalUri = Uri.parse(combinedUrl).replace(queryParameters: queryParams);
       AppLogger.debug(
@@ -70,10 +73,10 @@ class ApiClient {
         tag: 'ApiClient',
       );
     }
-    
+
     return finalUri;
   }
-  
+
   /// Replace localhost with 10.0.2.2 for Android emulator compatibility
   String _replaceLocalhostForAndroid(String url) {
     return url.replaceAll('localhost', '10.0.2.2');
@@ -101,7 +104,7 @@ class ApiClient {
       '📥 Response received - Status: ${response.statusCode}, Body length: ${response.body.length}',
       tag: 'ApiClient',
     );
-    
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
         final dynamic data = jsonDecode(response.body);
@@ -147,22 +150,39 @@ class ApiClient {
       uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
-      
-      AppLogger.info('🚀 GET Request - Full endpoint: ${uri.toString()}', tag: 'ApiClient');
-      AppLogger.apiRequest('GET', uri.toString(), tag: 'ApiClient', headers: requestHeaders);
+
+      AppLogger.info(
+        '🚀 GET Request - Full endpoint: ${uri.toString()}',
+        tag: 'ApiClient',
+      );
+      AppLogger.apiRequest(
+        'GET',
+        uri.toString(),
+        tag: 'ApiClient',
+        headers: requestHeaders,
+      );
 
       final response = await _client.get(uri, headers: requestHeaders);
       stopwatch.stop();
-      
-      AppLogger.apiResponse('GET', uri.toString(), response.statusCode, 
-          tag: 'ApiClient', duration: stopwatch.elapsedMilliseconds);
-      
+
+      AppLogger.apiResponse(
+        'GET',
+        uri.toString(),
+        response.statusCode,
+        tag: 'ApiClient',
+        duration: stopwatch.elapsedMilliseconds,
+      );
+
       return _handleResponse(response, parser);
     } catch (e) {
       stopwatch.stop();
-      AppLogger.error('GET request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}', 
-          tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
-      
+      AppLogger.error(
+        'GET request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}',
+        tag: 'ApiClient',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+
       if (e is ApiException) {
         rethrow;
       }
@@ -184,27 +204,44 @@ class ApiClient {
       uri = _buildUri(endpoint, queryParams: queryParams);
 
       final requestHeaders = await _createHeaders(additionalHeaders: headers);
-      
-      AppLogger.info('🚀 POST Request - Full endpoint: ${uri.toString()}', tag: 'ApiClient');
-      AppLogger.apiRequest('POST', uri.toString(), tag: 'ApiClient', 
-          headers: requestHeaders, body: body);
+
+      AppLogger.info(
+        '🚀 POST Request - Full endpoint: ${uri.toString()}',
+        tag: 'ApiClient',
+      );
+      AppLogger.apiRequest(
+        'POST',
+        uri.toString(),
+        tag: 'ApiClient',
+        headers: requestHeaders,
+        body: body,
+      );
 
       final response = await _client.post(
         uri,
         headers: requestHeaders,
         body: body != null ? jsonEncode(body) : null,
       );
-      
+
       stopwatch.stop();
-      AppLogger.apiResponse('POST', uri.toString(), response.statusCode, 
-          tag: 'ApiClient', duration: stopwatch.elapsedMilliseconds);
+      AppLogger.apiResponse(
+        'POST',
+        uri.toString(),
+        response.statusCode,
+        tag: 'ApiClient',
+        duration: stopwatch.elapsedMilliseconds,
+      );
 
       return _handleResponse(response, parser);
     } catch (e) {
       stopwatch.stop();
-      AppLogger.error('POST request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}', 
-          tag: 'ApiClient', error: e, stackTrace: StackTrace.current);
-      
+      AppLogger.error(
+        'POST request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}',
+        tag: 'ApiClient',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+
       if (e is ApiException) {
         rethrow;
       }

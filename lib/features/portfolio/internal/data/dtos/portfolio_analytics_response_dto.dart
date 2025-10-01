@@ -141,10 +141,7 @@ class SectorAllocationDto {
   final List<SectorWeightDto>? sectorWeights;
   final List<IndustryWeightDto>? industryWeights;
 
-  const SectorAllocationDto({
-    this.sectorWeights,
-    this.industryWeights,
-  });
+  const SectorAllocationDto({this.sectorWeights, this.industryWeights});
 
   factory SectorAllocationDto.fromJson(Map<String, dynamic> json) =>
       _$SectorAllocationDtoFromJson(json);

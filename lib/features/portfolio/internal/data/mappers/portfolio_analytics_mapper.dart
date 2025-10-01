@@ -76,8 +76,12 @@ class PortfolioAnalyticsMapper {
   static PortfolioAnalytics responseFromDto(PortfolioAnalyticsResponseDto dto) {
     return PortfolioAnalytics(
       portfolioId: dto.portfolioId ?? 'Unknown Portfolio',
-      timestamp: dto.timestamp != null ? DateTime.parse(dto.timestamp!) : DateTime.now(),
-      analytics: dto.analytics != null ? _analyticsFromDto(dto.analytics!) : _createEmptyAnalytics(),
+      timestamp: dto.timestamp != null
+          ? DateTime.parse(dto.timestamp!)
+          : DateTime.now(),
+      analytics: dto.analytics != null
+          ? _analyticsFromDto(dto.analytics!)
+          : _createEmptyAnalytics(),
     );
   }
 
@@ -97,9 +101,7 @@ class PortfolioAnalyticsMapper {
 
   /// Convert heatmap DTO to entity
   static Heatmap _heatmapFromDto(HeatmapDto dto) {
-    return Heatmap(
-      sectors: dto.sectors?.map(_sectorFromDto).toList() ?? [],
-    );
+    return Heatmap(sectors: dto.sectors?.map(_sectorFromDto).toList() ?? []);
   }
 
   /// Convert sector DTO to entity
@@ -145,8 +147,10 @@ class PortfolioAnalyticsMapper {
   /// Convert sector allocation DTO to entity
   static SectorAllocation _sectorAllocationFromDto(SectorAllocationDto dto) {
     return SectorAllocation(
-      sectorWeights: dto.sectorWeights?.map(_sectorWeightFromDto).toList() ?? [],
-      industryWeights: dto.industryWeights?.map(_industryWeightFromDto).toList() ?? [],
+      sectorWeights:
+          dto.sectorWeights?.map(_sectorWeightFromDto).toList() ?? [],
+      industryWeights:
+          dto.industryWeights?.map(_industryWeightFromDto).toList() ?? [],
     );
   }
 
