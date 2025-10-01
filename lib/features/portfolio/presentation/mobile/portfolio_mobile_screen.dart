@@ -7,6 +7,7 @@ import '../cubit/portfolio_state.dart';
 import '../../providers/portfolio_providers.dart';
 import 'widgets/portfolio_holdings_widget.dart';
 import '../../../../core/utils/logger.dart';
+import '../widgets/portfolio_summary_widget.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation
 class PortfolioMobileScreen extends ConsumerWidget {
@@ -226,63 +227,12 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Portfolio Summary Cards
-          _buildSummaryCard(
-            'Total Value',
-            '₹${summary.totalValue.toStringAsFixed(2)}',
-            Icons.account_balance_wallet,
-            Colors.blue,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryCard(
-            'Today\'s Change',
-            '₹${summary.todayChange.toStringAsFixed(2)}',
-            summary.todayChange >= 0 ? Icons.trending_up : Icons.trending_down,
-            summary.todayChange >= 0 ? Colors.green : Colors.red,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryCard(
-            'Total Return',
-            '₹${summary.totalGainLoss.toStringAsFixed(2)}',
-            summary.totalGainLoss >= 0
-                ? Icons.trending_up
-                : Icons.trending_down,
-            summary.totalGainLoss >= 0 ? Colors.green : Colors.red,
-          ),
-          const SizedBox(height: 24),
-
-          // Quick Actions
-          Text(
-            'Quick Actions',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
-                  'View Holdings',
-                  Icons.list_alt,
-                  () => _tabController.animateTo(1),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildActionCard(
-                  'Analysis',
-                  Icons.analytics,
-                  () => _tabController.animateTo(2),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return PortfolioSummaryWidget(
+      totalValue: summary.totalValue,
+      todayChange: summary.todayChange,
+      totalGainLoss: summary.totalGainLoss,
+      onViewHoldings: () => _tabController.animateTo(1),
+      onViewAnalysis: () => _tabController.animateTo(2),
     );
   }
 
@@ -300,80 +250,6 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
           SizedBox(height: 8),
           Text('Coming soon...', style: TextStyle(color: Colors.grey)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionCard(String title, IconData icon, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(icon, size: 32, color: Theme.of(context).primaryColor),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

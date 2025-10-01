@@ -7,16 +7,23 @@ part 'portfolio_summary.g.dart';
 @freezed
 class PortfolioSummary with _$PortfolioSummary {
   const PortfolioSummary._();
-  
+
   const factory PortfolioSummary({
     required String userId,
     required double totalValue,
     required double totalInvested,
+    required double investmentValue,
     required double totalGainLoss,
     required double totalGainLossPercentage,
     required double todayChange,
     required double todayChangePercentage,
+    required double todayGainLossPercentage,
     required int totalHoldings,
+    required int totalAssets,
+    required int todayGainersCount,
+    required int todayLosersCount,
+    required int gainersCount,
+    required int losersCount,
     required DateTime lastUpdated,
     @Default([]) List<SectorAllocation> sectorAllocation,
     @Default([]) List<TopPerformer> topPerformers,
@@ -31,27 +38,34 @@ class PortfolioSummary with _$PortfolioSummary {
       userId: userId,
       totalValue: 0.0,
       totalInvested: 0.0,
+      investmentValue: 0.0,
       totalGainLoss: 0.0,
       totalGainLossPercentage: 0.0,
       todayChange: 0.0,
       todayChangePercentage: 0.0,
+      todayGainLossPercentage: 0.0,
       totalHoldings: 0,
+      totalAssets: 0,
+      todayGainersCount: 0,
+      todayLosersCount: 0,
+      gainersCount: 0,
+      losersCount: 0,
       lastUpdated: DateTime.now(),
     );
   }
 
   /// Check if portfolio is profitable
   bool get isProfitable => totalGainLoss >= 0;
-  
+
   /// Check if today's performance is positive
   bool get isTodayPositive => todayChange >= 0;
-  
+
   /// Get formatted total value
   String get formattedTotalValue => _formatCurrency(totalValue);
-  
+
   /// Get formatted gain/loss
   String get formattedGainLoss => _formatCurrency(totalGainLoss);
-  
+
   /// Get formatted today's change
   String get formattedTodayChange => _formatCurrency(todayChange);
 

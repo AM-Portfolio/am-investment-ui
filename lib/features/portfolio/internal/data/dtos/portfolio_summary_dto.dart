@@ -10,6 +10,12 @@ class PortfolioSummaryDto {
   final double totalGain;
   final double totalGainPercentage;
   final double todaysGainPercentage;
+  final double todayGainLossPercentage;
+  final int totalAssets;
+  final int todayGainersCount;
+  final int todayLosersCount;
+  final int gainersCount;
+  final int losersCount;
   final Map<String, List<MarketCapHoldingDto>> marketCapHoldings;
   final Map<String, double> sectorAllocation;
   final List<ApiTopPerformer> topPerformers;
@@ -23,6 +29,12 @@ class PortfolioSummaryDto {
     required this.totalGain,
     required this.totalGainPercentage,
     required this.todaysGainPercentage,
+    required this.todayGainLossPercentage,
+    required this.totalAssets,
+    required this.todayGainersCount,
+    required this.todayLosersCount,
+    required this.gainersCount,
+    required this.losersCount,
     required this.marketCapHoldings,
     required this.sectorAllocation,
     required this.topPerformers,
@@ -38,6 +50,12 @@ class PortfolioSummaryDto {
       totalGain: _parseDouble(json['totalGain']),
       totalGainPercentage: _parseDouble(json['totalGainPercentage']),
       todaysGainPercentage: _parseDouble(json['todaysGainPercentage']),
+      todayGainLossPercentage: _parseDouble(json['todayGainLossPercentage']),
+      totalAssets: _parseInt(json['totalAssets']),
+      todayGainersCount: _parseInt(json['todayGainersCount']),
+      todayLosersCount: _parseInt(json['todayLosersCount']),
+      gainersCount: _parseInt(json['gainersCount']),
+      losersCount: _parseInt(json['losersCount']),
       marketCapHoldings: _parseMarketCapHoldings(json['marketCapHoldings']),
       sectorAllocation: _parseSectorAllocation(json['sectorAllocation']),
       topPerformers: _parseTopPerformers(json['topPerformers']),
@@ -60,52 +78,64 @@ class PortfolioSummaryDto {
     return 0.0;
   }
 
+  /// Helper method to safely parse int values from API
+  static int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) {
+      try {
+        return int.parse(value);
+      } catch (_) {
+        return 0;
+      }
+    }
+    return 0;
+  }
+
   /// Parse market cap holdings
   static Map<String, List<MarketCapHoldingDto>> _parseMarketCapHoldings(
-      dynamic value) {
+    dynamic value,
+  ) {
     if (value == null) return {};
-    
+
     final Map<String, List<MarketCapHoldingDto>> result = {};
     final map = value as Map<String, dynamic>;
-    
+
     for (final entry in map.entries) {
       final holdings = (entry.value as List? ?? [])
           .map((h) => MarketCapHoldingDto.fromJson(h))
           .toList();
       result[entry.key] = holdings;
     }
-    
+
     return result;
   }
 
   /// Parse sector allocation
   static Map<String, double> _parseSectorAllocation(dynamic value) {
     if (value == null) return {};
-    
+
     final Map<String, double> result = {};
     final map = value as Map<String, dynamic>;
-    
+
     for (final entry in map.entries) {
       result[entry.key] = _parseDouble(entry.value);
     }
-    
+
     return result;
   }
 
   /// Parse top performers
   static List<ApiTopPerformer> _parseTopPerformers(dynamic value) {
     if (value == null) return [];
-    return (value as List)
-        .map((p) => ApiTopPerformer.fromJson(p))
-        .toList();
+    return (value as List).map((p) => ApiTopPerformer.fromJson(p)).toList();
   }
 
   /// Parse top losers
   static List<ApiTopLoser> _parseTopLosers(dynamic value) {
     if (value == null) return [];
-    return (value as List)
-        .map((l) => ApiTopLoser.fromJson(l))
-        .toList();
+    return (value as List).map((l) => ApiTopLoser.fromJson(l)).toList();
   }
 
   /// Convert to JSON for API requests
@@ -117,6 +147,12 @@ class PortfolioSummaryDto {
       'totalGain': totalGain,
       'totalGainPercentage': totalGainPercentage,
       'todaysGainPercentage': todaysGainPercentage,
+      'todayGainLossPercentage': todayGainLossPercentage,
+      'totalAssets': totalAssets,
+      'todayGainersCount': todayGainersCount,
+      'todayLosersCount': todayLosersCount,
+      'gainersCount': gainersCount,
+      'losersCount': losersCount,
       'marketCapHoldings': marketCapHoldings.map(
         (key, value) => MapEntry(key, value.map((h) => h.toJson()).toList()),
       ),
@@ -177,8 +213,6 @@ class MarketCapHoldingDto {
     };
   }
 }
-
-
 
 /// API model for top performer
 class ApiTopPerformer {
