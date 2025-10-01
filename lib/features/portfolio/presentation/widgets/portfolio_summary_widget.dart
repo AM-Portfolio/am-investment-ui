@@ -21,20 +21,12 @@ class PortfolioSummaryWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main Portfolio Value Card
+          // Main Portfolio Value Card with fixed values
           _buildMainValueCard(context),
           const SizedBox(height: 12),
 
-          // Performance Cards Row
-          _buildPerformanceRow(context),
-          const SizedBox(height: 12),
-
-          // Investment Overview
-          _buildInvestmentOverviewCard(context),
-          const SizedBox(height: 12),
-
-          // Portfolio Statistics
-          _buildStatisticsCard(context),
+          // Dynamic Market Data Card
+          _buildDynamicMarketCard(context),
           const SizedBox(height: 16),
 
           // Quick Actions
@@ -89,35 +81,66 @@ class PortfolioSummaryWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              summary.formattedTotalValue,
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(height: 8),
+            // Total value and percentage in same row
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Icon(
-                  isPositive ? Icons.trending_up : Icons.trending_down,
-                  color: color,
-                  size: 20,
-                ),
-                const SizedBox(width: 4),
                 Text(
-                  '${isPositive ? '+' : ''}${summary.formattedGainLoss}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
+                  summary.formattedTotalValue,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '(${summary.totalGainLossPercentage.toStringAsFixed(2)}%)',
-                  style: Theme.of(
+                Row(
+                  children: [
+                    Icon(
+                      isPositive ? Icons.trending_up : Icons.trending_down,
+                      color: color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '(${summary.totalGainLossPercentage.toStringAsFixed(2)}%)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Investment Overview within main card
+            Row(
+              children: [
+                Expanded(
+                  child: _buildOverviewItem(
                     context,
-                  ).textTheme.bodyMedium?.copyWith(color: color),
+                    'Invested',
+                    '₹${summary.totalInvested.toStringAsFixed(0)}',
+                    Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildOverviewItem(
+                    context,
+                    'Current',
+                    '₹${summary.totalValue.toStringAsFixed(0)}',
+                    Colors.orange,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildOverviewItem(
+                    context,
+                    'Total Holdings',
+                    summary.totalHoldings.toString(),
+                    Colors.purple,
+                  ),
                 ),
               ],
             ),
@@ -127,37 +150,89 @@ class PortfolioSummaryWidget extends StatelessWidget {
     );
   }
 
-  /// Build performance row showing today's and total performance
-  Widget _buildPerformanceRow(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildPerformanceCard(
-            context,
-            'Today\'s Change',
-            summary.formattedTodayChange,
-            '${summary.todayChangePercentage.toStringAsFixed(2)}%',
-            summary.isTodayPositive,
-            Icons.today,
-          ),
+  /// Build dynamic market data card that changes frequently
+  Widget _buildDynamicMarketCard(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Today's Change and Total Returns Row
+            Row(
+              children: [
+                Expanded(
+                  child: _buildPerformanceItem(
+                    context,
+                    'Today\'s Change',
+                    summary.formattedTodayChange,
+                    '${summary.todayChangePercentage.toStringAsFixed(2)}%',
+                    summary.isTodayPositive,
+                    Icons.today,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPerformanceItem(
+                    context,
+                    'Total Returns',
+                    summary.formattedGainLoss,
+                    '${summary.totalGainLossPercentage.toStringAsFixed(2)}%',
+                    summary.isProfitable,
+                    Icons.trending_up,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Today's Gainers/Losers Row
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSimpleGainerLoserItem(
+                    context,
+                    'Today',
+                    summary.todayGainersCount,
+                    summary.todayLosersCount,
+                    Icons.today,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildSimpleGainerLoserItem(
+                    context,
+                    'Overall',
+                    summary.gainersCount,
+                    summary.losersCount,
+                    Icons.trending_up,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Last updated time
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  'Last updated: ${_formatDateTime(summary.lastUpdated)}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildPerformanceCard(
-            context,
-            'Total Returns',
-            summary.formattedGainLoss,
-            '${summary.totalGainLossPercentage.toStringAsFixed(2)}%',
-            summary.isProfitable,
-            Icons.trending_up,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  /// Build individual performance card
-  Widget _buildPerformanceCard(
+  /// Build individual performance item for dynamic card
+  Widget _buildPerformanceItem(
     BuildContext context,
     String title,
     String value,
@@ -167,78 +242,38 @@ class PortfolioSummaryWidget extends StatelessWidget {
   ) {
     final color = isPositive ? Colors.green : Colors.red;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+            Icon(icon, color: color, size: 16),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              percentage,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: color),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Build investment overview card
-  Widget _buildInvestmentOverviewCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Expanded(
-              child: _buildOverviewItem(
-                context,
-                'Invested',
-                '₹${summary.totalInvested.toStringAsFixed(0)}',
-                Colors.blue,
-              ),
-            ),
-            Expanded(
-              child: _buildOverviewItem(
-                context,
-                'Current',
-                '₹${summary.totalValue.toStringAsFixed(0)}',
-                Colors.orange,
               ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          percentage,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
+        ),
+      ],
     );
   }
 
@@ -270,92 +305,20 @@ class PortfolioSummaryWidget extends StatelessWidget {
     );
   }
 
-  /// Build statistics card with holdings and performance metrics
-  Widget _buildStatisticsCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    'Total Assets',
-                    summary.totalAssets.toString(),
-                    Icons.account_balance,
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    'Holdings',
-                    summary.totalHoldings.toString(),
-                    Icons.folder,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    'Gainers',
-                    '${summary.todayGainersCount}/${summary.gainersCount}',
-                    Icons.trending_up,
-                    Colors.green,
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    'Losers',
-                    '${summary.todayLosersCount}/${summary.losersCount}',
-                    Icons.trending_down,
-                    Colors.red,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  'Last updated: ${_formatDateTime(summary.lastUpdated)}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Build individual statistic item
-  Widget _buildStatItem(
+  /// Build simple gainer/loser item with XX/XX format
+  Widget _buildSimpleGainerLoserItem(
     BuildContext context,
     String label,
-    String value,
-    IconData icon, [
-    Color? iconColor,
-  ]) {
+    int gainersCount,
+    int losersCount,
+    IconData icon,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: iconColor ?? Colors.grey[600]),
+            Icon(icon, size: 16, color: Colors.grey[600]),
             const SizedBox(width: 4),
             Text(
               label,
@@ -366,11 +329,26 @@ class PortfolioSummaryWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        RichText(
+          text: TextSpan(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            children: [
+              TextSpan(
+                text: gainersCount.toString(),
+                style: const TextStyle(color: Colors.green),
+              ),
+              TextSpan(
+                text: '/',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              TextSpan(
+                text: losersCount.toString(),
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
         ),
       ],
     );
