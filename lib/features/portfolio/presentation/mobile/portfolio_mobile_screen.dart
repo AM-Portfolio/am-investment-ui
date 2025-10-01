@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
@@ -137,55 +138,83 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                AppLogger.userAction(
-                  'Refresh Portfolio',
-                  tag: 'PortfolioMobileView',
-                  context: {'userId': widget.userId},
-                );
-                context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
-              },
+        body: Column(
+          children: [
+            // Tab bar directly under status bar with logout icon
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TabBar(
+                        controller: _tabController,
+                        labelColor: Theme.of(context).primaryColor,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: Theme.of(context).primaryColor,
+                        labelStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        tabs: const [
+                          Tab(
+                            icon: Icon(Icons.dashboard_outlined, size: 20),
+                            text: 'Overview',
+                          ),
+                          Tab(
+                            icon: Icon(Icons.wallet, size: 20),
+                            text: 'Holdings',
+                          ),
+                          Tab(
+                            icon: Icon(Icons.analytics_outlined, size: 20),
+                            text: 'Analysis',
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Logout icon
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+                      child: IconButton(
+                        onPressed: _showLogoutDialog,
+                        icon: Icon(
+                          Icons.logout_outlined,
+                          color: Colors.grey[600],
+                          size: 22,
+                        ),
+                        tooltip: 'Logout',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Tab content with pull-to-refresh
+            Expanded(
+              child: BlocBuilder<PortfolioCubit, PortfolioState>(
+                builder: (context, state) {
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildOverviewTab(state),
+                      _buildHoldingsTab(state),
+                      _buildAnalysisTab(state),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Theme.of(context).primaryColor,
-            labelStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            tabs: const [
-              Tab(
-                icon: Icon(Icons.dashboard_outlined, size: 20),
-                text: 'Overview',
-              ),
-              Tab(icon: Icon(Icons.wallet, size: 20), text: 'Holdings'),
-              Tab(
-                icon: Icon(Icons.analytics_outlined, size: 20),
-                text: 'Analysis',
-              ),
-            ],
-          ),
-        ),
-        body: BlocBuilder<PortfolioCubit, PortfolioState>(
-          builder: (context, state) {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(state),
-                _buildHoldingsTab(state),
-                _buildAnalysisTab(state),
-              ],
-            );
-          },
         ),
       ),
     );
@@ -197,14 +226,46 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
     }
 
     if (state is PortfolioError) {
-      return _buildErrorWidget(state.message);
+      return RefreshIndicator(
+        onRefresh: () async {
+          AppLogger.userAction(
+            'Pull to Refresh Portfolio',
+            tag: 'PortfolioMobileView',
+            context: {'userId': widget.userId},
+          );
+          context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: _buildErrorWidget(state.message),
+          ),
+        ),
+      );
     }
 
     if (state is PortfolioLoaded) {
       return _buildOverviewContent(state);
     }
 
-    return const Center(child: Text('Loading portfolio...'));
+    return RefreshIndicator(
+      onRefresh: () async {
+        AppLogger.userAction(
+          'Pull to Refresh Portfolio',
+          tag: 'PortfolioMobileView',
+          context: {'userId': widget.userId},
+        );
+        context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+      },
+      child: const SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: 400,
+          child: Center(child: Text('Loading portfolio...')),
+        ),
+      ),
+    );
   }
 
   Widget _buildHoldingsTab(PortfolioState state) {
@@ -213,7 +274,23 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
     }
 
     if (state is PortfolioError) {
-      return _buildErrorWidget(state.message);
+      return RefreshIndicator(
+        onRefresh: () async {
+          AppLogger.userAction(
+            'Pull to Refresh Holdings',
+            tag: 'PortfolioMobileView',
+            context: {'userId': widget.userId},
+          );
+          context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: _buildErrorWidget(state.message),
+          ),
+        ),
+      );
     }
 
     return PortfolioHoldingsWidget(userId: widget.userId);
@@ -225,19 +302,66 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
     }
 
     if (state is PortfolioError) {
-      return _buildErrorWidget(state.message);
+      return RefreshIndicator(
+        onRefresh: () async {
+          AppLogger.userAction(
+            'Pull to Refresh Analysis',
+            tag: 'PortfolioMobileView',
+            context: {'userId': widget.userId},
+          );
+          context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: _buildErrorWidget(state.message),
+          ),
+        ),
+      );
     }
 
-    return _buildAnalysisContent(state);
+    return RefreshIndicator(
+      onRefresh: () async {
+        AppLogger.userAction(
+          'Pull to Refresh Analysis',
+          tag: 'PortfolioMobileView',
+          context: {'userId': widget.userId},
+        );
+        context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: _buildAnalysisContent(state),
+      ),
+    );
   }
 
   Widget _buildOverviewContent(PortfolioLoaded state) {
     final summary = state.summary;
 
-    return PortfolioSummaryWidget(
-      summary: summary,
-      onViewHoldings: () => _tabController.animateTo(1),
-      onViewAnalysis: () => _tabController.animateTo(2),
+    AppLogger.debug(
+      'Building overview with summary - totalValue: ${summary.totalValue}, todayChange: ${summary.todayChange}, totalGainLoss: ${summary.totalGainLoss}',
+      tag: 'PortfolioMobileView',
+    );
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        AppLogger.userAction(
+          'Pull to Refresh Overview',
+          tag: 'PortfolioMobileView',
+          context: {'userId': widget.userId},
+        );
+        context.read<PortfolioCubit>().refreshPortfolio(widget.userId);
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: PortfolioSummaryWidget(
+          summary: summary,
+          onViewHoldings: () => _tabController.animateTo(1),
+          onViewAnalysis: () => _tabController.animateTo(2),
+        ),
+      ),
     );
   }
 
@@ -284,6 +408,46 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
           ),
         ],
       ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                // Clear authentication state and navigate to login
+                try {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('is_authenticated');
+                  await prefs.remove('user_id');
+                } catch (e) {
+                  // Continue with logout even if SharedPreferences fails
+                }
+                // Navigate back to root and clear all routes
+                if (mounted) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/', (route) => false);
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
