@@ -24,6 +24,11 @@ class HeatmapWidget extends StatelessWidget {
     // Log heatmap data for debugging
     _logHeatmapData();
 
+    // Determine if sub-cards should be shown based on screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final showSubCards =
+        screenWidth > 768; // Show sub-cards on web/tablet, hide on mobile
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -32,6 +37,7 @@ class HeatmapWidget extends StatelessWidget {
             heatmap: heatmap,
             isLoading: isLoading,
             error: error,
+            showSubCards: showSubCards,
           ),
 
           const SizedBox(height: 16),
