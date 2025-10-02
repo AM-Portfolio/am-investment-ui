@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import '../../domain/entities/portfolio_analytics.dart';
 import '../../domain/entities/portfolio_analytics_request.dart';
@@ -57,14 +58,45 @@ class PortfolioAnalyticsRepositoryImpl implements PortfolioAnalyticsRepository {
       // Convert request entity to DTO
       final requestDto = PortfolioAnalyticsMapper.requestToDto(request);
 
+      // Log the complete request DTO
+      try {
+        final requestJson = jsonEncode(requestDto.toJson());
+        AppLogger.debug(
+          'Request DTO:\n${const JsonEncoder.withIndent('  ').convert(jsonDecode(requestJson))}',
+          tag: 'PortfolioAnalyticsRepository',
+        );
+      } catch (e) {
+        AppLogger.warning(
+          'Failed to serialize request DTO: $e',
+          tag: 'PortfolioAnalyticsRepository',
+        );
+      }
+
       // Fetch data from remote source
       final analyticsDto = await _remoteDataSource.getPortfolioAnalytics(
         request.coreIdentifiers.portfolioId,
         requestDto,
       );
 
+      // Log the complete analytics DTO response
+      try {
+        final responseJson = jsonEncode(analyticsDto.toJson());
+        AppLogger.debug(
+          'Analytics DTO Response:\n${const JsonEncoder.withIndent('  ').convert(jsonDecode(responseJson))}',
+          tag: 'PortfolioAnalyticsRepository',
+        );
+      } catch (e) {
+        AppLogger.warning(
+          'Failed to serialize analytics DTO response: $e',
+          tag: 'PortfolioAnalyticsRepository',
+        );
+      }
+
       // Map DTO to domain entity using analytics mapper
       final analytics = PortfolioAnalyticsMapper.responseFromDto(analyticsDto);
+
+      // Log the final mapped analytics entity
+      _logAnalyticsEntity(analytics);
 
       // Cache the result
       _cachedAnalytics = analytics;
@@ -324,6 +356,136 @@ class PortfolioAnalyticsRepositoryImpl implements PortfolioAnalyticsRepository {
       'Portfolio analytics cache cleared',
       tag: 'PortfolioAnalyticsRepository',
     );
+  }
+
+  /// Logs the complete analytics entity for debugging
+  void _logAnalyticsEntity(PortfolioAnalytics analytics) {
+    try {
+      // Create a comprehensive map of the analytics data
+      final analyticsMap = {
+        'portfolioId': analytics.portfolioId,
+        'timestamp': analytics.timestamp.toIso8601String(),
+        'analytics': {
+          'heatmap': analytics.analytics.heatmap != null
+              ? {
+                  'sectors': analytics.analytics.heatmap!.sectors
+                      .map(
+                        (sector) => {
+                          'sectorName': sector.sectorName,
+                          'totalValue': sector.totalValue,
+                          'weightage': sector.weightage,
+                          'stocks': sector.stocks
+                              .map(
+                                (stock) => {
+                                  'symbol': stock.symbol,
+                                  'companyName': stock.companyName,
+                                  'lastPrice': stock.lastPrice,
+                                  'changeAmount': stock.changeAmount,
+                                  'changePercent': stock.changePercent,
+                                  'sector': stock.sector,
+                                  'quantity': stock.quantity,
+                                  'avgPrice': stock.avgPrice,
+                                  'marketValue': stock.marketValue,
+                                  'totalReturn': stock.totalReturn,
+                                },
+                              )
+                              .toList(),
+                        },
+                      )
+                      .toList(),
+                }
+              : null,
+          'movers': analytics.analytics.movers != null
+              ? {
+                  'topGainers': analytics.analytics.movers!.topGainers
+                      .map(
+                        (stock) => {
+                          'symbol': stock.symbol,
+                          'companyName': stock.companyName,
+                          'changePercent': stock.changePercent,
+                          'changeAmount': stock.changeAmount,
+                          'lastPrice': stock.lastPrice,
+                        },
+                      )
+                      .toList(),
+                  'topLosers': analytics.analytics.movers!.topLosers
+                      .map(
+                        (stock) => {
+                          'symbol': stock.symbol,
+                          'companyName': stock.companyName,
+                          'changePercent': stock.changePercent,
+                          'changeAmount': stock.changeAmount,
+                          'lastPrice': stock.lastPrice,
+                        },
+                      )
+                      .toList(),
+                }
+              : null,
+          'sectorAllocation': analytics.analytics.sectorAllocation?.toString(),
+          'marketCapAllocation': analytics.analytics.marketCapAllocation
+              ?.toString(),
+        },
+      };
+
+      final jsonString = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(analyticsMap);
+      AppLogger.debug(
+        'Final Analytics Entity:\\n$jsonString',
+        tag: 'PortfolioAnalyticsRepository',
+      );
+
+      // Log summary statistics
+      if (analytics.analytics.heatmap != null) {
+        final heatmap = analytics.analytics.heatmap!;
+        final totalSectors = heatmap.sectors.length;
+        final totalStocks = heatmap.sectors.fold(
+          0,
+          (sum, sector) => sum + sector.stocks.length,
+        );
+
+        AppLogger.info(
+          'Analytics Summary - PortfolioId: ${analytics.portfolioId}, '
+          'Timestamp: ${analytics.timestamp}, '
+          'Sectors: $totalSectors, Total Stocks: $totalStocks',
+          tag: 'PortfolioAnalyticsRepository',
+        );
+
+        // Log sector-wise summaries with stock details
+        for (final sector in heatmap.sectors) {
+          AppLogger.debug(
+            'Sector: ${sector.sectorName} - '
+            'Stocks: ${sector.stocks.length}, '
+            'TotalValue: ${sector.totalValue}, '
+            'Weightage: ${sector.weightage}',
+            tag: 'PortfolioAnalyticsRepository',
+          );
+
+          // Log first few stocks with detailed info to debug missing values
+          final stocksToLog = sector.stocks.take(3).toList();
+          for (int i = 0; i < stocksToLog.length; i++) {
+            final stock = stocksToLog[i];
+            AppLogger.debug(
+              'Stock ${i + 1} in ${sector.sectorName}: ${stock.symbol} - '
+              'LastPrice: ${stock.lastPrice}, '
+              'MarketValue: ${stock.marketValue}, '
+              'Quantity: ${stock.quantity}, '
+              'AvgPrice: ${stock.avgPrice}, '
+              'ChangeAmount: ${stock.changeAmount}, '
+              'ChangePercent: ${stock.changePercent}, '
+              'CompanyName: "${stock.companyName}"',
+              tag: 'PortfolioAnalyticsRepository',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      AppLogger.error(
+        'Failed to log analytics entity: $e',
+        tag: 'PortfolioAnalyticsRepository',
+        error: e,
+      );
+    }
   }
 
   /// Dispose method to clean up resources

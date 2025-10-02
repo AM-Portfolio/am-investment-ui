@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
+import '../../../../shared/widgets/cards/investment_card.dart';
+import '../../../../shared/models/investment_card/models.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Widget displaying detailed sector information with expandable stock lists
 /// Shows sector rank, total value, weightage and expandable stock details
@@ -26,7 +29,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      margin: const EdgeInsets.all(8.0),
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -57,7 +60,16 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
   }
 
   Widget _buildContent(BuildContext context) {
+    AppLogger.debug(
+      'Building content - isLoading: ${widget.isLoading}, '
+      'hasError: ${widget.error != null}, '
+      'hasHeatmap: ${widget.heatmap != null}, '
+      'sectorsCount: ${widget.heatmap?.sectors.length ?? 0}',
+      tag: 'SectorDetailsCard',
+    );
+
     if (widget.isLoading) {
+      AppLogger.info('Showing loading state', tag: 'SectorDetailsCard');
       return const SizedBox(
         height: 200,
         child: Center(child: CircularProgressIndicator()),
@@ -65,6 +77,10 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
     }
 
     if (widget.error != null) {
+      AppLogger.error(
+        'Showing error state: ${widget.error}',
+        tag: 'SectorDetailsCard',
+      );
       return SizedBox(
         height: 200,
         child: Center(
@@ -100,6 +116,10 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
     }
 
     if (widget.heatmap == null || widget.heatmap!.sectors.isEmpty) {
+      AppLogger.warning(
+        'No sector details available',
+        tag: 'SectorDetailsCard',
+      );
       return SizedBox(
         height: 200,
         child: Center(
@@ -125,52 +145,149 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       );
     }
 
+    AppLogger.info(
+      'Building sectors list with valid heatmap data',
+      tag: 'SectorDetailsCard',
+    );
     return _buildSectorsList(context);
   }
 
   Widget _buildSectorsList(BuildContext context) {
     final sectors = widget.heatmap!.sectors;
 
+    AppLogger.info(
+      'Building sectors list with ${sectors.length} sectors',
+      tag: 'SectorDetailsCard',
+    );
+
+    // Log each sector's raw data
+    for (int i = 0; i < sectors.length; i++) {
+      final sector = sectors[i];
+      AppLogger.debug(
+        'Sector ${i + 1}: ${sector.sectorName} - '
+        'totalValue: ${sector.totalValue}, '
+        'weightage: ${sector.weightage}, '
+        'stocks count: ${sector.stocks.length}',
+        tag: 'SectorDetailsCard',
+      );
+
+      // Log individual stock data in this sector
+      for (int j = 0; j < sector.stocks.length && j < 3; j++) {
+        // Log first 3 stocks
+        final stock = sector.stocks[j];
+        AppLogger.debug(
+          'Stock ${j + 1} in ${sector.sectorName}: ${stock.symbol} - '
+          'lastPrice: ${stock.lastPrice}, '
+          'marketValue: ${stock.marketValue}, '
+          'quantity: ${stock.quantity}, '
+          'avgPrice: ${stock.avgPrice}, '
+          'changeAmount: ${stock.changeAmount}, '
+          'changePercent: ${stock.changePercent}',
+          tag: 'SectorDetailsCard',
+        );
+      }
+    }
+
     // Calculate total portfolio value using improved logic
     double totalValue = sectors.fold(0.0, (sum, sector) {
+      AppLogger.debug(
+        'Processing sector ${sector.sectorName} with totalValue: ${sector.totalValue}',
+        tag: 'SectorDetailsCard',
+      );
+
       // Try sector.totalValue first
       if (sector.totalValue > 0) {
+        AppLogger.debug(
+          'Using sector.totalValue: ${sector.totalValue} for ${sector.sectorName}',
+          tag: 'SectorDetailsCard',
+        );
         return sum + sector.totalValue;
       }
+
       // Fallback calculation
       double sectorValue = sector.stocks.fold(0.0, (sectorSum, stock) {
+        double stockValue = 0.0;
+
         if (stock.marketValue != null && stock.marketValue! > 0) {
-          return sectorSum + stock.marketValue!;
+          stockValue = stock.marketValue!;
+          AppLogger.debug(
+            'Using marketValue ${stockValue} for ${stock.symbol}',
+            tag: 'SectorDetailsCard',
+          );
+        } else if (stock.quantity != null &&
+            stock.quantity! > 0 &&
+            stock.lastPrice > 0) {
+          stockValue = stock.quantity! * stock.lastPrice;
+          AppLogger.debug(
+            'Calculated value ${stockValue} (qty: ${stock.quantity} × price: ${stock.lastPrice}) for ${stock.symbol}',
+            tag: 'SectorDetailsCard',
+          );
+        } else {
+          AppLogger.warning(
+            'No valid value calculation for ${stock.symbol} - '
+            'marketValue: ${stock.marketValue}, quantity: ${stock.quantity}, lastPrice: ${stock.lastPrice}',
+            tag: 'SectorDetailsCard',
+          );
         }
-        if (stock.quantity != null && stock.quantity! > 0) {
-          return sectorSum + (stock.quantity! * stock.lastPrice);
-        }
-        return sectorSum;
+
+        return sectorSum + stockValue;
       });
+
+      AppLogger.debug(
+        'Calculated fallback sectorValue: ${sectorValue} for ${sector.sectorName}',
+        tag: 'SectorDetailsCard',
+      );
+
       return sum + sectorValue;
     });
 
+    AppLogger.info(
+      'Total portfolio value calculated: ${totalValue}',
+      tag: 'SectorDetailsCard',
+    );
+
     // Create sector info with calculations
     List<SectorInfo> sectorInfos = sectors.map((sector) {
+      AppLogger.debug(
+        'Creating SectorInfo for ${sector.sectorName}',
+        tag: 'SectorDetailsCard',
+      );
+
       // Use the same calculation logic
       double sectorValue = sector.totalValue > 0
           ? sector.totalValue
           : sector.stocks.fold(0.0, (sum, stock) {
+              double stockValue = 0.0;
               if (stock.marketValue != null && stock.marketValue! > 0) {
-                return sum + stock.marketValue!;
+                stockValue = stock.marketValue!;
+              } else if (stock.quantity != null && stock.quantity! > 0) {
+                stockValue = stock.quantity! * stock.lastPrice;
               }
-              if (stock.quantity != null && stock.quantity! > 0) {
-                return sum + (stock.quantity! * stock.lastPrice);
-              }
-              return sum;
+              return sum + stockValue;
             });
+
+      AppLogger.debug(
+        'Sector ${sector.sectorName} calculated value: ${sectorValue}',
+        tag: 'SectorDetailsCard',
+      );
 
       // Use sector.weightage if available, otherwise calculate
       double weightage = sector.weightage > 0
           ? sector.weightage
           : (totalValue > 0 ? (sectorValue / totalValue) * 100 : 0);
 
+      AppLogger.debug(
+        'Sector ${sector.sectorName} weightage: ${weightage}% '
+        '(raw: ${sector.weightage}, calculated: ${totalValue > 0 ? (sectorValue / totalValue) * 100 : 0})',
+        tag: 'SectorDetailsCard',
+      );
+
       double avgPerformance = _calculateSectorPerformance(sector);
+
+      AppLogger.debug(
+        'Sector ${sector.sectorName} average performance: ${avgPerformance}%',
+        tag: 'SectorDetailsCard',
+      );
 
       return SectorInfo(
         sector: sector,
@@ -263,7 +380,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: performanceColor.withOpacity(0.2),
+                                color: performanceColor.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: performanceColor),
                               ),
@@ -327,6 +444,12 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
   Widget _buildStocksList(BuildContext context, SectorInfo sectorInfo) {
     final stocks = sectorInfo.sector.stocks;
 
+    AppLogger.info(
+      'Building stocks list for sector ${sectorInfo.sector.sectorName} '
+      'with ${stocks.length} stocks',
+      tag: 'SectorDetailsCard',
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
@@ -335,205 +458,112 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
           bottomRight: Radius.circular(8),
         ),
       ),
-      child: Column(
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Stock',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Qty',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Value',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Weight',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Change',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Stocks list
-          ...stocks
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: stocks
               .map(
                 (stock) =>
-                    _buildStockRow(context, stock, sectorInfo.totalValue),
+                    _buildStockCard(context, stock, sectorInfo.totalValue),
               )
               .toList(),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildStockRow(
+  Widget _buildStockCard(
     BuildContext context,
     Stock stock,
     double sectorTotalValue,
   ) {
-    // Use improved calculation for stock value
-    final stockValue = stock.marketValue != null && stock.marketValue! > 0
-        ? stock.marketValue!
-        : (stock.quantity != null && stock.quantity! > 0
-              ? stock.quantity! * stock.lastPrice
-              : 0.0);
+    // Log detailed stock information for debugging
+    AppLogger.debug(
+      'Building stock card for ${stock.symbol}',
+      tag: 'SectorDetailsCard',
+    );
 
+    AppLogger.debug(
+      'Stock data - Symbol: ${stock.symbol}, '
+      'Company: ${stock.companyName}, '
+      'LastPrice: ${stock.lastPrice}, '
+      'MarketValue: ${stock.marketValue}, '
+      'Quantity: ${stock.quantity}, '
+      'AvgPrice: ${stock.avgPrice}, '
+      'ChangeAmount: ${stock.changeAmount}, '
+      'ChangePercent: ${stock.changePercent}',
+      tag: 'SectorDetailsCard',
+    );
+
+    // Check for missing critical values
+    if (stock.marketValue == null || stock.marketValue == 0) {
+      AppLogger.warning(
+        'Missing marketValue for ${stock.symbol} - using calculated value',
+        tag: 'SectorDetailsCard',
+      );
+    }
+
+    if (stock.quantity == null || stock.quantity == 0) {
+      AppLogger.warning(
+        'Missing quantity for ${stock.symbol}',
+        tag: 'SectorDetailsCard',
+      );
+    }
+
+    if (stock.companyName.isEmpty) {
+      AppLogger.warning(
+        'Missing company name for ${stock.symbol}',
+        tag: 'SectorDetailsCard',
+      );
+    }
+
+    // Calculate weight percentage info for additional info
     final stockWeight = sectorTotalValue > 0
-        ? (stockValue / sectorTotalValue) * 100
+        ? (stock.marketValue != null && stock.marketValue! > 0
+              ? (stock.marketValue! / sectorTotalValue) * 100
+              : (stock.quantity != null && stock.quantity! > 0
+                    ? ((stock.quantity! * stock.lastPrice) / sectorTotalValue) *
+                          100
+                    : 0))
         : 0;
-    final changeColor = stock.changePercent >= 0 ? Colors.green : Colors.red;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+    AppLogger.debug(
+      'Calculated stockWeight: ${stockWeight.toStringAsFixed(2)}% '
+      '(sectorTotalValue: ${sectorTotalValue.toStringAsFixed(2)})',
+      tag: 'SectorDetailsCard',
+    );
+
+    final weightInfo = 'Weight: ${stockWeight.toStringAsFixed(1)}%';
+
+    // Calculate the current value to show
+    final currentValue = stock.marketValue ?? (stock.lastPrice);
+
+    AppLogger.debug(
+      'Using currentValue: ${currentValue.toStringAsFixed(2)} for ${stock.symbol}',
+      tag: 'SectorDetailsCard',
+    );
+
+    return InvestmentCard(
+      data: InvestmentData(
+        symbol: stock.symbol,
+        name: stock.companyName.isNotEmpty ? stock.companyName : stock.symbol,
+        currentValue: currentValue, // Show market value or last price
+        investedAmount: 0, // Don't show invested amount
+        avgPrice: 0, // Don't show average price
+        quantity: stock.quantity?.toInt() ?? 0,
+        currentPrice: stock.lastPrice,
+        changeValue: stock.changeAmount,
+        changePercent: stock.changePercent,
+        isPositive: stock.changePercent >= 0,
+        additionalInfo: weightInfo, // Show weight info
       ),
-      child: Row(
-        children: [
-          // Stock symbol and name
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    stock.symbol,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (stock.companyName.isNotEmpty)
-                  Flexible(
-                    child: Text(
-                      stock.companyName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Quantity (placeholder - need to get from actual data)
-          Expanded(
-            flex: 1,
-            child: Text(
-              '-', // Replace with actual quantity when available
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-
-          // Value
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    '₹${_formatValue(stockValue)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Flexible(
-                  child: Text(
-                    '₹${stock.lastPrice.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Weight
-          Expanded(
-            flex: 1,
-            child: Text(
-              '${stockWeight.toStringAsFixed(1)}%',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-
-          // Change
-          Expanded(
-            flex: 1,
-            child: Text(
-              '${stock.changePercent >= 0 ? '+' : ''}${stock.changePercent.toStringAsFixed(2)}%',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: changeColor,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
+      config: const InvestmentCardConfig(currencySymbol: '₹'),
+      style: InvestmentCardStyle.compact, // Use compact style
+      displayOptions: const InvestmentDisplayOptions(
+        showInvestmentDetails: false, // Hide investment details section
+        showCurrentPrice: false, // Don't show redundant current price
+        showQuantity: true, // Show quantity
+        showAveragePrice: false, // Don't show average price
       ),
     );
   }
