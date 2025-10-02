@@ -7,8 +7,20 @@ abstract class PortfolioRepository {
   /// Get portfolio holdings for a user
   Future<PortfolioHoldings> getPortfolioHoldings(String userId);
 
+  /// Get portfolio holdings for a user and specific portfolio
+  Future<PortfolioHoldings> getPortfolioHoldingsById(
+    String userId,
+    String portfolioId,
+  );
+
   /// Get portfolio summary for a user
   Future<PortfolioSummary> getPortfolioSummary(String userId);
+
+  /// Get portfolio summary for a user and specific portfolio
+  Future<PortfolioSummary> getPortfolioSummaryById(
+    String userId,
+    String portfolioId,
+  );
 
   /// Get holdings stream for real-time updates
   Stream<PortfolioHoldings> watchPortfolioHoldings(String userId);

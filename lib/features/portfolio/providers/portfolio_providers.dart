@@ -9,6 +9,7 @@ import '../internal/domain/repositories/portfolio_analytics_repository.dart';
 import '../internal/domain/usecases/get_portfolio_holdings.dart';
 import '../internal/domain/usecases/get_portfolio_summary.dart';
 import '../internal/domain/usecases/get_portfolio_analytics.dart';
+import '../internal/domain/usecases/get_portfolios_list.dart';
 
 import '../internal/data/repositories/portfolio_repository_impl.dart';
 import '../internal/data/repositories/portfolio_analytics_repository_impl.dart';
@@ -76,6 +77,16 @@ Future<GetPortfolioSummary> getPortfolioSummary(
   return GetPortfolioSummary(repository);
 }
 
+@riverpod
+Future<GetPortfoliosList> getPortfoliosList(GetPortfoliosListRef ref) async {
+  AppLogger.debug(
+    'Creating GetPortfoliosList use case',
+    tag: 'PortfolioProviders',
+  );
+  final repository = await ref.watch(portfolioRepositoryProvider.future);
+  return GetPortfoliosList(repository);
+}
+
 /// Analytics providers
 @riverpod
 Future<PortfolioAnalyticsRepository> portfolioAnalyticsRepository(
@@ -114,8 +125,9 @@ Future<PortfolioService> portfolioService(PortfolioServiceRef ref) async {
   );
   final getHoldings = await ref.watch(getPortfolioHoldingsProvider.future);
   final getSummary = await ref.watch(getPortfolioSummaryProvider.future);
+  final getPortfoliosList = await ref.watch(getPortfoliosListProvider.future);
 
-  return PortfolioService(getHoldings, getSummary);
+  return PortfolioService(getHoldings, getSummary, getPortfoliosList);
 }
 
 @riverpod

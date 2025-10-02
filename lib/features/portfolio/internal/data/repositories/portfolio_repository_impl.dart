@@ -157,6 +157,74 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   }
 
   @override
+  Future<PortfolioHoldings> getPortfolioHoldingsById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioHoldingsById',
+      tag: 'PortfolioRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      // Fetch from remote data source using specific portfolio ID
+      final holdingsDto = await _remoteDataSource.getPortfolioHoldingsById(
+        userId,
+        portfolioId,
+      );
+
+      // Map DTO to domain entity using holdings mapper
+      final holdings = PortfolioHoldingsMapper.fromApiModel(
+        holdingsDto,
+        userId,
+      );
+
+      // Cache the result
+      _cachedHoldings = holdings;
+      _lastUserId = userId;
+
+      // Emit to stream for real-time updates
+      _holdingsController.add(holdings);
+
+      AppLogger.info(
+        'Portfolio holdings fetched successfully by ID',
+        tag: 'PortfolioRepository',
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioRepository',
+        result: 'success',
+      );
+
+      return holdings;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch portfolio holdings by ID',
+        tag: 'PortfolioRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioRepository',
+        result: 'error',
+      );
+
+      // Return cached data if available, otherwise rethrow
+      if (_cachedHoldings != null && _lastUserId == userId) {
+        AppLogger.info(
+          'Returning cached portfolio holdings due to error',
+          tag: 'PortfolioRepository',
+        );
+        return _cachedHoldings!;
+      }
+
+      rethrow;
+    }
+  }
+
+  @override
   Stream<PortfolioHoldings> watchPortfolioHoldings(String userId) {
     AppLogger.methodEntry(
       'watchPortfolioHoldings',
@@ -186,6 +254,71 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
     }
 
     return _holdingsController.stream;
+  }
+
+  @override
+  Future<PortfolioSummary> getPortfolioSummaryById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioSummaryById',
+      tag: 'PortfolioRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      // Fetch from remote data source using specific portfolio ID
+      final summaryDto = await _remoteDataSource.getPortfolioSummaryById(
+        userId,
+        portfolioId,
+      );
+
+      // Map DTO to domain entity using summary mapper
+      final summary = PortfolioSummaryMapper.fromApiModel(summaryDto, userId);
+
+      // Cache the result
+      _cachedSummary = summary;
+      _lastUserId = userId;
+
+      // Emit to stream for real-time updates
+      _summaryController.add(summary);
+
+      AppLogger.info(
+        'Portfolio summary fetched successfully by ID',
+        tag: 'PortfolioRepository',
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
+        tag: 'PortfolioRepository',
+        result: 'success',
+      );
+
+      return summary;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch portfolio summary by ID',
+        tag: 'PortfolioRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
+        tag: 'PortfolioRepository',
+        result: 'error',
+      );
+
+      // Return cached data if available, otherwise rethrow
+      if (_cachedSummary != null && _lastUserId == userId) {
+        AppLogger.info(
+          'Returning cached portfolio summary due to error',
+          tag: 'PortfolioRepository',
+        );
+        return _cachedSummary!;
+      }
+
+      rethrow;
+    }
   }
 
   @override

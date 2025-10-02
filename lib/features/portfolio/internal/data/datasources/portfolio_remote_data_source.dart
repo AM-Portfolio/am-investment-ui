@@ -11,11 +11,23 @@ import '../mappers/portfolio_analytics_mapper.dart';
 
 /// Abstract data source for portfolio data
 abstract class PortfolioRemoteDataSource {
-  /// Get portfolio holdings from remote API
+  /// Get portfolio holdings from remote API (legacy - uses default portfolio)
   Future<PortfolioHoldingsDto> getPortfolioHoldings(String userId);
 
-  /// Get portfolio summary from remote API
+  /// Get portfolio holdings from remote API for specific portfolio
+  Future<PortfolioHoldingsDto> getPortfolioHoldingsById(
+    String userId,
+    String portfolioId,
+  );
+
+  /// Get portfolio summary from remote API (legacy - uses default portfolio)
   Future<PortfolioSummaryDto> getPortfolioSummary(String userId);
+
+  /// Get portfolio summary from remote API for specific portfolio
+  Future<PortfolioSummaryDto> getPortfolioSummaryById(
+    String userId,
+    String portfolioId,
+  );
 
   /// Get portfolio analytics from remote API
   Future<PortfolioAnalyticsResponseDto> getPortfolioAnalytics(
@@ -95,6 +107,63 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
   }
 
   @override
+  Future<PortfolioHoldingsDto> getPortfolioHoldingsById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioHoldingsById',
+      tag: 'PortfolioRemoteDataSource',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      AppLogger.debug(
+        'API request prepared for portfolio holdings with userId and portfolioId query params',
+        tag: 'PortfolioRemoteDataSource',
+      );
+
+      // Construct full URI from portfolio config with userId and portfolioId query parameters
+      final baseUri =
+          '${_portfolioConfig.baseUrl}${_portfolioConfig.holdingsResource}';
+      final fullUri = '$baseUri?userId=$userId&portfolioId=$portfolioId';
+
+      // Use ApiClient for consistent error handling and logging
+      final holdingsResponse = await _apiClient.get<PortfolioHoldingsDto>(
+        fullUri,
+        parser: (data) => PortfolioMapper.portfolioHoldingsFromJson(
+          data as Map<String, dynamic>,
+        ),
+      );
+
+      AppLogger.info(
+        'Portfolio holdings fetched successfully from API',
+        tag: 'PortfolioRemoteDataSource',
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'success',
+      );
+
+      return holdingsResponse;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch portfolio holdings by ID',
+        tag: 'PortfolioRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'error',
+      );
+      rethrow;
+    }
+  }
+
+  @override
   Future<PortfolioSummaryDto> getPortfolioSummary(String userId) async {
     AppLogger.methodEntry(
       'getPortfolioSummary',
@@ -141,6 +210,63 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
       AppLogger.methodExit(
         'getPortfolioSummary',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'error',
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PortfolioSummaryDto> getPortfolioSummaryById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioSummaryById',
+      tag: 'PortfolioRemoteDataSource',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      AppLogger.debug(
+        'API request prepared for portfolio summary with userId and portfolioId query params',
+        tag: 'PortfolioRemoteDataSource',
+      );
+
+      // Construct full URI from portfolio config with userId and portfolioId query parameters
+      final baseUri =
+          '${_portfolioConfig.baseUrl}${_portfolioConfig.summaryResource}';
+      final fullUri = '$baseUri?userId=$userId&portfolioId=$portfolioId';
+
+      // Use ApiClient for consistent error handling and logging
+      final summaryResponse = await _apiClient.get<PortfolioSummaryDto>(
+        fullUri,
+        parser: (data) => PortfolioMapper.portfolioSummaryFromJson(
+          data as Map<String, dynamic>,
+        ),
+      );
+
+      AppLogger.info(
+        'Portfolio summary fetched successfully from API',
+        tag: 'PortfolioRemoteDataSource',
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'success',
+      );
+
+      return summaryResponse;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch portfolio summary by ID',
+        tag: 'PortfolioRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );

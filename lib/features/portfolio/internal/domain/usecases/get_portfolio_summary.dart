@@ -9,11 +9,11 @@ class GetPortfolioSummary {
   const GetPortfolioSummary(this._repository);
 
   /// Execute the use case
-  Future<PortfolioSummary> call(String userId) async {
+  Future<PortfolioSummary> call(String userId, [String? portfolioId]) async {
     AppLogger.methodEntry(
       'GetPortfolioSummary.call',
       tag: 'GetPortfolioSummary',
-      params: {'userId': userId},
+      params: {'userId': userId, 'portfolioId': portfolioId},
     );
 
     if (userId.isEmpty) {
@@ -29,7 +29,11 @@ class GetPortfolioSummary {
         'Executing get portfolio summary use case',
         tag: 'GetPortfolioSummary',
       );
-      final result = await _repository.getPortfolioSummary(userId);
+
+      // Call the appropriate repository method based on whether portfolioId is provided
+      final result = portfolioId != null && portfolioId.isNotEmpty
+          ? await _repository.getPortfolioSummaryById(userId, portfolioId)
+          : await _repository.getPortfolioSummary(userId);
 
       AppLogger.info(
         'Portfolio summary use case completed successfully',
@@ -56,6 +60,19 @@ class GetPortfolioSummary {
       );
       rethrow;
     }
+  }
+
+  /// Get portfolio summary for user only (legacy method)
+  Future<PortfolioSummary> callForUser(String userId) async {
+    return call(userId);
+  }
+
+  /// Get portfolio summary for specific portfolio
+  Future<PortfolioSummary> callForPortfolio(
+    String userId,
+    String portfolioId,
+  ) async {
+    return call(userId, portfolioId);
   }
 
   /// Execute with stream for real-time updates
