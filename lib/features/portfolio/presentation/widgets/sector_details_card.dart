@@ -496,28 +496,17 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       );
     }
 
-    // Use weight from stock if available, otherwise calculate
-    final stockWeight =
-        stock.weight ??
-        (sectorTotalValue > 0
-            ? (stock.marketValue != null && stock.marketValue! > 0
-                  ? (stock.marketValue! / sectorTotalValue) * 100
-                  : (stock.quantity != null && stock.quantity! > 0
-                        ? ((stock.quantity! * stock.lastPrice) /
-                                  sectorTotalValue) *
-                              100
-                        : 0))
-            : 0);
+    // Use weight directly from backend
+    final stockWeight = stock.weight ?? 0.0;
 
     AppLogger.debug(
       'Stock weight for ${stock.symbol}: ${stockWeight.toStringAsFixed(2)}% '
-      '(from backend: ${stock.weight != null ? stock.weight!.toStringAsFixed(2) : "null"}, '
-      'calculated: ${sectorTotalValue > 0 ? (stock.marketValue != null && stock.marketValue! > 0 ? (stock.marketValue! / sectorTotalValue) * 100 : (stock.quantity != null && stock.quantity! > 0 ? ((stock.quantity! * stock.lastPrice) / sectorTotalValue) * 100 : 0)) : 0})',
+      '(directly from backend: ${stock.weight != null ? stock.weight!.toStringAsFixed(2) : "null"})',
       tag: 'SectorDetailsCard',
     );
 
-    // Calculate the current value to show
-    final currentValue = stock.marketValue ?? (stock.lastPrice);
+    // Use market value directly from backend
+    final currentValue = stock.marketValue ?? 0.0;
 
     AppLogger.debug(
       'Using currentValue: ${currentValue.toStringAsFixed(2)} for ${stock.symbol}',
@@ -528,14 +517,14 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       data: InvestmentData(
         symbol: stock.symbol,
         name: stock.companyName.isNotEmpty ? stock.companyName : stock.symbol,
-        currentValue: currentValue, // Show market value or last price
-        investedAmount: 0, // Not needed
-        avgPrice: 0, // Not needed
-        quantity: 0, // Not needed
-        currentPrice: 0, // Not needed
-        changeValue: 0, // Not needed
-        changePercent: 0, // Not needed
-        isPositive: true, // Not needed
+        currentValue: currentValue, // Direct from backend
+        investedAmount: 0, // Stock entity doesn't have investedAmount
+        avgPrice: stock.avgPrice ?? 0, // Direct from backend with null handling
+        quantity: stock.quantity?.toInt() ?? 0, // Direct from backend
+        currentPrice: stock.lastPrice, // Direct from backend
+        changeValue: stock.changeAmount, // Direct from backend
+        changePercent: stock.changePercent, // Direct from backend
+        isPositive: stock.changeAmount >= 0, // Based on backend change amount
         additionalInfo: null, // Don't show in additional info
       ),
       config: InvestmentCardConfig(
