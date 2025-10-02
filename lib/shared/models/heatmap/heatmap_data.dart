@@ -97,11 +97,11 @@ class HeatmapConfiguration {
   /// Create configuration for mobile view
   factory HeatmapConfiguration.mobile() {
     return const HeatmapConfiguration(
-      showSubCards: false,
+      showSubCards: true,
       showPerformance: true,
       showWeightage: true,
-      showValue: false,
-      layout: HeatmapLayout.grid,
+      showValue: true,
+      layout: HeatmapLayout.treemap,
       minTileWidth: 80,
       maxTileWidth: 120,
       minTileHeight: 60,
