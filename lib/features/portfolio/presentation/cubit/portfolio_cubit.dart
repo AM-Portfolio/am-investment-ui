@@ -80,6 +80,77 @@ class PortfolioCubit extends Cubit<PortfolioState> {
     }
   }
 
+  /// Load portfolio data for a specific portfolio ID
+  Future<void> loadPortfolioById(String userId, String portfolioId) async {
+    AppLogger.methodEntry(
+      'loadPortfolioById',
+      tag: 'PortfolioCubit',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+    AppLogger.stateChange(
+      '${state.runtimeType}',
+      'PortfolioLoading',
+      tag: 'PortfolioCubit',
+    );
+
+    emit(PortfolioLoading());
+
+    try {
+      AppLogger.info(
+        'Starting portfolio data fetch by ID via service',
+        tag: 'PortfolioCubit',
+      );
+
+      // Use portfolio service to fetch data concurrently by portfolio ID
+      final results = await Future.wait([
+        _portfolioService.getPortfolioHoldingsById(userId, portfolioId),
+        _portfolioService.getPortfolioSummaryById(userId, portfolioId),
+      ]);
+
+      final holdings = results[0] as PortfolioHoldings;
+      final summary = results[1] as PortfolioSummary;
+
+      AppLogger.stateChange(
+        'PortfolioLoading',
+        'PortfolioLoaded',
+        tag: 'PortfolioCubit',
+      );
+      AppLogger.info(
+        'Portfolio data loaded successfully by ID via service (${holdings.holdings.length} holdings)',
+        tag: 'PortfolioCubit',
+      );
+
+      emit(PortfolioLoaded(summary: summary, holdings: holdings.holdings));
+
+      AppLogger.methodExit(
+        'loadPortfolioById',
+        tag: 'PortfolioCubit',
+        result: 'success',
+      );
+    } catch (error) {
+      AppLogger.stateChange(
+        'PortfolioLoading',
+        'PortfolioError',
+        tag: 'PortfolioCubit',
+        event: error.toString(),
+      );
+      AppLogger.error(
+        'Failed to load portfolio by ID via service',
+        tag: 'PortfolioCubit',
+        error: error,
+        stackTrace: StackTrace.current,
+      );
+
+      emit(PortfolioError(error.toString()));
+
+      AppLogger.methodExit(
+        'loadPortfolioById',
+        tag: 'PortfolioCubit',
+        result: 'error',
+      );
+    }
+  }
+
   void changeView(PortfolioViewType viewType) {
     final currentState = state;
     if (currentState is PortfolioLoaded) {
@@ -130,6 +201,53 @@ class PortfolioCubit extends Cubit<PortfolioState> {
       }
     } else {
       loadPortfolio(userId);
+    }
+  }
+
+  /// Refresh portfolio data for a specific portfolio ID
+  Future<void> refreshPortfolioById(String userId, String portfolioId) async {
+    final currentState = state;
+    if (currentState is PortfolioLoaded) {
+      try {
+        AppLogger.info(
+          'Refreshing portfolio data by ID via service',
+          tag: 'PortfolioCubit',
+        );
+
+        // Keep current state while refreshing, set refreshing to true
+        emit(currentState.copyWith(isRefreshing: true));
+
+        // Use portfolio service to refresh data by portfolio ID
+        final results = await Future.wait([
+          _portfolioService.getPortfolioHoldingsById(userId, portfolioId),
+          _portfolioService.getPortfolioSummaryById(userId, portfolioId),
+        ]);
+
+        final holdings = results[0] as PortfolioHoldings;
+        final summary = results[1] as PortfolioSummary;
+
+        emit(
+          currentState.copyWith(
+            summary: summary,
+            holdings: holdings.holdings,
+            isRefreshing: false,
+          ),
+        );
+
+        AppLogger.info(
+          'Portfolio data refreshed successfully by ID via service',
+          tag: 'PortfolioCubit',
+        );
+      } catch (error) {
+        AppLogger.error(
+          'Failed to refresh portfolio by ID via service',
+          tag: 'PortfolioCubit',
+          error: error,
+        );
+        emit(PortfolioError(error.toString()));
+      }
+    } else {
+      loadPortfolioById(userId, portfolioId);
     }
   }
 

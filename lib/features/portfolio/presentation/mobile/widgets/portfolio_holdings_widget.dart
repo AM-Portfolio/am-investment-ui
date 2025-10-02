@@ -8,9 +8,13 @@ import '../../../providers/portfolio_providers.dart';
 /// Portfolio holdings widget with comprehensive display controller at bottom
 class PortfolioHoldingsWidget extends ConsumerStatefulWidget {
   final String userId;
+  final String? portfolioId;
 
-  const PortfolioHoldingsWidget({Key? key, required this.userId})
-    : super(key: key);
+  const PortfolioHoldingsWidget({
+    Key? key,
+    required this.userId,
+    this.portfolioId,
+  }) : super(key: key);
 
   @override
   ConsumerState<PortfolioHoldingsWidget> createState() =>
@@ -27,13 +31,16 @@ class _PortfolioHoldingsWidgetState
   @override
   Widget build(BuildContext context) {
     AppLogger.debug(
-      'Building PortfolioHoldingsWidget for userId: ${widget.userId}',
+      'Building PortfolioHoldingsWidget for userId: ${widget.userId}, portfolioId: ${widget.portfolioId}',
       tag: 'PortfolioHoldingsWidget',
     );
 
-    final portfolioHoldingsAsync = ref.watch(
-      portfolioHoldingsProvider(widget.userId),
-    );
+    // Use the appropriate provider based on whether portfolioId is provided
+    final portfolioHoldingsAsync = widget.portfolioId != null
+        ? ref.watch(
+            portfolioHoldingsByIdProvider(widget.userId, widget.portfolioId!),
+          )
+        : ref.watch(portfolioHoldingsProvider(widget.userId));
 
     return Column(
       children: [
@@ -50,7 +57,17 @@ class _PortfolioHoldingsWidgetState
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  ref.invalidate(portfolioHoldingsProvider(widget.userId));
+                  // Invalidate the appropriate provider based on portfolioId
+                  if (widget.portfolioId != null) {
+                    ref.invalidate(
+                      portfolioHoldingsByIdProvider(
+                        widget.userId,
+                        widget.portfolioId!,
+                      ),
+                    );
+                  } else {
+                    ref.invalidate(portfolioHoldingsProvider(widget.userId));
+                  }
                 },
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -122,9 +139,21 @@ class _PortfolioHoldingsWidgetState
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(
-                        portfolioHoldingsProvider(widget.userId),
-                      ),
+                      onPressed: () {
+                        // Invalidate the appropriate provider based on portfolioId
+                        if (widget.portfolioId != null) {
+                          ref.invalidate(
+                            portfolioHoldingsByIdProvider(
+                              widget.userId,
+                              widget.portfolioId!,
+                            ),
+                          );
+                        } else {
+                          ref.invalidate(
+                            portfolioHoldingsProvider(widget.userId),
+                          );
+                        }
+                      },
                       child: const Text('Retry'),
                     ),
                   ],

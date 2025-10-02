@@ -66,6 +66,52 @@ class PortfolioService {
     }
   }
 
+  /// Retrieves portfolio holdings for the specified user and portfolio
+  /// Returns holdings data or throws an exception if retrieval fails
+  Future<PortfolioHoldings> getPortfolioHoldingsById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioHoldingsById',
+      tag: 'PortfolioService',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      AppLogger.info(
+        'Getting portfolio holdings by ID',
+        tag: 'PortfolioService',
+      );
+      final holdings = await _getPortfolioHoldings(userId, portfolioId);
+
+      AppLogger.info(
+        'Portfolio holdings retrieved successfully by ID',
+        tag: 'PortfolioService',
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioService',
+        result: 'success',
+      );
+
+      return holdings;
+    } catch (error) {
+      AppLogger.error(
+        'Failed to get portfolio holdings by ID',
+        tag: 'PortfolioService',
+        error: error,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioHoldingsById',
+        tag: 'PortfolioService',
+        result: 'error',
+      );
+      rethrow;
+    }
+  }
+
   /// Retrieves portfolio summary for the specified user
   /// Returns summary data or throws an exception if retrieval fails
   Future<PortfolioSummary> getPortfolioSummary(String userId) async {
@@ -99,6 +145,52 @@ class PortfolioService {
       );
       AppLogger.methodExit(
         'getPortfolioSummary',
+        tag: 'PortfolioService',
+        result: 'error',
+      );
+      rethrow;
+    }
+  }
+
+  /// Retrieves portfolio summary for the specified user and portfolio
+  /// Returns summary data or throws an exception if retrieval fails
+  Future<PortfolioSummary> getPortfolioSummaryById(
+    String userId,
+    String portfolioId,
+  ) async {
+    AppLogger.methodEntry(
+      'getPortfolioSummaryById',
+      tag: 'PortfolioService',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    try {
+      AppLogger.info(
+        'Getting portfolio summary by ID',
+        tag: 'PortfolioService',
+      );
+      final summary = await _getPortfolioSummary(userId, portfolioId);
+
+      AppLogger.info(
+        'Portfolio summary retrieved successfully by ID',
+        tag: 'PortfolioService',
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
+        tag: 'PortfolioService',
+        result: 'success',
+      );
+
+      return summary;
+    } catch (error) {
+      AppLogger.error(
+        'Failed to get portfolio summary by ID',
+        tag: 'PortfolioService',
+        error: error,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfolioSummaryById',
         tag: 'PortfolioService',
         result: 'error',
       );

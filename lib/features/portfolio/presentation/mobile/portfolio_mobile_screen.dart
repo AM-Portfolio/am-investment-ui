@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubit/portfolio_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
-import '../cubit/portfolio_analytics_state.dart';
 import '../../providers/portfolio_providers.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
-import 'widgets/portfolio_holdings_widget.dart';
+import 'widgets/portfolio_header_widget.dart';
+import 'widgets/portfolio_tab_content_widget.dart';
+import 'widgets/portfolio_logout_handler.dart';
 import '../../../../core/utils/logger.dart';
-import '../widgets/portfolio_summary_widget.dart';
-import '../widgets/heatmap_widget.dart';
-import 'portfolio_analysis_widget.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation and portfolio selection
 class PortfolioMobileScreen extends ConsumerWidget {
@@ -178,7 +175,10 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
     // Load portfolio data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_currentPortfolioId != null) {
-        context.read<PortfolioCubit>().loadPortfolio(_currentPortfolioId!);
+        context.read<PortfolioCubit>().loadPortfolioById(
+          widget.userId,
+          _currentPortfolioId!,
+        );
       }
     });
   }
@@ -187,6 +187,22 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Handles portfolio selection change
+  void _onPortfolioChanged(String portfolioId, String portfolioName) {
+    setState(() {
+      _currentPortfolioId = portfolioId;
+    });
+
+    // Load new portfolio data
+    context.read<PortfolioCubit>().loadPortfolioById(
+      widget.userId,
+      portfolioId,
+    );
+
+    // Notify parent if callback is provided
+    widget.onPortfolioChanged?.call(portfolioId, portfolioName);
   }
 
   @override
@@ -225,478 +241,25 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
       child: Scaffold(
         body: Column(
           children: [
-            // Portfolio selector and tab bar
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    // Portfolio selector dropdown (only show if portfolios are provided)
-                    if (widget.portfolios != null &&
-                        widget.portfolios!.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet,
-                              color: Theme.of(context).primaryColor,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _currentPortfolioId,
-                                  isExpanded: true,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                  items: widget.portfolios!.map((portfolio) {
-                                    return DropdownMenuItem<String>(
-                                      value: portfolio.portfolioId,
-                                      child: Text(
-                                        portfolio.portfolioName,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? newPortfolioId) {
-                                    if (newPortfolioId != null &&
-                                        newPortfolioId != _currentPortfolioId) {
-                                      final selectedPortfolio = widget
-                                          .portfolios!
-                                          .firstWhere(
-                                            (p) =>
-                                                p.portfolioId == newPortfolioId,
-                                          );
-
-                                      setState(() {
-                                        _currentPortfolioId = newPortfolioId;
-                                      });
-
-                                      // Load new portfolio data
-                                      context
-                                          .read<PortfolioCubit>()
-                                          .loadPortfolio(newPortfolioId);
-
-                                      // Notify parent if callback is provided
-                                      widget.onPortfolioChanged?.call(
-                                        newPortfolioId,
-                                        selectedPortfolio.portfolioName,
-                                      );
-
-                                      AppLogger.info(
-                                        'Portfolio selection changed to: ${selectedPortfolio.portfolioName} ($newPortfolioId)',
-                                        tag: 'PortfolioMobileView',
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                            ),
-                            // Logout button
-                            IconButton(
-                              icon: const Icon(Icons.logout),
-                              onPressed: _showLogoutDialog,
-                              tooltip: 'Logout',
-                            ),
-                          ],
-                        ),
-                      ),
-                    // Tab bar
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TabBar(
-                            controller: _tabController,
-                            labelColor: Theme.of(context).primaryColor,
-                            unselectedLabelColor: Colors.grey,
-                            indicatorColor: Theme.of(context).primaryColor,
-                            labelStyle: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            tabs: const [
-                              Tab(
-                                icon: Icon(Icons.dashboard_outlined, size: 20),
-                                text: 'Overview',
-                              ),
-                              Tab(
-                                icon: Icon(Icons.wallet, size: 20),
-                                text: 'Holdings',
-                              ),
-                              Tab(
-                                icon: Icon(Icons.analytics_outlined, size: 20),
-                                text: 'Analysis',
-                              ),
-                              Tab(
-                                icon: Icon(Icons.grid_view, size: 20),
-                                text: 'Heatmap',
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Logout icon (only show if no portfolio selector)
-                        if (widget.portfolios == null ||
-                            widget.portfolios!.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              right: 16.0,
-                              top: 8.0,
-                            ),
-                            child: IconButton(
-                              onPressed: _showLogoutDialog,
-                              icon: Icon(
-                                Icons.logout_outlined,
-                                color: Colors.grey[600],
-                                size: 22,
-                              ),
-                              tooltip: 'Logout',
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+            // Portfolio header with selector and tabs
+            PortfolioHeaderWidget(
+              tabController: _tabController,
+              currentPortfolioId: _currentPortfolioId,
+              portfolios: widget.portfolios,
+              onPortfolioChanged: _onPortfolioChanged,
+              onLogout: () => PortfolioLogoutHandler.showLogoutDialog(context),
             ),
-            // Tab content with pull-to-refresh
+            // Tab content
             Expanded(
-              child: BlocBuilder<PortfolioCubit, PortfolioState>(
-                builder: (context, state) {
-                  return TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildOverviewTab(state),
-                      _buildHoldingsTab(state),
-                      _buildAnalysisTab(state),
-                      _buildHeatmapTab(state),
-                    ],
-                  );
-                },
+              child: PortfolioTabContentWidget(
+                tabController: _tabController,
+                currentPortfolioId: _currentPortfolioId!,
+                userId: widget.userId,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildOverviewTab(PortfolioState state) {
-    if (state is PortfolioLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state is PortfolioError) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          AppLogger.userAction(
-            'Pull to Refresh Portfolio',
-            tag: 'PortfolioMobileView',
-            context: {'portfolioId': _currentPortfolioId},
-          );
-          context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: _buildErrorWidget(state.message),
-          ),
-        ),
-      );
-    }
-
-    if (state is PortfolioLoaded) {
-      return _buildOverviewContent(state);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        AppLogger.userAction(
-          'Pull to Refresh Portfolio',
-          tag: 'PortfolioMobileView',
-          context: {'portfolioId': _currentPortfolioId},
-        );
-        context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-      },
-      child: const SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: 400,
-          child: Center(child: Text('Loading portfolio...')),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHoldingsTab(PortfolioState state) {
-    if (state is PortfolioLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state is PortfolioError) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          AppLogger.userAction(
-            'Pull to Refresh Holdings',
-            tag: 'PortfolioMobileView',
-            context: {'portfolioId': _currentPortfolioId},
-          );
-          context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: _buildErrorWidget(state.message),
-          ),
-        ),
-      );
-    }
-
-    return PortfolioHoldingsWidget(userId: _currentPortfolioId!);
-  }
-
-  Widget _buildAnalysisTab(PortfolioState state) {
-    if (state is PortfolioLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state is PortfolioError) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          AppLogger.userAction(
-            'Pull to Refresh Analysis',
-            tag: 'PortfolioMobileView',
-            context: {'portfolioId': _currentPortfolioId},
-          );
-          context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: _buildErrorWidget(state.message),
-          ),
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        AppLogger.userAction(
-          'Pull to Refresh Analysis',
-          tag: 'PortfolioMobileView',
-          context: {'portfolioId': _currentPortfolioId},
-        );
-        context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: _buildAnalysisContent(state),
-      ),
-    );
-  }
-
-  Widget _buildHeatmapTab(PortfolioState state) {
-    if (state is PortfolioLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state is PortfolioError) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          AppLogger.userAction(
-            'Pull to Refresh Heatmap',
-            tag: 'PortfolioMobileView',
-            context: {'portfolioId': _currentPortfolioId},
-          );
-          context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.7,
-            child: _buildErrorWidget(state.message),
-          ),
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        AppLogger.userAction(
-          'Pull to Refresh Heatmap',
-          tag: 'PortfolioMobileView',
-          context: {'portfolioId': _currentPortfolioId},
-        );
-        context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: _buildHeatmapContent(state),
-      ),
-    );
-  }
-
-  Widget _buildOverviewContent(PortfolioLoaded state) {
-    final summary = state.summary;
-
-    AppLogger.debug(
-      'Building overview with summary - totalValue: ${summary.totalValue}, todayChange: ${summary.todayChange}, totalGainLoss: ${summary.totalGainLoss}',
-      tag: 'PortfolioMobileView',
-    );
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        AppLogger.userAction(
-          'Pull to Refresh Overview',
-          tag: 'PortfolioMobileView',
-          context: {'portfolioId': _currentPortfolioId},
-        );
-        context.read<PortfolioCubit>().refreshPortfolio(_currentPortfolioId!);
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: PortfolioSummaryWidget(
-          summary: summary,
-          onViewHoldings: () => _tabController.animateTo(1),
-          onViewAnalysis: () => _tabController.animateTo(2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAnalysisContent(PortfolioState state) {
-    // Use current portfolio ID for analysis
-    return PortfolioAnalysisWidget(portfolioId: _currentPortfolioId!);
-  }
-
-  Widget _buildHeatmapContent(PortfolioState state) {
-    return BlocBuilder<PortfolioAnalyticsCubit, PortfolioAnalyticsState>(
-      builder: (context, analyticsState) {
-        if (analyticsState is PortfolioAnalyticsLoading) {
-          return const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: HeatmapWidget(isLoading: true),
-          );
-        } else if (analyticsState is PortfolioAnalyticsLoaded) {
-          final isLoading = analyticsState.isLoadingType(
-            AnalyticsDataType.heatmap,
-          );
-          final error = analyticsState.getErrorForType(
-            AnalyticsDataType.heatmap,
-          );
-
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: HeatmapWidget(
-              heatmap: analyticsState.heatmap,
-              isLoading: isLoading,
-              error: error,
-            ),
-          );
-        } else if (analyticsState is PortfolioAnalyticsError) {
-          AppLogger.error(
-            'Failed to load heatmap',
-            tag: 'PortfolioMobileView',
-            error: analyticsState.message,
-          );
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: HeatmapWidget(error: analyticsState.message),
-          );
-        }
-
-        return const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: HeatmapWidget(isLoading: true),
-        );
-      },
-    );
-  }
-
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text('Error', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => context.read<PortfolioCubit>().refreshPortfolio(
-              _currentPortfolioId!,
-            ),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLogoutDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Logout'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                // Clear authentication state and navigate to login
-                try {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('is_authenticated');
-                  await prefs.remove('user_id');
-                } catch (e) {
-                  // Continue with logout even if SharedPreferences fails
-                }
-                // Navigate back to root and clear all routes
-                if (mounted) {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/', (route) => false);
-                }
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }
