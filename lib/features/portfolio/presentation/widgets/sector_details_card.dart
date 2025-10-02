@@ -552,22 +552,32 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
         symbol: stock.symbol,
         name: stock.companyName.isNotEmpty ? stock.companyName : stock.symbol,
         currentValue: currentValue, // Show market value or last price
-        investedAmount: 0, // Don't show invested amount
-        avgPrice: 0, // Don't show average price
-        quantity: stock.quantity?.toInt() ?? 0,
-        currentPrice: stock.lastPrice,
-        changeValue: stock.changeAmount,
-        changePercent: stock.changePercent,
-        isPositive: stock.changePercent >= 0,
-        additionalInfo: weightInfo, // Show weight info
+        investedAmount: 0, // Not needed
+        avgPrice: 0, // Not needed
+        quantity: 0, // Not needed
+        currentPrice: 0, // Not needed
+        changeValue: 0, // Not needed
+        changePercent: 0, // Not needed
+        isPositive: true, // Not needed
+        additionalInfo: null, // Don't show in additional info
       ),
-      config: const InvestmentCardConfig(currencySymbol: '₹'),
+      config: InvestmentCardConfig(
+        currencySymbol: '₹',
+        customBottomWidget: Text(
+          weightInfo,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ),
       style: InvestmentCardStyle.compact, // Use compact style
       displayOptions: const InvestmentDisplayOptions(
         showInvestmentDetails: false, // Hide investment details section
-        showCurrentPrice: false, // Don't show redundant current price
-        showQuantity: true, // Show quantity
-        showAveragePrice: false, // Don't show average price
+        showCurrentPrice: false, // Hide current price
+        showQuantity: false, // Hide quantity
+        showAveragePrice: false, // Hide average price
       ),
     );
   }
