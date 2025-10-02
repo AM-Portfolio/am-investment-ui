@@ -88,22 +88,27 @@ npm_modules/
 /coverage/
 lcov.info
 
-# Generated files
-*.g.dart
-*.freezed.dart
-*.chopper.dart
-*.gr.dart
+# Generated files - DO NOT COMMIT
+**/*.g.dart
+**/*.freezed.dart
+**/*.config.dart
+**/*.gr.dart
+**/*.part.dart
 
 # Build outputs
-*.apk
-*.aab
-*.ipa
-*.dSYM.zip
-*.app
-*.exe
-*.dmg
-*.zip
-*.tar.gz
+/build/
+.dart_tool/
+.packages
+pubspec.lock
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Firebase
 .firebase/
