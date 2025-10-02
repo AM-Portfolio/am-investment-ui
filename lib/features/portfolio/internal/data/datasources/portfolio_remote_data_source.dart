@@ -2,6 +2,7 @@ import '../dtos/portfolio_holdings_dto.dart';
 import '../dtos/portfolio_summary_dto.dart';
 import '../dtos/portfolio_analytics_request_dto.dart';
 import '../dtos/portfolio_analytics_response_dto.dart';
+import '../dtos/portfolio_list_dto.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../config/app_config.dart';
@@ -21,6 +22,9 @@ abstract class PortfolioRemoteDataSource {
     String portfolioId,
     PortfolioAnalyticsRequestDto request,
   );
+
+  /// Get portfolios list from remote API
+  Future<PortfolioListDto> getPortfoliosList(String userId);
 }
 
 /// Concrete implementation of portfolio remote data source
@@ -247,6 +251,58 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
       AppLogger.methodExit(
         'getPortfolioAnalytics',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'error',
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<PortfolioListDto> getPortfoliosList(String userId) async {
+    AppLogger.methodEntry(
+      'getPortfoliosList',
+      tag: 'PortfolioRemoteDataSource',
+      params: {'userId': userId},
+    );
+
+    try {
+      AppLogger.debug(
+        'API request prepared for portfolios list with userId query param',
+        tag: 'PortfolioRemoteDataSource',
+      );
+
+      // Construct full URI from portfolio config with userId query parameter
+      final baseUri = '${_portfolioConfig.baseUrl}/api/v1/portfolios/list';
+      final fullUri = '$baseUri?userId=$userId';
+
+      // Use ApiClient for consistent error handling and logging
+      final listResponse = await _apiClient.get<PortfolioListDto>(
+        fullUri,
+        parser: (data) =>
+            PortfolioMapper.portfolioListFromJson(data as List<dynamic>),
+      );
+
+      AppLogger.info(
+        'Portfolios list fetched successfully from API',
+        tag: 'PortfolioRemoteDataSource',
+      );
+      AppLogger.methodExit(
+        'getPortfoliosList',
+        tag: 'PortfolioRemoteDataSource',
+        result: 'success',
+      );
+
+      return listResponse;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch portfolios list',
+        tag: 'PortfolioRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'getPortfoliosList',
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );

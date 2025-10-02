@@ -1,6 +1,7 @@
 ﻿import 'package:equatable/equatable.dart';
 import '../../internal/domain/entities/portfolio_summary.dart';
 import '../../internal/domain/entities/portfolio_holding.dart';
+import '../../internal/domain/entities/portfolio_list.dart';
 
 /// Represents different portfolio views
 enum PortfolioViewType { overview, holdings, analysis }
@@ -57,13 +58,13 @@ class PortfolioLoaded extends PortfolioState {
 
   @override
   List<Object?> get props => [
-        summary,
-        holdings,
-        currentView,
-        isRefreshing,
-        searchQuery,
-        searchResults,
-      ];
+    summary,
+    holdings,
+    currentView,
+    isRefreshing,
+    searchQuery,
+    searchResults,
+  ];
 }
 
 /// Error state when portfolio loading fails
@@ -76,3 +77,39 @@ class PortfolioError extends PortfolioState {
   List<Object?> get props => [message];
 }
 
+/// Loading state when portfolio list is being fetched
+class PortfolioListLoading extends PortfolioState {}
+
+/// Loaded state with portfolio list data
+class PortfolioListLoaded extends PortfolioState {
+  final PortfolioList portfolioList;
+  final bool isRefreshing;
+
+  const PortfolioListLoaded({
+    required this.portfolioList,
+    this.isRefreshing = false,
+  });
+
+  PortfolioListLoaded copyWith({
+    PortfolioList? portfolioList,
+    bool? isRefreshing,
+  }) {
+    return PortfolioListLoaded(
+      portfolioList: portfolioList ?? this.portfolioList,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+    );
+  }
+
+  @override
+  List<Object?> get props => [portfolioList, isRefreshing];
+}
+
+/// Error state when portfolio list loading fails
+class PortfolioListError extends PortfolioState {
+  final String message;
+
+  const PortfolioListError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
