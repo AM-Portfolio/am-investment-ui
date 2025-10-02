@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../shared/widgets/portfolio_display_controller.dart';
+import '../../../../../shared/widgets/cards/investment_card.dart';
 import '../../../providers/portfolio_providers.dart';
 
 /// Portfolio holdings widget with comprehensive display controller at bottom
@@ -66,197 +67,26 @@ class _PortfolioHoldingsWidgetState
                         : holding.totalGainLossPercentage;
                     final isPositive = changeValue >= 0;
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: InkWell(
-                        onTap: () {
-                          // TODO: Navigate to holding details
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              // Top row: Symbol and Market Value
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Left: Symbol with colored circle
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          color: isPositive
-                                              ? Colors.green.shade100
-                                              : Colors.red.shade100,
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            holding.symbol.length >= 2
-                                                ? holding.symbol
-                                                      .substring(0, 2)
-                                                      .toUpperCase()
-                                                : holding.symbol.toUpperCase(),
-                                            style: TextStyle(
-                                              color: isPositive
-                                                  ? Colors.green.shade800
-                                                  : Colors.red.shade800,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            holding.symbol,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          Text(
-                                            holding.companyName,
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  // Right: Market Value
-                                  Text(
-                                    '₹${holding.currentValue.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Bottom row: Investment details and P&L
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Left: Investment details
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Inv. ',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          Text(
-                                            '₹${holding.investedAmount.toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            isPositive
-                                                ? Icons.trending_up
-                                                : Icons.trending_down,
-                                            color: isPositive
-                                                ? Colors.green
-                                                : Colors.red,
-                                            size: 12,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            'Avg ${holding.avgPrice.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            Icons.inventory_2_outlined,
-                                            color: Colors.grey.shade600,
-                                            size: 12,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            '${holding.quantity.toInt()}',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  // Right: P&L and Current Price
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        _displayFormat == DisplayFormat.value
-                                            ? '${isPositive ? '+' : ''}₹${changeValue.toStringAsFixed(2)}'
-                                            : '${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
-                                        style: TextStyle(
-                                          color: isPositive
-                                              ? Colors.green
-                                              : Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Live ',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${holding.currentPrice.toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                    return InvestmentCard.legacy(
+                      symbol: holding.symbol,
+                      name: holding.companyName,
+                      currentValue: holding.currentValue,
+                      investedAmount: holding.investedAmount,
+                      avgPrice: holding.avgPrice,
+                      quantity: holding.quantity.toInt(),
+                      currentPrice: holding.currentPrice,
+                      changeValue: changeValue,
+                      changePercent: changePercent,
+                      isPositive: isPositive,
+                      onTap: () {
+                        // TODO: Navigate to holding details
+                      },
+                      // Custom display based on format preference
+                      customBottomWidget: _buildCustomBottomRow(
+                        holding,
+                        changeValue,
+                        changePercent,
+                        isPositive,
                       ),
                     );
                   },
@@ -345,6 +175,100 @@ class _PortfolioHoldingsWidgetState
               tag: 'PortfolioHoldingsWidget',
             );
           },
+        ),
+      ],
+    );
+  }
+
+  /// Build custom bottom row with display format preference
+  Widget _buildCustomBottomRow(
+    dynamic holding,
+    double changeValue,
+    double changePercent,
+    bool isPositive,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Left: Investment details
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Inv. ',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                Text(
+                  '₹${holding.investedAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                Icon(
+                  isPositive ? Icons.trending_up : Icons.trending_down,
+                  color: isPositive ? Colors.green : Colors.red,
+                  size: 12,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  'Avg ${holding.avgPrice.toStringAsFixed(2)}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.inventory_2_outlined,
+                  color: Colors.grey.shade600,
+                  size: 12,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '${holding.quantity.toInt()}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+        // Right: P&L and Current Price with format preference
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              _displayFormat == DisplayFormat.value
+                  ? '${isPositive ? '+' : ''}₹${changeValue.toStringAsFixed(2)}'
+                  : '${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
+              style: TextStyle(
+                color: isPositive ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Live ',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+                Text(
+                  '${holding.currentPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );
