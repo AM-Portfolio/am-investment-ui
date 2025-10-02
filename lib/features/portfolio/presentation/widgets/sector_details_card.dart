@@ -340,27 +340,6 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
               padding: const EdgeInsets.all(12.0),
               child: Row(
                 children: [
-                  // Rank badge
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$rank',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
                   // Sector info
                   Expanded(
                     child: Column(
@@ -537,8 +516,6 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       tag: 'SectorDetailsCard',
     );
 
-    final weightInfo = 'Weight: ${stockWeight.toStringAsFixed(1)}%';
-
     // Calculate the current value to show
     final currentValue = stock.marketValue ?? (stock.lastPrice);
 
@@ -563,22 +540,34 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       ),
       config: InvestmentCardConfig(
         currencySymbol: '₹',
-        customBottomWidget: Text(
-          weightInfo,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade600,
-          ),
+        trailingWidget: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.pie_chart_outline,
+              size: 14,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '${stockWeight.toStringAsFixed(1)}%',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '₹${currentValue.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ],
         ),
       ),
       style: InvestmentCardStyle.compact, // Use compact style
-      displayOptions: const InvestmentDisplayOptions(
-        showInvestmentDetails: false, // Hide investment details section
-        showCurrentPrice: false, // Hide current price
-        showQuantity: false, // Hide quantity
-        showAveragePrice: false, // Hide average price
-      ),
+      displayOptions: InvestmentDisplayOptions
+          .sectorStock, // Use clean sector stock display
     );
   }
 

@@ -4,12 +4,22 @@ class InvestmentDisplayOptions {
   final bool showCurrentPrice;
   final bool showQuantity;
   final bool showAveragePrice;
+  final bool showChangeValue;
+  final bool showChangePercent;
+  final bool showPerformanceSection;
+  final bool showDefaultValue;
+  final bool showAdditionalInfo;
 
   const InvestmentDisplayOptions({
     this.showInvestmentDetails = true,
     this.showCurrentPrice = true,
     this.showQuantity = true,
     this.showAveragePrice = true,
+    this.showChangeValue = true,
+    this.showChangePercent = true,
+    this.showPerformanceSection = true,
+    this.showDefaultValue = true,
+    this.showAdditionalInfo = true,
   });
 
   /// Default options showing all details
@@ -21,12 +31,32 @@ class InvestmentDisplayOptions {
     showCurrentPrice: false,
     showQuantity: false,
     showAveragePrice: false,
+    showChangeValue: false,
+    showChangePercent: false,
+    showPerformanceSection: false,
+    showAdditionalInfo: false,
   );
 
   /// Watchlist options showing basic info
   static const InvestmentDisplayOptions watchlist = InvestmentDisplayOptions(
     showInvestmentDetails: false,
     showCurrentPrice: false,
+    showChangeValue: true,
+    showChangePercent: true,
+    showPerformanceSection: true,
+  );
+
+  /// Clean options for sector stock display
+  static const InvestmentDisplayOptions sectorStock = InvestmentDisplayOptions(
+    showInvestmentDetails: false,
+    showCurrentPrice: false,
+    showQuantity: false,
+    showAveragePrice: false,
+    showChangeValue: false,
+    showChangePercent: false,
+    showPerformanceSection: false,
+    showDefaultValue: false,
+    showAdditionalInfo: false,
   );
 
   /// Create a copy with modified values
@@ -35,6 +65,11 @@ class InvestmentDisplayOptions {
     bool? showCurrentPrice,
     bool? showQuantity,
     bool? showAveragePrice,
+    bool? showChangeValue,
+    bool? showChangePercent,
+    bool? showPerformanceSection,
+    bool? showDefaultValue,
+    bool? showAdditionalInfo,
   }) {
     return InvestmentDisplayOptions(
       showInvestmentDetails:
@@ -42,6 +77,12 @@ class InvestmentDisplayOptions {
       showCurrentPrice: showCurrentPrice ?? this.showCurrentPrice,
       showQuantity: showQuantity ?? this.showQuantity,
       showAveragePrice: showAveragePrice ?? this.showAveragePrice,
+      showChangeValue: showChangeValue ?? this.showChangeValue,
+      showChangePercent: showChangePercent ?? this.showChangePercent,
+      showPerformanceSection:
+          showPerformanceSection ?? this.showPerformanceSection,
+      showDefaultValue: showDefaultValue ?? this.showDefaultValue,
+      showAdditionalInfo: showAdditionalInfo ?? this.showAdditionalInfo,
     );
   }
 }

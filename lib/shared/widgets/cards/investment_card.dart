@@ -113,7 +113,10 @@ class InvestmentCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildLeftSection(),
-        config.trailingWidget ?? _buildValueDisplay(),
+        config.trailingWidget ??
+            (displayOptions.showDefaultValue
+                ? _buildValueDisplay()
+                : const SizedBox.shrink()),
       ],
     );
   }
@@ -134,7 +137,8 @@ class InvestmentCard extends StatelessWidget {
       children: [
         _buildSymbolText(),
         _buildNameText(),
-        if (data.additionalInfo != null) _buildAdditionalInfo(),
+        if (data.additionalInfo != null && displayOptions.showAdditionalInfo)
+          _buildAdditionalInfo(),
       ],
     );
   }
@@ -191,7 +195,7 @@ class InvestmentCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (displayOptions.showInvestmentDetails) _buildInvestmentDetails(),
-        _buildPerformanceSection(),
+        if (displayOptions.showPerformanceSection) _buildPerformanceSection(),
       ],
     );
   }
@@ -258,8 +262,8 @@ class InvestmentCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: style.rightAlignment,
       children: [
-        _buildChangeValue(color),
-        _buildChangePercent(color),
+        if (displayOptions.showChangeValue) _buildChangeValue(color),
+        if (displayOptions.showChangePercent) _buildChangePercent(color),
         if (displayOptions.showCurrentPrice) _buildCurrentPrice(),
       ],
     );
