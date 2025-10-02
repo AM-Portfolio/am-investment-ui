@@ -88,7 +88,7 @@ class SectorDto {
   Map<String, dynamic> toJson() => _$SectorDtoToJson(this);
 }
 
-/// Stock data in sector
+/// Stock data in sector - supports multiple JSON formats
 @JsonSerializable()
 class StockDto {
   final String? symbol;
@@ -101,6 +101,7 @@ class StockDto {
   final double? avgPrice;
   final double? marketValue;
   final double? totalReturn;
+  final double? weight; // Additional field for weight percentage
 
   const StockDto({
     this.symbol,
@@ -113,10 +114,29 @@ class StockDto {
     this.avgPrice,
     this.marketValue,
     this.totalReturn,
+    this.weight,
   });
 
-  factory StockDto.fromJson(Map<String, dynamic> json) =>
-      _$StockDtoFromJson(json);
+  /// Custom factory to handle multiple JSON formats
+  factory StockDto.fromJson(Map<String, dynamic> json) {
+    return StockDto(
+      symbol: json['symbol'] as String?,
+      // Handle both 'companyName' and 'name' fields
+      companyName: (json['companyName'] ?? json['name']) as String?,
+      // Handle both 'lastPrice' and 'price' fields
+      lastPrice: (json['lastPrice'] ?? json['price'])?.toDouble(),
+      // Handle both 'changeAmount' and 'change' fields
+      changeAmount: (json['changeAmount'] ?? json['change'])?.toDouble(),
+      changePercent: json['changePercent']?.toDouble(),
+      sector: json['sector'] as String?,
+      quantity: json['quantity']?.toDouble(),
+      avgPrice: json['avgPrice']?.toDouble(),
+      // Handle both 'marketValue' and 'value' fields
+      marketValue: (json['marketValue'] ?? json['value'])?.toDouble(),
+      totalReturn: json['totalReturn']?.toDouble(),
+      weight: json['weight']?.toDouble(),
+    );
+  }
 
   Map<String, dynamic> toJson() => _$StockDtoToJson(this);
 }

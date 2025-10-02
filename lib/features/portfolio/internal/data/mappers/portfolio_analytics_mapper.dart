@@ -133,6 +133,7 @@ class PortfolioAnalyticsMapper {
       avgPrice: dto.avgPrice ?? 0.0,
       marketValue: dto.marketValue ?? 0.0,
       totalReturn: dto.totalReturn ?? 0.0,
+      weight: dto.weight, // Include weight field from DTO
     );
   }
 

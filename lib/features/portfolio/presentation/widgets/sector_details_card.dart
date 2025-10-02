@@ -517,19 +517,23 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       );
     }
 
-    // Calculate weight percentage info for additional info
-    final stockWeight = sectorTotalValue > 0
-        ? (stock.marketValue != null && stock.marketValue! > 0
-              ? (stock.marketValue! / sectorTotalValue) * 100
-              : (stock.quantity != null && stock.quantity! > 0
-                    ? ((stock.quantity! * stock.lastPrice) / sectorTotalValue) *
-                          100
-                    : 0))
-        : 0;
+    // Use weight from stock if available, otherwise calculate
+    final stockWeight =
+        stock.weight ??
+        (sectorTotalValue > 0
+            ? (stock.marketValue != null && stock.marketValue! > 0
+                  ? (stock.marketValue! / sectorTotalValue) * 100
+                  : (stock.quantity != null && stock.quantity! > 0
+                        ? ((stock.quantity! * stock.lastPrice) /
+                                  sectorTotalValue) *
+                              100
+                        : 0))
+            : 0);
 
     AppLogger.debug(
-      'Calculated stockWeight: ${stockWeight.toStringAsFixed(2)}% '
-      '(sectorTotalValue: ${sectorTotalValue.toStringAsFixed(2)})',
+      'Stock weight for ${stock.symbol}: ${stockWeight.toStringAsFixed(2)}% '
+      '(from backend: ${stock.weight != null ? stock.weight!.toStringAsFixed(2) : "null"}, '
+      'calculated: ${sectorTotalValue > 0 ? (stock.marketValue != null && stock.marketValue! > 0 ? (stock.marketValue! / sectorTotalValue) * 100 : (stock.quantity != null && stock.quantity! > 0 ? ((stock.quantity! * stock.lastPrice) / sectorTotalValue) * 100 : 0)) : 0})',
       tag: 'SectorDetailsCard',
     );
 

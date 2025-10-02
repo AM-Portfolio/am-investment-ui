@@ -85,6 +85,7 @@ class Stock {
   final double? avgPrice;
   final double? marketValue;
   final double? totalReturn;
+  final double? weight; // Weight percentage in portfolio/sector
 
   const Stock({
     required this.symbol,
@@ -97,6 +98,7 @@ class Stock {
     this.avgPrice,
     this.marketValue,
     this.totalReturn,
+    this.weight,
   });
 
   /// Helper getter for formatted change percent
