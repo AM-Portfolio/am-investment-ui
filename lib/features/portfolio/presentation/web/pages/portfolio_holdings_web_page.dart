@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/portfolio_providers.dart';
 import '../widgets/portfolio_holdings_web_card.dart';
-import '../../widgets/portfolio_summary_widget.dart';
-import '../../widgets/movers_widget.dart';
-import '../../../../../core/utils/logger.dart';
 
 /// Web-specific portfolio holdings page with advanced filtering and sorting
 class PortfolioHoldingsWebPage extends ConsumerStatefulWidget {
@@ -26,18 +23,12 @@ class PortfolioHoldingsWebPage extends ConsumerStatefulWidget {
 
 class _PortfolioHoldingsWebPageState
     extends ConsumerState<PortfolioHoldingsWebPage> {
-  String _searchQuery = '';
   String _sortBy = 'marketValue';
   bool _sortAscending = false;
   String _filterSector = 'All';
 
   @override
   Widget build(BuildContext context) {
-    AppLogger.info(
-      'Building PortfolioHoldingsWebPage for portfolioId: ${widget.portfolioId}',
-      tag: 'PortfolioHoldingsWebPage',
-    );
-
     final holdingsAsync = ref.watch(
       portfolioHoldingsProvider(widget.portfolioId),
     );
@@ -46,18 +37,6 @@ class _PortfolioHoldingsWebPageState
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.portfolioName ?? 'Portfolio'} - Holdings'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.invalidate(portfolioHoldingsProvider(widget.portfolioId));
-              ref.invalidate(portfolioSummaryProvider(widget.portfolioId));
-            },
-          ),
-        ],
-      ),
       body: Column(
         children: [
           // Top Summary Bar
@@ -115,7 +94,7 @@ class _PortfolioHoldingsWebPageState
                       left: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
-                  child: _buildSidePanel(context, holdingsAsync),
+                  child: _buildSidePanel(context),
                 ),
               ],
             ),
@@ -223,9 +202,7 @@ class _PortfolioHoldingsWebPageState
               ),
             ),
             onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
+              // Handle search
             },
           ),
         ),
@@ -337,11 +314,6 @@ class _PortfolioHoldingsWebPageState
                 showDetails: true,
                 maxHoldings: 100,
                 onHoldingTap: (holding) {
-                  AppLogger.userAction(
-                    'Holding selected',
-                    tag: 'PortfolioHoldingsWebPage',
-                    context: {'symbol': holding.symbol},
-                  );
                   // Show holding details in side panel or modal
                 },
               ),
@@ -352,7 +324,7 @@ class _PortfolioHoldingsWebPageState
     );
   }
 
-  Widget _buildSidePanel(BuildContext context, AsyncValue holdingsAsync) {
+  Widget _buildSidePanel(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Column(
@@ -365,7 +337,7 @@ class _PortfolioHoldingsWebPageState
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.blue),
+                const Icon(Icons.info_outline, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text(
                   'Holdings Info',
@@ -377,7 +349,7 @@ class _PortfolioHoldingsWebPageState
             ),
           ),
 
-          // Top Movers Section
+          // Panel Content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -385,59 +357,48 @@ class _PortfolioHoldingsWebPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Top Movers',
+                    'Analysis Tools',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
 
-                  holdingsAsync.when(
-                    data: (holdings) => MoversWidget(
-                      holdings: holdings.holdings,
-                      showGainers: true,
-                      maxItems: 5,
-                    ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Text(
-                      'Failed to load movers',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  Text(
-                    'Top Losers',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  holdingsAsync.when(
-                    data: (holdings) => MoversWidget(
-                      holdings: holdings.holdings,
-                      showGainers: false,
-                      maxItems: 5,
-                    ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Text(
-                      'Failed to load losers',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
+                  _buildAnalysisPlaceholder(context, 'Top Performers'),
+                  const SizedBox(height: 16),
+                  _buildAnalysisPlaceholder(context, 'Risk Analysis'),
+                  const SizedBox(height: 16),
+                  _buildAnalysisPlaceholder(context, 'Sector Breakdown'),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAnalysisPlaceholder(BuildContext context, String title) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(Icons.analytics, size: 32, color: Colors.grey.shade400),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Coming soon...',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

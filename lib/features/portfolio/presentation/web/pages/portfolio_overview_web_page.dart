@@ -21,18 +21,6 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
     final holdingsAsync = ref.watch(portfolioHoldingsProvider(portfolioId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(portfolioName ?? 'Portfolio Overview'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.invalidate(portfolioSummaryProvider(portfolioId));
-              ref.invalidate(portfolioHoldingsProvider(portfolioId));
-            },
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -61,86 +49,16 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // Charts and Analytics Section
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left Column - Allocation Charts
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      _buildSectionTitle(context, 'Allocation Breakdown'),
-                      const SizedBox(height: 16),
-
-                      // Sectorial Allocation
-                      holdingsAsync.when(
-                        data: (holdings) => SectorialAllocationWidget(
-                          holdings: holdings.holdings,
-                        ),
-                        loading: () =>
-                            _buildLoadingCard('Loading sector allocation...'),
-                        error: (error, stack) => _buildErrorCard(
-                          context,
-                          'Failed to load sector allocation',
-                          error.toString(),
-                          () => ref.invalidate(
-                            portfolioHoldingsProvider(portfolioId),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Market Cap Allocation
-                      holdingsAsync.when(
-                        data: (holdings) => MarketCapAllocationWidget(
-                          holdings: holdings.holdings,
-                        ),
-                        loading: () => _buildLoadingCard(
-                          'Loading market cap allocation...',
-                        ),
-                        error: (error, stack) => _buildErrorCard(
-                          context,
-                          'Failed to load market cap allocation',
-                          error.toString(),
-                          () => ref.invalidate(
-                            portfolioHoldingsProvider(portfolioId),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 24),
-
-                // Right Column - Performance Metrics
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      _buildSectionTitle(context, 'Performance Metrics'),
-                      const SizedBox(height: 16),
-
-                      summaryAsync.when(
-                        data: (summary) =>
-                            _buildPerformanceMetrics(context, summary),
-                        loading: () =>
-                            _buildLoadingCard('Loading performance metrics...'),
-                        error: (error, stack) => _buildErrorCard(
-                          context,
-                          'Failed to load performance metrics',
-                          error.toString(),
-                          () => ref.invalidate(
-                            portfolioSummaryProvider(portfolioId),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            // Holdings Overview
+            holdingsAsync.when(
+              data: (holdings) => _buildHoldingsOverview(context, holdings),
+              loading: () => _buildLoadingCard('Loading holdings...'),
+              error: (error, stack) => _buildErrorCard(
+                context,
+                'Failed to load holdings',
+                error.toString(),
+                () => ref.invalidate(portfolioHoldingsProvider(portfolioId)),
+              ),
             ),
 
             const SizedBox(height: 24),
@@ -157,72 +75,54 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: PortfolioSummaryWidget(
-          summary: summary,
-          onViewHoldings: () {
-            // Navigate to holdings view
-            AppLogger.userAction(
-              'Navigate to Holdings from Overview',
-              tag: 'PortfolioOverviewWebPage',
-              context: {'portfolioId': portfolioId},
-            );
-          },
-          onViewAnalysis: () {
-            // Navigate to analysis view
-            AppLogger.userAction(
-              'Navigate to Analysis from Overview',
-              tag: 'PortfolioOverviewWebPage',
-              context: {'portfolioId': portfolioId},
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPerformanceMetrics(BuildContext context, dynamic summary) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Key Metrics',
+              'Portfolio Summary',
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
-            _buildMetricRow(
-              context,
-              'Total Return',
-              '\$${summary.totalValue.toStringAsFixed(2)}',
-              summary.totalValue >= 0 ? Colors.green : Colors.red,
-              summary.totalValue >= 0 ? Icons.trending_up : Icons.trending_down,
-            ),
-            const Divider(),
-
-            _buildMetricRow(
-              context,
-              'Today\'s Change',
-              '\$${summary.todayChange.toStringAsFixed(2)}',
-              summary.todayChange >= 0 ? Colors.green : Colors.red,
-              summary.todayChange >= 0
-                  ? Icons.trending_up
-                  : Icons.trending_down,
-            ),
-            const Divider(),
-
-            _buildMetricRow(
-              context,
-              'Portfolio Value',
-              '\$${summary.totalValue.toStringAsFixed(2)}',
-              Colors.blue,
-              Icons.account_balance_wallet,
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    context,
+                    'Total Value',
+                    '\$${summary.totalValue.toStringAsFixed(2)}',
+                    Icons.account_balance_wallet,
+                    Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildSummaryCard(
+                    context,
+                    'Today\'s Change',
+                    '\$${summary.todayChange.toStringAsFixed(2)}',
+                    summary.todayChange >= 0
+                        ? Icons.trending_up
+                        : Icons.trending_down,
+                    summary.todayChange >= 0 ? Colors.green : Colors.red,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildSummaryCard(
+                    context,
+                    'Total Return',
+                    '\$${summary.totalValue.toStringAsFixed(2)}',
+                    summary.totalValue >= 0
+                        ? Icons.trending_up
+                        : Icons.trending_down,
+                    summary.totalValue >= 0 ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -230,22 +130,138 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricRow(
-    BuildContext context,
-    String label,
-    String value,
-    Color color,
-    IconData icon,
-  ) {
+  Widget _buildHoldingsOverview(BuildContext context, dynamic holdings) {
+    final holdingsList = holdings.holdings as List<dynamic>;
+    final topHoldings = holdingsList.take(5).toList();
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Top Holdings',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+
+            ...topHoldings.map((holding) => _buildHoldingRow(context, holding)),
+
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  // Navigate to full holdings view
+                },
+                child: const Text('View All Holdings'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHoldingRow(BuildContext context, dynamic holding) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                holding.symbol?.substring(0, 2) ?? 'N/A',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  holding.symbol ?? 'Unknown',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${holding.quantity ?? 0} shares',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                ),
+              ],
+            ),
           ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '\$${(holding.marketValue ?? 0).toStringAsFixed(2)}',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${(holding.changePercent ?? 0) >= 0 ? '+' : ''}${(holding.changePercent ?? 0).toStringAsFixed(2)}%',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: (holding.changePercent ?? 0) >= 0
+                      ? Colors.green
+                      : Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -262,7 +278,7 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -284,10 +300,6 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
                     Colors.blue,
                     () {
                       // Navigate to holdings
-                      AppLogger.userAction(
-                        'Quick Action: View Holdings',
-                        tag: 'PortfolioOverviewWebPage',
-                      );
                     },
                   ),
                 ),
@@ -300,10 +312,6 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
                     Colors.green,
                     () {
                       // Navigate to analysis
-                      AppLogger.userAction(
-                        'Quick Action: View Analysis',
-                        tag: 'PortfolioOverviewWebPage',
-                      );
                     },
                   ),
                 ),
@@ -316,10 +324,6 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
                     Colors.orange,
                     () {
                       // Navigate to heatmap
-                      AppLogger.userAction(
-                        'Quick Action: View Heatmap',
-                        tag: 'PortfolioOverviewWebPage',
-                      );
                     },
                   ),
                 ),
@@ -350,19 +354,10 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(
-        context,
-      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-    );
-  }
-
   Widget _buildLoadingCard(String message) {
     return Card(
       elevation: 2,
-      child: Container(
+      child: SizedBox(
         height: 150,
         child: Center(
           child: Column(
@@ -386,7 +381,7 @@ class PortfolioOverviewWebPage extends ConsumerWidget {
   ) {
     return Card(
       elevation: 2,
-      child: Container(
+      child: SizedBox(
         height: 150,
         child: Center(
           child: Column(
