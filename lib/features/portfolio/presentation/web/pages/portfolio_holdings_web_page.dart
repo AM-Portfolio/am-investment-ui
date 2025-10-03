@@ -310,7 +310,8 @@ class _PortfolioHoldingsWebPageState
 
             Expanded(
               child: PortfolioHoldingsWebCard(
-                holdings: holdings,
+                userId: widget.userId,
+                portfolioId: widget.portfolioId,
                 showDetails: true,
                 maxHoldings: 100,
                 onHoldingTap: (holding) {

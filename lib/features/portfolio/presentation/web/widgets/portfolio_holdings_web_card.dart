@@ -1,14 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../internal/domain/entities/portfolio_holding.dart';
 import '../../../../../shared/widgets/table/sortable_table.dart';
+import '../../../providers/portfolio_providers.dart';
+import '../../../../../core/utils/logger.dart';
 
 /// Web-optimized card widget to display portfolio holdings
 /// Features advanced sorting, pagination, and responsive design for web platforms
-class PortfolioHoldingsWebCard extends StatefulWidget {
-  /// Portfolio holdings data
-  final PortfolioHoldings holdings;
+class PortfolioHoldingsWebCard extends ConsumerStatefulWidget {
+  /// User ID for fetching portfolio data
+  final String userId;
+
+  /// Portfolio ID - if null, uses default portfolio for user
+  final String? portfolioId;
 
   /// Whether to show detailed information
   final bool showDetails;
@@ -28,7 +34,8 @@ class PortfolioHoldingsWebCard extends StatefulWidget {
   /// Constructor
   const PortfolioHoldingsWebCard({
     super.key,
-    required this.holdings,
+    required this.userId,
+    this.portfolioId,
     this.showDetails = false,
     this.maxHoldings = 25,
     this.onHoldingTap,
@@ -37,31 +44,24 @@ class PortfolioHoldingsWebCard extends StatefulWidget {
   });
 
   @override
-  State<PortfolioHoldingsWebCard> createState() => _PortfolioHoldingsWebCardState();
+  ConsumerState<PortfolioHoldingsWebCard> createState() =>
+      _PortfolioHoldingsWebCardState();
 }
 
-class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
+class _PortfolioHoldingsWebCardState
+    extends ConsumerState<PortfolioHoldingsWebCard> {
   int _currentPage = 0;
   List<PortfolioHolding> _sortedHoldings = [];
   int _totalPages = 1;
 
-  @override
-  void initState() {
-    super.initState();
-    _sortHoldingsByAllocation();
-  }
+  void _sortHoldingsByAllocation(PortfolioHoldings holdings) {
+    AppLogger.debug(
+      'Sorting ${holdings.holdings.length} holdings by allocation for userId: ${widget.userId}, portfolioId: ${widget.portfolioId}',
+      tag: 'PortfolioHoldingsWebCard',
+    );
 
-  @override
-  void didUpdateWidget(PortfolioHoldingsWebCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.holdings != widget.holdings) {
-      _sortHoldingsByAllocation();
-    }
-  }
-
-  void _sortHoldingsByAllocation() {
     // Sort holdings by weight in portfolio (allocation percentage) in descending order
-    _sortedHoldings = List.from(widget.holdings.holdings);
+    _sortedHoldings = List.from(holdings.holdings);
     _sortedHoldings.sort(
       (a, b) => b.portfolioWeight.compareTo(a.portfolioWeight),
     );
@@ -99,149 +99,232 @@ class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
     );
     return currencyFormat.format(value);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate start and end indices for current page
-        final startIndex = _currentPage * widget.maxHoldings;
-        final endIndex = min(
-          startIndex + widget.maxHoldings,
-          _sortedHoldings.length,
-        );
+    AppLogger.debug(
+      'Building PortfolioHoldingsWebCard for userId: ${widget.userId}, portfolioId: ${widget.portfolioId}',
+      tag: 'PortfolioHoldingsWebCard',
+    );
 
-        // Get holdings for current page
-        final List<PortfolioHolding> displayHoldings = _sortedHoldings.isEmpty
-            ? <PortfolioHolding>[]
-            : _sortedHoldings.sublist(startIndex, endIndex);
+    // Use the appropriate provider based on whether portfolioId is provided
+    final portfolioHoldingsAsync = widget.portfolioId != null
+        ? ref.watch(
+            portfolioHoldingsByIdProvider(widget.userId, widget.portfolioId!),
+          )
+        : ref.watch(portfolioHoldingsProvider(widget.userId));
 
-        // Responsive row height based on text size and scale factor
-        final baseFontSize = theme.textTheme.bodyMedium?.fontSize ?? 14.0;
-        final textScale = MediaQuery.textScaleFactorOf(context);
-        final double rowHeight = (baseFontSize * 2.6 * textScale)
-            .clamp(40.0, 64.0)
-            .toDouble();
+    return portfolioHoldingsAsync.when(
+      data: (holdings) {
+        // Sort holdings when data is available
+        _sortHoldingsByAllocation(holdings);
 
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-          ),
-          child: LayoutBuilder(
-            builder: (context, cardConstraints) {
-              // Minimal padding to maximize table space
-              final horizontalPadding = cardConstraints.maxWidth * 0.01;
-              final verticalPadding = cardConstraints.maxHeight * 0.01;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate start and end indices for current page
+            final startIndex = _currentPage * widget.maxHoldings;
+            final endIndex = min(
+              startIndex + widget.maxHoldings,
+              _sortedHoldings.length,
+            );
 
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: verticalPadding,
+            // Get holdings for current page
+            final List<PortfolioHolding> displayHoldings =
+                _sortedHoldings.isEmpty
+                ? <PortfolioHolding>[]
+                : _sortedHoldings.sublist(startIndex, endIndex);
+
+            // Responsive row height based on text size and scale factor
+            final baseFontSize = theme.textTheme.bodyMedium?.fontSize ?? 14.0;
+            final textScale = MediaQuery.textScaleFactorOf(context);
+            final double rowHeight = (baseFontSize * 2.6 * textScale)
+                .clamp(40.0, 64.0)
+                .toDouble();
+
+            return Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Compact header with title
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+              ),
+              child: LayoutBuilder(
+                builder: (context, cardConstraints) {
+                  // Minimal padding to maximize table space
+                  final horizontalPadding = cardConstraints.maxWidth * 0.01;
+                  final verticalPadding = cardConstraints.maxHeight * 0.01;
+
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: verticalPadding,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.account_balance,
-                          color: theme.colorScheme.primary,
-                          size: cardConstraints.maxWidth * 0.02,
-                        ),
-                        SizedBox(width: cardConstraints.maxWidth * 0.01),
-                        Text(
-                          'Portfolio Holdings',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Summary section if enabled
-                    if (widget.showDetails) ...[
-                      _buildSummarySection(theme),
-                      SizedBox(height: cardConstraints.maxHeight * 0.01),
-                    ],
-
-                    // Sortable table for holdings - fill remaining space and scroll
-                    Expanded(
-                      child: SortableTable<PortfolioHolding>(
-                        items: displayHoldings,
-                        columns: _buildColumns(),
-                        initialSortColumnIndex: 2, // Sort by current value initially
-                        initialSortDirection: SortDirection.descending,
-                        onItemTap: widget.onHoldingTap,
-                        showDividers: true,
-                        rowHeight: rowHeight,
-                      ),
-                    ),
-
-                    // Compact pagination controls integrated with table footer
-                    if (_totalPages > 1)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Total holdings count
-                          Text(
-                            _sortedHoldings.isEmpty
-                                ? 'No holdings'
-                                : '${startIndex + 1}-$endIndex of ${_sortedHoldings.length}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                              fontSize: cardConstraints.maxWidth * 0.015,
+                        // Compact header with title
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.account_balance,
+                              color: theme.colorScheme.primary,
+                              size: cardConstraints.maxWidth * 0.02,
                             ),
-                          ),
-
-                          // Page navigation
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Previous page button
-                              IconButton(
-                                onPressed: _currentPage > 0 ? _previousPage : null,
-                                icon: const Icon(Icons.chevron_left, size: 16),
-                                tooltip: 'Previous page',
-                                color: theme.colorScheme.primary,
-                                disabledColor: theme.colorScheme.onSurface.withOpacity(0.3),
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints.tightFor(),
+                            SizedBox(width: cardConstraints.maxWidth * 0.01),
+                            Text(
+                              'Portfolio Holdings',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
+                            ),
+                          ],
+                        ),
 
-                              // Page indicator
+                        // Summary section if enabled
+                        if (widget.showDetails) ...[
+                          _buildSummarySection(theme, holdings),
+                          SizedBox(height: cardConstraints.maxHeight * 0.01),
+                        ],
+
+                        // Sortable table for holdings - fill remaining space and scroll
+                        Expanded(
+                          child: SortableTable<PortfolioHolding>(
+                            items: displayHoldings,
+                            columns: _buildColumns(),
+                            initialSortColumnIndex:
+                                2, // Sort by current value initially
+                            initialSortDirection: SortDirection.descending,
+                            onItemTap: widget.onHoldingTap,
+                            showDividers: true,
+                            rowHeight: rowHeight,
+                          ),
+                        ),
+
+                        // Compact pagination controls integrated with table footer
+                        if (_totalPages > 1)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Total holdings count
                               Text(
-                                '${_currentPage + 1}/$_totalPages',
+                                _sortedHoldings.isEmpty
+                                    ? 'No holdings'
+                                    : '${startIndex + 1}-$endIndex of ${_sortedHoldings.length}',
                                 style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                   fontSize: cardConstraints.maxWidth * 0.015,
                                 ),
                               ),
 
-                              // Next page button
-                              IconButton(
-                                onPressed: _currentPage < _totalPages - 1 ? _nextPage : null,
-                                icon: const Icon(Icons.chevron_right, size: 16),
-                                tooltip: 'Next page',
-                                color: theme.colorScheme.primary,
-                                disabledColor: theme.colorScheme.onSurface.withOpacity(0.3),
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints.tightFor(),
+                              // Page navigation
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Previous page button
+                                  IconButton(
+                                    onPressed: _currentPage > 0
+                                        ? _previousPage
+                                        : null,
+                                    icon: const Icon(
+                                      Icons.chevron_left,
+                                      size: 16,
+                                    ),
+                                    tooltip: 'Previous page',
+                                    color: theme.colorScheme.primary,
+                                    disabledColor: theme.colorScheme.onSurface
+                                        .withOpacity(0.3),
+                                    padding: EdgeInsets.zero,
+                                    visualDensity: VisualDensity.compact,
+                                    constraints:
+                                        const BoxConstraints.tightFor(),
+                                  ),
+
+                                  // Page indicator
+                                  Text(
+                                    '${_currentPage + 1}/$_totalPages',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontSize:
+                                          cardConstraints.maxWidth * 0.015,
+                                    ),
+                                  ),
+
+                                  // Next page button
+                                  IconButton(
+                                    onPressed: _currentPage < _totalPages - 1
+                                        ? _nextPage
+                                        : null,
+                                    icon: const Icon(
+                                      Icons.chevron_right,
+                                      size: 16,
+                                    ),
+                                    tooltip: 'Next page',
+                                    color: theme.colorScheme.primary,
+                                    disabledColor: theme.colorScheme.onSurface
+                                        .withOpacity(0.3),
+                                    padding: EdgeInsets.zero,
+                                    visualDensity: VisualDensity.compact,
+                                    constraints:
+                                        const BoxConstraints.tightFor(),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+      loading: () {
+        AppLogger.debug(
+          'Showing loading indicator for portfolio holdings web card',
+          tag: 'PortfolioHoldingsWebCard',
+        );
+        return const Center(child: CircularProgressIndicator());
+      },
+      error: (error, stackTrace) {
+        AppLogger.warning(
+          'Showing error state in portfolio holdings web card: $error',
+          tag: 'PortfolioHoldingsWebCard',
+        );
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Error loading portfolio: $error',
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Invalidate the appropriate provider based on portfolioId
+                  if (widget.portfolioId != null) {
+                    ref.invalidate(
+                      portfolioHoldingsByIdProvider(
+                        widget.userId,
+                        widget.portfolioId!,
                       ),
-                  ],
-                ),
-              );
-            },
+                    );
+                  } else {
+                    ref.invalidate(portfolioHoldingsProvider(widget.userId));
+                  }
+                },
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         );
       },
@@ -249,12 +332,12 @@ class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
   }
 
   /// Build summary section with dynamic sizing
-  Widget _buildSummarySection(ThemeData theme) {
+  Widget _buildSummarySection(ThemeData theme, PortfolioHoldings holdings) {
     // Calculate total investment and current value
     double totalInvestment = 0;
     double totalCurrentValue = 0;
 
-    for (final holding in widget.holdings.holdings) {
+    for (final holding in holdings.holdings) {
       totalInvestment += holding.investedAmount;
       totalCurrentValue += holding.currentValue;
     }
@@ -301,7 +384,7 @@ class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
               ],
             ),
           ),
-          
+
           // Current value
           Expanded(
             child: Column(
@@ -324,7 +407,7 @@ class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
               ],
             ),
           ),
-          
+
           // Gain/Loss
           Expanded(
             child: Column(
@@ -456,10 +539,7 @@ class _PortfolioHoldingsWebCardState extends State<PortfolioHoldingsWebCard> {
               ),
               Text(
                 '${isPositive ? "+" : ""}${gainLossPercentage.toStringAsFixed(1)}%',
-                style: TextStyle(
-                  color: valueColor,
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: valueColor, fontSize: 11),
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
               ),

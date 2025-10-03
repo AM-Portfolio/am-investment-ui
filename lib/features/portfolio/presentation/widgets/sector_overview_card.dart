@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
-import '../../../../shared/widgets/cards/heatmap_template_card.dart';
+import '../../../../shared/widgets/heatmap/heatmap_template_card.dart';
 import '../../../../shared/utils/sector_heatmap_converter.dart';
 
 /// Widget displaying sector allocation overview with visual heatmap

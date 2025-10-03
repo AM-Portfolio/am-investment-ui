@@ -1,0 +1,289 @@
+import 'package:flutter/material.dart';
+import '../inputs/app_segmented_control.dart';
+
+/// Enum for different sector categories
+enum SectorType {
+  all('All', 'All Sectors', Icons.dashboard),
+  technology('Tech', 'Technology', Icons.computer),
+  healthcare('Health', 'Healthcare', Icons.medical_services),
+  finance('Finance', 'Financial Services', Icons.account_balance),
+  energy('Energy', 'Energy & Utilities', Icons.flash_on),
+  consumer('Consumer', 'Consumer Goods', Icons.shopping_cart),
+  industrials('Industry', 'Industrials', Icons.factory),
+  materials('Materials', 'Materials & Mining', Icons.construction),
+  telecom('Telecom', 'Telecommunications', Icons.phone),
+  utilities('Utilities', 'Utilities', Icons.electrical_services),
+  realEstate('RealEst', 'Real Estate', Icons.home),
+  aerospace('Aerospace', 'Aerospace & Defense', Icons.flight);
+
+  const SectorType(this.shortName, this.displayName, this.icon);
+
+  /// Short name for compact display
+  final String shortName;
+
+  /// Full display name
+  final String displayName;
+
+  /// Representative icon
+  final IconData icon;
+
+  /// Get sector type from short name
+  static SectorType? fromShortName(String shortName) {
+    for (final sector in SectorType.values) {
+      if (sector.shortName == shortName) {
+        return sector;
+      }
+    }
+    return null;
+  }
+
+  /// Common sectors for portfolio analysis
+  static List<SectorType> get portfolioSectors => [
+    SectorType.all,
+    SectorType.technology,
+    SectorType.healthcare,
+    SectorType.finance,
+    SectorType.energy,
+    SectorType.consumer,
+  ];
+
+  /// All available sectors
+  static List<SectorType> get allSectors => SectorType.values;
+}
+
+/// Widget for selecting different sectors
+class SectorSelector extends StatelessWidget {
+  /// Currently selected sector
+  final SectorType selectedSector;
+
+  /// Callback when sector changes
+  final ValueChanged<SectorType> onSectorChanged;
+
+  /// Available sector options (defaults to portfolio sectors)
+  final List<SectorType>? availableSectors;
+
+  /// Whether to show as compact chips instead of dropdown
+  final bool compact;
+
+  /// Primary color for the selector
+  final Color? primaryColor;
+
+  /// Whether to show icons alongside text
+  final bool showIcons;
+
+  /// Whether to use full display names instead of short names
+  final bool useDisplayNames;
+
+  /// Optional title for the selector
+  final String? title;
+
+  /// Whether to show as dropdown instead of chips
+  final bool asDropdown;
+
+  /// Constructor
+  const SectorSelector({
+    super.key,
+    required this.selectedSector,
+    required this.onSectorChanged,
+    this.availableSectors,
+    this.compact = false,
+    this.primaryColor,
+    this.showIcons = false,
+    this.useDisplayNames = false,
+    this.title,
+    this.asDropdown = true,
+  });
+
+  /// Factory constructor for portfolio context
+  factory SectorSelector.portfolio({
+    Key? key,
+    required SectorType selectedSector,
+    required ValueChanged<SectorType> onSectorChanged,
+    bool compact = false,
+    Color? primaryColor,
+    bool showIcons = true,
+    String? title,
+  }) {
+    return SectorSelector(
+      key: key,
+      selectedSector: selectedSector,
+      onSectorChanged: onSectorChanged,
+      availableSectors: SectorType.portfolioSectors,
+      compact: compact,
+      primaryColor: primaryColor,
+      showIcons: showIcons,
+      title: title,
+      asDropdown: false,
+    );
+  }
+
+  /// Factory constructor for heatmap context
+  factory SectorSelector.heatmap({
+    Key? key,
+    required SectorType selectedSector,
+    required ValueChanged<SectorType> onSectorChanged,
+    bool asDropdown = true,
+    Color? primaryColor,
+    String? title,
+  }) {
+    return SectorSelector(
+      key: key,
+      selectedSector: selectedSector,
+      onSectorChanged: onSectorChanged,
+      availableSectors: SectorType.allSectors,
+      asDropdown: asDropdown,
+      primaryColor: primaryColor,
+      showIcons: true,
+      useDisplayNames: false,
+      title: title,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sectors = availableSectors ?? SectorType.portfolioSectors;
+
+    Widget selector;
+
+    if (asDropdown) {
+      selector = _buildDropdownSelector(context, sectors);
+    } else if (compact) {
+      selector = _buildCompactSelector(context, sectors);
+    } else {
+      selector = _buildSegmentedSelector(context, sectors);
+    }
+
+    if (title != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title!,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          selector,
+        ],
+      );
+    }
+
+    return selector;
+  }
+
+  Widget _buildSegmentedSelector(
+    BuildContext context,
+    List<SectorType> sectors,
+  ) {
+    final children = Map<SectorType, String>.fromEntries(
+      sectors.map(
+        (sector) => MapEntry(
+          sector,
+          useDisplayNames ? sector.displayName : sector.shortName,
+        ),
+      ),
+    );
+
+    return AppSegmentedControl<SectorType>(
+      selectedValue: selectedSector,
+      children: children,
+      onValueChanged: onSectorChanged,
+      primaryColor: primaryColor,
+    );
+  }
+
+  Widget _buildCompactSelector(BuildContext context, List<SectorType> sectors) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: sectors.map((sector) {
+        final isSelected = sector == selectedSector;
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => onSectorChanged(sector),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? (primaryColor ?? Theme.of(context).primaryColor)
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? (primaryColor ?? Theme.of(context).primaryColor)
+                      : Colors.grey.shade300,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showIcons) ...[
+                    Icon(
+                      sector.icon,
+                      size: 14,
+                      color: isSelected ? Colors.white : Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    useDisplayNames ? sector.displayName : sector.shortName,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey.shade700,
+                      fontSize: 12,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildDropdownSelector(
+    BuildContext context,
+    List<SectorType> sectors,
+  ) {
+    return DropdownButtonFormField<SectorType>(
+      value: selectedSector,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        isDense: true,
+      ),
+      items: sectors.map((sector) {
+        return DropdownMenuItem<SectorType>(
+          value: sector,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (showIcons) ...[
+                Icon(sector.icon, size: 16),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                useDisplayNames ? sector.displayName : sector.shortName,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (sector) {
+        if (sector != null) {
+          onSectorChanged(sector);
+        }
+      },
+    );
+  }
+}

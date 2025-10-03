@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../shared/widgets/cards/heatmap_template_card.dart';
+import '../../../../../shared/widgets/heatmap/heatmap_template_card.dart';
 import '../../../../../shared/models/heatmap/heatmap_data.dart';
 import '../../../internal/domain/entities/portfolio_analytics.dart';
 import '../../../providers/portfolio_providers.dart';

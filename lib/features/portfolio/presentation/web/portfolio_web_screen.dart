@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'widgets/portfolio_heatmap_web_card.dart';
 import '../widgets/portfolio_sidebar.dart';
 import '../cubit/portfolio_state.dart';
 import '../../providers/portfolio_providers.dart';
@@ -8,6 +7,7 @@ import '../../internal/domain/entities/portfolio_list.dart';
 import 'pages/portfolio_overview_web_page.dart';
 import 'pages/portfolio_holdings_web_page.dart';
 import 'pages/portfolio_analysis_web_page.dart';
+import 'pages/portfolio_heatmap_web_page.dart';
 
 /// Web-specific portfolio screen implementation
 class PortfolioWebScreen extends ConsumerStatefulWidget {
@@ -165,32 +165,12 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
     );
   }
 
-  /// Build heatmap content
+  /// Build heatmap content using dedicated heatmap page
   Widget _buildHeatmapContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Portfolio Heatmap',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: PortfolioHeatmapWebCard(
-              portfolioId: _currentPortfolioId!,
-              title: 'Sector Performance Heatmap',
-              icon: Icons.grid_view,
-              onTilePressed: () {
-                // Handle tile press - could show sector details
-              },
-            ),
-          ),
-        ),
-      ],
+    return PortfolioHeatmapWebPage(
+      userId: widget.userId,
+      portfolioId: _currentPortfolioId!,
+      portfolioName: widget.selectedPortfolioName,
     );
   }
 }

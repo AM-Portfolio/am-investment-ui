@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../../models/heatmap.dart';
+import '../../models/heatmap/heatmap_ui_data.dart';
+import '../../models/heatmap/heatmap_tile_data.dart';
+import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import 'heatmap_selector_card.dart';
 
 /// A reusable heatmap template card widget that displays data in a treemap or grid layout
 /// with configurable sub-card visibility for responsive design
@@ -12,6 +15,15 @@ class HeatmapTemplateCard extends StatelessWidget {
   final VoidCallback? onTilePressed;
   final Widget Function(HeatmapTileData tile)? customTileBuilder;
 
+  /// Optional selector configuration
+  final HeatmapSelectorConfig? selectorConfig;
+
+  /// Optional selector callbacks
+  final HeatmapSelectorCallbacks? selectorCallbacks;
+
+  /// Whether to show selectors above the heatmap
+  final bool showSelectors;
+
   const HeatmapTemplateCard({
     super.key,
     required this.data,
@@ -20,24 +32,43 @@ class HeatmapTemplateCard extends StatelessWidget {
     this.icon,
     this.onTilePressed,
     this.customTileBuilder,
+    this.selectorConfig,
+    this.selectorCallbacks,
+    this.showSelectors = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 16),
-            SizedBox(height: 250, child: _buildContent(context)),
-          ],
+    return Column(
+      children: [
+        // Optional selector card
+        if (showSelectors &&
+            selectorConfig != null &&
+            selectorCallbacks != null)
+          HeatmapSelectorCard(
+            config: selectorConfig!,
+            callbacks: selectorCallbacks!,
+            compact: true,
+            margin: const EdgeInsets.only(bottom: 8),
+          ),
+
+        // Main heatmap card
+        Card(
+          elevation: 4,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                const SizedBox(height: 16),
+                SizedBox(height: 250, child: _buildContent(context)),
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -154,7 +185,7 @@ class HeatmapTemplateCard extends StatelessWidget {
   }
 
   Widget _buildColorLegend(BuildContext context) {
-    if (data.configuration.colorScheme != HeatmapColorScheme.performance) {
+    if (data.configuration.colorScheme != HeatmapColorSchemeType.performance) {
       return const SizedBox.shrink();
     }
 
@@ -196,18 +227,19 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   Widget _buildHeatmap(BuildContext context) {
     switch (data.configuration.layout) {
-      case HeatmapLayout.treemap:
+      case HeatmapLayoutType.treemap:
         return _buildTreemapLayout(context);
-      case HeatmapLayout.grid:
+      case HeatmapLayoutType.grid:
         return _buildGridLayout(context);
-      case HeatmapLayout.list:
+      case HeatmapLayoutType.list:
         return _buildListLayout(context);
     }
   }
 
   Widget _buildTreemapLayout(BuildContext context) {
     // Sort tiles by weightage for better visualization
-    final sortedTiles = List<HeatmapTileData>.from(data.tiles)
+    final tiles = _getUiTiles();
+    final sortedTiles = List<HeatmapTileData>.from(tiles)
       ..sort((a, b) => b.weightage.compareTo(a.weightage));
 
     return LayoutBuilder(
@@ -229,6 +261,7 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   Widget _buildGridLayout(BuildContext context) {
     final crossAxisCount = _calculateGridCrossAxisCount(context);
+    final tiles = _getUiTiles();
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -237,19 +270,21 @@ class HeatmapTemplateCard extends StatelessWidget {
         mainAxisSpacing: 4,
         childAspectRatio: 1.2,
       ),
-      itemCount: data.tiles.length,
+      itemCount: tiles.length,
       itemBuilder: (context, index) {
-        final tile = data.tiles[index];
+        final tile = tiles[index];
         return _buildHeatmapTile(context, tile, null, null);
       },
     );
   }
 
   Widget _buildListLayout(BuildContext context) {
+    final tiles = _getUiTiles();
+
     return ListView.builder(
-      itemCount: data.tiles.length,
+      itemCount: tiles.length,
       itemBuilder: (context, index) {
-        final tile = data.tiles[index];
+        final tile = tiles[index];
         return Container(
           height: 60,
           margin: const EdgeInsets.only(bottom: 4),
@@ -367,7 +402,7 @@ class HeatmapTemplateCard extends StatelessWidget {
           color: tileColor,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
             width: 0.5,
           ),
         ),
@@ -443,7 +478,7 @@ class HeatmapTemplateCard extends StatelessWidget {
                   isSmall: true,
                 ),
                 fontWeight: FontWeight.w500,
-                color: textColor.withOpacity(0.9),
+                color: textColor.withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -464,7 +499,7 @@ class HeatmapTemplateCard extends StatelessWidget {
                   isSmall: true,
                 ),
                 fontWeight: FontWeight.w400,
-                color: textColor.withOpacity(0.8),
+                color: textColor.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -493,13 +528,13 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   Color _getTileColor(HeatmapTileData tile) {
     switch (data.configuration.colorScheme) {
-      case HeatmapColorScheme.performance:
+      case HeatmapColorSchemeType.performance:
         return _getPerformanceColor(tile.performance);
-      case HeatmapColorScheme.custom:
+      case HeatmapColorSchemeType.custom:
         return tile.customColor ?? Colors.grey.shade300;
-      case HeatmapColorScheme.weightage:
+      case HeatmapColorSchemeType.weightage:
         return _getWeightageColor(tile.weightage);
-      case HeatmapColorScheme.neutral:
+      case HeatmapColorSchemeType.neutral:
         return Colors.grey.shade300;
     }
   }
@@ -528,5 +563,17 @@ class HeatmapTemplateCard extends StatelessWidget {
   Color _getTextColor(Color backgroundColor) {
     final luminance = backgroundColor.computeLuminance();
     return luminance > 0.5 ? Colors.black87 : Colors.white;
+  }
+
+  /// Get UI tiles from data, converting if necessary
+  List<HeatmapTileData> _getUiTiles() {
+    return data.tiles.map((tile) {
+      if (tile is HeatmapTileData) {
+        return tile;
+      } else {
+        // Convert entity to UI data
+        return HeatmapTileData.fromEntity(tile);
+      }
+    }).toList();
   }
 }
