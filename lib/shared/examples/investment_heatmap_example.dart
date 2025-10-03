@@ -336,9 +336,11 @@ class _InvestmentHeatmapExampleState extends State<InvestmentHeatmapExample> {
 class SpecificInvestmentExamples {
   /// Portfolio heatmap example
   static Widget portfolioExample(List<PortfolioInputData> portfolioData) {
-    return InvestmentHeatmapWidget.portfolio(
-      portfolioData: portfolioData,
-      onTilePressed: (data) => print('Portfolio tile pressed: ${data.name}'),
+    return InvestmentHeatmapWidget(
+      filterType: InvestmentFilterType.portfolio,
+      inputData: portfolioData,
+      onTilePressed: (data) =>
+          debugPrint('Portfolio tile pressed: ${data.name}'),
       compact: false,
       accentColor: Colors.blue,
     );
@@ -346,9 +348,10 @@ class SpecificInvestmentExamples {
 
   /// Mutual funds heatmap example
   static Widget mutualFundsExample(List<MutualFundInputData> fundData) {
-    return InvestmentHeatmapWidget.mutualFunds(
-      fundData: fundData,
-      onTilePressed: (data) => print('Fund tile pressed: ${data.name}'),
+    return InvestmentHeatmapWidget(
+      filterType: InvestmentFilterType.mutualFunds,
+      inputData: fundData,
+      onTilePressed: (data) => debugPrint('Fund tile pressed: ${data.name}'),
       compact: true,
       accentColor: Colors.orange,
     );
@@ -356,9 +359,10 @@ class SpecificInvestmentExamples {
 
   /// ETF heatmap example
   static Widget etfExample(List<EtfInputData> etfData) {
-    return InvestmentHeatmapWidget.etf(
-      etfData: etfData,
-      onTilePressed: (data) => print('ETF tile pressed: ${data.name}'),
+    return InvestmentHeatmapWidget(
+      filterType: InvestmentFilterType.etf,
+      inputData: etfData,
+      onTilePressed: (data) => debugPrint('ETF tile pressed: ${data.name}'),
       compact: false,
       accentColor: Colors.purple,
     );

@@ -183,7 +183,7 @@ class _InvestmentHeatmapWidgetState
                   },
                   selectedColor: config.accentColor,
                   checkmarkColor: Colors.white,
-                  backgroundColor: config.accentColor?.withOpacity(0.1),
+                  backgroundColor: config.accentColor?.withValues(alpha: 0.1),
                 );
               }).toList(),
             ),
