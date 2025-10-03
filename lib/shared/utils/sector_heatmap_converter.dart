@@ -12,9 +12,15 @@ class SectorHeatmapConverter {
   }) {
     if (heatmap == null || heatmap.sectors.isEmpty) {
       return HeatmapData(
+        id: 'sector-heatmap-empty',
         title: title,
         subtitle: subtitle,
         tiles: [],
+        metadata: HeatmapMetadata(
+          dataSource: 'sector_converter',
+          lastUpdated: DateTime.now(),
+          additionalInfo: const {},
+        ),
         configuration: showSubCards
             ? HeatmapConfiguration.web()
             : HeatmapConfiguration.mobile(),
@@ -68,9 +74,15 @@ class SectorHeatmapConverter {
     tiles.sort((a, b) => b.weightage.compareTo(a.weightage));
 
     return HeatmapData(
+      id: 'sector-heatmap-${heatmap.hashCode}',
       title: title,
       subtitle: subtitle,
       tiles: tiles,
+      metadata: HeatmapMetadata(
+        dataSource: 'sector_converter',
+        lastUpdated: DateTime.now(),
+        additionalInfo: {'totalValue': totalValue},
+      ),
       configuration: showSubCards
           ? HeatmapConfiguration.web()
           : HeatmapConfiguration.mobile(),

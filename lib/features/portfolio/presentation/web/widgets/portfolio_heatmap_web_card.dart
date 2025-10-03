@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../shared/widgets/heatmap/heatmap_template_card.dart';
 import '../../../../../shared/models/heatmap/heatmap_data.dart';
+import '../../../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
 import '../../../internal/domain/entities/portfolio_analytics.dart';
 import '../../../providers/portfolio_providers.dart';
 import '../../../../../core/utils/logger.dart';
@@ -75,9 +76,15 @@ class PortfolioHeatmapWebCard extends ConsumerWidget {
     }).toList();
 
     return HeatmapData(
+      id: 'portfolio-heatmap-$portfolioId',
       title: title ?? 'Portfolio Heatmap',
       subtitle: 'Sector Performance Overview',
       tiles: tiles,
+      metadata: HeatmapMetadata(
+        dataSource: 'portfolio_heatmap_converter',
+        lastUpdated: DateTime.now(),
+        additionalInfo: {'portfolioId': portfolioId},
+      ),
       configuration: HeatmapConfiguration.web(),
     );
   }
@@ -96,9 +103,14 @@ class PortfolioHeatmapWebCard extends ConsumerWidget {
   /// Build loading state heatmap
   Widget _buildLoadingHeatmap(BuildContext context) {
     final loadingData = HeatmapData(
+      id: 'portfolio-heatmap-loading',
       title: title ?? 'Portfolio Heatmap',
       subtitle: 'Loading...',
       tiles: [],
+      metadata: HeatmapMetadata(
+        dataSource: 'portfolio_loading',
+        lastUpdated: DateTime.now(),
+      ),
       configuration: HeatmapConfiguration.web(),
     );
 
@@ -112,9 +124,15 @@ class PortfolioHeatmapWebCard extends ConsumerWidget {
   /// Build error state heatmap
   Widget _buildErrorHeatmap(BuildContext context, String error) {
     final errorData = HeatmapData(
+      id: 'portfolio-heatmap-error',
       title: title ?? 'Portfolio Heatmap',
       subtitle: 'Error loading data',
       tiles: [],
+      metadata: HeatmapMetadata(
+        dataSource: 'portfolio_error',
+        lastUpdated: DateTime.now(),
+        additionalInfo: {'error': error},
+      ),
       configuration: HeatmapConfiguration.web(),
     );
 
@@ -128,9 +146,14 @@ class PortfolioHeatmapWebCard extends ConsumerWidget {
   /// Build empty state heatmap
   Widget _buildEmptyHeatmap(BuildContext context) {
     final emptyData = HeatmapData(
+      id: 'portfolio-heatmap-empty',
       title: title ?? 'Portfolio Heatmap',
       subtitle: 'No data available',
       tiles: [],
+      metadata: HeatmapMetadata(
+        dataSource: 'portfolio_empty',
+        lastUpdated: DateTime.now(),
+      ),
       configuration: HeatmapConfiguration.web(),
     );
 

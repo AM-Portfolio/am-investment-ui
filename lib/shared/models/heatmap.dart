@@ -1,7 +1,9 @@
-// Export the new UI-specific models (these supersede the old ones)
-export 'heatmap/heatmap_tile_data.dart';
-export 'heatmap/heatmap_ui_data.dart';
+// Export all heatmap models - canonical structure
+export 'heatmap/heatmap_ui_data.dart' show HeatmapData, HeatmapConfiguration;
+export 'heatmap/heatmap_tile_data.dart' show HeatmapTileData;
 
-// Hide the old models that have been replaced
-export 'heatmap/heatmap_data.dart'
-    hide HeatmapTileData, HeatmapData, HeatmapConfiguration;
+// Re-export heatmap_data.dart for compatibility (it now forwards to canonical files)
+export 'heatmap/heatmap_data.dart';
+
+// Export core entities for direct access
+export '../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';

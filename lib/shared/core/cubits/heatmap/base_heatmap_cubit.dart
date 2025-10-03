@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
-import '../../models/heatmap.dart';
+import '../../../models/heatmap.dart';
 import 'heatmap_state.dart';
 
 /// Base cubit for heatmap functionality

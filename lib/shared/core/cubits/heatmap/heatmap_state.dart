@@ -1,5 +1,4 @@
-import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
-import '../../models/heatmap.dart';
+import '../../../models/heatmap.dart';
 
 /// Base state class for heatmap-related states
 abstract class HeatmapState {
