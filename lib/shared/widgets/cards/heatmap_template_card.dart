@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../../models/heatmap.dart';
 
-/// A reusable heatmap card widget that displays data in a treemap or grid layout
+/// A reusable heatmap template card widget that displays data in a treemap or grid layout
 /// with configurable sub-card visibility for responsive design
-class HeatmapCard extends StatelessWidget {
+class HeatmapTemplateCard extends StatelessWidget {
   final HeatmapData data;
   final bool isLoading;
   final String? error;
@@ -12,7 +12,7 @@ class HeatmapCard extends StatelessWidget {
   final VoidCallback? onTilePressed;
   final Widget Function(HeatmapTileData tile)? customTileBuilder;
 
-  const HeatmapCard({
+  const HeatmapTemplateCard({
     super.key,
     required this.data,
     this.isLoading = false,

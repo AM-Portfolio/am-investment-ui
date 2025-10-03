@@ -20,10 +20,7 @@ class PortfolioSidebar extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Text(
             'Portfolio Navigation',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         _buildNavItem(
@@ -44,6 +41,12 @@ class PortfolioSidebar extends StatelessWidget {
           title: 'Analysis',
           viewType: PortfolioViewType.analysis,
         ),
+        _buildNavItem(
+          context,
+          icon: Icons.grid_view,
+          title: 'Heatmap',
+          viewType: PortfolioViewType.heatmap,
+        ),
       ],
     );
   }
@@ -55,7 +58,7 @@ class PortfolioSidebar extends StatelessWidget {
     required PortfolioViewType viewType,
   }) {
     final isSelected = selectedView == viewType;
-    
+
     return ListTile(
       leading: Icon(
         icon,

@@ -161,7 +161,13 @@ class _PortfolioListWrapperState extends ConsumerState<PortfolioListWrapper> {
         onPortfolioChanged: _onPortfolioChanged,
       );
     } else {
-      return PortfolioWebScreen(userId: selectedPortfolioId!);
+      return PortfolioWebScreen(
+        userId: widget.userId,
+        selectedPortfolioId: selectedPortfolioId!,
+        selectedPortfolioName: selectedPortfolioName!,
+        portfolios: portfolios,
+        onPortfolioChanged: _onPortfolioChanged,
+      );
     }
   }
 

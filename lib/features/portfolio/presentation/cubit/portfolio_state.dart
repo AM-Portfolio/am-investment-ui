@@ -4,7 +4,7 @@ import '../../internal/domain/entities/portfolio_holding.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
 
 /// Represents different portfolio views
-enum PortfolioViewType { overview, holdings, analysis }
+enum PortfolioViewType { overview, holdings, analysis, heatmap }
 
 /// Base class for all portfolio states
 abstract class PortfolioState extends Equatable {
