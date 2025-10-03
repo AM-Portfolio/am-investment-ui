@@ -16,12 +16,39 @@ Portfolio Analytics → InvestmentInputData    →    HeatmapData
 ## Consolidated Architecture Components
 
 ### Layer 1: Core Heatmap Library (`lib/core/` & `lib/shared/models/heatmap/`)
+
+**Core Domain Entities** (`lib/core/app_logic/domain/entities/heatmap/`):
 - **HeatmapDataEntity** - Base domain entity with metadata
 - **HeatmapTileEntity** - Individual tile entity 
 - **HeatmapConfigurationEntity** - Layout and color scheme enums
-- **HeatmapData** (UI Model) - Extends entity with UI-specific features
-- **HeatmapTileData** (UI Model) - Extends entity with display properties
-- **HeatmapConfiguration** (UI Model) - Extends entity with UI configuration
+- **HeatmapMetadata** - Metadata with dataSource, lastUpdated, additionalInfo
+
+**UI Models with Entity-to-UI Mappers** (`lib/shared/models/heatmap/`):
+- **HeatmapData** (UI Model) - Extends HeatmapDataEntity with UI-specific features
+  ```dart
+  // Mapper: Domain Entity → UI Model
+  factory HeatmapData.fromEntity(
+    HeatmapDataEntity entity, {
+    required HeatmapConfiguration configuration,
+    Widget? customHeader,
+    Widget? customFooter,
+    VoidCallback? onRefresh,
+    Function(HeatmapTileData)? onTileInteraction,
+  })
+  ```
+- **HeatmapTileData** (UI Model) - Extends HeatmapTileEntity with display properties
+  ```dart
+  // Mapper: Domain Entity → UI Model
+  factory HeatmapTileData.fromEntity(
+    HeatmapTileEntity entity, {
+    Color? customColor,
+    IconData? icon,
+    String? imageUrl,
+    VoidCallback? onTap,
+    Map<String, Widget>? customWidgets,
+  })
+  ```
+- **HeatmapConfiguration** (UI Model) - Extends HeatmapConfigurationEntity with UI configuration
 
 ### Layer 2: Shared Investment Heatmap (`lib/shared/widgets/investment/`)
 - **InvestmentHeatmapWidget** - Universal investment data handler
