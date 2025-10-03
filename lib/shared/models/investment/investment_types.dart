@@ -2,70 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
-
-// Selector enums - should match the ones from selectors package
-enum TimeFrame {
-  oneDay,
-  oneWeek,
-  oneMonth,
-  threeMonths,
-  sixMonths,
-  oneYear,
-  ytd,
-  threeYears,
-  fiveYears,
-  all;
-
-  static List<TimeFrame> get portfolioTimeFrames => [
-    TimeFrame.oneMonth,
-    TimeFrame.threeMonths,
-    TimeFrame.sixMonths,
-    TimeFrame.oneYear,
-    TimeFrame.ytd,
-    TimeFrame.all,
-  ];
-
-  static List<TimeFrame> get heatmapTimeFrames => [
-    TimeFrame.oneDay,
-    TimeFrame.oneWeek,
-    TimeFrame.oneMonth,
-    TimeFrame.threeMonths,
-    TimeFrame.sixMonths,
-    TimeFrame.oneYear,
-  ];
-}
-
-enum MetricType {
-  changePercent,
-  changeAmount,
-  totalReturn,
-  dayReturn,
-  nav,
-  aum,
-  volume,
-  marketCap,
-}
-
-enum SectorType {
-  all,
-  technology,
-  healthcare,
-  financialServices,
-  industrials,
-  consumerDiscretionary,
-  utilities,
-  commodities,
-  fastMovingConsumerGoods,
-  services,
-  informationTechnology,
-}
-
-enum MarketCapType { all, largeCap, midCap, smallCap }
+import '../../widgets/selectors/selectors.dart';
 
 /// Enum for different investment filter types
 enum InvestmentFilterType {
   portfolio('Portfolio', 'Holdings-based analysis'),
-  index('Index', 'Market index tracking'),
+  indexFund('Index', 'Market index tracking'),
   mutualFunds('Mutual Funds', 'Fund performance analysis'),
   etf('ETF', 'Exchange-traded funds'),
   stocks('Stocks', 'Individual stock analysis'),
@@ -145,7 +87,7 @@ class InvestmentTypeConfig {
     Color? accentColor,
   }) {
     return InvestmentTypeConfig(
-      type: InvestmentFilterType.index,
+      type: InvestmentFilterType.indexFund,
       heatmapConfig: HeatmapConfigurationEntity(
         showPerformance: true,
         showWeightage: true,
@@ -195,9 +137,9 @@ class InvestmentTypeConfig {
       ],
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.totalReturn,
-        MetricType.nav,
-        MetricType.aum,
+        MetricType.returns,
+        MetricType.marketValue,
+        MetricType.volume,
       ],
       availableSectors: null, // Funds may not have sector breakdown
       availableMarketCaps: null,
@@ -227,9 +169,9 @@ class InvestmentTypeConfig {
       availableTimeFrames: TimeFrame.heatmapTimeFrames,
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.changeAmount,
+        MetricType.returns,
         MetricType.volume,
-        MetricType.nav,
+        MetricType.marketValue,
       ],
       availableSectors: SectorType.values,
       availableMarketCaps: MarketCapType.values,
@@ -259,9 +201,9 @@ class InvestmentTypeConfig {
       availableTimeFrames: TimeFrame.heatmapTimeFrames,
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.changeAmount,
+        MetricType.returns,
         MetricType.volume,
-        MetricType.marketCap,
+        MetricType.marketValue,
       ],
       availableSectors: SectorType.values,
       availableMarketCaps: MarketCapType.values,
@@ -291,8 +233,8 @@ class InvestmentTypeConfig {
       availableTimeFrames: TimeFrame.heatmapTimeFrames,
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.changeAmount,
-        MetricType.totalReturn,
+        MetricType.returns,
+        MetricType.marketValue,
       ],
       availableSectors: null, // Sectors themselves are the focus
       availableMarketCaps: MarketCapType.values,
@@ -316,7 +258,7 @@ class InvestmentTypeConfig {
           compactView: compactView,
           accentColor: accentColor,
         );
-      case InvestmentFilterType.index:
+      case InvestmentFilterType.indexFund:
         return InvestmentTypeConfig.index(
           compactView: compactView,
           accentColor: accentColor,

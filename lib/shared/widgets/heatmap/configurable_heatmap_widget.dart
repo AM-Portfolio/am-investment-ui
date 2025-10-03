@@ -213,7 +213,11 @@ class _ConfigurableHeatmapWidgetState
       title: widget.title ?? 'Portfolio Heatmap',
       subtitle: 'No data available',
       tiles: [],
-      metadata: const {'source': 'configurable_widget', 'status': 'empty'},
+      metadata: HeatmapMetadata(
+        lastUpdated: DateTime.now(),
+        dataSource: 'configurable_widget',
+        additionalInfo: const {'status': 'empty'},
+      ),
       configuration: HeatmapConfiguration(
         showPerformance: true,
         showWeightage: true,

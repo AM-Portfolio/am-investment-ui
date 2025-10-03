@@ -1,5 +1,21 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../../core/app_logic/domain/entit      layout: HeatmapLayoutType.treemap,
+      minTileWidth: 80,
+      maxTileWidth: 150,
+      minTileHeight: 60,
+      maxTileHeight: 100,
+    );
+  }
+
+  /// Create configuration for web view
+  factory HeatmapConfiguration.web() {
+    return const HeatmapConfiguration(
+      showSubCards: true,
+      showPerformance: true,
+      showWeightage: true,
+      showValue: true,
+      layout: HeatmapLayoutType.treemap,map_entities.dart';
 
 /// Generic heatmap tile data that can be used across features
 class HeatmapTileData {
@@ -43,14 +59,14 @@ class HeatmapTileData {
   bool get isNeutral => performance == 0;
 }
 
-/// Generic heatmap data container
-class HeatmapData {
+/// Simple heatmap data container for basic use cases
+class SimpleHeatmapData {
   final String title;
   final String? subtitle;
   final List<HeatmapTileData> tiles;
   final HeatmapConfiguration configuration;
 
-  const HeatmapData({
+  const SimpleHeatmapData({
     required this.title,
     this.subtitle,
     required this.tiles,
@@ -70,8 +86,8 @@ class HeatmapConfiguration {
   final bool showPerformance;
   final bool showWeightage;
   final bool showValue;
-  final HeatmapLayout layout;
-  final HeatmapColorScheme colorScheme;
+  final HeatmapLayoutType layout;
+  final HeatmapColorSchemeType colorScheme;
   final double? minTileWidth;
   final double? maxTileWidth;
   final double? minTileHeight;
@@ -84,8 +100,8 @@ class HeatmapConfiguration {
     this.showPerformance = true,
     this.showWeightage = true,
     this.showValue = false,
-    this.layout = HeatmapLayout.treemap,
-    this.colorScheme = HeatmapColorScheme.performance,
+    this.layout = HeatmapLayoutType.treemap,
+    this.colorScheme = HeatmapColorSchemeType.performance,
     this.minTileWidth,
     this.maxTileWidth,
     this.minTileHeight,
@@ -116,7 +132,7 @@ class HeatmapConfiguration {
       showPerformance: true,
       showWeightage: true,
       showValue: true,
-      layout: HeatmapLayout.treemap,
+      layout: HeatmapLayoutType.treemap,
       minTileWidth: 120,
       maxTileWidth: 200,
       minTileHeight: 80,

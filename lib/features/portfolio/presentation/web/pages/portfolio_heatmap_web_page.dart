@@ -1,297 +1,290 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/portfolio_providers.dart';
-import '../../../../../shared/widgets/selectors/selectors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../shared/core/cubits/heatmap/heatmap_display_cubit.dart';
 import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
-import '../../../../../shared/widgets/heatmap/heatmap_config.dart';
-import '../../../../../shared/models/heatmap.dart';
+import '../../../../../shared/widgets/selectors/time_frame_selector.dart';
+import '../../../../../shared/widgets/selectors/metric_selector.dart';
 
-/// Web-specific portfolio heatmap page with market visualization
-class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
-  final String userId;
-  final String portfolioId;
-  final String? portfolioName;
-
-  const PortfolioHeatmapWebPage({
-    super.key,
-    required this.userId,
-    required this.portfolioId,
-    this.portfolioName,
-  });
+class PortfolioHeatmapWebPage extends StatefulWidget {
+  const PortfolioHeatmapWebPage({super.key});
 
   @override
-  ConsumerState<PortfolioHeatmapWebPage> createState() =>
+  State<PortfolioHeatmapWebPage> createState() =>
       _PortfolioHeatmapWebPageState();
 }
 
-class _PortfolioHeatmapWebPageState
-    extends ConsumerState<PortfolioHeatmapWebPage> {
-  TimeFrame _selectedTimeframe = TimeFrame.oneDay;
-  MetricType _selectedMetric = MetricType.changePercent;
-  SectorType _selectedSector = SectorType.all;
-  MarketCapType _selectedMarketCap = MarketCapType.all;
+class _PortfolioHeatmapWebPageState extends State<PortfolioHeatmapWebPage> {
+  MetricType _selectedMetric = MetricType.returns;
+  TimeFrame _selectedTimeframe = TimeFrame.oneYear;
+  InvestmentType _selectedInvestmentType = InvestmentType.portfolio;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeHeatmap();
+  }
+
+  void _initializeHeatmap() {
+    // Initialize heatmap with portfolio configuration
+    final heatmapCubit = context.read<HeatmapDisplayCubit>();
+    final config = HeatmapDisplayConfig.portfolio(
+      title: 'Portfolio Heatmap',
+      compactMode: false,
+    );
+
+    // Sample portfolio data - in real app this would come from portfolio service
+    final sampleData = <String, dynamic>{
+      'holdings': [
+        {
+          'id': 'AAPL',
+          'symbol': 'AAPL',
+          'name': 'Apple Inc.',
+          'sector': 'Technology',
+          'value': 10000,
+          'performance': 5.2,
+          'weightage': 15.0,
+        },
+        {
+          'id': 'MSFT',
+          'symbol': 'MSFT',
+          'name': 'Microsoft Corp.',
+          'sector': 'Technology',
+          'value': 8000,
+          'performance': -2.1,
+          'weightage': 12.0,
+        },
+        {
+          'id': 'GOOGL',
+          'symbol': 'GOOGL',
+          'name': 'Alphabet Inc.',
+          'sector': 'Technology',
+          'value': 6000,
+          'performance': 1.8,
+          'weightage': 9.0,
+        },
+      ],
+    };
+
+    heatmapCubit.initialize(config: config, rawData: sampleData);
+  }
+
+  void _onMetricChanged(MetricType metric) {
+    setState(() {
+      _selectedMetric = metric;
+    });
+    final heatmapCubit = context.read<HeatmapDisplayCubit>();
+    heatmapCubit.updateMetric(metric);
+  }
+
+  void _onTimeframeChanged(TimeFrame timeframe) {
+    setState(() {
+      _selectedTimeframe = timeframe;
+    });
+    final heatmapCubit = context.read<HeatmapDisplayCubit>();
+    heatmapCubit.updateTimeFrame(timeframe);
+  }
+
+  void _onInvestmentTypeChanged(InvestmentType investmentType) {
+    setState(() {
+      _selectedInvestmentType = investmentType;
+    });
+    // Would need to reinitialize with different config for different investment types
+    _initializeHeatmap();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final holdingsAsync = ref.watch(
-      portfolioHoldingsProvider(widget.portfolioId),
-    );
-
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ConfigurableHeatmapWidget.web(
-          data: holdingsAsync.when(
-            data: (holdings) => _convertHoldingsToHeatmapData(holdings),
-            loading: () => null,
-            error: (error, stack) => null,
-          ),
-          isLoading: holdingsAsync.isLoading,
-          error: holdingsAsync.hasError ? holdingsAsync.error.toString() : null,
-          title: widget.portfolioName != null 
-                 ? '${widget.portfolioName} Heatmap' 
-                 : 'Portfolio Heatmap',
-          onSelectorsChanged: ({timeFrame, metric, sector, marketCap}) {
-            setState(() {
-              if (timeFrame != null) _selectedTimeframe = timeFrame;
-              if (metric != null) _selectedMetric = metric;
-              if (sector != null) _selectedSector = sector;
-              if (marketCap != null) _selectedMarketCap = marketCap;
-            });
-          },
-          initialTimeFrame: _selectedTimeframe,
-          initialMetric: _selectedMetric,
-          initialSector: _selectedSector,
-          initialMarketCap: _selectedMarketCap,
-          onTilePressed: () {
-            // Handle tile press - could navigate to holding details
-                _selectedMetric = MetricType.changePercent;
-                _selectedSector = SectorType.all;
-                _selectedMarketCap = MarketCapType.all;
-              });
-            },
-          ),
-
-          // Main Heatmap Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: holdingsAsync.when(
-                data: (holdings) => _buildHeatmapContent(context, holdings),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildErrorContent(
-                  context,
-                  'Failed to load heatmap data',
-                  error.toString(),
-                  () => ref.invalidate(
-                    portfolioHoldingsProvider(widget.portfolioId),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        title: const Text('Portfolio Heatmap'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-    );
-  }
-
-  Widget _buildHeatmapContent(BuildContext context, dynamic holdings) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Header
+            // Controls Row
             Row(
               children: [
-                Icon(
-                  Icons.grid_view,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
+                // Investment Type Dropdown
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Investment Type',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<InvestmentType>(
+                        value: _selectedInvestmentType,
+                        onChanged: (InvestmentType? value) {
+                          if (value != null) {
+                            _onInvestmentTypeChanged(value);
+                          }
+                        },
+                        items: InvestmentType.values
+                            .map<DropdownMenuItem<InvestmentType>>(
+                              (InvestmentType type) =>
+                                  DropdownMenuItem<InvestmentType>(
+                                    value: type,
+                                    child: Text(type.displayName),
+                                  ),
+                            )
+                            .toList(),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Portfolio Heatmap - $_selectedMetric ($_selectedTimeframe)',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                const SizedBox(width: 16),
+                // Metric Type Dropdown
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Metric',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<MetricType>(
+                        value: _selectedMetric,
+                        onChanged: (MetricType? value) {
+                          if (value != null) {
+                            _onMetricChanged(value);
+                          }
+                        },
+                        items: MetricType.values
+                            .map<DropdownMenuItem<MetricType>>(
+                              (MetricType type) => DropdownMenuItem<MetricType>(
+                                value: type,
+                                child: Text(type.displayName),
+                              ),
+                            )
+                            .toList(),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
-                _buildLegend(context),
+                const SizedBox(width: 16),
+                // Timeframe Dropdown
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Timeframe',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<TimeFrame>(
+                        value: _selectedTimeframe,
+                        onChanged: (TimeFrame? value) {
+                          if (value != null) {
+                            _onTimeframeChanged(value);
+                          }
+                        },
+                        items: TimeFrame.values
+                            .map<DropdownMenuItem<TimeFrame>>(
+                              (TimeFrame timeframe) =>
+                                  DropdownMenuItem<TimeFrame>(
+                                    value: timeframe,
+                                    child: Text(timeframe.displayName),
+                                  ),
+                            )
+                            .toList(),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
+            // Heatmap Widget
+            Expanded(
+              child: BlocBuilder<HeatmapDisplayCubit, HeatmapDisplayState>(
+                builder: (context, state) {
+                  if (state is HeatmapDisplayLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            // Heatmap Visualization
-            Expanded(child: _buildHeatmapVisualization(context)),
+                  if (state is HeatmapDisplayError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error: ${state.message}',
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _initializeHeatmap,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state is HeatmapDisplayLoaded) {
+                    return ConfigurableHeatmapWidget(data: state.data);
+                  }
+
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.bar_chart_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No data available',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Initialize heatmap to see data',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLegend(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          'Legend:',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: 8),
-        _buildLegendItem(context, 'High', Colors.green),
-        const SizedBox(width: 8),
-        _buildLegendItem(context, 'Medium', Colors.yellow),
-        const SizedBox(width: 8),
-        _buildLegendItem(context, 'Low', Colors.red),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(BuildContext context, String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-      ],
-    );
-  }
-
-  Widget _buildHeatmapVisualization(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.grid_view, size: 80, color: Colors.grey.shade400),
-            const SizedBox(height: 24),
-            Text(
-              'Interactive Portfolio Heatmap',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Visualizing $_selectedMetric over $_selectedTimeframe',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).primaryColor.withOpacity(0.3),
-                ),
-              ),
-              child: Text(
-                'Heatmap visualization will be implemented here',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Sample Grid Layout (placeholder)
-            _buildSampleHeatmapGrid(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSampleHeatmapGrid(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 200,
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 6,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-        ),
-        itemCount: 30,
-        itemBuilder: (context, index) {
-          final colors = [Colors.green, Colors.yellow, Colors.red, Colors.blue];
-          final color = colors[index % colors.length];
-
-          return Container(
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: color.withOpacity(0.5)),
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildErrorContent(
-    BuildContext context,
-    String title,
-    String error,
-    VoidCallback onRetry,
-  ) {
-    return Center(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-            ],
-          ),
         ),
       ),
     );
