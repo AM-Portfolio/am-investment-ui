@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import '../../../core/utils/logger.dart';
 import 'heatmap_tile_data.dart';
 
 /// UI-specific heatmap data that extends the core entity with display configurations
@@ -10,7 +11,7 @@ class HeatmapData extends HeatmapDataEntity {
   final VoidCallback? onRefresh;
   final Function(HeatmapTileData)? onTileInteraction;
 
-  const HeatmapData({
+  HeatmapData({
     required super.id,
     required super.title,
     super.subtitle,
@@ -21,7 +22,12 @@ class HeatmapData extends HeatmapDataEntity {
     this.customFooter,
     this.onRefresh,
     this.onTileInteraction,
-  }) : super(tiles: tiles);
+  }) : super(tiles: tiles) {
+    AppLogger.debug(
+      'HeatmapData created: id=$id, tilesCount=${tiles.length}',
+      tag: 'HeatmapData',
+    );
+  }
 
   /// Create from core entity
   factory HeatmapData.fromEntity(
@@ -32,9 +38,19 @@ class HeatmapData extends HeatmapDataEntity {
     VoidCallback? onRefresh,
     Function(HeatmapTileData)? onTileInteraction,
   }) {
+    AppLogger.debug(
+      'Converting HeatmapDataEntity to HeatmapData: ${entity.id}',
+      tag: 'HeatmapData',
+    );
+
     final uiTiles = entity.tiles
         .map((tile) => HeatmapTileData.fromEntity(tile))
         .toList();
+
+    AppLogger.debug(
+      'Converted ${entity.tiles.length} entity tiles to UI tiles',
+      tag: 'HeatmapData',
+    );
 
     return HeatmapData(
       id: entity.id,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import '../../../core/utils/logger.dart';
 
 /// UI-specific heatmap tile data that extends the core entity with display properties
 class HeatmapTileData extends HeatmapTileEntity {
@@ -9,7 +10,7 @@ class HeatmapTileData extends HeatmapTileEntity {
   final VoidCallback? onTap;
   final Map<String, Widget>? customWidgets;
 
-  const HeatmapTileData({
+  HeatmapTileData({
     required super.id,
     required super.name,
     required super.displayName,
@@ -22,7 +23,12 @@ class HeatmapTileData extends HeatmapTileEntity {
     this.imageUrl,
     this.onTap,
     this.customWidgets,
-  });
+  }) {
+    AppLogger.debug(
+      'HeatmapTileData created: id=$id, name=$name, performance=$performance',
+      tag: 'HeatmapTileData',
+    );
+  }
 
   /// Create from core entity
   factory HeatmapTileData.fromEntity(
@@ -33,6 +39,11 @@ class HeatmapTileData extends HeatmapTileEntity {
     VoidCallback? onTap,
     Map<String, Widget>? customWidgets,
   }) {
+    AppLogger.debug(
+      'Converting HeatmapTileEntity to HeatmapTileData: ${entity.id}',
+      tag: 'HeatmapTileData',
+    );
+
     return HeatmapTileData(
       id: entity.id,
       name: entity.name,

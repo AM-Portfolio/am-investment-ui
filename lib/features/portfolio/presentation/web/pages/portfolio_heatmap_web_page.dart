@@ -7,6 +7,7 @@ import '../../../../../shared/widgets/selectors/metric_selector.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
 import '../../../../../shared/widgets/selectors/selectors.dart';
+import '../../../../../core/utils/logger.dart';
 
 class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
   final String userId;
@@ -36,10 +37,30 @@ class _PortfolioHeatmapWebPageState
   @override
   void initState() {
     super.initState();
+    AppLogger.info(
+      'PortfolioHeatmapWebPage initialized',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+    AppLogger.debug(
+      'Page parameters: userId=${widget.userId}, portfolioId=${widget.portfolioId}, portfolioName=${widget.portfolioName ?? 'null'}',
+      tag: 'PortfolioHeatmapWebPage',
+    );
     _loadHeatmapData();
   }
 
   void _loadHeatmapData() {
+    AppLogger.methodEntry(
+      '_loadHeatmapData',
+      tag: 'PortfolioHeatmapWebPage',
+      params: {
+        'portfolioId': widget.portfolioId,
+        'timeFrame': _selectedTimeframe.name,
+        'metric': _selectedMetric.name,
+        'sector': _selectedSector?.name ?? 'all',
+        'marketCap': _selectedMarketCap?.name ?? 'all',
+      },
+    );
+
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
     portfolioHeatmapCubit.loadHeatmapData(
       portfolioId: widget.portfolioId,
@@ -48,36 +69,82 @@ class _PortfolioHeatmapWebPageState
       sector: _selectedSector ?? SectorType.all,
       marketCap: _selectedMarketCap ?? MarketCapType.all,
     );
+
+    AppLogger.methodExit('_loadHeatmapData', tag: 'PortfolioHeatmapWebPage');
   }
 
   void _onMetricChanged(MetricType metric) {
+    AppLogger.userAction(
+      'Changed metric filter',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+    AppLogger.debug(
+      'Metric changed from ${_selectedMetric.name} to ${metric.name}',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+
     setState(() {
       _selectedMetric = metric;
     });
+
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
     portfolioHeatmapCubit.updateMetric(metric);
   }
 
   void _onTimeframeChanged(TimeFrame timeframe) {
+    AppLogger.userAction(
+      'Changed timeframe filter',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+    AppLogger.debug(
+      'Timeframe changed from ${_selectedTimeframe.name} to ${timeframe.name}',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+
     setState(() {
       _selectedTimeframe = timeframe;
     });
+
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
     portfolioHeatmapCubit.updateTimeFrame(timeframe);
   }
 
   void _onSectorChanged(SectorType? sector) {
+    AppLogger.userAction(
+      'Changed sector filter',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+    final oldSector = _selectedSector?.name ?? 'all';
+    final newSector = sector?.name ?? 'all';
+    AppLogger.debug(
+      'Sector changed from $oldSector to $newSector',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+
     setState(() {
       _selectedSector = sector;
     });
+
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
     portfolioHeatmapCubit.updateSector(sector ?? SectorType.all);
   }
 
   void _onMarketCapChanged(MarketCapType? marketCap) {
+    AppLogger.userAction(
+      'Changed market cap filter',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+    final oldMarketCap = _selectedMarketCap?.name ?? 'all';
+    final newMarketCap = marketCap?.name ?? 'all';
+    AppLogger.debug(
+      'Market cap changed from $oldMarketCap to $newMarketCap',
+      tag: 'PortfolioHeatmapWebPage',
+    );
+
     setState(() {
       _selectedMarketCap = marketCap;
     });
+
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
     portfolioHeatmapCubit.updateMarketCap(marketCap ?? MarketCapType.all);
   }
@@ -181,7 +248,16 @@ class _PortfolioHeatmapWebPageState
                 initialData: PortfolioHeatmapInitial(),
                 builder: (context, snapshot) {
                   final state = snapshot.data ?? PortfolioHeatmapInitial();
+                  AppLogger.debug(
+                    'UI state update: ${state.runtimeType}',
+                    tag: 'PortfolioHeatmapWebPage',
+                  );
+
                   if (state is PortfolioHeatmapLoading) {
+                    AppLogger.info(
+                      'Displaying loading state',
+                      tag: 'PortfolioHeatmapWebPage',
+                    );
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -198,6 +274,10 @@ class _PortfolioHeatmapWebPageState
                   }
 
                   if (state is PortfolioHeatmapError) {
+                    AppLogger.warning(
+                      'Displaying error state: ${state.message}',
+                      tag: 'PortfolioHeatmapWebPage',
+                    );
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +306,13 @@ class _PortfolioHeatmapWebPageState
                           ],
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: _loadHeatmapData,
+                            onPressed: () {
+                              AppLogger.userAction(
+                                'Retry button clicked',
+                                tag: 'PortfolioHeatmapWebPage',
+                              );
+                              _loadHeatmapData();
+                            },
                             child: const Text('Retry'),
                           ),
                         ],
@@ -235,6 +321,15 @@ class _PortfolioHeatmapWebPageState
                   }
 
                   if (state is PortfolioHeatmapLoaded) {
+                    AppLogger.info(
+                      'Displaying loaded heatmap data',
+                      tag: 'PortfolioHeatmapWebPage',
+                    );
+                    AppLogger.debug(
+                      'Heatmap data details',
+                      tag: 'PortfolioHeatmapWebPage',
+                    );
+
                     return ConfigurableHeatmapWidget(
                       data: state.heatmapData,
                       showSelectors: false, // Selectors are handled above
