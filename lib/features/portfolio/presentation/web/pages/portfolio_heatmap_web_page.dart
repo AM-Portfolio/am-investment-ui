@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
+import '../../../../../shared/utils/sector_heatmap_converter.dart';
+import '../../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
 import '../../../../../shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
+import '../../../../../shared/widgets/heatmap/universal_heatmap_widget.dart';
 import '../../../../../shared/widgets/selectors/selectors.dart';
 import '../../cubit/portfolio_analytics_cubit.dart';
+import '../../cubit/portfolio_analytics_state.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
 
@@ -227,14 +230,109 @@ class _PortfolioHeatmapWebPageState
       tag: 'PortfolioHeatmap.UI',
     );
 
-    return ConfigurableHeatmapWidget(
-      data: state.heatmapData,
-      config: _webHeatmapDefaults,
-      initialTimeFrame: _selectedTimeframe,
-      initialMetric: _selectedMetric,
-      initialSector: _selectedSector,
-      initialMarketCap: _selectedMarketCap,
-      onSelectorsChanged: _onFiltersChanged,
+    // 1. Get analytics data from the cubit
+    final portfolioAnalyticsCubit = context.read<PortfolioAnalyticsCubit>();
+    final analyticsState = portfolioAnalyticsCubit.state;
+
+    // Check if analytics data is available
+    if (analyticsState is! PortfolioAnalyticsLoaded ||
+        analyticsState.heatmap == null) {
+      AppLogger.warning(
+        'Analytics data not available for heatmap display',
+        tag: 'PortfolioHeatmap.UI',
+      );
+      return const Center(child: Text('Analytics data is loading...'));
+    }
+
+    // 2. Use sector heatmap converter to convert analytics data
+    final convertedHeatmapData = SectorHeatmapConverter.convertToHeatmapData(
+      heatmap: analyticsState.heatmap,
+      showSubCards: true,
+      title: 'Portfolio Sector Heatmap',
+      subtitle: 'Performance by sector allocation',
+    );
+
+    AppLogger.debug(
+      'Converted heatmap data: ${convertedHeatmapData.tiles.length} tiles',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    // 3. Load platform-specific default config (web optimized)
+    final platformConfig = ui_config.HeatmapConfig.web(
+      title: 'Portfolio Sector Performance',
+      timeFrames: [
+        TimeFrame.oneDay,
+        TimeFrame.oneWeek,
+        TimeFrame.oneMonth,
+        TimeFrame.oneYear,
+      ],
+      metrics: [
+        MetricType.changePercent,
+        MetricType.marketValue,
+        MetricType.returns,
+      ],
+      sectors: [
+        SectorType.all,
+        SectorType.technology,
+        SectorType.healthcare,
+        SectorType.finance,
+      ],
+      marketCaps: [
+        MarketCapType.all,
+        MarketCapType.largeCap,
+        MarketCapType.midCap,
+        MarketCapType.smallCap,
+      ],
+      accentColor: Theme.of(context).primaryColor,
+    );
+
+    // 4. Create raw data for universal widget
+    final rawData = <String, dynamic>{
+      'holdings': convertedHeatmapData.tiles
+          .map(
+            (tile) => {
+              'id': tile.id,
+              'name': tile.name,
+              'displayName': tile.displayName,
+              'weightage': tile.weightage,
+              'performance': tile.performance,
+              'value': tile.value,
+              'metadata': tile.metadata,
+            },
+          )
+          .toList(),
+      'metadata': {
+        'totalValue':
+            convertedHeatmapData.metadata.additionalInfo?['totalValue'] ?? 0.0,
+        'lastUpdated': convertedHeatmapData.metadata.lastUpdated
+            .toIso8601String(),
+        'dataSource': convertedHeatmapData.metadata.dataSource,
+      },
+    };
+
+    // 5. Return UniversalHeatmapWidget with analytics-based data
+    return UniversalHeatmapWidget(
+      investmentType: InvestmentType.portfolio,
+      rawData: rawData,
+      config: platformConfig,
+      title: 'Portfolio Sector Heatmap',
+      showSelectors: true,
+      compactMode: false,
+      onTilePressed: () {
+        AppLogger.userAction(
+          'Heatmap tile pressed',
+          tag: 'PortfolioHeatmap.Action',
+        );
+      },
+      onFiltersChanged: ({timeFrame, metric, sector, marketCap}) {
+        _onFiltersChanged(
+          timeFrame: timeFrame,
+          metric: metric,
+          sector: sector,
+          marketCap: marketCap,
+        );
+      },
+      templateType: UniversalTemplateType.full,
     );
   }
 
