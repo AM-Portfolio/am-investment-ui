@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../../models/heatmap.dart';
+import '../../selectors/selectors.dart';
 import '../configs/selector_config.dart';
 import '../heatmap_config.dart' as ui_config;
 import '../heatmap_display_template.dart';
 import '../heatmap_layout_template.dart';
 import '../heatmap_selector_template.dart';
-import '../../selectors/selectors.dart';
 import 'config_manager.dart';
 import 'types.dart';
 

@@ -214,6 +214,14 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           Expanded(flex: 2, child: _buildMetricDropdown(context)),
           const SizedBox(width: 12),
         ],
+        if (widget.showSector) ...[
+          Expanded(flex: 2, child: _buildSectorDropdown(context)),
+          const SizedBox(width: 12),
+        ],
+        if (widget.showMarketCap) ...[
+          Expanded(flex: 2, child: _buildMarketCapDropdown(context)),
+          const SizedBox(width: 12),
+        ],
         if (widget.showResetButton) _buildResetButton(context),
       ],
     ),
