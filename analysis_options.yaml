@@ -183,3 +183,8 @@ linter:
     void_checks: true
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+# Code style preferences for logging
+# - Keep logger calls on single lines for better readability
+# - Use consistent parameter formatting
+# - Prefer concise but descriptive log messages

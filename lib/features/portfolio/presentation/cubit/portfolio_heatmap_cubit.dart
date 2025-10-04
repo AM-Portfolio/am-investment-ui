@@ -1,19 +1,17 @@
 ﻿import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'portfolio_heatmap_state.dart';
+import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.dart';
+import '../../../../core/utils/logger.dart';
+import '../../../../shared/models/heatmap/heatmap_tile_data.dart';
+import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
+import '../../../../shared/utils/sector_heatmap_converter.dart';
+import '../../../../shared/widgets/selectors/selectors.dart';
 import 'portfolio_analytics_cubit.dart';
 import 'portfolio_analytics_state.dart';
-import '../../../../shared/widgets/selectors/selectors.dart';
-import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
-import '../../../../shared/models/heatmap/heatmap_tile_data.dart';
-import '../../../../shared/utils/sector_heatmap_converter.dart';
-import '../../../../core/utils/logger.dart';
-import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.dart';
+import 'portfolio_heatmap_state.dart';
 
 /// Portfolio Heatmap Cubit
 class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
-  final PortfolioAnalyticsCubit? _analyticsCubit;
-
   PortfolioHeatmapCubit([this._analyticsCubit])
     : super(PortfolioHeatmapInitial()) {
     AppLogger.info(
@@ -26,6 +24,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
       tag: 'PortfolioHeatmapCubit',
     );
   }
+  final PortfolioAnalyticsCubit? _analyticsCubit;
 
   /// Load heatmap data for portfolio
   Future<void> loadHeatmapData({
@@ -152,7 +151,11 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         tag: 'PortfolioHeatmapCubit',
       );
 
-      emit(PortfolioHeatmapError(message: 'Failed to load portfolio heatmap'));
+      emit(
+        const PortfolioHeatmapError(
+          message: 'Failed to load portfolio heatmap',
+        ),
+      );
 
       AppLogger.methodExit(
         'loadHeatmapData',
