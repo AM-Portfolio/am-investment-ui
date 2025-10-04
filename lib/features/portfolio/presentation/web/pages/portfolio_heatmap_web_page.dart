@@ -16,6 +16,7 @@ class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
     super.key,
     this.portfolioName,
   });
+
   final String userId;
   final String portfolioId;
   final String? portfolioName;
@@ -31,18 +32,17 @@ class _PortfolioHeatmapWebPageState
   TimeFrame _selectedTimeframe = TimeFrame.oneYear;
   SectorType? _selectedSector;
   MarketCapType? _selectedMarketCap;
-  // Fixed to portfolio type since this is called from portfolio features
 
   @override
   void initState() {
     super.initState();
     AppLogger.info(
       'PortfolioHeatmapWebPage initialized',
-      tag: 'PortfolioHeatmapWebPage',
+      tag: 'PortfolioHeatmap.Init',
     );
     AppLogger.debug(
       'Page parameters: userId=${widget.userId}, portfolioId=${widget.portfolioId}, portfolioName=${widget.portfolioName ?? 'null'}',
-      tag: 'PortfolioHeatmapWebPage',
+      tag: 'PortfolioHeatmap.Init',
     );
     _loadHeatmapData();
   }
@@ -50,7 +50,7 @@ class _PortfolioHeatmapWebPageState
   void _loadHeatmapData() {
     AppLogger.methodEntry(
       '_loadHeatmapData',
-      tag: 'PortfolioHeatmapWebPage',
+      tag: 'PortfolioHeatmap.Data',
       params: {
         'portfolioId': widget.portfolioId,
         'timeFrame': _selectedTimeframe.name,
@@ -58,12 +58,6 @@ class _PortfolioHeatmapWebPageState
         'sector': _selectedSector?.name ?? 'all',
         'marketCap': _selectedMarketCap?.name ?? 'all',
       },
-    );
-
-    // Step 1: First call PortfolioAnalyticsCubit.loadAnalytics as required
-    AppLogger.info(
-      'Step 1: Calling PortfolioAnalyticsCubit.loadAnalytics',
-      tag: 'PortfolioHeatmapWebPage',
     );
 
     final portfolioAnalyticsCubit = context.read<PortfolioAnalyticsCubit>();
@@ -74,11 +68,10 @@ class _PortfolioHeatmapWebPageState
         .loadAnalytics(widget.portfolioId)
         .then((_) {
           AppLogger.info(
-            'Analytics data loaded, now loading heatmap with real data',
-            tag: 'PortfolioHeatmapWebPage',
+            'Analytics loaded, proceeding with heatmap data',
+            tag: 'PortfolioHeatmap.Data',
           );
 
-          // Step 2: Then proceed with heatmap-specific data loading using the loaded analytics
           portfolioHeatmapCubit.loadHeatmapData(
             portfolioId: widget.portfolioId,
             timeFrame: _selectedTimeframe,
@@ -90,12 +83,11 @@ class _PortfolioHeatmapWebPageState
         })
         .catchError((error) {
           AppLogger.error(
-            'Failed to load analytics, proceeding with heatmap fallback',
-            tag: 'PortfolioHeatmapWebPage',
+            'Analytics failed, using fallback',
+            tag: 'PortfolioHeatmap.Data',
             error: error,
           );
 
-          // Load heatmap even if analytics fails
           portfolioHeatmapCubit.loadHeatmapData(
             portfolioId: widget.portfolioId,
             timeFrame: _selectedTimeframe,
@@ -106,13 +98,13 @@ class _PortfolioHeatmapWebPageState
           );
         });
 
-    AppLogger.methodExit('_loadHeatmapData', tag: 'PortfolioHeatmapWebPage');
+    AppLogger.methodExit('_loadHeatmapData', tag: 'PortfolioHeatmap.Data');
   }
 
   @override
   Widget build(BuildContext context) {
     AppLogger.debug(
-      'PortfolioHeatmapWebPage: building UI with timeframe=${_selectedTimeframe.code}, metric=${_selectedMetric.shortName}',
+      'Building UI: timeframe=${_selectedTimeframe.code}, metric=${_selectedMetric.shortName}',
       tag: 'PortfolioHeatmap.UI',
     );
 
@@ -120,174 +112,207 @@ class _PortfolioHeatmapWebPageState
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder<PortfolioHeatmapState>(
-                stream: context.read<PortfolioHeatmapCubit>().stream,
-                initialData: PortfolioHeatmapInitial(),
-                builder: (context, snapshot) {
-                  final state = snapshot.data ?? PortfolioHeatmapInitial();
-                  AppLogger.debug(
-                    'UI state update: ${state.runtimeType}',
-                    tag: 'PortfolioHeatmapWebPage',
-                  );
-
-                  if (state is PortfolioHeatmapLoading) {
-                    AppLogger.info(
-                      'Displaying loading state',
-                      tag: 'PortfolioHeatmapWebPage',
-                    );
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 16),
-                          Text(
-                            state.message ?? 'Loading heatmap data...',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  if (state is PortfolioHeatmapError) {
-                    AppLogger.warning(
-                      'Displaying error state: ${state.message}',
-                      tag: 'PortfolioHeatmapWebPage',
-                    );
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error: ${state.message}',
-                            style: const TextStyle(color: Colors.red),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (state.details != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              state.details!,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              AppLogger.userAction(
-                                'Retry button clicked',
-                                tag: 'PortfolioHeatmapWebPage',
-                              );
-                              _loadHeatmapData();
-                            },
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  if (state is PortfolioHeatmapLoaded) {
-                    AppLogger.info(
-                      'Displaying loaded heatmap data',
-                      tag: 'PortfolioHeatmapWebPage',
-                    );
-                    AppLogger.debug(
-                      'Heatmap data details',
-                      tag: 'PortfolioHeatmapWebPage',
-                    );
-
-                    return ConfigurableHeatmapWidget(
-                      data: state.heatmapData,
-                      initialTimeFrame: _selectedTimeframe,
-                      initialMetric: _selectedMetric,
-                      initialSector: _selectedSector,
-                      initialMarketCap: _selectedMarketCap,
-                      onSelectorsChanged:
-                          ({timeFrame, metric, sector, marketCap}) {
-                            // Update local state
-                            if (timeFrame != null)
-                              _selectedTimeframe = timeFrame;
-                            if (metric != null) _selectedMetric = metric;
-                            if (sector != null) _selectedSector = sector;
-                            if (marketCap != null)
-                              _selectedMarketCap = marketCap;
-
-                            // Reload heatmap data with new selections
-                            _loadHeatmapData();
-                          },
-                    );
-                  }
-
-                  if (state is PortfolioHeatmapEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.folder_open,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            state.message,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Add some investments to see the heatmap',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.bar_chart_outlined,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Loading portfolio data...',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadHeatmapData,
-                          child: const Text('Load Heatmap'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+          children: [Expanded(child: _buildHeatmapStreamBuilder())],
         ),
       ),
     );
+  }
+
+  /// Builds the main StreamBuilder for heatmap state management
+  Widget _buildHeatmapStreamBuilder() => StreamBuilder<PortfolioHeatmapState>(
+    stream: context.read<PortfolioHeatmapCubit>().stream,
+    initialData: PortfolioHeatmapInitial(),
+    builder: (context, snapshot) {
+      final state = snapshot.data ?? PortfolioHeatmapInitial();
+
+      AppLogger.debug(
+        'State update: ${state.runtimeType}',
+        tag: 'PortfolioHeatmap.State',
+      );
+
+      return _buildStateWidget(state);
+    },
+  );
+
+  /// Routes to appropriate widget based on current state
+  Widget _buildStateWidget(PortfolioHeatmapState state) {
+    if (state is PortfolioHeatmapLoading) {
+      return _buildLoadingWidget(state);
+    }
+
+    if (state is PortfolioHeatmapError) {
+      return _buildErrorWidget(state);
+    }
+
+    if (state is PortfolioHeatmapLoaded) {
+      return _buildLoadedWidget(state);
+    }
+
+    if (state is PortfolioHeatmapEmpty) {
+      return _buildEmptyWidget(state);
+    }
+
+    return _buildDefaultWidget();
+  }
+
+  /// Builds loading state UI
+  Widget _buildLoadingWidget(PortfolioHeatmapLoading state) {
+    AppLogger.info(
+      'Showing loading: ${state.message ?? "Loading..."}',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(
+            state.message ?? 'Loading heatmap data...',
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds error state UI
+  Widget _buildErrorWidget(PortfolioHeatmapError state) {
+    AppLogger.warning(
+      'Showing error: ${state.message}',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            'Error: ${state.message}',
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          if (state.details != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              state.details!,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _onRetryPressed,
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds loaded state UI with heatmap
+  Widget _buildLoadedWidget(PortfolioHeatmapLoaded state) {
+    AppLogger.info(
+      'Showing heatmap: ${state.heatmapData.tiles.length} tiles',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    return ConfigurableHeatmapWidget(
+      data: state.heatmapData,
+      initialTimeFrame: _selectedTimeframe,
+      initialMetric: _selectedMetric,
+      initialSector: _selectedSector,
+      initialMarketCap: _selectedMarketCap,
+      onSelectorsChanged: _onFiltersChanged,
+    );
+  }
+
+  /// Builds empty state UI
+  Widget _buildEmptyWidget(PortfolioHeatmapEmpty state) {
+    AppLogger.info(
+      'Showing empty state: ${state.message}',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.folder_open, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            state.message,
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Add some investments to see the heatmap',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds default/fallback state UI
+  Widget _buildDefaultWidget() {
+    AppLogger.debug(
+      'Showing default state (initial)',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.bar_chart_outlined, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          const Text(
+            'Loading portfolio data...',
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadHeatmapData,
+            child: const Text('Load Heatmap'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Handles retry button press
+  void _onRetryPressed() {
+    AppLogger.userAction(
+      'Retry button clicked',
+      tag: 'PortfolioHeatmap.Action',
+    );
+    _loadHeatmapData();
+  }
+
+  /// Handles filter changes from heatmap selectors
+  void _onFiltersChanged({
+    TimeFrame? timeFrame,
+    MetricType? metric,
+    SectorType? sector,
+    MarketCapType? marketCap,
+  }) {
+    AppLogger.debug(
+      'Filters: timeFrame=${timeFrame?.code}, metric=${metric?.shortName}, sector=${sector?.name}, marketCap=${marketCap?.name}',
+      tag: 'PortfolioHeatmap.Filter',
+    );
+
+    // Update local state
+    if (timeFrame != null) _selectedTimeframe = timeFrame;
+    if (metric != null) _selectedMetric = metric;
+    if (sector != null) _selectedSector = sector;
+    if (marketCap != null) _selectedMarketCap = marketCap;
+
+    // Reload heatmap data with new selections
+    _loadHeatmapData();
   }
 }
