@@ -2,17 +2,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-import '../state/portfolio_heatmap_state.dart';
+import 'portfolio_heatmap_state.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
 import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
 import '../../../../shared/models/heatmap/heatmap_tile_data.dart';
-import '../../../../shared/models/heatmap/heatmap_configuration.dart';
+
+import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.dart';
 
 /// Portfolio Heatmap Cubit
 class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
   final Ref _ref;
 
-  PortfolioHeatmapCubit(this._ref) : super(const PortfolioHeatmapInitial());
+  PortfolioHeatmapCubit(this._ref) : super(PortfolioHeatmapInitial());
 
   /// Load heatmap data for portfolio
   Future<void> loadHeatmapData({
@@ -20,10 +21,12 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
     TimeFrame timeFrame = TimeFrame.oneDay,
     MetricType metric = MetricType.marketValue,
     SectorType sector = SectorType.all,
-    MarketCapType marketCap = MarketCapType.all,  
+    MarketCapType marketCap = MarketCapType.all,
   }) async {
     try {
-      emit(const PortfolioHeatmapLoading(message: 'Loading portfolio heatmap...'));
+      emit(
+        const PortfolioHeatmapLoading(message: 'Loading portfolio heatmap...'),
+      );
       await Future.delayed(const Duration(milliseconds: 500));
 
       final sampleData = HeatmapData(
@@ -33,7 +36,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         tiles: [
           HeatmapTileData(
             id: 'technology',
-            name: 'technology', 
+            name: 'technology',
             displayName: 'Technology',
             weightage: 36.0,
             performance: 3.45,
@@ -42,27 +45,26 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
             metadata: {'allocation': 36.0},
           ),
         ],
-        metadata: {'portfolioId': portfolioId},
-        configuration: const HeatmapConfiguration(
-          layout: HeatmapLayoutType.grid,
-          colorScheme: HeatmapColorSchemeType.performance,
-          defaultSorting: HeatmapSortingType.performance,
+        metadata: HeatmapMetadata(
+          lastUpdated: DateTime.now(),
+          dataSource: 'portfolio_api',
+          additionalInfo: {'portfolioId': portfolioId},
         ),
+        configuration: const HeatmapConfiguration(),
       );
 
       emit(PortfolioHeatmapLoaded(
-        data: sampleData,
+        heatmapData: sampleData,
         portfolioId: portfolioId,
         timeFrame: timeFrame,
         metric: metric,
         sector: sector,
         marketCap: marketCap,
+        lastUpdated: DateTime.now(),
       ));
-    } catch (e, stackTrace) {
+    } catch (e) {
       emit(PortfolioHeatmapError(
         message: 'Failed to load portfolio heatmap',
-        error: e,
-        stackTrace: stackTrace,
       ));
     }
   }
@@ -74,8 +76,8 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         portfolioId: currentState.portfolioId,
         timeFrame: timeFrame,
         metric: currentState.metric,
-        sector: currentState.sector,
-        marketCap: currentState.marketCap,
+        sector: currentState.sector ?? SectorType.all,
+        marketCap: currentState.marketCap ?? MarketCapType.all,
       );
     }
   }
@@ -87,8 +89,8 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         portfolioId: currentState.portfolioId,
         timeFrame: currentState.timeFrame,
         metric: metric,
-        sector: currentState.sector,
-        marketCap: currentState.marketCap,
+        sector: currentState.sector ?? SectorType.all,
+        marketCap: currentState.marketCap ?? MarketCapType.all,
       );
     }
   }
@@ -101,7 +103,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         timeFrame: currentState.timeFrame,
         metric: currentState.metric,
         sector: sector,
-        marketCap: currentState.marketCap,
+        marketCap: currentState.marketCap ?? MarketCapType.all,
       );
     }
   }
@@ -113,7 +115,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         portfolioId: currentState.portfolioId,
         timeFrame: currentState.timeFrame,
         metric: currentState.metric,
-        sector: currentState.sector,
+        sector: currentState.sector ?? SectorType.all,
         marketCap: marketCap,
       );
     }
@@ -126,8 +128,8 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         portfolioId: currentState.portfolioId,
         timeFrame: currentState.timeFrame,
         metric: currentState.metric,
-        sector: currentState.sector,
-        marketCap: currentState.marketCap,
+        sector: currentState.sector ?? SectorType.all,
+        marketCap: currentState.marketCap ?? MarketCapType.all,
       );
     }
   }

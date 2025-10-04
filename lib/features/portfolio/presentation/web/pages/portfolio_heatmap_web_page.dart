@@ -45,8 +45,8 @@ class _PortfolioHeatmapWebPageState
       portfolioId: widget.portfolioId,
       timeFrame: _selectedTimeframe,
       metric: _selectedMetric,
-      sector: _selectedSector,
-      marketCap: _selectedMarketCap,
+      sector: _selectedSector ?? SectorType.all,
+      marketCap: _selectedMarketCap ?? MarketCapType.all,
     );
   }
 
@@ -55,10 +55,7 @@ class _PortfolioHeatmapWebPageState
       _selectedMetric = metric;
     });
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateMetric(
-      portfolioId: widget.portfolioId,
-      metric: metric,
-    );
+    portfolioHeatmapCubit.updateMetric(metric);
   }
 
   void _onTimeframeChanged(TimeFrame timeframe) {
@@ -66,10 +63,7 @@ class _PortfolioHeatmapWebPageState
       _selectedTimeframe = timeframe;
     });
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateTimeFrame(
-      portfolioId: widget.portfolioId,
-      timeFrame: timeframe,
-    );
+    portfolioHeatmapCubit.updateTimeFrame(timeframe);
   }
 
   void _onSectorChanged(SectorType? sector) {
@@ -77,10 +71,7 @@ class _PortfolioHeatmapWebPageState
       _selectedSector = sector;
     });
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateSector(
-      portfolioId: widget.portfolioId,
-      sector: sector,
-    );
+    portfolioHeatmapCubit.updateSector(sector ?? SectorType.all);
   }
 
   void _onMarketCapChanged(MarketCapType? marketCap) {
@@ -88,10 +79,7 @@ class _PortfolioHeatmapWebPageState
       _selectedMarketCap = marketCap;
     });
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateMarketCap(
-      portfolioId: widget.portfolioId,
-      marketCap: marketCap,
-    );
+    portfolioHeatmapCubit.updateMarketCap(marketCap ?? MarketCapType.all);
   }
 
   @override
@@ -188,8 +176,11 @@ class _PortfolioHeatmapWebPageState
             const SizedBox(height: 24),
             // Heatmap Widget
             Expanded(
-              child: BlocBuilder<PortfolioHeatmapCubit, PortfolioHeatmapState>(
-                builder: (context, state) {
+              child: StreamBuilder<PortfolioHeatmapState>(
+                stream: context.read<PortfolioHeatmapCubit>().stream,
+                initialData: PortfolioHeatmapInitial(),
+                builder: (context, snapshot) {
+                  final state = snapshot.data ?? PortfolioHeatmapInitial();
                   if (state is PortfolioHeatmapLoading) {
                     return Center(
                       child: Column(
