@@ -41,8 +41,7 @@ class UniversalHeatmapDataConverters {
             'tilesCount': tiles.length,
           },
         ),
-        configuration: UniversalHeatmapConfigManager.getBaseConfig(
-          investmentType,
+        configuration: UniversalHeatmapConfigManager.getBasicConfig(
           title: title,
         ),
       );
@@ -78,10 +77,7 @@ class UniversalHeatmapDataConverters {
       dataSource: 'universal_widget',
       additionalInfo: const {'status': 'empty'},
     ),
-    configuration: UniversalHeatmapConfigManager.getBaseConfig(
-      investmentType,
-      title: title,
-    ),
+    configuration: UniversalHeatmapConfigManager.getBasicConfig(title: title),
   );
 
   /// Convert raw data to heatmap tiles based on investment type

@@ -25,7 +25,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     this.customWidgets,
   }) {
     AppLogger.debug(
-      'HeatmapTileData created: id=$id, name=$name, performance=$performance',
+      'HeatmapTileData created: id=$id, name=$name, performance=$performance, children=${children?.length ?? 0}',
       tag: 'HeatmapTileData',
     );
   }
@@ -40,7 +40,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     Map<String, Widget>? customWidgets,
   }) {
     AppLogger.debug(
-      'Converting HeatmapTileEntity to HeatmapTileData: ${entity.id}',
+      'Converting HeatmapTileEntity to HeatmapTileData: ${entity.id}, children=${entity.children?.length ?? 0}',
       tag: 'HeatmapTileData',
     );
 

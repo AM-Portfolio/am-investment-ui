@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../../models/heatmap.dart';
-import '../heatmap_config.dart' as ui_config;
 import '../../selectors/selectors.dart';
+import '../heatmap_config.dart' as ui_config;
 import 'config_manager.dart';
 import 'data_converters.dart';
 import 'template_factory.dart';
@@ -16,12 +16,12 @@ class UniversalHeatmapWidget extends StatelessWidget {
   const UniversalHeatmapWidget({
     required this.investmentType,
     required this.rawData,
+    required this.title,
     super.key,
     this.config,
     this.onTilePressed,
     this.onFiltersChanged,
     this.showSelectors,
-    this.title,
     this.compactMode,
     this.isLoading = false,
     this.error,
@@ -34,8 +34,11 @@ class UniversalHeatmapWidget extends StatelessWidget {
   /// Raw data to be converted to heatmap format
   final Map<String, dynamic> rawData;
 
-  /// Optional configuration overrides
+  /// Configuration overrides (optional, uses basic config if not provided)
   final ui_config.HeatmapConfig? config;
+
+  /// Custom title (required)
+  final String title;
 
   /// Callback when a tile is pressed
   final VoidCallback? onTilePressed;
@@ -51,9 +54,6 @@ class UniversalHeatmapWidget extends StatelessWidget {
 
   /// Whether to show selectors (can override config)
   final bool? showSelectors;
-
-  /// Custom title (can override config)
-  final String? title;
 
   /// Whether to use compact mode (can override config)
   final bool? compactMode;
@@ -78,19 +78,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
     );
 
     AppLogger.debug(
-      'Widget config: hasConfig=${config != null}, showSelectors=$showSelectors, '
+      'Widget config: showSelectors=$showSelectors, '
       'title=$title, compactMode=$compactMode, isLoading=$isLoading, '
       'hasError=${error != null}, templateType=${templateType.name}',
       tag: 'UniversalHeatmapWidget',
-    );
-
-    // Get effective configuration based on investment type
-    final effectiveConfig = UniversalHeatmapConfigManager.getEffectiveConfig(
-      investmentType: investmentType,
-      userConfig: config,
-      title: title,
-      showSelectors: showSelectors,
-      compactMode: compactMode,
     );
 
     // Convert raw data to heatmap data
@@ -98,14 +89,18 @@ class UniversalHeatmapWidget extends StatelessWidget {
         UniversalHeatmapDataConverters.convertRawDataToHeatmapData(
           investmentType: investmentType,
           rawData: rawData,
-          title:
-              title ??
-              UniversalHeatmapConfigManager.getDefaultTitle(investmentType),
-          subtitle: UniversalHeatmapConfigManager.getDefaultSubtitle(
-            investmentType,
-          ),
+          title: title,
+          subtitle: investmentType.name,
           isLoading: isLoading,
           error: error,
+        );
+
+    // Get effective config (use provided config or basic fallback)
+    final effectiveConfig =
+        config ??
+        UniversalHeatmapConfigManager.getBasicConfig(
+          title: title,
+          compactMode: compactMode ?? false,
         );
 
     // Build the universal template by composing the 3 separate components
@@ -143,9 +138,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
         heatmapData ??
         UniversalHeatmapDataConverters.getEmptyData(
           investmentType: investmentType,
-          title:
-              title ??
-              UniversalHeatmapConfigManager.getDefaultTitle(investmentType),
+          title: title,
         );
 
     // 1. Create Display Template (handles tile rendering)
