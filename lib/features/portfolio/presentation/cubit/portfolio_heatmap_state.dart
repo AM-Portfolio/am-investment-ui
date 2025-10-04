@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+
 import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
-import '../../../../shared/models/investment/investment_types.dart';
 
 /// Base class for all portfolio heatmap states
 abstract class PortfolioHeatmapState extends Equatable {
@@ -16,9 +16,8 @@ class PortfolioHeatmapInitial extends PortfolioHeatmapState {}
 
 /// Loading state when heatmap data is being fetched
 class PortfolioHeatmapLoading extends PortfolioHeatmapState {
-  final String? message;
-
   const PortfolioHeatmapLoading({this.message});
+  final String? message;
 
   @override
   List<Object?> get props => [message];
@@ -26,6 +25,15 @@ class PortfolioHeatmapLoading extends PortfolioHeatmapState {
 
 /// Loaded state with heatmap data and current filters
 class PortfolioHeatmapLoaded extends PortfolioHeatmapState {
+  const PortfolioHeatmapLoaded({
+    required this.heatmapData,
+    required this.timeFrame,
+    required this.metric,
+    required this.portfolioId,
+    required this.lastUpdated,
+    this.sector,
+    this.marketCap,
+  });
   final HeatmapData heatmapData;
   final TimeFrame timeFrame;
   final MetricType metric;
@@ -33,16 +41,6 @@ class PortfolioHeatmapLoaded extends PortfolioHeatmapState {
   final MarketCapType? marketCap;
   final String portfolioId;
   final DateTime lastUpdated;
-
-  const PortfolioHeatmapLoaded({
-    required this.heatmapData,
-    required this.timeFrame,
-    required this.metric,
-    this.sector,
-    this.marketCap,
-    required this.portfolioId,
-    required this.lastUpdated,
-  });
 
   @override
   List<Object?> get props => [
@@ -64,28 +62,19 @@ class PortfolioHeatmapLoaded extends PortfolioHeatmapState {
     MarketCapType? marketCap,
     String? portfolioId,
     DateTime? lastUpdated,
-  }) {
-    return PortfolioHeatmapLoaded(
-      heatmapData: heatmapData ?? this.heatmapData,
-      timeFrame: timeFrame ?? this.timeFrame,
-      metric: metric ?? this.metric,
-      sector: sector ?? this.sector,
-      marketCap: marketCap ?? this.marketCap,
-      portfolioId: portfolioId ?? this.portfolioId,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-    );
-  }
+  }) => PortfolioHeatmapLoaded(
+    heatmapData: heatmapData ?? this.heatmapData,
+    timeFrame: timeFrame ?? this.timeFrame,
+    metric: metric ?? this.metric,
+    sector: sector ?? this.sector,
+    marketCap: marketCap ?? this.marketCap,
+    portfolioId: portfolioId ?? this.portfolioId,
+    lastUpdated: lastUpdated ?? this.lastUpdated,
+  );
 }
 
 /// Error state when heatmap data loading fails
 class PortfolioHeatmapError extends PortfolioHeatmapState {
-  final String message;
-  final String? details;
-  final TimeFrame? timeFrame;
-  final MetricType? metric;
-  final SectorType? sector;
-  final MarketCapType? marketCap;
-
   const PortfolioHeatmapError({
     required this.message,
     this.details,
@@ -94,6 +83,12 @@ class PortfolioHeatmapError extends PortfolioHeatmapState {
     this.sector,
     this.marketCap,
   });
+  final String message;
+  final String? details;
+  final TimeFrame? timeFrame;
+  final MetricType? metric;
+  final SectorType? sector;
+  final MarketCapType? marketCap;
 
   @override
   List<Object?> get props => [
@@ -108,15 +103,14 @@ class PortfolioHeatmapError extends PortfolioHeatmapState {
 
 /// State when no data is available (empty portfolio)
 class PortfolioHeatmapEmpty extends PortfolioHeatmapState {
-  final String message;
-  final TimeFrame? timeFrame;
-  final MetricType? metric;
-
   const PortfolioHeatmapEmpty({
     this.message = 'No portfolio data available',
     this.timeFrame,
     this.metric,
   });
+  final String message;
+  final TimeFrame? timeFrame;
+  final MetricType? metric;
 
   @override
   List<Object?> get props => [message, timeFrame, metric];
