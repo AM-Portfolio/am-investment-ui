@@ -179,12 +179,15 @@ class PortfolioHeatmapConfig {
 
   /// Creates custom selector configuration for portfolio heatmap
   /// - Hides timeframe selector
+  /// - Hides metric selector
+  /// - Hides sector selector
   /// - Shows only market cap selector with custom options including "no group"
   /// - Full control over selector behavior
   static SelectorConfig createPortfolioSelectorConfig() => SelectorConfig(
     // Hide all selectors except market cap
     showTimeFrameSelector: false,
     showMetricSelector: false,
+    showSectorSelector: false,
 
     // Custom market cap options including "no group" equivalent (all)
     availableMarketCaps: portfolioMarketCapOptions,

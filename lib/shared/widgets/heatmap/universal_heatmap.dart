@@ -39,7 +39,7 @@
 library;
 
 // Convenience investment-specific widgets
-export 'universal_heatmap/investment_widgets.dart';
+//export 'universal_heatmap/investment_widgets.dart';
 export 'universal_heatmap/types.dart';
 // Core widget and types
 export 'universal_heatmap/universal_heatmap_widget.dart';

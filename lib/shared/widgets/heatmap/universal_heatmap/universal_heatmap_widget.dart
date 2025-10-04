@@ -134,6 +134,23 @@ class UniversalHeatmapWidget extends StatelessWidget {
       tag: 'UniversalHeatmapWidget.Template',
     );
 
+    // Log complete effectiveConfig as JSON for debugging
+    AppLogger.debug(
+      'Complete effectiveConfig: {'
+      '"showTimeFrameSelector": ${effectiveConfig.showTimeFrameSelector}, '
+      '"showMetricSelector": ${effectiveConfig.showMetricSelector}, '
+      '"showSelectorSelector": ${effectiveConfig.showSectorSelector}, '
+      '"showMarketCapSelector": ${effectiveConfig.showMarketCapSelector}, '
+      '"layoutType": "${effectiveConfig.layoutType}", '
+      '"compactView": ${effectiveConfig.compactView}, '
+      '"showTitle": ${effectiveConfig.showTitle}, '
+      '"customTitle": "${effectiveConfig.customTitle}", '
+      '"showLegend": ${effectiveConfig.showLegend}, '
+      '"showHeader": ${effectiveConfig.showHeader}'
+      '}',
+      tag: 'UniversalHeatmapWidget.Config',
+    );
+
     final data =
         heatmapData ??
         UniversalHeatmapDataConverters.getEmptyData(

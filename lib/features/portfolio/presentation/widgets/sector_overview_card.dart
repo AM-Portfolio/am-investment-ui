@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
-import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
+// import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
+// import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
 import '../mappers/sector_heatmap_converter.dart';
 
@@ -52,22 +52,22 @@ class SectorOverviewCard extends StatelessWidget {
       );
     }
 
-    // Create raw data for universal widget
-    final rawData = <String, dynamic>{
-      'holdings': heatmapData.tiles
-          .map(
-            (tile) => {
-              'id': tile.id,
-              'name': tile.name,
-              'displayName': tile.displayName,
-              'weightage': tile.weightage,
-              'performance': tile.performance,
-              'value': tile.value,
-              'metadata': tile.metadata,
-            },
-          )
-          .toList(),
-    };
+    // Create raw data for universal widget (commented out for now)
+    // final rawData = <String, dynamic>{
+    //   'holdings': heatmapData.tiles
+    //       .map(
+    //         (tile) => {
+    //           'id': tile.id,
+    //           'name': tile.name,
+    //           'displayName': tile.displayName,
+    //           'weightage': tile.weightage,
+    //           'performance': tile.performance,
+    //           'value': tile.value,
+    //           'metadata': tile.metadata,
+    //         },
+    //       )
+    //       .toList(),
+    // };
 
     return Card(
       child: Padding(
@@ -88,14 +88,21 @@ class SectorOverviewCard extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               height: 300,
-              child: UniversalHeatmapWidget(
-                investmentType: InvestmentType.portfolio,
-                rawData: rawData,
-                config: ui_config.HeatmapConfig.mobilePortfolio(),
-                templateType: UniversalTemplateType.minimal,
-                showSelectors: false,
-                compactMode: true,
+              // TODO: Re-enable UniversalHeatmapWidget when ready
+              child: Center(
+                child: Text(
+                  'Heatmap temporarily disabled',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
+              // child: UniversalHeatmapWidget(
+              //   investmentType: InvestmentType.portfolio,
+              //   rawData: rawData,
+              //   config: ui_config.HeatmapConfig.mobilePortfolio(),
+              //   templateType: UniversalTemplateType.minimal,
+              //   showSelectors: false,
+              //   compactMode: true,
+              // ),
             ),
           ],
         ),
