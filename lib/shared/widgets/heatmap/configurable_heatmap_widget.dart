@@ -120,17 +120,20 @@ class _ConfigurableHeatmapWidgetState
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          // Time frame
+          // Time frame (Disabled)
           Expanded(
-            child: TimeFrameSelector(
-              selectedTimeFrame: _selectedTimeFrame,
-              onTimeFrameChanged: (timeFrame) {
-                setState(() {
-                  _selectedTimeFrame = timeFrame;
-                });
-                _notifySelectorsChanged();
-              },
-              compact: true,
+            child: IgnorePointer(
+              ignoring: true, // Disable interaction
+              child: Opacity(
+                opacity: 0.5, // Make it look disabled
+                child: TimeFrameSelector(
+                  selectedTimeFrame: _selectedTimeFrame,
+                  onTimeFrameChanged: (timeFrame) {
+                    // Disabled - no action
+                  },
+                  compact: true,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),

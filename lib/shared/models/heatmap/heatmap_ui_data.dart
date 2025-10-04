@@ -73,7 +73,7 @@ class HeatmapData extends HeatmapDataEntity {
     String? id,
     String? title,
     String? subtitle,
-    List<HeatmapTileData>? tiles,
+    List<HeatmapTileEntity>? tiles,
     HeatmapMetadata? metadata,
     HeatmapConfiguration? configuration,
     Widget? customHeader,
@@ -85,7 +85,11 @@ class HeatmapData extends HeatmapDataEntity {
       id: id ?? this.id,
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
-      tiles: tiles ?? uiTiles,
+      tiles:
+          tiles
+              ?.map((tileEntity) => HeatmapTileData.fromEntity(tileEntity))
+              .toList() ??
+          uiTiles,
       metadata: metadata ?? this.metadata,
       configuration: configuration ?? this.configuration,
       customHeader: customHeader ?? this.customHeader,
