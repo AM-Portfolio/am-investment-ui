@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
 import '../../../core/utils/logger.dart';
+import '../../widgets/heatmap/heatmap_config.dart' as ui_config;
 import 'heatmap_tile_data.dart';
 
 /// UI-specific heatmap data that extends the core entity with display configurations
@@ -27,7 +28,7 @@ class HeatmapData extends HeatmapDataEntity {
   /// Create from core entity
   factory HeatmapData.fromEntity(
     HeatmapDataEntity entity, {
-    required HeatmapConfiguration configuration,
+    required ui_config.HeatmapConfig configuration,
     Widget? customHeader,
     Widget? customFooter,
     VoidCallback? onRefresh,
@@ -58,7 +59,7 @@ class HeatmapData extends HeatmapDataEntity {
       onTileInteraction: onTileInteraction,
     );
   }
-  final HeatmapConfiguration configuration;
+  final ui_config.HeatmapConfig configuration;
   final Widget? customHeader;
   final Widget? customFooter;
   final VoidCallback? onRefresh;
@@ -89,7 +90,7 @@ class HeatmapData extends HeatmapDataEntity {
     String? subtitle,
     List<HeatmapTileEntity>? tiles,
     HeatmapMetadata? metadata,
-    HeatmapConfiguration? configuration,
+    ui_config.HeatmapConfig? configuration,
     Widget? customHeader,
     Widget? customFooter,
     VoidCallback? onRefresh,
@@ -105,202 +106,5 @@ class HeatmapData extends HeatmapDataEntity {
     customFooter: customFooter ?? this.customFooter,
     onRefresh: onRefresh ?? this.onRefresh,
     onTileInteraction: onTileInteraction ?? this.onTileInteraction,
-  );
-}
-
-/// UI-specific configuration for heatmap display and behavior
-class HeatmapConfiguration extends HeatmapConfigurationEntity {
-  const HeatmapConfiguration({
-    super.showPerformance,
-    super.showWeightage,
-    super.showValue,
-    super.layout,
-    super.colorScheme,
-    super.defaultSorting,
-    super.enabledFilters,
-    super.customSettings,
-    this.showSubCards = true,
-    this.showLegend = true,
-    this.showHeader = true,
-    this.showFooter = false,
-    this.minTileWidth,
-    this.maxTileWidth,
-    this.minTileHeight,
-    this.maxTileHeight,
-    this.tilePadding,
-    this.tileMargin,
-    this.cardPadding,
-    this.tileBorderRadius,
-    this.tileElevation,
-    this.animationDuration,
-  });
-
-  /// Create configuration for mobile view
-  factory HeatmapConfiguration.mobile() => const HeatmapConfiguration(
-    layout: HeatmapLayoutType.grid,
-    showSubCards: false, // Simplified for mobile
-    showLegend: false, // Hidden for space
-    minTileWidth: 80,
-    maxTileWidth: 120,
-    minTileHeight: 60,
-    maxTileHeight: 80,
-    tilePadding: EdgeInsets.all(4),
-    tileMargin: EdgeInsets.all(2),
-    cardPadding: EdgeInsets.all(8),
-    tileBorderRadius: BorderRadius.all(Radius.circular(6)),
-    tileElevation: 2,
-    animationDuration: Duration(milliseconds: 200),
-  );
-
-  /// Create configuration for web view
-  factory HeatmapConfiguration.web() => const HeatmapConfiguration(
-    showValue: true,
-    showFooter: true,
-    minTileWidth: 120,
-    maxTileWidth: 200,
-    minTileHeight: 80,
-    maxTileHeight: 120,
-    tilePadding: EdgeInsets.all(8),
-    tileMargin: EdgeInsets.all(4),
-    cardPadding: EdgeInsets.all(16),
-    tileBorderRadius: BorderRadius.all(Radius.circular(8)),
-    tileElevation: 4,
-    animationDuration: Duration(milliseconds: 300),
-  );
-
-  /// Create minimal configuration for widgets/previews
-  factory HeatmapConfiguration.minimal() => const HeatmapConfiguration(
-    showWeightage: false,
-    layout: HeatmapLayoutType.grid,
-    showSubCards: false,
-    showLegend: false,
-    showHeader: false,
-    minTileWidth: 60,
-    maxTileWidth: 80,
-    minTileHeight: 40,
-    maxTileHeight: 60,
-    tilePadding: EdgeInsets.all(2),
-    tileMargin: EdgeInsets.all(1),
-    cardPadding: EdgeInsets.all(4),
-    tileBorderRadius: BorderRadius.all(Radius.circular(4)),
-    tileElevation: 1,
-    animationDuration: Duration(milliseconds: 150),
-  );
-
-  /// Create from core entity configuration
-  factory HeatmapConfiguration.fromEntity(
-    HeatmapConfigurationEntity entity, {
-    bool? showSubCards,
-    bool? showLegend,
-    bool? showHeader,
-    bool? showFooter,
-    double? minTileWidth,
-    double? maxTileWidth,
-    double? minTileHeight,
-    double? maxTileHeight,
-    EdgeInsets? tilePadding,
-    EdgeInsets? tileMargin,
-    EdgeInsets? cardPadding,
-    BorderRadius? tileBorderRadius,
-    double? tileElevation,
-    Duration? animationDuration,
-  }) => HeatmapConfiguration(
-    showPerformance: entity.showPerformance,
-    showWeightage: entity.showWeightage,
-    showValue: entity.showValue,
-    layout: entity.layout,
-    colorScheme: entity.colorScheme,
-    defaultSorting: entity.defaultSorting,
-    enabledFilters: entity.enabledFilters,
-    customSettings: entity.customSettings,
-    showSubCards: showSubCards ?? true,
-    showLegend: showLegend ?? true,
-    showHeader: showHeader ?? true,
-    showFooter: showFooter ?? false,
-    minTileWidth: minTileWidth,
-    maxTileWidth: maxTileWidth,
-    minTileHeight: minTileHeight,
-    maxTileHeight: maxTileHeight,
-    tilePadding: tilePadding,
-    tileMargin: tileMargin,
-    cardPadding: cardPadding,
-    tileBorderRadius: tileBorderRadius,
-    tileElevation: tileElevation,
-    animationDuration: animationDuration,
-  );
-  final bool showSubCards;
-  final bool showLegend;
-  final bool showHeader;
-  final bool showFooter;
-  final double? minTileWidth;
-  final double? maxTileWidth;
-  final double? minTileHeight;
-  final double? maxTileHeight;
-  final EdgeInsets? tilePadding;
-  final EdgeInsets? tileMargin;
-  final EdgeInsets? cardPadding;
-  final BorderRadius? tileBorderRadius;
-  final double? tileElevation;
-  final Duration? animationDuration;
-
-  /// Convert to core entity
-  HeatmapConfigurationEntity toEntity() => HeatmapConfigurationEntity(
-    showPerformance: showPerformance,
-    showWeightage: showWeightage,
-    showValue: showValue,
-    layout: layout,
-    colorScheme: colorScheme,
-    defaultSorting: defaultSorting,
-    enabledFilters: enabledFilters,
-    customSettings: customSettings,
-  );
-
-  @override
-  HeatmapConfiguration copyWith({
-    bool? showPerformance,
-    bool? showWeightage,
-    bool? showValue,
-    HeatmapLayoutType? layout,
-    HeatmapColorSchemeType? colorScheme,
-    HeatmapSortingType? defaultSorting,
-    List<HeatmapFilterType>? enabledFilters,
-    Map<String, dynamic>? customSettings,
-    bool? showSubCards,
-    bool? showLegend,
-    bool? showHeader,
-    bool? showFooter,
-    double? minTileWidth,
-    double? maxTileWidth,
-    double? minTileHeight,
-    double? maxTileHeight,
-    EdgeInsets? tilePadding,
-    EdgeInsets? tileMargin,
-    EdgeInsets? cardPadding,
-    BorderRadius? tileBorderRadius,
-    double? tileElevation,
-    Duration? animationDuration,
-  }) => HeatmapConfiguration(
-    showPerformance: showPerformance ?? this.showPerformance,
-    showWeightage: showWeightage ?? this.showWeightage,
-    showValue: showValue ?? this.showValue,
-    layout: layout ?? this.layout,
-    colorScheme: colorScheme ?? this.colorScheme,
-    defaultSorting: defaultSorting ?? this.defaultSorting,
-    enabledFilters: enabledFilters ?? this.enabledFilters,
-    customSettings: customSettings ?? this.customSettings,
-    showSubCards: showSubCards ?? this.showSubCards,
-    showLegend: showLegend ?? this.showLegend,
-    showHeader: showHeader ?? this.showHeader,
-    showFooter: showFooter ?? this.showFooter,
-    minTileWidth: minTileWidth ?? this.minTileWidth,
-    maxTileWidth: maxTileWidth ?? this.maxTileWidth,
-    minTileHeight: minTileHeight ?? this.minTileHeight,
-    maxTileHeight: maxTileHeight ?? this.maxTileHeight,
-    tilePadding: tilePadding ?? this.tilePadding,
-    tileMargin: tileMargin ?? this.tileMargin,
-    cardPadding: cardPadding ?? this.cardPadding,
-    tileBorderRadius: tileBorderRadius ?? this.tileBorderRadius,
-    tileElevation: tileElevation ?? this.tileElevation,
-    animationDuration: animationDuration ?? this.animationDuration,
   );
 }

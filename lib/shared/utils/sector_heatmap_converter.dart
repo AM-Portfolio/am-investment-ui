@@ -1,5 +1,6 @@
 import '../../features/portfolio/internal/domain/entities/portfolio_analytics.dart';
 import '../models/heatmap.dart';
+import '../widgets/heatmap/heatmap_config.dart' as ui_config;
 
 /// Utility class to convert portfolio analytics data to generic heatmap data
 class SectorHeatmapConverter {
@@ -22,19 +23,19 @@ class SectorHeatmapConverter {
           additionalInfo: const {},
         ),
         configuration: showSubCards
-            ? HeatmapConfiguration.web()
-            : HeatmapConfiguration.mobile(),
+            ? ui_config.HeatmapConfig.web()
+            : ui_config.HeatmapConfig.mobile(),
       );
     }
 
     // Calculate total portfolio value
-    double totalValue = _calculateTotalValue(heatmap.sectors);
+    final totalValue = _calculateTotalValue(heatmap.sectors);
 
     // Convert sectors to heatmap tiles
     final tiles = heatmap.sectors
         .map((sector) {
           // Calculate sector value
-          double sectorValue = sector.totalValue > 0
+          final sectorValue = sector.totalValue > 0
               ? sector.totalValue
               : sector.stocks.fold(0.0, (sum, stock) {
                   if (stock.marketValue != null && stock.marketValue! > 0) {
@@ -47,11 +48,11 @@ class SectorHeatmapConverter {
                 });
 
           // Use sector.weightage if available, otherwise calculate
-          double weightage = sector.weightage > 0
+          final weightage = sector.weightage > 0
               ? sector.weightage
               : (totalValue > 0 ? (sectorValue / totalValue) * 100 : 0);
 
-          double avgPerformance = _calculateSectorPerformance(sector);
+          final avgPerformance = _calculateSectorPerformance(sector);
 
           return HeatmapTileData(
             id: sector.sectorName,
@@ -84,35 +85,34 @@ class SectorHeatmapConverter {
         additionalInfo: {'totalValue': totalValue},
       ),
       configuration: showSubCards
-          ? HeatmapConfiguration.web()
-          : HeatmapConfiguration.mobile(),
+          ? ui_config.HeatmapConfig.web()
+          : ui_config.HeatmapConfig.mobile(),
     );
   }
 
-  static double _calculateTotalValue(List<Sector> sectors) {
-    return sectors.fold(0.0, (sum, sector) {
-      // Try sector.totalValue first
-      if (sector.totalValue > 0) {
-        return sum + sector.totalValue;
-      }
-      // Fallback: calculate from stocks
-      double sectorValue = sector.stocks.fold(0.0, (sectorSum, stock) {
-        if (stock.marketValue != null && stock.marketValue! > 0) {
-          return sectorSum + stock.marketValue!;
+  static double _calculateTotalValue(List<Sector> sectors) =>
+      sectors.fold(0.0, (sum, sector) {
+        // Try sector.totalValue first
+        if (sector.totalValue > 0) {
+          return sum + sector.totalValue;
         }
-        if (stock.quantity != null && stock.quantity! > 0) {
-          return sectorSum + (stock.quantity! * stock.lastPrice);
-        }
-        return sectorSum;
+        // Fallback: calculate from stocks
+        final sectorValue = sector.stocks.fold(0.0, (sectorSum, stock) {
+          if (stock.marketValue != null && stock.marketValue! > 0) {
+            return sectorSum + stock.marketValue!;
+          }
+          if (stock.quantity != null && stock.quantity! > 0) {
+            return sectorSum + (stock.quantity! * stock.lastPrice);
+          }
+          return sectorSum;
+        });
+        return sum + sectorValue;
       });
-      return sum + sectorValue;
-    });
-  }
 
   static double _calculateSectorPerformance(Sector sector) {
     if (sector.stocks.isEmpty) return 0.0;
 
-    double totalPerformance = sector.stocks.fold(
+    final totalPerformance = sector.stocks.fold(
       0.0,
       (sum, stock) => sum + stock.changePercent,
     );
@@ -121,7 +121,7 @@ class SectorHeatmapConverter {
 
   static String _getSectorDisplayName(String sectorName) {
     // Shorten long sector names for better display
-    final Map<String, String> sectorAbbreviations = {
+    final sectorAbbreviations = <String, String>{
       'Information Technology': 'IT',
       'Financial Services': 'Finance',
       'Consumer Durables': 'Consumer Dur.',

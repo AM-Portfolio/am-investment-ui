@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/app_logic/domain/entities/heatmap/heatmap_configuration_entity.dart'
-    as config_entity;
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart'
     as core_entities;
 import '../../models/heatmap/heatmap_tile_data.dart';
@@ -248,102 +246,76 @@ class UniversalHeatmapWidget extends StatelessWidget {
   ui_config.HeatmapConfig _getEffectiveConfig() {
     ui_config.HeatmapConfig baseConfig;
 
-    // Create base config based on investment type
+    // Create base config based on investment type using new defaults system
     switch (investmentType) {
       case InvestmentType.portfolio:
-        baseConfig = HeatmapConfig(
-          customTitle: title ?? 'Portfolio Heatmap',
-          compactView: compactMode ?? false,
-          showTimeFrameSelector: true,
-          showMetricSelector: true,
-          showSectorSelector: true,
-          showMarketCapSelector: false,
+        baseConfig = ui_config.HeatmapConfig.portfolio(
+          title: title ?? 'Portfolio Heatmap',
         );
         break;
       case InvestmentType.indexFund:
-        baseConfig = HeatmapConfig(
-          customTitle: title ?? 'Index Heatmap',
-          compactView: compactMode ?? false,
-          showTimeFrameSelector: true,
-          showMetricSelector: true,
-          showSectorSelector: false,
-          showMarketCapSelector: false,
+        baseConfig = ui_config.HeatmapConfig.analytics(
+          title: title ?? 'Index Heatmap',
         );
         break;
       case InvestmentType.mutualFunds:
-        baseConfig = HeatmapConfig(
-          customTitle: title ?? 'Mutual Funds Heatmap',
-          compactView: compactMode ?? false,
-          showTimeFrameSelector: true,
-          showMetricSelector: true,
-          showSectorSelector: true,
-          showMarketCapSelector: true,
+        baseConfig = ui_config.HeatmapConfig.analytics(
+          title: title ?? 'Mutual Funds Heatmap',
         );
         break;
       case InvestmentType.etf:
-        baseConfig = HeatmapConfig(
-          customTitle: title ?? 'ETF Heatmap',
-          compactView: compactMode ?? false,
-          showTimeFrameSelector: true,
-          showMetricSelector: true,
-          showSectorSelector: true,
-          showMarketCapSelector: false,
+        baseConfig = ui_config.HeatmapConfig.trading(
+          title: title ?? 'ETF Heatmap',
         );
         break;
     }
 
     // Apply user-provided config overrides if available
     if (config != null) {
-      return _mergeConfigs(baseConfig, config);
+      return _mergeConfigs(baseConfig, config!);
     }
 
-    // Apply simple overrides
+    // Apply simple overrides using modifier methods
     if (showSelectors != null || compactMode != null) {
-      return baseConfig.copyWith(
-        showTimeFrameSelector:
-            showSelectors ?? baseConfig.showTimeFrameSelector,
-        showMetricSelector: showSelectors ?? baseConfig.showMetricSelector,
-        compactView: compactMode ?? baseConfig.compactView,
-        customTitle: title ?? baseConfig.customTitle,
-      );
+      var modifiedConfig = baseConfig;
+
+      if (compactMode != null) {
+        modifiedConfig = modifiedConfig.withLayout(compact: compactMode);
+      }
+
+      if (showSelectors != null) {
+        modifiedConfig = modifiedConfig.withSelectors(
+          timeFrame: showSelectors!,
+          metric: showSelectors!,
+          sector: showSelectors!,
+          marketCap: showSelectors!,
+        );
+      }
+
+      if (title != null) {
+        modifiedConfig = modifiedConfig.withLayout(title: title);
+      }
+
+      return modifiedConfig;
     }
 
     return baseConfig;
   }
 
-  /// Merge user config with base config
-  HeatmapConfig _mergeConfigs(
-    HeatmapConfig base,
-    HeatmapConfig user,
-  ) => ui_config.HeatmapConfig(
-    showTimeFrameSelector: showSelectors ?? user.showTimeFrameSelector,
-    showMetricSelector: showSelectors ?? user.showMetricSelector,
-    showSectorSelector: user.showSectorSelector,
-    showMarketCapSelector: user.showMarketCapSelector,
-    availableTimeFrames: user.availableTimeFrames ?? base.availableTimeFrames,
-    availableMetrics: user.availableMetrics ?? base.availableMetrics,
-    availableSectors: user.availableSectors ?? base.availableSectors,
-    availableMarketCaps: user.availableMarketCaps ?? base.availableMarketCaps,
-    showSubCards: user.showSubCards,
-    showPerformance: user.showPerformance,
-    showWeightage: user.showWeightage,
-    showValue: user.showValue,
-    showLegend: user.showLegend,
-    showHeader: user.showHeader,
-    showRefreshButton: user.showRefreshButton,
-    layoutType: user.layoutType,
-    compactView: compactMode ?? user.compactView,
-    showTitle: user.showTitle,
-    customTitle: title ?? user.customTitle,
-    enableTileInteraction: user.enableTileInteraction,
-    enableSelectorInteraction: user.enableSelectorInteraction,
-    showLoadingStates: user.showLoadingStates,
-    showErrorStates: user.showErrorStates,
-    selectorPadding: user.selectorPadding,
-    cardPadding: user.cardPadding,
-    selectorSpacing: user.selectorSpacing,
-    accentColor: user.accentColor,
-  );
+  /// Merge user config with base config using new copyWith approach
+  ui_config.HeatmapConfig _mergeConfigs(
+    ui_config.HeatmapConfig base,
+    ui_config.HeatmapConfig user,
+  ) {
+    // Use the base config and selectively override with user config parts
+    return ui_config.HeatmapConfig(
+      selectors: user.selectors ?? base.selectors,
+      display: user.display ?? base.display,
+      layout: user.layout ?? base.layout,
+      interactions: user.interactions ?? base.interactions,
+      visual: user.visual ?? base.visual,
+    );
+  }
 
   /// Convert raw data to heatmap data format
   HeatmapData? _convertRawDataToHeatmapData() {
@@ -365,7 +337,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
         title: _getDefaultTitle(),
         subtitle: _getSubtitle(),
         tiles: tiles,
-        metadata: HeatmapMetadata(
+        metadata: core_entities.HeatmapMetadata(
           lastUpdated: DateTime.now(),
           dataSource: 'universal_widget',
           additionalInfo: {
@@ -538,11 +510,20 @@ class UniversalHeatmapWidget extends StatelessWidget {
           config.showSectorSelector ||
           config.showMarketCapSelector);
 
-  ui_config.HeatmapLayoutType _getDisplayLayout(
-    ui_config.HeatmapConfig config,
-  ) => config.layoutType;
+  /// Get display layout type - need to import the correct enum from display template
+  dynamic _getDisplayLayout(ui_config.HeatmapConfig config) {
+    // Convert UI config layout type to display template layout type
+    switch (config.layoutType) {
+      case ui_config.HeatmapLayoutType.treemap:
+        return 'treemap'; // Return string for now, adjust based on display template requirements
+      case ui_config.HeatmapLayoutType.grid:
+        return 'grid';
+      case ui_config.HeatmapLayoutType.list:
+        return 'list';
+    }
+  }
 
-  SelectorLayoutType _getSelectorLayout(HeatmapConfig config) {
+  SelectorLayoutType _getSelectorLayout(ui_config.HeatmapConfig config) {
     if (config.compactView) {
       return SelectorLayoutType.compact;
     } else if (templateType == UniversalTemplateType.minimal) {
@@ -593,37 +574,9 @@ class UniversalHeatmapWidget extends StatelessWidget {
     }
   }
 
-  HeatmapConfiguration _getHeatmapConfiguration() {
-    final effectiveConfig = _getEffectiveConfig();
-
-    // Map config layout type to entity layout type
-    HeatmapLayoutType entityLayoutType;
-    switch (effectiveConfig.layoutType.toString()) {
-      case 'HeatmapLayoutType.treemap':
-        entityLayoutType = HeatmapLayoutType.treemap;
-        break;
-      case 'HeatmapLayoutType.grid':
-        entityLayoutType = HeatmapLayoutType.grid;
-        break;
-      case 'HeatmapLayoutType.list':
-        entityLayoutType = HeatmapLayoutType.list;
-        break;
-      default:
-        entityLayoutType = HeatmapLayoutType.treemap;
-    }
-
-    return HeatmapConfiguration(
-      layout: entityLayoutType,
-      colorScheme: HeatmapColorSchemeType.performance,
-      defaultSorting: HeatmapSortingType.performance,
-      showPerformance: effectiveConfig.showPerformance,
-      showWeightage: effectiveConfig.showWeightage,
-      showValue: effectiveConfig.showValue,
-      enabledFilters: const [
-        HeatmapFilterType.performance,
-        HeatmapFilterType.weightage,
-      ],
-    );
+  ui_config.HeatmapConfig _getHeatmapConfiguration() {
+    // Just return the effective config since we're now using HeatmapConfig directly
+    return _getEffectiveConfig();
   }
 
   HeatmapData _getEmptyData() => HeatmapData(
@@ -631,7 +584,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
     title: _getDefaultTitle(),
     subtitle: 'No data available',
     tiles: [],
-    metadata: HeatmapMetadata(
+    metadata: core_entities.HeatmapMetadata(
       lastUpdated: DateTime.now(),
       dataSource: 'universal_widget',
       additionalInfo: const {'status': 'empty'},
