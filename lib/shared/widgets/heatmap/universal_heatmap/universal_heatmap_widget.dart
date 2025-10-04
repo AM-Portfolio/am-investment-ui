@@ -95,6 +95,19 @@ class UniversalHeatmapWidget extends StatelessWidget {
           error: error,
         );
 
+    // Log complete heatmap data as JSON string
+    if (heatmapData != null) {
+      AppLogger.debug(
+        'Complete HeatmapData JSON: ${heatmapData.toJsonString()}',
+        tag: 'UniversalHeatmapWidget.HeatmapData',
+      );
+    } else {
+      AppLogger.warning(
+        'HeatmapData is null for investment type: ${investmentType.name}',
+        tag: 'UniversalHeatmapWidget.HeatmapData',
+      );
+    }
+
     // Get effective config (use provided config or basic fallback)
     final effectiveConfig =
         config ??
@@ -132,23 +145,6 @@ class UniversalHeatmapWidget extends StatelessWidget {
       'Building universal template: layout=${effectiveConfig.layoutType}, '
       'tiles=${heatmapData?.tiles.length ?? 0}, isLoading=$isLoading',
       tag: 'UniversalHeatmapWidget.Template',
-    );
-
-    // Log complete effectiveConfig as JSON for debugging
-    AppLogger.debug(
-      'Complete effectiveConfig: {'
-      '"showTimeFrameSelector": ${effectiveConfig.showTimeFrameSelector}, '
-      '"showMetricSelector": ${effectiveConfig.showMetricSelector}, '
-      '"showSelectorSelector": ${effectiveConfig.showSectorSelector}, '
-      '"showMarketCapSelector": ${effectiveConfig.showMarketCapSelector}, '
-      '"layoutType": "${effectiveConfig.layoutType}", '
-      '"compactView": ${effectiveConfig.compactView}, '
-      '"showTitle": ${effectiveConfig.showTitle}, '
-      '"customTitle": "${effectiveConfig.customTitle}", '
-      '"showLegend": ${effectiveConfig.showLegend}, '
-      '"showHeader": ${effectiveConfig.showHeader}'
-      '}',
-      tag: 'UniversalHeatmapWidget.Config',
     );
 
     final data =

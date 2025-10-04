@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/logger.dart';
 import '../../../../shared/models/heatmap.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
 import '../config/portfolio_heatmap_config.dart';
@@ -26,7 +29,7 @@ class SectorHeatmapConverter {
     final totalValue = _calculateTotalValue(heatmap.sectors);
     final tiles = _createHierarchicalTiles(heatmap.sectors, totalValue);
 
-    return _buildHeatmapData(
+    return _logAndBuildHeatmapData(
       heatmap: heatmap,
       title: title,
       subtitle: subtitle,
@@ -161,6 +164,195 @@ class SectorHeatmapConverter {
         'totalReturn': stock.totalReturn,
       },
     );
+  }
+
+  /// Logs the heatmap data building parameters and builds the final HeatmapData object
+  static HeatmapData _logAndBuildHeatmapData({
+    required Heatmap heatmap,
+    required String title,
+    required List<HeatmapTileData> tiles,
+    required double totalValue,
+    required bool showSubCards,
+    String? subtitle,
+    Color? accentColor,
+  }) {
+    try {
+      // Log comprehensive heatmap building parameters as JSON
+      AppLogger.info(
+        '================ SECTOR HEATMAP CONVERTER LOG ================',
+        tag: 'SectorHeatmapConverter.Build',
+      );
+
+      // Build parameters JSON
+      final buildParameters = {
+        'title': title,
+        'subtitle': subtitle,
+        'totalValue': totalValue,
+        'totalTiles': tiles.length,
+        'showSubCards': showSubCards,
+        'accentColor': accentColor?.toString(),
+        'heatmapHash': heatmap.hashCode,
+        'sectorsCount': heatmap.sectors.length,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      AppLogger.debug(
+        'Building HeatmapData Parameters: ${jsonEncode(buildParameters)}',
+        tag: 'SectorHeatmapConverter.Parameters',
+      );
+
+      // Log tiles summary as JSON
+      final tilesSummary = tiles
+          .map(
+            (tile) => {
+              'id': tile.id,
+              'name': tile.name,
+              'displayName': tile.displayName,
+              'weightage': double.parse(tile.weightage.toStringAsFixed(2)),
+              'performance': double.parse(tile.performance.toStringAsFixed(2)),
+              'value': tile.value != null
+                  ? double.parse(tile.value!.toStringAsFixed(2))
+                  : null,
+              'childrenCount': tile.children?.length ?? 0,
+              'hasChildren': tile.hasChildren,
+            },
+          )
+          .toList();
+
+      AppLogger.debug(
+        'Tiles Summary: ${jsonEncode(tilesSummary)}',
+        tag: 'SectorHeatmapConverter.Tiles',
+      );
+
+      // Log detailed children information as JSON
+      final childrenDetails = <String, List<Map<String, dynamic>>>{};
+      for (var i = 0; i < tiles.length; i++) {
+        final tile = tiles[i];
+        if (tile.children != null && tile.children!.isNotEmpty) {
+          childrenDetails[tile.id] = tile.children!
+              .map(
+                (child) => {
+                  'name': child.name,
+                  'displayName': child.displayName,
+                  'performance': double.parse(
+                    child.performance.toStringAsFixed(2),
+                  ),
+                  'weightage': double.parse(child.weightage.toStringAsFixed(2)),
+                  'value': child.value != null
+                      ? double.parse(child.value!.toStringAsFixed(2))
+                      : null,
+                  'id': child.id,
+                },
+              )
+              .toList();
+        }
+      }
+
+      if (childrenDetails.isNotEmpty) {
+        AppLogger.debug(
+          'Children Details: ${jsonEncode(childrenDetails)}',
+          tag: 'SectorHeatmapConverter.Children',
+        );
+      }
+
+      // Calculate and log statistics as JSON
+      final totalWeightage = tiles.fold(
+        0.0,
+        (sum, tile) => sum + tile.weightage,
+      );
+      final avgPerformance = tiles.isNotEmpty
+          ? tiles.fold(0.0, (sum, tile) => sum + tile.performance) /
+                tiles.length
+          : 0.0;
+      final totalChildren = tiles.fold(
+        0,
+        (sum, tile) => sum + (tile.children?.length ?? 0),
+      );
+
+      final statistics = {
+        'totalWeightage': double.parse(totalWeightage.toStringAsFixed(2)),
+        'averagePerformance': double.parse(avgPerformance.toStringAsFixed(2)),
+        'totalChildren': totalChildren,
+        'bestPerformer': _findBestTile(tiles),
+        'worstPerformer': _findWorstTile(tiles),
+        'tilesCount': tiles.length,
+        'hasHierarchicalData': tiles.any((tile) => tile.hasChildren),
+      };
+
+      AppLogger.info(
+        'Heatmap Statistics: ${jsonEncode(statistics)}',
+        tag: 'SectorHeatmapConverter.Statistics',
+      );
+
+      AppLogger.debug(
+        'Building HeatmapData object...',
+        tag: 'SectorHeatmapConverter.Build',
+      );
+
+      // Call the original build method
+      final result = _buildHeatmapData(
+        heatmap: heatmap,
+        title: title,
+        subtitle: subtitle,
+        tiles: tiles,
+        totalValue: totalValue,
+        showSubCards: showSubCards,
+        accentColor: accentColor,
+      );
+
+      // Log successful completion
+      final completionInfo = {
+        'resultId': result.id,
+        'resultTitle': result.title,
+        'resultTilesCount': result.tiles.length,
+        'buildSuccess': true,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      AppLogger.info(
+        'HeatmapData Build Completed: ${jsonEncode(completionInfo)}',
+        tag: 'SectorHeatmapConverter.Completion',
+      );
+
+      AppLogger.info(
+        '================ END SECTOR HEATMAP CONVERTER LOG ================',
+        tag: 'SectorHeatmapConverter.Build',
+      );
+
+      return result;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+        'Error in _logAndBuildHeatmapData: $e',
+        tag: 'SectorHeatmapConverter.Error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      // Fallback to original build method without logging
+      return _buildHeatmapData(
+        heatmap: heatmap,
+        title: title,
+        subtitle: subtitle,
+        tiles: tiles,
+        totalValue: totalValue,
+        showSubCards: showSubCards,
+        accentColor: accentColor,
+      );
+    }
+  }
+
+  /// Helper method to find the best performing tile
+  static String _findBestTile(List<HeatmapTileData> tiles) {
+    if (tiles.isEmpty) return 'None';
+    final best = tiles.reduce((a, b) => a.performance > b.performance ? a : b);
+    return '${best.name} (${best.performance.toStringAsFixed(2)}%)';
+  }
+
+  /// Helper method to find the worst performing tile
+  static String _findWorstTile(List<HeatmapTileData> tiles) {
+    if (tiles.isEmpty) return 'None';
+    final worst = tiles.reduce((a, b) => a.performance < b.performance ? a : b);
+    return '${worst.name} (${worst.performance.toStringAsFixed(2)}%)';
   }
 
   /// Builds the final HeatmapData object
