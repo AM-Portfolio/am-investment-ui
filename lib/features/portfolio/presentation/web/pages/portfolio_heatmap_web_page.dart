@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/widgets/heatmap/universal_heatmap_widget.dart';
+import '../../../../../shared/widgets/heatmap/universal_heatmap.dart';
 import '../../../../../shared/widgets/selectors/selectors.dart';
 import '../../cubit/portfolio_analytics_cubit.dart';
 import '../../cubit/portfolio_analytics_state.dart';
