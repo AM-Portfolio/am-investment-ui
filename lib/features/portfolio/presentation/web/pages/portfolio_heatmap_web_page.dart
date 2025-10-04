@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
-import '../../../../../shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
 import '../../../../../shared/widgets/heatmap/universal_heatmap_widget.dart';
 import '../../../../../shared/widgets/selectors/selectors.dart';
 import '../../cubit/portfolio_analytics_cubit.dart';
@@ -37,17 +35,12 @@ class _PortfolioHeatmapWebPageState
   SectorType? _selectedSector;
   MarketCapType? _selectedMarketCap;
 
-  late WebHeatmapDefaults _webHeatmapDefaults;
-
   @override
   void initState() {
     super.initState();
 
-    // Initialize web-optimized heatmap configuration
-    _webHeatmapDefaults = WebHeatmapDefaults();
-
     AppLogger.info(
-      'PortfolioHeatmapWebPage initialized with config: $_webHeatmapDefaults',
+      'PortfolioHeatmapWebPage initialized',
       tag: 'PortfolioHeatmap.Init',
     );
     AppLogger.debug(
@@ -244,12 +237,13 @@ class _PortfolioHeatmapWebPageState
       return const Center(child: Text('Analytics data is loading...'));
     }
 
-    // 2. Use sector heatmap converter to convert analytics data
+    // 2. Use sector heatmap converter to convert analytics data with web configuration
     final convertedHeatmapData = SectorHeatmapConverter.convertToHeatmapData(
       heatmap: analyticsState.heatmap,
       showSubCards: true,
       title: 'Portfolio Sector Heatmap',
       subtitle: 'Performance by sector allocation',
+      accentColor: Theme.of(context).primaryColor,
     );
 
     AppLogger.debug(
@@ -257,36 +251,7 @@ class _PortfolioHeatmapWebPageState
       tag: 'PortfolioHeatmap.UI',
     );
 
-    // 3. Load platform-specific default config (web optimized)
-    final platformConfig = ui_config.HeatmapConfig.web(
-      title: 'Portfolio Sector Performance',
-      timeFrames: [
-        TimeFrame.oneDay,
-        TimeFrame.oneWeek,
-        TimeFrame.oneMonth,
-        TimeFrame.oneYear,
-      ],
-      metrics: [
-        MetricType.changePercent,
-        MetricType.marketValue,
-        MetricType.returns,
-      ],
-      sectors: [
-        SectorType.all,
-        SectorType.technology,
-        SectorType.healthcare,
-        SectorType.finance,
-      ],
-      marketCaps: [
-        MarketCapType.all,
-        MarketCapType.largeCap,
-        MarketCapType.midCap,
-        MarketCapType.smallCap,
-      ],
-      accentColor: Theme.of(context).primaryColor,
-    );
-
-    // 4. Create raw data for universal widget
+    // 3. Create raw data for universal widget
     final rawData = <String, dynamic>{
       'holdings': convertedHeatmapData.tiles
           .map(
@@ -310,11 +275,11 @@ class _PortfolioHeatmapWebPageState
       },
     };
 
-    // 5. Return UniversalHeatmapWidget with analytics-based data
+    // 4. Return UniversalHeatmapWidget with analytics-based data and converter configuration
     return UniversalHeatmapWidget(
       investmentType: InvestmentType.portfolio,
       rawData: rawData,
-      config: platformConfig,
+      config: convertedHeatmapData.configuration,
       title: 'Portfolio Sector Heatmap',
       showSelectors: true,
       compactMode: false,

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../../shared/models/heatmap.dart';
 import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
 import '../../internal/domain/entities/portfolio_analytics.dart';
@@ -10,6 +12,7 @@ class SectorHeatmapConverter {
     required bool showSubCards,
     String title = 'Sector Allocation',
     String? subtitle,
+    Color? accentColor,
   }) {
     if (heatmap == null || heatmap.sectors.isEmpty) {
       return HeatmapData(
@@ -23,8 +26,14 @@ class SectorHeatmapConverter {
           additionalInfo: const {},
         ),
         configuration: showSubCards
-            ? ui_config.HeatmapConfig.web()
-            : ui_config.HeatmapConfig.mobile(),
+            ? ui_config.HeatmapConfig.portfolio(
+                title: title,
+                accentColor: accentColor,
+              )
+            : ui_config.HeatmapConfig.mobilePortfolio(
+                title: title,
+                accentColor: accentColor,
+              ),
       );
     }
 
@@ -85,8 +94,14 @@ class SectorHeatmapConverter {
         additionalInfo: {'totalValue': totalValue},
       ),
       configuration: showSubCards
-          ? ui_config.HeatmapConfig.web()
-          : ui_config.HeatmapConfig.mobile(),
+          ? ui_config.HeatmapConfig.portfolio(
+              title: title,
+              accentColor: accentColor,
+            )
+          : ui_config.HeatmapConfig.mobilePortfolio(
+              title: title,
+              accentColor: accentColor,
+            ),
     );
   }
 
