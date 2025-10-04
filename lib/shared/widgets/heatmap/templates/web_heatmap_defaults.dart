@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../selectors/selectors.dart';
 import '../configs/display_config.dart';
 import '../configs/interaction_config.dart';
 import '../configs/layout_config.dart' as layout_config;
@@ -22,6 +23,10 @@ class WebHeatmapDefaults {
   }) => HeatmapConfig(
     selectors: SelectorConfig(
       showMarketCapSelector: false, // Less relevant for personal portfolios
+      availableTimeFrames: TimeFrame.webTimeFrames,
+      availableMetrics: MetricType.webMetrics,
+      availableSectors: SectorType.allSectors,
+      availableMarketCaps: MarketCapType.allMarketCaps,
       selectorLayout: selectorLayout ?? SelectorLayoutType.compact,
     ),
     display: const DisplayConfig(),

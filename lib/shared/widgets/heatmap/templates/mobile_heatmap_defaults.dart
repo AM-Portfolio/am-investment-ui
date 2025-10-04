@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../selectors/selectors.dart';
 import '../configs/display_config.dart';
 import '../configs/interaction_config.dart';
 import '../configs/layout_config.dart' as layout_config;
@@ -21,7 +22,12 @@ class MobileHeatmapDefaults {
     SelectorLayoutType? selectorLayout,
   }) => HeatmapConfig(
     selectors: SelectorConfig(
+      showSectorSelector: false, // Too crowded on mobile
       showMarketCapSelector: false, // Less relevant for personal portfolios
+      availableTimeFrames: TimeFrame.mobileTimeFrames,
+      availableMetrics: MetricType.mobileMetrics,
+      availableSectors: SectorType.allSectors,
+      availableMarketCaps: MarketCapType.allMarketCaps,
       selectorLayout: selectorLayout ?? SelectorLayoutType.compact,
     ),
     display: const DisplayConfig(

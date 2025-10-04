@@ -26,6 +26,10 @@ class HeatmapSelectorTemplate extends StatefulWidget {
     this.primaryColor,
     this.title,
     this.showResetButton = true,
+    this.availableTimeFrames,
+    this.availableMetrics,
+    this.availableSectors,
+    this.availableMarketCaps,
   });
 
   final TimeFrame? initialTimeFrame;
@@ -55,6 +59,12 @@ class HeatmapSelectorTemplate extends StatefulWidget {
   final Color? primaryColor;
   final String? title;
   final bool showResetButton;
+
+  // Available options from configuration
+  final List<TimeFrame>? availableTimeFrames;
+  final List<MetricType>? availableMetrics;
+  final List<SectorType>? availableSectors;
+  final List<MarketCapType>? availableMarketCaps;
 
   @override
   State<HeatmapSelectorTemplate> createState() =>
@@ -282,13 +292,15 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
   );
 
   Widget _buildTimeFramePills(BuildContext context) {
-    final timeFrames = [
-      TimeFrame.oneDay,
-      TimeFrame.oneWeek,
-      TimeFrame.oneMonth,
-      TimeFrame.threeMonths,
-      TimeFrame.oneYear,
-    ];
+    final timeFrames =
+        widget.availableTimeFrames ??
+        [
+          TimeFrame.oneDay,
+          TimeFrame.oneWeek,
+          TimeFrame.oneMonth,
+          TimeFrame.threeMonths,
+          TimeFrame.oneYear,
+        ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -364,7 +376,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
-        items: MetricType.heatmapMetrics
+        items: (widget.availableMetrics ?? MetricType.heatmapMetrics)
             .map(
               (metric) => DropdownMenuItem<MetricType>(
                 value: metric,
@@ -490,7 +502,9 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
   // Additional pill and dropdown builders for other selectors
   Widget _buildMetricPills(BuildContext context) => Wrap(
     spacing: 6,
-    children: MetricType.heatmapMetrics.map((metric) {
+    children: (widget.availableMetrics ?? MetricType.heatmapMetrics).map((
+      metric,
+    ) {
       final isSelected = _selectedMetric == metric;
       return InkWell(
         onTap: () => _onMetricChanged(metric),
@@ -522,12 +536,14 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
   );
 
   Widget _buildSectorPills(BuildContext context) {
-    final sectors = [
-      SectorType.all,
-      SectorType.technology,
-      SectorType.healthcare,
-      SectorType.finance,
-    ];
+    final sectors =
+        widget.availableSectors ??
+        [
+          SectorType.all,
+          SectorType.technology,
+          SectorType.healthcare,
+          SectorType.finance,
+        ];
     return Wrap(
       spacing: 6,
       children: sectors.map((sector) {
@@ -563,12 +579,14 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
   }
 
   Widget _buildMarketCapPills(BuildContext context) {
-    final marketCaps = [
-      MarketCapType.all,
-      MarketCapType.largeCap,
-      MarketCapType.midCap,
-      MarketCapType.smallCap,
-    ];
+    final marketCaps =
+        widget.availableMarketCaps ??
+        [
+          MarketCapType.all,
+          MarketCapType.largeCap,
+          MarketCapType.midCap,
+          MarketCapType.smallCap,
+        ];
     return Wrap(
       spacing: 6,
       children: marketCaps.map((marketCap) {
@@ -612,13 +630,14 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           border: OutlineInputBorder(),
         ),
         items:
-            [
-                  TimeFrame.oneDay,
-                  TimeFrame.oneWeek,
-                  TimeFrame.oneMonth,
-                  TimeFrame.threeMonths,
-                  TimeFrame.oneYear,
-                ]
+            (widget.availableTimeFrames ??
+                    [
+                      TimeFrame.oneDay,
+                      TimeFrame.oneWeek,
+                      TimeFrame.oneMonth,
+                      TimeFrame.threeMonths,
+                      TimeFrame.oneYear,
+                    ])
                 .map(
                   (timeFrame) => DropdownMenuItem(
                     value: timeFrame,
@@ -640,12 +659,13 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           border: OutlineInputBorder(),
         ),
         items:
-            [
-                  SectorType.all,
-                  SectorType.technology,
-                  SectorType.healthcare,
-                  SectorType.finance,
-                ]
+            (widget.availableSectors ??
+                    [
+                      SectorType.all,
+                      SectorType.technology,
+                      SectorType.healthcare,
+                      SectorType.finance,
+                    ])
                 .map(
                   (sector) => DropdownMenuItem(
                     value: sector,
@@ -667,12 +687,13 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           border: OutlineInputBorder(),
         ),
         items:
-            [
-                  MarketCapType.all,
-                  MarketCapType.largeCap,
-                  MarketCapType.midCap,
-                  MarketCapType.smallCap,
-                ]
+            (widget.availableMarketCaps ??
+                    [
+                      MarketCapType.all,
+                      MarketCapType.largeCap,
+                      MarketCapType.midCap,
+                      MarketCapType.smallCap,
+                    ])
                 .map(
                   (marketCap) => DropdownMenuItem(
                     value: marketCap,

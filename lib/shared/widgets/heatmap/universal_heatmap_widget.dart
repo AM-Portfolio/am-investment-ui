@@ -163,6 +163,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
             SelectorLayoutType.compact,
         primaryColor: effectiveConfig.accentColor,
         title: 'Filters',
+        availableTimeFrames: effectiveConfig.availableTimeFrames,
+        availableMetrics: effectiveConfig.availableMetrics,
+        availableSectors: effectiveConfig.availableSectors,
+        availableMarketCaps: effectiveConfig.availableMarketCaps,
       );
     } else {
       AppLogger.debug(
