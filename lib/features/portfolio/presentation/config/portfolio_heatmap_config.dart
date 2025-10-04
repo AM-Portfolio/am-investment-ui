@@ -187,7 +187,6 @@ class PortfolioHeatmapConfig {
     // Hide all selectors except market cap
     showTimeFrameSelector: false,
     showMetricSelector: false,
-    showSectorSelector: false,
 
     // Custom market cap options including "no group" equivalent (all)
     availableMarketCaps: portfolioMarketCapOptions,
