@@ -11,6 +11,23 @@ import 'heatmap_template_card.dart';
 /// A configurable heatmap widget that adapts based on platform and use case
 /// Combines selectors and heatmap display with full configuration control
 class ConfigurableHeatmapWidget extends ConsumerStatefulWidget {
+  const ConfigurableHeatmapWidget({
+    super.key,
+    this.data,
+    this.isLoading = false,
+    this.error,
+    this.onTilePressed,
+    this.onSelectorsChanged,
+    this.initialTimeFrame,
+    this.initialMetric,
+    this.initialSector,
+    this.initialMarketCap,
+    this.customTileBuilder,
+    this.showSelectors = true,
+    this.title,
+    this.compact = false,
+  });
+
   /// Data provider for the heatmap
   final HeatmapData? data;
 
@@ -50,23 +67,6 @@ class ConfigurableHeatmapWidget extends ConsumerStatefulWidget {
   /// Whether to use compact layout
   final bool compact;
 
-  const ConfigurableHeatmapWidget({
-    super.key,
-    this.data,
-    this.isLoading = false,
-    this.error,
-    this.onTilePressed,
-    this.onSelectorsChanged,
-    this.initialTimeFrame,
-    this.initialMetric,
-    this.initialSector,
-    this.initialMarketCap,
-    this.customTileBuilder,
-    this.showSelectors = true,
-    this.title,
-    this.compact = false,
-  });
-
   @override
   ConsumerState<ConfigurableHeatmapWidget> createState() =>
       _ConfigurableHeatmapWidgetState();
@@ -82,7 +82,7 @@ class _ConfigurableHeatmapWidgetState
   @override
   void initState() {
     super.initState();
-    
+
     // Log widget initialization
     HeatmapLogger.logInitialization(
       component: 'ConfigurableHeatmapWidget',
@@ -95,7 +95,7 @@ class _ConfigurableHeatmapWidgetState
         'hasError': widget.error != null,
       },
     );
-    
+
     _initializeSelectors();
   }
 
@@ -113,7 +113,7 @@ class _ConfigurableHeatmapWidgetState
       newValue: timeFrame,
       component: 'ConfigurableHeatmapWidget',
     );
-    
+
     setState(() {
       _selectedTimeFrame = timeFrame;
     });
@@ -127,7 +127,7 @@ class _ConfigurableHeatmapWidgetState
       newValue: metric,
       component: 'ConfigurableHeatmapWidget',
     );
-    
+
     setState(() {
       _selectedMetric = metric;
     });
@@ -146,7 +146,7 @@ class _ConfigurableHeatmapWidgetState
       phase: 'build',
       itemCount: widget.data?.tiles.length,
     );
-    
+
     return Column(
       children: [
         // Selectors section (if enabled)
@@ -171,7 +171,6 @@ class _ConfigurableHeatmapWidgetState
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Theme.of(context).primaryColor.withOpacity(0.1),
-          width: 1,
         ),
         boxShadow: [
           BoxShadow(
@@ -232,7 +231,6 @@ class _ConfigurableHeatmapWidgetState
                     color: isSelected
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).primaryColor.withOpacity(0.3),
-                    width: 1,
                   ),
                 ),
                 child: Text(
@@ -254,123 +252,109 @@ class _ConfigurableHeatmapWidgetState
   }
 
   /// Build compact metric selector dropdown
-  Widget _buildCompactMetricSelector(BuildContext context) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<MetricType>(
-          value: _selectedMetric,
-          isExpanded: true,
-          icon: Icon(
-            Icons.expand_more,
-            color: Theme.of(context).primaryColor,
-            size: 18,
-          ),
-          style: TextStyle(
-            color: Theme.of(context).primaryColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-          items: MetricType.heatmapMetrics.map((metric) {
-            return DropdownMenuItem<MetricType>(
-              value: metric,
-              child: Row(
-                children: [
-                  Icon(
-                    metric.icon,
-                    size: 14,
-                    color: Theme.of(context).primaryColor.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(metric.shortName),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              _onMetricChanged(value);
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  /// Build compact reset button
-  Widget _buildCompactResetButton(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        _selectedTimeFrame = TimeFrame.oneMonth;
-        _selectedMetric = MetricType.changePercent;
-        _selectedSector = SectorType.all;
-        _selectedMarketCap = MarketCapType.all;
-        _onSelectorsChanged();
-      },
+  Widget _buildCompactMetricSelector(BuildContext context) => Container(
+    height: 40,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: BoxDecoration(
+      color: Theme.of(context).primaryColor.withOpacity(0.05),
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          Icons.refresh,
-          color: Theme.of(context).primaryColor.withOpacity(0.7),
+      border: Border.all(
+        color: Theme.of(context).primaryColor.withOpacity(0.2),
+      ),
+    ),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<MetricType>(
+        value: _selectedMetric,
+        isExpanded: true,
+        icon: Icon(
+          Icons.expand_more,
+          color: Theme.of(context).primaryColor,
           size: 18,
         ),
+        style: TextStyle(
+          color: Theme.of(context).primaryColor,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        items: MetricType.heatmapMetrics
+            .map(
+              (metric) => DropdownMenuItem<MetricType>(
+                value: metric,
+                child: Row(
+                  children: [
+                    Icon(
+                      metric.icon,
+                      size: 14,
+                      color: Theme.of(context).primaryColor.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(metric.shortName),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (value) {
+          if (value != null) {
+            _onMetricChanged(value);
+          }
+        },
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildHeatmapContent(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      child: HeatmapTemplateCard(
-        data: widget.data ?? _getEmptyData(),
-        isLoading: widget.isLoading,
-        error: widget.error,
-        onTilePressed: widget.onTilePressed,
-        customTileBuilder: widget.customTileBuilder,
-        icon: Icons.grid_view,
+  /// Build compact reset button
+  Widget _buildCompactResetButton(BuildContext context) => InkWell(
+    onTap: () {
+      _selectedTimeFrame = TimeFrame.oneMonth;
+      _selectedMetric = MetricType.changePercent;
+      _selectedSector = SectorType.all;
+      _selectedMarketCap = MarketCapType.all;
+      _onSelectorsChanged();
+    },
+    borderRadius: BorderRadius.circular(12),
+    child: Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.3),
+        ),
       ),
-    );
-  }
+      child: Icon(
+        Icons.refresh,
+        color: Theme.of(context).primaryColor.withOpacity(0.7),
+        size: 18,
+      ),
+    ),
+  );
 
-  HeatmapData _getEmptyData() {
-    return HeatmapData(
-      id: 'empty-heatmap',
-      title: widget.title ?? 'Portfolio Heatmap',
-      subtitle: 'No data available',
-      tiles: [],
-      metadata: HeatmapMetadata(
-        lastUpdated: DateTime.now(),
-        dataSource: 'configurable_widget',
-        additionalInfo: const {'status': 'empty'},
-      ),
-      configuration: HeatmapConfiguration(
-        showPerformance: true,
-        showWeightage: true,
-        showValue: false,
-        layout: HeatmapLayoutType.treemap,
-        colorScheme: HeatmapColorSchemeType.performance,
-      ),
-    );
-  }
+  Widget _buildHeatmapContent(BuildContext context) => Container(
+    padding: const EdgeInsets.all(8),
+    child: HeatmapTemplateCard(
+      data: widget.data ?? _getEmptyData(),
+      isLoading: widget.isLoading,
+      error: widget.error,
+      onTilePressed: widget.onTilePressed,
+      customTileBuilder: widget.customTileBuilder,
+      icon: Icons.grid_view,
+    ),
+  );
+
+  HeatmapData _getEmptyData() => HeatmapData(
+    id: 'empty-heatmap',
+    title: widget.title ?? 'Portfolio Heatmap',
+    subtitle: 'No data available',
+    tiles: [],
+    metadata: HeatmapMetadata(
+      lastUpdated: DateTime.now(),
+      dataSource: 'configurable_widget',
+      additionalInfo: const {'status': 'empty'},
+    ),
+    configuration: const HeatmapConfiguration(),
+  );
 
   void _notifySelectorsChanged() {
     widget.onSelectorsChanged?.call(
@@ -399,19 +383,16 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
     })?
     onSelectorsChanged,
     String? title,
-  }) {
-    return ConfigurableHeatmapWidget(
-      key: key,
-      data: data,
-      isLoading: isLoading,
-      error: error,
-      onTilePressed: onTilePressed,
-      onSelectorsChanged: onSelectorsChanged,
-      title: title,
-      compact: true,
-      showSelectors: true,
-    );
-  }
+  }) => ConfigurableHeatmapWidget(
+    key: key,
+    data: data,
+    isLoading: isLoading,
+    error: error,
+    onTilePressed: onTilePressed,
+    onSelectorsChanged: onSelectorsChanged,
+    title: title,
+    compact: true,
+  );
 
   /// Create a web-optimized heatmap widget
   static ConfigurableHeatmapWidget web({
@@ -428,19 +409,15 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
     })?
     onSelectorsChanged,
     String? title,
-  }) {
-    return ConfigurableHeatmapWidget(
-      key: key,
-      data: data,
-      isLoading: isLoading,
-      error: error,
-      onTilePressed: onTilePressed,
-      onSelectorsChanged: onSelectorsChanged,
-      title: title,
-      compact: false,
-      showSelectors: true,
-    );
-  }
+  }) => ConfigurableHeatmapWidget(
+    key: key,
+    data: data,
+    isLoading: isLoading,
+    error: error,
+    onTilePressed: onTilePressed,
+    onSelectorsChanged: onSelectorsChanged,
+    title: title,
+  );
 
   /// Create a dashboard heatmap widget
   static ConfigurableHeatmapWidget dashboard({
@@ -458,19 +435,17 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
     onSelectorsChanged,
     String? title,
     bool interactive = true,
-  }) {
-    return ConfigurableHeatmapWidget(
-      key: key,
-      data: data,
-      isLoading: isLoading,
-      error: error,
-      onTilePressed: onTilePressed,
-      onSelectorsChanged: onSelectorsChanged,
-      title: title,
-      compact: true,
-      showSelectors: interactive,
-    );
-  }
+  }) => ConfigurableHeatmapWidget(
+    key: key,
+    data: data,
+    isLoading: isLoading,
+    error: error,
+    onTilePressed: onTilePressed,
+    onSelectorsChanged: onSelectorsChanged,
+    title: title,
+    compact: true,
+    showSelectors: interactive,
+  );
 
   /// Create a minimal heatmap widget (for previews, widgets, etc.)
   static ConfigurableHeatmapWidget minimal({
@@ -480,16 +455,14 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
     String? error,
     VoidCallback? onTilePressed,
     String? title,
-  }) {
-    return ConfigurableHeatmapWidget(
-      key: key,
-      data: data,
-      isLoading: isLoading,
-      error: error,
-      onTilePressed: onTilePressed,
-      title: title,
-      compact: true,
-      showSelectors: false,
-    );
-  }
+  }) => ConfigurableHeatmapWidget(
+    key: key,
+    data: data,
+    isLoading: isLoading,
+    error: error,
+    onTilePressed: onTilePressed,
+    title: title,
+    compact: true,
+    showSelectors: false,
+  );
 }

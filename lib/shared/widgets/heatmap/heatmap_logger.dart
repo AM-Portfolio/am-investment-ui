@@ -26,7 +26,7 @@ class HeatmapLogger {
       'Heatmap component initialized: $component for $investmentType',
       tag: '$_tag.Init',
     );
-    
+
     developer.log(
       'Heatmap initialization',
       name: '$_tag.Init',
@@ -42,12 +42,12 @@ class HeatmapLogger {
   }) {
     final operationId = '${operation}_${DateTime.now().millisecondsSinceEpoch}';
     _operationStartTimes[operationId] = DateTime.now();
-    
+
     AppLogger.info(
       'Starting data loading: $operation${dataSize != null ? ' (size: $dataSize)' : ''}${source != null ? ' from $source' : ''}',
       tag: '$_tag.Data',
     );
-    
+
     developer.log(
       'Data loading started',
       name: '$_tag.Data',
@@ -63,12 +63,12 @@ class HeatmapLogger {
   }) {
     final operationId = _findOperationId(operation);
     final duration = _calculateDuration(operationId);
-    
+
     AppLogger.info(
       'Data loading completed: $operation${duration != null ? ' (${duration.inMilliseconds}ms)' : ''}${itemCount != null ? ' - $itemCount items' : ''}${processingInfo != null ? ' - $processingInfo' : ''}',
       tag: '$_tag.Data',
     );
-    
+
     if (operationId != null) {
       _operationStartTimes.remove(operationId);
     }
@@ -83,14 +83,14 @@ class HeatmapLogger {
   }) {
     final operationId = _findOperationId(operation);
     final duration = _calculateDuration(operationId);
-    
+
     AppLogger.error(
       'Data loading failed: $operation${duration != null ? ' (${duration.inMilliseconds}ms)' : ''}',
       error: error,
       stackTrace: stackTrace,
       tag: '$_tag.Data.Error',
     );
-    
+
     if (operationId != null) {
       _operationStartTimes.remove(operationId);
     }
@@ -104,7 +104,7 @@ class HeatmapLogger {
     String? component,
   }) {
     _incrementEventCount('filter_change');
-    
+
     AppLogger.debug(
       'Filter changed: $filterType from $oldValue to $newValue${component != null ? ' in $component' : ''} (count: ${_eventCounts['filter_change']})',
       tag: '$_tag.Filter',
@@ -119,7 +119,7 @@ class HeatmapLogger {
     String? component,
   }) {
     _incrementEventCount('tile_interaction');
-    
+
     AppLogger.info(
       'Tile interaction: $action on $tileId${component != null ? ' in $component' : ''} (count: ${_eventCounts['tile_interaction']})',
       tag: '$_tag.Interaction',
@@ -144,7 +144,7 @@ class HeatmapLogger {
         tag: '$_tag.Performance',
       );
     }
-    
+
     developer.log(
       'Performance metric',
       name: '$_tag.Performance',

@@ -11,6 +11,18 @@ import 'heatmap_selector_card.dart';
 /// A reusable heatmap template card widget that displays data in a treemap or grid layout
 /// with configurable sub-card visibility for responsive design
 class HeatmapTemplateCard extends StatelessWidget {
+  const HeatmapTemplateCard({
+    required this.data,
+    super.key,
+    this.isLoading = false,
+    this.error,
+    this.icon,
+    this.onTilePressed,
+    this.customTileBuilder,
+    this.selectorConfig,
+    this.selectorCallbacks,
+    this.showSelectors = false,
+  });
   final HeatmapData data;
   final bool isLoading;
   final String? error;
@@ -27,19 +39,6 @@ class HeatmapTemplateCard extends StatelessWidget {
   /// Whether to show selectors above the heatmap
   final bool showSelectors;
 
-  const HeatmapTemplateCard({
-    super.key,
-    required this.data,
-    this.isLoading = false,
-    this.error,
-    this.icon,
-    this.onTilePressed,
-    this.customTileBuilder,
-    this.selectorConfig,
-    this.selectorCallbacks,
-    this.showSelectors = false,
-  });
-
   @override
   Widget build(BuildContext context) {
     // Log rendering performance
@@ -48,7 +47,7 @@ class HeatmapTemplateCard extends StatelessWidget {
       phase: 'build',
       itemCount: data.tiles.length,
     );
-    
+
     return Column(
       children: [
         // Optional selector card
@@ -84,38 +83,36 @@ class HeatmapTemplateCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        if (icon != null) ...[
-          Icon(icon, color: Theme.of(context).primaryColor, size: 24),
-          const SizedBox(width: 8),
-        ],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                data.title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              if (data.subtitle != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  data.subtitle!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+  Widget _buildHeader(BuildContext context) => Row(
+    children: [
+      if (icon != null) ...[
+        Icon(icon, color: Theme.of(context).primaryColor, size: 24),
+        const SizedBox(width: 8),
       ],
-    );
-  }
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              data.title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (data.subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                data.subtitle!,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ],
+  );
 
   Widget _buildContent(BuildContext context) {
     if (isLoading) {
@@ -141,60 +138,56 @@ class HeatmapTemplateCard extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
+  Widget _buildErrorState(BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.error_outline,
+          color: Theme.of(context).colorScheme.error,
+          size: 48,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Failed to load heatmap data',
+          style: TextStyle(
             color: Theme.of(context).colorScheme.error,
-            size: 48,
+            fontSize: 16,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Failed to load heatmap data',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.error,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            error!,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 12,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.data_usage_outlined,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          error!,
+          style: TextStyle(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: 48,
+            fontSize: 12,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'No data available',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 16,
-            ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildEmptyState(BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.data_usage_outlined,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 48,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'No data available',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 16,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 
   Widget _buildColorLegend(BuildContext context) {
     if (data.configuration.colorScheme != HeatmapColorSchemeType.performance) {
@@ -219,23 +212,22 @@ class HeatmapTemplateCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
+  Widget _buildLegendItem(BuildContext context, String label, Color color) =>
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-        ),
-        const SizedBox(width: 4),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-      ],
-    );
-  }
+          const SizedBox(width: 4),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      );
 
   Widget _buildHeatmap(BuildContext context) {
     switch (data.configuration.layout) {
@@ -320,17 +312,17 @@ class HeatmapTemplateCard extends StatelessWidget {
     double width,
     double height,
   ) {
-    List<Widget> widgets = [];
+    final widgets = <Widget>[];
     double currentX = 0;
     double currentY = 0;
     double rowHeight = 0;
 
-    for (int i = 0; i < tiles.length; i++) {
+    for (var i = 0; i < tiles.length; i++) {
       final tile = tiles[i];
 
       // Calculate tile dimensions based on weightage
-      double tileWidth = _calculateTileWidth(tile.weightage, width);
-      double tileHeight = _calculateTileHeight(tile.weightage, height);
+      var tileWidth = _calculateTileWidth(tile.weightage, width);
+      var tileHeight = _calculateTileHeight(tile.weightage, height);
 
       // Check if we need to move to next row
       if (currentX + tileWidth > width && currentX > 0) {
@@ -367,7 +359,7 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   double _calculateTileWidth(double weightage, double containerWidth) {
     // Base width calculation - larger weightage gets more width
-    double baseWidth = (weightage / 100) * containerWidth;
+    final baseWidth = (weightage / 100) * containerWidth;
 
     // Apply configuration constraints
     final minWidth = data.configuration.minTileWidth ?? containerWidth * 0.15;
@@ -378,7 +370,7 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   double _calculateTileHeight(double weightage, double containerHeight) {
     // Base height calculation
-    double baseHeight = (weightage / 100) * containerHeight;
+    final baseHeight = (weightage / 100) * containerHeight;
 
     // Apply configuration constraints
     final minHeight =
@@ -415,11 +407,12 @@ class HeatmapTemplateCard extends StatelessWidget {
           tileData: {
             'name': tile.name,
             'value': tile.value,
-            'changePercent': tile.changePercent,
+            'performance': tile.performance,
+            'weightage': tile.weightage,
           },
           component: 'HeatmapTemplateCard',
         );
-        
+
         onTilePressed?.call();
       },
       child: Container(
@@ -454,7 +447,6 @@ class HeatmapTemplateCard extends StatelessWidget {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Tile name - always shown if height allows
@@ -592,14 +584,12 @@ class HeatmapTemplateCard extends StatelessWidget {
   }
 
   /// Get UI tiles from data, converting if necessary
-  List<HeatmapTileData> _getUiTiles() {
-    return data.tiles.map((tile) {
-      if (tile is HeatmapTileData) {
-        return tile;
-      } else {
-        // Convert entity to UI data
-        return HeatmapTileData.fromEntity(tile);
-      }
-    }).toList();
-  }
+  List<HeatmapTileData> _getUiTiles() => data.tiles.map((tile) {
+    if (tile is HeatmapTileData) {
+      return tile;
+    } else {
+      // Convert entity to UI data
+      return HeatmapTileData.fromEntity(tile);
+    }
+  }).toList();
 }
