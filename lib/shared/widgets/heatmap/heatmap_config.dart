@@ -27,58 +27,6 @@ class HeatmapConfig {
   /// Create from web defaults configuration
   factory HeatmapConfig.fromWeb(HeatmapConfig webConfig) => webConfig;
 
-  /// Create a mobile-optimized heatmap configuration using MobileHeatmapDefaults
-  factory HeatmapConfig.mobile({
-    String? title,
-    List<TimeFrame>? timeFrames,
-    List<MetricType>? metrics,
-    Color? accentColor,
-  }) => MobileHeatmapDefaults.standard(
-    title: title,
-    timeFrames: timeFrames,
-    metrics: metrics,
-    accentColor: accentColor,
-  );
-
-  /// Create a web-optimized heatmap configuration using WebHeatmapDefaults
-  factory HeatmapConfig.web({
-    String? title,
-    List<TimeFrame>? timeFrames,
-    List<MetricType>? metrics,
-    List<SectorType>? sectors,
-    List<MarketCapType>? marketCaps,
-    Color? accentColor,
-  }) => WebHeatmapDefaults.standard(
-    title: title,
-    timeFrames: timeFrames,
-    metrics: metrics,
-    sectors: sectors,
-    marketCaps: marketCaps,
-    accentColor: accentColor,
-  );
-
-  /// Create a minimal heatmap configuration using WebHeatmapDefaults
-  factory HeatmapConfig.minimal({
-    String? title,
-    bool showSelectors = false,
-    Color? accentColor,
-  }) => WebHeatmapDefaults.minimal(
-    title: title,
-    showSelectors: showSelectors,
-    accentColor: accentColor,
-  );
-
-  /// Create a dashboard widget configuration using WebHeatmapDefaults
-  factory HeatmapConfig.dashboard({
-    String? title,
-    bool interactive = true,
-    Color? accentColor,
-  }) => WebHeatmapDefaults.dashboard(
-    title: title,
-    interactive: interactive,
-    accentColor: accentColor,
-  );
-
   /// Create portfolio-specific configuration using WebHeatmapDefaults
   factory HeatmapConfig.portfolio({
     String? title,
@@ -90,107 +38,16 @@ class HeatmapConfig {
     selectorLayout: selectorLayout,
   );
 
-  /// Create analytics configuration using WebHeatmapDefaults
-  factory HeatmapConfig.analytics({
+  /// Create mobile portfolio-specific configuration using MobileHeatmapDefaults
+  factory HeatmapConfig.mobilePortfolio({
     String? title,
     Color? accentColor,
     SelectorLayoutType? selectorLayout,
-  }) => WebHeatmapDefaults.analytics(
+  }) => MobileHeatmapDefaults.portfolio(
     title: title,
     accentColor: accentColor,
     selectorLayout: selectorLayout,
   );
-
-  /// Create trading configuration using WebHeatmapDefaults
-  factory HeatmapConfig.trading({
-    String? title,
-    Color? accentColor,
-    SelectorLayoutType? selectorLayout,
-  }) => WebHeatmapDefaults.trading(
-    title: title,
-    accentColor: accentColor,
-    selectorLayout: selectorLayout,
-  );
-
-  /// Create from any mobile default configuration
-  factory HeatmapConfig.mobileDefaults(
-    String type, {
-    String? title,
-    Color? accentColor,
-  }) {
-    switch (type.toLowerCase()) {
-      case 'standard':
-        return MobileHeatmapDefaults.standard(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'minimal':
-        return MobileHeatmapDefaults.minimal(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'dashboard':
-        return MobileHeatmapDefaults.dashboard(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'portfolio':
-        return MobileHeatmapDefaults.portfolio(
-          title: title,
-          accentColor: accentColor,
-        );
-      default:
-        return MobileHeatmapDefaults.standard(
-          title: title,
-          accentColor: accentColor,
-        );
-    }
-  }
-
-  /// Create from any web default configuration
-  factory HeatmapConfig.webDefaults(
-    String type, {
-    String? title,
-    Color? accentColor,
-  }) {
-    switch (type.toLowerCase()) {
-      case 'standard':
-        return WebHeatmapDefaults.standard(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'analytics':
-        return WebHeatmapDefaults.analytics(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'dashboard':
-        return WebHeatmapDefaults.dashboard(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'portfolio':
-        return WebHeatmapDefaults.portfolio(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'minimal':
-        return WebHeatmapDefaults.minimal(
-          title: title,
-          accentColor: accentColor,
-        );
-      case 'trading':
-        return WebHeatmapDefaults.trading(
-          title: title,
-          accentColor: accentColor,
-        );
-      default:
-        return WebHeatmapDefaults.standard(
-          title: title,
-          accentColor: accentColor,
-        );
-    }
-  }
 
   /// Selector configuration (what selectors to show and their options) - nullable
   final SelectorConfig? selectors;
@@ -292,46 +149,6 @@ class HeatmapConfig {
     interactions: interactions ?? this.interactions,
     visual: visual ?? this.visual,
   );
-
-  /// Merge with mobile defaults as base
-  HeatmapConfig mergeWithMobileDefaults(
-    String type, {
-    String? title,
-    Color? accentColor,
-  }) {
-    final mobileBase = HeatmapConfig.mobileDefaults(
-      type,
-      title: title,
-      accentColor: accentColor,
-    );
-    return HeatmapConfig(
-      selectors: selectors ?? mobileBase.selectors,
-      display: display ?? mobileBase.display,
-      layout: layout ?? mobileBase.layout,
-      interactions: interactions ?? mobileBase.interactions,
-      visual: visual ?? mobileBase.visual,
-    );
-  }
-
-  /// Merge with web defaults as base
-  HeatmapConfig mergeWithWebDefaults(
-    String type, {
-    String? title,
-    Color? accentColor,
-  }) {
-    final webBase = HeatmapConfig.webDefaults(
-      type,
-      title: title,
-      accentColor: accentColor,
-    );
-    return HeatmapConfig(
-      selectors: selectors ?? webBase.selectors,
-      display: display ?? webBase.display,
-      layout: layout ?? webBase.layout,
-      interactions: interactions ?? webBase.interactions,
-      visual: visual ?? webBase.visual,
-    );
-  }
 
   /// Create configuration with modified selectors
   HeatmapConfig withSelectors({

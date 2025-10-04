@@ -358,17 +358,17 @@ class UniversalHeatmapWidget extends StatelessWidget {
         );
         break;
       case InvestmentType.indexFund:
-        baseConfig = ui_config.HeatmapConfig.analytics(
+        baseConfig = ui_config.HeatmapConfig.portfolio(
           title: title ?? 'Index Heatmap',
         );
         break;
       case InvestmentType.mutualFunds:
-        baseConfig = ui_config.HeatmapConfig.analytics(
+        baseConfig = ui_config.HeatmapConfig.portfolio(
           title: title ?? 'Mutual Funds Heatmap',
         );
         break;
       case InvestmentType.etf:
-        baseConfig = ui_config.HeatmapConfig.trading(
+        baseConfig = ui_config.HeatmapConfig.portfolio(
           title: title ?? 'ETF Heatmap',
         );
         break;
