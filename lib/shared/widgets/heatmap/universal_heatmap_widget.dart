@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../core/cubits/heatmap/heatmap_display_cubit.dart';
-import '../../widgets/heatmap/heatmap_template_card.dart';
 import '../../widgets/heatmap/configurable_heatmap_widget.dart';
+import 'heatmap_logger.dart';
 import '../../widgets/selectors/selectors.dart';
 
 /// Universal heatmap widget that integrates with any investment type using cubit state management
@@ -50,6 +51,22 @@ class UniversalHeatmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize logger
+    HeatmapLogger.initialize();
+    
+    // Log widget initialization
+    HeatmapLogger.logInitialization(
+      component: 'UniversalHeatmapWidget',
+      investmentType: investmentType.toString(),
+      config: {
+        'hasConfig': config != null,
+        'hasInitialFilters': initialFilters != null,
+        'showSelectors': showSelectors,
+        'title': title,
+        'compactMode': compactMode,
+      },
+    );
+    
     return BlocProvider(
       create: (context) => HeatmapDisplayCubit(),
       child: _UniversalHeatmapContent(
@@ -106,11 +123,31 @@ class _UniversalHeatmapContentState extends State<_UniversalHeatmapContent> {
     final cubit = context.read<HeatmapDisplayCubit>();
     final effectiveConfig = _getEffectiveConfig();
 
-    cubit.initialize(
-      config: effectiveConfig,
-      rawData: widget.rawData,
-      initialFilters: widget.initialFilters,
+    HeatmapLogger.logDataLoading(
+      operation: 'initialize_heatmap',
+      dataSize: widget.rawData.length,
+      source: 'raw_data',
     );
+
+    try {
+      cubit.initialize(
+        config: effectiveConfig,
+        rawData: widget.rawData,
+        initialFilters: widget.initialFilters,
+      );
+      
+      HeatmapLogger.logDataLoadingSuccess(
+        operation: 'initialize_heatmap',
+        processingInfo: 'Config applied successfully',
+      );
+    } catch (error, stackTrace) {
+      HeatmapLogger.logDataLoadingError(
+        operation: 'initialize_heatmap',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 
   HeatmapDisplayConfig _getEffectiveConfig() {
@@ -162,8 +199,21 @@ class _UniversalHeatmapContentState extends State<_UniversalHeatmapContent> {
   Widget build(BuildContext context) {
     return BlocConsumer<HeatmapDisplayCubit, HeatmapDisplayState>(
       listener: (context, state) {
+        // Log state changes
+        HeatmapLogger.logStateChange(
+          component: 'UniversalHeatmapWidget',
+          fromState: 'previous_state',
+          toState: state.runtimeType.toString(),
+        );
+        
         if (state is HeatmapDisplayLoaded) {
           widget.onFiltersChanged?.call(state.filters);
+        } else if (state is HeatmapDisplayError) {
+          HeatmapLogger.logError(
+            message: 'Heatmap display error',
+            error: state.message,
+            component: 'UniversalHeatmapWidget',
+          );
         }
       },
       builder: (context, state) {
@@ -234,6 +284,13 @@ class _UniversalHeatmapContentState extends State<_UniversalHeatmapContent> {
       initialSector: state.filters.sector,
       initialMarketCap: state.filters.marketCap,
       onTilePressed: () {
+        // Log tile interaction
+        HeatmapLogger.logTileInteraction(
+          action: 'tile_pressed',
+          tileId: 'tile-id',
+          component: 'UniversalHeatmapWidget',
+        );
+        
         // Handle tile press - you could pass tile-specific data here
         widget.onTilePressed?.call('tile-id', null);
       },
@@ -247,26 +304,43 @@ class _UniversalHeatmapContentState extends State<_UniversalHeatmapContent> {
             final cubit = context.read<HeatmapDisplayCubit>();
 
             if (timeFrame != null && timeFrame != state.filters.timeFrame) {
+              HeatmapLogger.logFilterChange(
+                filterType: 'timeFrame',
+                oldValue: state.filters.timeFrame,
+                newValue: timeFrame,
+                component: 'UniversalHeatmapWidget',
+              );
               cubit.updateTimeFrame(timeFrame);
             }
             if (metric != null && metric != state.filters.metric) {
+              HeatmapLogger.logFilterChange(
+                filterType: 'metric',
+                oldValue: state.filters.metric,
+                newValue: metric,
+                component: 'UniversalHeatmapWidget',
+              );
               cubit.updateMetric(metric);
             }
             if (sector != null && sector != state.filters.sector) {
+              HeatmapLogger.logFilterChange(
+                filterType: 'sector',
+                oldValue: state.filters.sector,
+                newValue: sector,
+                component: 'UniversalHeatmapWidget',
+              );
               cubit.updateSector(sector);
             }
             if (marketCap != null && marketCap != state.filters.marketCap) {
+              HeatmapLogger.logFilterChange(
+                filterType: 'marketCap',
+                oldValue: state.filters.marketCap,
+                newValue: marketCap,
+                component: 'UniversalHeatmapWidget',
+              );
               cubit.updateMarketCap(marketCap);
             }
           },
-      customTileBuilder: _buildCustomTile,
     );
-  }
-
-  Widget? _buildCustomTile(dynamic tile) {
-    // You can customize tile appearance based on investment type
-    // Return null to use default tile builder
-    return null;
   }
 }
 
@@ -322,7 +396,7 @@ class IndexHeatmapWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UniversalHeatmapWidget(
-      investmentType: InvestmentType.index,
+      investmentType: InvestmentType.indexFund,
       rawData: indexData,
       title: title,
       compactMode: compactMode,

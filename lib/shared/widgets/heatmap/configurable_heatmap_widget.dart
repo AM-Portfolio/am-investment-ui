@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../selectors/selectors.dart';
-import 'heatmap_template_card.dart';
-import '../../models/heatmap/heatmap_ui_data.dart';
-import '../../models/heatmap/heatmap_tile_data.dart';
+
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import '../../models/heatmap/heatmap_tile_data.dart';
+import '../../models/heatmap/heatmap_ui_data.dart';
+import '../selectors/selectors.dart';
+import 'heatmap_logger.dart';
+import 'heatmap_template_card.dart';
 
 /// A configurable heatmap widget that adapts based on platform and use case
 /// Combines selectors and heatmap display with full configuration control
@@ -80,6 +82,20 @@ class _ConfigurableHeatmapWidgetState
   @override
   void initState() {
     super.initState();
+    
+    // Log widget initialization
+    HeatmapLogger.logInitialization(
+      component: 'ConfigurableHeatmapWidget',
+      investmentType: 'generic',
+      config: {
+        'showSelectors': widget.showSelectors,
+        'compact': widget.compact,
+        'hasData': widget.data != null,
+        'isLoading': widget.isLoading,
+        'hasError': widget.error != null,
+      },
+    );
+    
     _initializeSelectors();
   }
 
@@ -91,6 +107,13 @@ class _ConfigurableHeatmapWidgetState
   }
 
   void _onTimeFrameChanged(TimeFrame timeFrame) {
+    HeatmapLogger.logFilterChange(
+      filterType: 'timeFrame',
+      oldValue: _selectedTimeFrame,
+      newValue: timeFrame,
+      component: 'ConfigurableHeatmapWidget',
+    );
+    
     setState(() {
       _selectedTimeFrame = timeFrame;
     });
@@ -98,6 +121,13 @@ class _ConfigurableHeatmapWidgetState
   }
 
   void _onMetricChanged(MetricType metric) {
+    HeatmapLogger.logFilterChange(
+      filterType: 'metric',
+      oldValue: _selectedMetric,
+      newValue: metric,
+      component: 'ConfigurableHeatmapWidget',
+    );
+    
     setState(() {
       _selectedMetric = metric;
     });
@@ -110,6 +140,13 @@ class _ConfigurableHeatmapWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // Log rendering phase
+    HeatmapLogger.logRendering(
+      component: 'ConfigurableHeatmapWidget',
+      phase: 'build',
+      itemCount: widget.data?.tiles.length,
+    );
+    
     return Column(
       children: [
         // Selectors section (if enabled)
