@@ -14,7 +14,8 @@ import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.d
 class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
   final PortfolioAnalyticsCubit? _analyticsCubit;
 
-  PortfolioHeatmapCubit([this._analyticsCubit]) : super(PortfolioHeatmapInitial()) {
+  PortfolioHeatmapCubit([this._analyticsCubit])
+    : super(PortfolioHeatmapInitial()) {
     AppLogger.info(
       'PortfolioHeatmapCubit initialized',
       tag: 'PortfolioHeatmapCubit',
@@ -65,18 +66,19 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
 
       // Get analytics data from the analytics cubit or passed parameter
       final usedAnalyticsCubit = analyticsCubit ?? _analyticsCubit;
-      
+
       HeatmapData heatmapData;
-      
+
       if (usedAnalyticsCubit != null) {
         final analyticsState = usedAnalyticsCubit.state;
-        
-        if (analyticsState is PortfolioAnalyticsLoaded && analyticsState.heatmap != null) {
+
+        if (analyticsState is PortfolioAnalyticsLoaded &&
+            analyticsState.heatmap != null) {
           AppLogger.info(
             'Using real analytics data from cubit',
             tag: 'PortfolioHeatmapCubit',
           );
-          
+
           // Convert real analytics data to heatmap data
           heatmapData = SectorHeatmapConverter.convertToHeatmapData(
             heatmap: analyticsState.heatmap,
@@ -84,7 +86,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
             title: 'Portfolio Heatmap',
             subtitle: 'Sector Performance Analysis',
           );
-          
+
           AppLogger.info(
             'Converted analytics data to heatmap: ${heatmapData.tiles.length} sectors found',
             tag: 'PortfolioHeatmapCubit',
@@ -108,7 +110,10 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         'Heatmap data created successfully',
         tag: 'PortfolioHeatmapCubit',
       );
-      AppLogger.debug('Heatmap data details: ${heatmapData.tiles.length} tiles', tag: 'PortfolioHeatmapCubit');
+      AppLogger.debug(
+        'Heatmap data details: ${heatmapData.tiles.length} tiles',
+        tag: 'PortfolioHeatmapCubit',
+      );
 
       AppLogger.stateChange(
         'PortfolioHeatmapLoading',
@@ -379,7 +384,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
       'Creating fallback heatmap data',
       tag: 'PortfolioHeatmapCubit',
     );
-    
+
     return HeatmapData(
       id: 'portfolio-heatmap-fallback',
       title: 'Portfolio Heatmap',
