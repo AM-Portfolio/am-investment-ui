@@ -658,13 +658,39 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
         },
       );
 
-  Widget _buildSectorDropdown(BuildContext context) =>
-      DropdownButtonFormField<SectorType>(
+  Widget _buildSectorDropdown(BuildContext context) => Container(
+    height: 40,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: BoxDecoration(
+      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+          .withOpacity(0.05),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+            .withOpacity(0.2),
+      ),
+    ),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<SectorType>(
         value: _selectedSector,
-        decoration: const InputDecoration(
-          labelText: 'Sector',
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          border: OutlineInputBorder(),
+        isExpanded: true,
+        hint: Text(
+          'Sector',
+          style: TextStyle(
+            color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+                .withOpacity(0.7),
+            fontSize: 13,
+          ),
+        ),
+        icon: Icon(
+          Icons.expand_more,
+          color: widget.primaryColor ?? Theme.of(context).primaryColor,
+          size: 18,
+        ),
+        style: TextStyle(
+          color: widget.primaryColor ?? Theme.of(context).primaryColor,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
         items:
             (widget.availableSectors ??
@@ -675,24 +701,71 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
                       SectorType.finance,
                     ])
                 .map(
-                  (sector) => DropdownMenuItem(
+                  (sector) => DropdownMenuItem<SectorType>(
                     value: sector,
-                    child: Text(sector.displayName),
+                    child: Row(
+                      children: [
+                        Icon(
+                          sector.icon,
+                          size: 14,
+                          color:
+                              (widget.primaryColor ??
+                                      Theme.of(context).primaryColor)
+                                  .withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            sector.shortName,
+                            style: const TextStyle(fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
                 .toList(),
         onChanged: (value) {
           if (value != null) _onSectorChanged(value);
         },
-      );
+      ),
+    ),
+  );
 
-  Widget _buildMarketCapDropdown(BuildContext context) =>
-      DropdownButtonFormField<MarketCapType>(
+  Widget _buildMarketCapDropdown(BuildContext context) => Container(
+    height: 40,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: BoxDecoration(
+      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+          .withOpacity(0.05),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+            .withOpacity(0.2),
+      ),
+    ),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<MarketCapType>(
         value: _selectedMarketCap,
-        decoration: const InputDecoration(
-          labelText: 'Market Cap',
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          border: OutlineInputBorder(),
+        isExpanded: true,
+        hint: Text(
+          'Market Cap',
+          style: TextStyle(
+            color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+                .withOpacity(0.7),
+            fontSize: 13,
+          ),
+        ),
+        icon: Icon(
+          Icons.expand_more,
+          color: widget.primaryColor ?? Theme.of(context).primaryColor,
+          size: 18,
+        ),
+        style: TextStyle(
+          color: widget.primaryColor ?? Theme.of(context).primaryColor,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
         items:
             (widget.availableMarketCaps ??
@@ -703,16 +776,37 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
                       MarketCapType.smallCap,
                     ])
                 .map(
-                  (marketCap) => DropdownMenuItem(
+                  (marketCap) => DropdownMenuItem<MarketCapType>(
                     value: marketCap,
-                    child: Text(marketCap.displayName),
+                    child: Row(
+                      children: [
+                        Icon(
+                          marketCap.icon,
+                          size: 14,
+                          color:
+                              (widget.primaryColor ??
+                                      Theme.of(context).primaryColor)
+                                  .withOpacity(0.7),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            marketCap.shortName,
+                            style: const TextStyle(fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
                 .toList(),
         onChanged: (value) {
           if (value != null) _onMarketCapChanged(value);
         },
-      );
+      ),
+    ),
+  );
 
   Widget _buildIconResetButton(BuildContext context) => IconButton(
     onPressed: _resetFilters,
