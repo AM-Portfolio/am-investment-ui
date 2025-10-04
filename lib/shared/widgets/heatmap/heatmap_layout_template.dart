@@ -107,14 +107,14 @@ class HeatmapLayoutTemplate extends StatelessWidget {
             children: [
               Text(
                 effectiveTitle ?? 'Heatmap',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               if (effectiveSubtitle != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  effectiveSubtitle!,
+                  effectiveSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -156,21 +156,22 @@ class HeatmapLayoutTemplate extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, String label, Color color) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-      const SizedBox(width: 4),
-      Text(label, style: Theme.of(context).textTheme.bodySmall),
-    ],
-  );
+  Widget _buildLegendItem(BuildContext context, String label, Color color) =>
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      );
 }
 
 /// Factory constructors for common layout configurations
@@ -188,7 +189,6 @@ extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
     icon: icon,
     showSelectors: false,
     showLegend: false,
-    showHeader: true,
   );
 
   /// Create a compact layout (compact selectors, minimal header)
@@ -205,8 +205,6 @@ extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
     title: title,
     icon: icon,
     showSelectors: selectorWidget != null,
-    showLegend: true,
-    showHeader: true,
     padding: const EdgeInsets.all(4),
   );
 
@@ -227,8 +225,6 @@ extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
     subtitle: subtitle,
     icon: icon,
     showSelectors: selectorWidget != null,
-    showLegend: true,
-    showHeader: true,
     headerActions: headerActions,
     padding: const EdgeInsets.all(8),
   );
@@ -248,7 +244,6 @@ extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
     icon: icon,
     showSelectors: selectorWidget != null,
     showLegend: false,
-    showHeader: true,
     padding: const EdgeInsets.all(6),
   );
 }

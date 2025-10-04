@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
@@ -241,7 +242,8 @@ class HeatmapDisplayTemplate extends StatelessWidget {
 
   double _calculateTileHeight(double weightage, double containerHeight) {
     final baseHeight = (weightage / 100) * containerHeight;
-    final minHeight = data.configuration.minTileHeight ?? containerHeight * 0.15;
+    final minHeight =
+        data.configuration.minTileHeight ?? containerHeight * 0.15;
     final maxHeight = data.configuration.maxTileHeight ?? containerHeight * 0.4;
     return baseHeight.clamp(minHeight, maxHeight);
   }
@@ -276,10 +278,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
         decoration: BoxDecoration(
           color: tileColor,
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 0.5,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.2), width: 0.5),
         ),
         child: Padding(
           padding: config.tilePadding ?? const EdgeInsets.all(4.0),
@@ -329,7 +328,11 @@ class HeatmapDisplayTemplate extends StatelessWidget {
               '${tile.weightage.toStringAsFixed(1)}%',
               style: TextStyle(
                 color: textColor.withOpacity(0.8),
-                fontSize: _calculateFontSize(effectiveWidth, showSubCards, isSecondary: true),
+                fontSize: _calculateFontSize(
+                  effectiveWidth,
+                  showSubCards,
+                  isSecondary: true,
+                ),
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -344,7 +347,11 @@ class HeatmapDisplayTemplate extends StatelessWidget {
               '${tile.performance >= 0 ? '+' : ''}${tile.performance.toStringAsFixed(1)}%',
               style: TextStyle(
                 color: textColor.withOpacity(0.9),
-                fontSize: _calculateFontSize(effectiveWidth, showSubCards, isSmall: true),
+                fontSize: _calculateFontSize(
+                  effectiveWidth,
+                  showSubCards,
+                  isSmall: true,
+                ),
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -352,14 +359,21 @@ class HeatmapDisplayTemplate extends StatelessWidget {
           ),
 
         // Value
-        if (config.showValue && showSubCards && effectiveHeight > 80 && tile.value != null)
+        if (config.showValue &&
+            showSubCards &&
+            effectiveHeight > 80 &&
+            tile.value != null)
           Padding(
             padding: const EdgeInsets.only(top: 1),
             child: Text(
               '\$${tile.value!.toStringAsFixed(0)}',
               style: TextStyle(
                 color: textColor.withOpacity(0.7),
-                fontSize: _calculateFontSize(effectiveWidth, showSubCards, isSmall: true),
+                fontSize: _calculateFontSize(
+                  effectiveWidth,
+                  showSubCards,
+                  isSmall: true,
+                ),
                 fontWeight: FontWeight.w400,
               ),
               textAlign: TextAlign.center,
@@ -437,8 +451,4 @@ class HeatmapDisplayTemplate extends StatelessWidget {
 }
 
 /// Enum for different layout types in display template
-enum HeatmapLayoutType {
-  treemap,
-  grid,
-  list,
-}
+enum HeatmapLayoutType { treemap, grid, list }

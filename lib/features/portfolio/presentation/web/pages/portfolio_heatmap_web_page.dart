@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
 import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
-import '../../../../../shared/widgets/heatmap/heatmap_config.dart';
+import '../../../../../shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
 import '../../../../../shared/widgets/selectors/selectors.dart';
 import '../../cubit/portfolio_analytics_cubit.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
@@ -34,25 +34,17 @@ class _PortfolioHeatmapWebPageState
   SectorType? _selectedSector;
   MarketCapType? _selectedMarketCap;
 
-  late HeatmapConfig _heatmapConfig;
+  late WebHeatmapDefaults _webHeatmapDefaults;
 
   @override
   void initState() {
     super.initState();
 
     // Initialize web-optimized heatmap configuration
-    _heatmapConfig =
-        HeatmapConfig.web(
-          title: widget.portfolioName ?? 'Portfolio Heatmap',
-        ).withInteractions(
-          tileInteraction: true,
-          selectorInteraction: true,
-          loadingStates: true,
-          errorStates: true,
-        );
+    _webHeatmapDefaults = WebHeatmapDefaults();
 
     AppLogger.info(
-      'PortfolioHeatmapWebPage initialized with config: ${_heatmapConfig.isWeb}',
+      'PortfolioHeatmapWebPage initialized with config: $_webHeatmapDefaults',
       tag: 'PortfolioHeatmap.Init',
     );
     AppLogger.debug(
@@ -237,7 +229,7 @@ class _PortfolioHeatmapWebPageState
 
     return ConfigurableHeatmapWidget(
       data: state.heatmapData,
-      config: _heatmapConfig,
+      config: _webHeatmapDefaults,
       initialTimeFrame: _selectedTimeframe,
       initialMetric: _selectedMetric,
       initialSector: _selectedSector,
