@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../selectors/selectors.dart';
-import 'heatmap_selector_card.dart';
 import 'heatmap_template_card.dart';
-import 'advanced_heatmap_selector_card.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
@@ -92,6 +90,24 @@ class _ConfigurableHeatmapWidgetState
     _selectedMarketCap = widget.initialMarketCap ?? MarketCapType.all;
   }
 
+  void _onTimeFrameChanged(TimeFrame timeFrame) {
+    setState(() {
+      _selectedTimeFrame = timeFrame;
+    });
+    _onSelectorsChanged();
+  }
+
+  void _onMetricChanged(MetricType metric) {
+    setState(() {
+      _selectedMetric = metric;
+    });
+    _onSelectorsChanged();
+  }
+
+  void _onSelectorsChanged() {
+    _notifySelectorsChanged();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -109,101 +125,178 @@ class _ConfigurableHeatmapWidgetState
   }
 
   Widget _buildSelectorsSection(BuildContext context) {
-    if (widget.compact) {
-      return _buildCompactSelectors(context);
-    } else {
-      return _buildFullSelectors(context);
-    }
-  }
-
-  Widget _buildCompactSelectors(BuildContext context) {
+    // Always use compact design for minimal space usage
     return Container(
-      padding: const EdgeInsets.all(8),
+      height: 60, // Fixed compact height
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         children: [
-          // Time frame (Disabled)
-          Expanded(
-            child: IgnorePointer(
-              ignoring: true, // Disable interaction
-              child: Opacity(
-                opacity: 0.5, // Make it look disabled
-                child: TimeFrameSelector(
-                  selectedTimeFrame: _selectedTimeFrame,
-                  onTimeFrameChanged: (timeFrame) {
-                    // Disabled - no action
-                  },
-                  compact: true,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
+          // Time Frame Pills
+          Expanded(flex: 3, child: _buildCompactTimeFrameSelector(context)),
+          const SizedBox(width: 12),
 
-          // Metric
-          Expanded(
-            child: MetricSelector(
-              selectedMetric: _selectedMetric,
-              onMetricChanged: (metric) {
-                setState(() {
-                  _selectedMetric = metric;
-                });
-                _notifySelectorsChanged();
-              },
-              compact: true,
-            ),
-          ),
+          // Metric Dropdown
+          Expanded(flex: 2, child: _buildCompactMetricSelector(context)),
+          const SizedBox(width: 12),
+
+          // Reset Button
+          _buildCompactResetButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildFullSelectors(BuildContext context) {
-    return AdvancedHeatmapSelectorCard(
-      config: HeatmapSelectorConfig(
-        selectedTimeFrame: _selectedTimeFrame,
-        selectedMetric: _selectedMetric,
-        selectedSector: _selectedSector,
-        selectedMarketCap: _selectedMarketCap,
+  /// Build compact time frame selector with pills
+  Widget _buildCompactTimeFrameSelector(BuildContext context) {
+    final timeFrames = [
+      TimeFrame.oneDay,
+      TimeFrame.oneWeek,
+      TimeFrame.oneMonth,
+      TimeFrame.threeMonths,
+      TimeFrame.oneYear,
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: timeFrames.map<Widget>((timeFrame) {
+          final isSelected = _selectedTimeFrame == timeFrame;
+          return Container(
+            padding: const EdgeInsets.only(right: 8),
+            child: InkWell(
+              onTap: () => _onTimeFrameChanged(timeFrame),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  timeFrame.displayName,
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).primaryColor,
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
-      callbacks: HeatmapSelectorCallbacks(
-        onTimeFrameChanged: (timeFrame) {
-          setState(() {
-            _selectedTimeFrame = timeFrame;
-          });
-          _notifySelectorsChanged();
-        },
-        onMetricChanged: (metric) {
-          setState(() {
-            _selectedMetric = metric;
-          });
-          _notifySelectorsChanged();
-        },
-        onSectorChanged: (sector) {
-          setState(() {
-            _selectedSector = sector;
-          });
-          _notifySelectorsChanged();
-        },
-        onMarketCapChanged: (marketCap) {
-          setState(() {
-            _selectedMarketCap = marketCap;
-          });
-          _notifySelectorsChanged();
-        },
+    );
+  }
+
+  /// Build compact metric selector dropdown
+  Widget _buildCompactMetricSelector(BuildContext context) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.2),
+          width: 1,
+        ),
       ),
-      compact: widget.compact,
-      showResetButton: true,
-      showExportButton: false,
-      onReset: () {
-        setState(() {
-          _selectedTimeFrame = TimeFrame.oneYear;
-          _selectedMetric = MetricType.changePercent;
-          _selectedSector = SectorType.all;
-          _selectedMarketCap = MarketCapType.all;
-        });
-        _notifySelectorsChanged();
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<MetricType>(
+          value: _selectedMetric,
+          isExpanded: true,
+          icon: Icon(
+            Icons.expand_more,
+            color: Theme.of(context).primaryColor,
+            size: 18,
+          ),
+          style: TextStyle(
+            color: Theme.of(context).primaryColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+          items: MetricType.heatmapMetrics.map((metric) {
+            return DropdownMenuItem<MetricType>(
+              value: metric,
+              child: Row(
+                children: [
+                  Icon(
+                    metric.icon,
+                    size: 14,
+                    color: Theme.of(context).primaryColor.withOpacity(0.7),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(metric.shortName),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              _onMetricChanged(value);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Build compact reset button
+  Widget _buildCompactResetButton(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        _selectedTimeFrame = TimeFrame.oneMonth;
+        _selectedMetric = MetricType.changePercent;
+        _selectedSector = SectorType.all;
+        _selectedMarketCap = MarketCapType.all;
+        _onSelectorsChanged();
       },
-      margin: EdgeInsets.zero,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          Icons.refresh,
+          color: Theme.of(context).primaryColor.withOpacity(0.7),
+          size: 18,
+        ),
+      ),
     );
   }
 

@@ -53,18 +53,20 @@ class HeatmapTemplateCard extends StatelessWidget {
           ),
 
         // Main heatmap card
-        Card(
-          elevation: 4,
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 16),
-                SizedBox(height: 250, child: _buildContent(context)),
-              ],
+        Expanded(
+          child: Card(
+            elevation: 4,
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 16),
+                  Expanded(child: _buildContent(context)),
+                ],
+              ),
             ),
           ),
         ),
