@@ -6,6 +6,7 @@ import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../selectors/selectors.dart';
+import 'heatmap_config.dart';
 import 'heatmap_template_card.dart';
 
 /// A configurable heatmap widget that adapts based on platform and use case
@@ -14,6 +15,7 @@ class ConfigurableHeatmapWidget extends ConsumerStatefulWidget {
   const ConfigurableHeatmapWidget({
     super.key,
     this.data,
+    this.config,
     this.isLoading = false,
     this.error,
     this.onTilePressed,
@@ -23,13 +25,13 @@ class ConfigurableHeatmapWidget extends ConsumerStatefulWidget {
     this.initialSector,
     this.initialMarketCap,
     this.customTileBuilder,
-    this.showSelectors = true,
-    this.title,
-    this.compact = false,
   });
 
   /// Data provider for the heatmap
   final HeatmapData? data;
+
+  /// Configuration for heatmap behavior and appearance
+  final HeatmapConfig? config;
 
   /// Loading state
   final bool isLoading;
@@ -58,15 +60,6 @@ class ConfigurableHeatmapWidget extends ConsumerStatefulWidget {
   /// Custom widget builder for tiles
   final Widget Function(HeatmapTileData tile)? customTileBuilder;
 
-  /// Whether to show selectors
-  final bool showSelectors;
-
-  /// Widget title
-  final String? title;
-
-  /// Whether to use compact layout
-  final bool compact;
-
   @override
   ConsumerState<ConfigurableHeatmapWidget> createState() =>
       _ConfigurableHeatmapWidgetState();
@@ -85,7 +78,7 @@ class _ConfigurableHeatmapWidgetState
 
     // Log widget initialization
     AppLogger.debug(
-      'ConfigurableHeatmapWidget: initialized with selectors=${widget.showSelectors}, compact=${widget.compact}, hasData=${widget.data != null}',
+      'ConfigurableHeatmapWidget: initialized with config=${widget.config != null}, selectors=$_effectiveShowSelectors, compact=$_effectiveCompact, hasData=${widget.data != null}',
       tag: 'Heatmap.Widget',
     );
 
@@ -98,6 +91,11 @@ class _ConfigurableHeatmapWidgetState
     _selectedSector = widget.initialSector ?? SectorType.all;
     _selectedMarketCap = widget.initialMarketCap ?? MarketCapType.all;
   }
+
+  /// Get effective configuration values (with sensible defaults if no config provided)
+  bool get _effectiveShowSelectors => widget.config?.hasSelectors ?? true;
+  bool get _effectiveCompact => widget.config?.compactView ?? false;
+  String? get _effectiveTitle => widget.config?.customTitle;
 
   void _onTimeFrameChanged(TimeFrame timeFrame) {
     AppLogger.debug(
@@ -138,7 +136,7 @@ class _ConfigurableHeatmapWidgetState
     return Column(
       children: [
         // Selectors section (if enabled)
-        if (widget.showSelectors) ...[
+        if (_effectiveShowSelectors) ...[
           _buildSelectorsSection(context),
           const SizedBox(height: 16),
         ],
@@ -330,10 +328,9 @@ class _ConfigurableHeatmapWidgetState
       icon: Icons.grid_view,
     ),
   );
-
   HeatmapData _getEmptyData() => HeatmapData(
     id: 'empty-heatmap',
-    title: widget.title ?? 'Portfolio Heatmap',
+    title: _effectiveTitle ?? 'Portfolio Heatmap',
     subtitle: 'No data available',
     tiles: [],
     metadata: HeatmapMetadata(
@@ -360,6 +357,7 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
   static ConfigurableHeatmapWidget mobile({
     Key? key,
     HeatmapData? data,
+    HeatmapConfig? config,
     bool isLoading = false,
     String? error,
     VoidCallback? onTilePressed,
@@ -374,18 +372,18 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
   }) => ConfigurableHeatmapWidget(
     key: key,
     data: data,
+    config: config ?? HeatmapConfig.mobile(title: title),
     isLoading: isLoading,
     error: error,
     onTilePressed: onTilePressed,
     onSelectorsChanged: onSelectorsChanged,
-    title: title,
-    compact: true,
   );
 
   /// Create a web-optimized heatmap widget
   static ConfigurableHeatmapWidget web({
     Key? key,
     HeatmapData? data,
+    HeatmapConfig? config,
     bool isLoading = false,
     String? error,
     VoidCallback? onTilePressed,
@@ -400,17 +398,18 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
   }) => ConfigurableHeatmapWidget(
     key: key,
     data: data,
+    config: config ?? HeatmapConfig.web(title: title),
     isLoading: isLoading,
     error: error,
     onTilePressed: onTilePressed,
     onSelectorsChanged: onSelectorsChanged,
-    title: title,
   );
 
   /// Create a dashboard heatmap widget
   static ConfigurableHeatmapWidget dashboard({
     Key? key,
     HeatmapData? data,
+    HeatmapConfig? config,
     bool isLoading = false,
     String? error,
     VoidCallback? onTilePressed,
@@ -426,19 +425,20 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
   }) => ConfigurableHeatmapWidget(
     key: key,
     data: data,
+    config:
+        config ??
+        HeatmapConfig.dashboard(title: title, interactive: interactive),
     isLoading: isLoading,
     error: error,
     onTilePressed: onTilePressed,
     onSelectorsChanged: onSelectorsChanged,
-    title: title,
-    compact: true,
-    showSelectors: interactive,
   );
 
   /// Create a minimal heatmap widget (for previews, widgets, etc.)
   static ConfigurableHeatmapWidget minimal({
     Key? key,
     HeatmapData? data,
+    HeatmapConfig? config,
     bool isLoading = false,
     String? error,
     VoidCallback? onTilePressed,
@@ -446,11 +446,9 @@ extension ConfigurableHeatmapExtensions on ConfigurableHeatmapWidget {
   }) => ConfigurableHeatmapWidget(
     key: key,
     data: data,
+    config: config ?? HeatmapConfig.minimal(title: title),
     isLoading: isLoading,
     error: error,
     onTilePressed: onTilePressed,
-    title: title,
-    compact: true,
-    showSelectors: false,
   );
 }
