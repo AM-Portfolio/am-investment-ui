@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/logger.dart';
+import '../heatmap/heatmap_logger.dart';
 import '../inputs/app_segmented_control.dart';
 
 /// Enum for different metric types that can be displayed
@@ -123,6 +126,113 @@ enum MetricType {
 
 /// Widget for selecting different metrics to display
 class MetricSelector extends StatelessWidget {
+  /// Constructor
+  const MetricSelector({
+    required this.selectedMetric,
+    required this.onMetricChanged,
+    super.key,
+    this.availableMetrics,
+    this.compact = false,
+    this.primaryColor,
+    this.showIcons = false,
+    this.useDisplayNames = false,
+    this.title,
+    this.asDropdown = false,
+  });
+
+  /// Factory constructor for portfolio context
+  factory MetricSelector.portfolio({
+    required MetricType selectedMetric,
+    required ValueChanged<MetricType> onMetricChanged,
+    Key? key,
+    bool compact = false,
+    Color? primaryColor,
+    bool showIcons = true,
+    String? title,
+  }) => MetricSelector(
+    key: key,
+    selectedMetric: selectedMetric,
+    onMetricChanged: onMetricChanged,
+    availableMetrics: MetricType.portfolioMetrics,
+    compact: compact,
+    primaryColor: primaryColor,
+    showIcons: showIcons,
+    title: title,
+  );
+
+  /// Factory constructor for performance analysis context
+  factory MetricSelector.performance({
+    required MetricType selectedMetric,
+    required ValueChanged<MetricType> onMetricChanged,
+    Key? key,
+    bool compact = true,
+    Color? primaryColor,
+    String? title,
+  }) => MetricSelector(
+    key: key,
+    selectedMetric: selectedMetric,
+    onMetricChanged: onMetricChanged,
+    availableMetrics: MetricType.performanceMetrics,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
+  /// Factory constructor for risk analysis context
+  factory MetricSelector.risk({
+    required MetricType selectedMetric,
+    required ValueChanged<MetricType> onMetricChanged,
+    Key? key,
+    bool asDropdown = true,
+    Color? primaryColor,
+    String? title,
+  }) => MetricSelector(
+    key: key,
+    selectedMetric: selectedMetric,
+    onMetricChanged: onMetricChanged,
+    availableMetrics: MetricType.riskMetrics,
+    asDropdown: asDropdown,
+    primaryColor: primaryColor,
+    useDisplayNames: true,
+    title: title,
+  );
+
+  /// Factory constructor for heatmap context
+  factory MetricSelector.heatmap({
+    required MetricType selectedMetric,
+    required ValueChanged<MetricType> onMetricChanged,
+    Key? key,
+    bool compact = true,
+    Color? primaryColor,
+    String? title,
+  }) => MetricSelector(
+    key: key,
+    selectedMetric: selectedMetric,
+    onMetricChanged: onMetricChanged,
+    availableMetrics: MetricType.heatmapMetrics,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
+  /// Factory constructor for trading context
+  factory MetricSelector.trading({
+    required MetricType selectedMetric,
+    required ValueChanged<MetricType> onMetricChanged,
+    Key? key,
+    bool compact = true,
+    Color? primaryColor,
+    String? title,
+  }) => MetricSelector(
+    key: key,
+    selectedMetric: selectedMetric,
+    onMetricChanged: onMetricChanged,
+    availableMetrics: MetricType.tradingMetrics,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
   /// Currently selected metric
   final MetricType selectedMetric;
 
@@ -150,126 +260,20 @@ class MetricSelector extends StatelessWidget {
   /// Whether to show as dropdown instead of chips/segments
   final bool asDropdown;
 
-  /// Constructor
-  const MetricSelector({
-    super.key,
-    required this.selectedMetric,
-    required this.onMetricChanged,
-    this.availableMetrics,
-    this.compact = false,
-    this.primaryColor,
-    this.showIcons = false,
-    this.useDisplayNames = false,
-    this.title,
-    this.asDropdown = false,
-  });
-
-  /// Factory constructor for portfolio context
-  factory MetricSelector.portfolio({
-    Key? key,
-    required MetricType selectedMetric,
-    required ValueChanged<MetricType> onMetricChanged,
-    bool compact = false,
-    Color? primaryColor,
-    bool showIcons = true,
-    String? title,
-  }) {
-    return MetricSelector(
-      key: key,
-      selectedMetric: selectedMetric,
-      onMetricChanged: onMetricChanged,
-      availableMetrics: MetricType.portfolioMetrics,
-      compact: compact,
-      primaryColor: primaryColor,
-      showIcons: showIcons,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for performance analysis context
-  factory MetricSelector.performance({
-    Key? key,
-    required MetricType selectedMetric,
-    required ValueChanged<MetricType> onMetricChanged,
-    bool compact = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return MetricSelector(
-      key: key,
-      selectedMetric: selectedMetric,
-      onMetricChanged: onMetricChanged,
-      availableMetrics: MetricType.performanceMetrics,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for risk analysis context
-  factory MetricSelector.risk({
-    Key? key,
-    required MetricType selectedMetric,
-    required ValueChanged<MetricType> onMetricChanged,
-    bool asDropdown = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return MetricSelector(
-      key: key,
-      selectedMetric: selectedMetric,
-      onMetricChanged: onMetricChanged,
-      availableMetrics: MetricType.riskMetrics,
-      asDropdown: asDropdown,
-      primaryColor: primaryColor,
-      useDisplayNames: true,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for heatmap context
-  factory MetricSelector.heatmap({
-    Key? key,
-    required MetricType selectedMetric,
-    required ValueChanged<MetricType> onMetricChanged,
-    bool compact = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return MetricSelector(
-      key: key,
-      selectedMetric: selectedMetric,
-      onMetricChanged: onMetricChanged,
-      availableMetrics: MetricType.heatmapMetrics,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for trading context
-  factory MetricSelector.trading({
-    Key? key,
-    required MetricType selectedMetric,
-    required ValueChanged<MetricType> onMetricChanged,
-    bool compact = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return MetricSelector(
-      key: key,
-      selectedMetric: selectedMetric,
-      onMetricChanged: onMetricChanged,
-      availableMetrics: MetricType.tradingMetrics,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final metrics = availableMetrics ?? MetricType.portfolioMetrics;
+
+    HeatmapLogger.logRendering(
+      component: 'MetricSelector',
+      phase: 'build',
+      itemCount: metrics.length,
+    );
+
+    AppLogger.debug(
+      'Building MetricSelector: selected=${selectedMetric.shortName}, compact=$compact, dropdown=$asDropdown, items=${metrics.length}',
+      tag: 'MetricSelector',
+    );
 
     Widget selector;
 
@@ -317,120 +321,152 @@ class MetricSelector extends StatelessWidget {
     return AppSegmentedControl<MetricType>(
       selectedValue: selectedMetric,
       children: children,
-      onValueChanged: onMetricChanged,
+      onValueChanged: (metric) {
+        HeatmapLogger.logFilterChange(
+          filterType: 'metric',
+          oldValue: selectedMetric,
+          newValue: metric,
+          component: 'MetricSelector',
+        );
+        AppLogger.debug(
+          'Metric selection (segmented): ${metric.shortName} (${metric.displayName})',
+          tag: 'MetricSelector',
+        );
+        onMetricChanged(metric);
+      },
       primaryColor: primaryColor,
     );
   }
 
-  Widget _buildCompactSelector(BuildContext context, List<MetricType> metrics) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: metrics.map((metric) {
-        final isSelected = metric == selectedMetric;
+  Widget _buildCompactSelector(
+    BuildContext context,
+    List<MetricType> metrics,
+  ) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: metrics.map((metric) {
+      final isSelected = metric == selectedMetric;
 
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => onMetricChanged(metric),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              constraints: const BoxConstraints(
-                minHeight: 40,
-              ), // Better touch target
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HeatmapLogger.logFilterChange(
+              filterType: 'metric',
+              oldValue: selectedMetric,
+              newValue: metric,
+              component: 'MetricSelector',
+            );
+            AppLogger.debug(
+              'Metric selection (compact): ${metric.shortName} (${metric.displayName})',
+              tag: 'MetricSelector',
+            );
+            onMetricChanged(metric);
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: 40,
+            ), // Better touch target
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (primaryColor ?? Theme.of(context).primaryColor)
+                  : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
                 color: isSelected
                     ? (primaryColor ?? Theme.of(context).primaryColor)
-                    : Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? (primaryColor ?? Theme.of(context).primaryColor)
-                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                  width: 1.5,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color:
-                              (primaryColor ?? Theme.of(context).primaryColor)
-                                  .withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                width: 1.5,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showIcons) ...[
-                    Icon(
-                      metric.icon,
-                      size: 16,
-                      color: isSelected
-                          ? Colors.white
-                          : Theme.of(context).colorScheme.onSurface,
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    useDisplayNames ? metric.displayName : metric.shortName,
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      letterSpacing: 0.2,
-                    ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: (primaryColor ?? Theme.of(context).primaryColor)
+                            .withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showIcons) ...[
+                  Icon(
+                    metric.icon,
+                    size: 16,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
                   ),
+                  const SizedBox(width: 8),
                 ],
-              ),
+                Text(
+                  useDisplayNames ? metric.displayName : metric.shortName,
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
+        ),
+      );
+    }).toList(),
+  );
 
   Widget _buildDropdownSelector(
     BuildContext context,
     List<MetricType> metrics,
-  ) {
-    return DropdownButtonFormField<MetricType>(
-      value: selectedMetric,
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        isDense: true,
-      ),
-      items: metrics.map((metric) {
-        return DropdownMenuItem<MetricType>(
-          value: metric,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (showIcons) ...[
-                Icon(metric.icon, size: 16),
-                const SizedBox(width: 8),
+  ) => DropdownButtonFormField<MetricType>(
+    value: selectedMetric,
+    decoration: InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      isDense: true,
+    ),
+    items: metrics
+        .map(
+          (metric) => DropdownMenuItem<MetricType>(
+            value: metric,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showIcons) ...[
+                  Icon(metric.icon, size: 16),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  useDisplayNames ? metric.displayName : metric.shortName,
+                  style: const TextStyle(fontSize: 14),
+                ),
               ],
-              Text(
-                useDisplayNames ? metric.displayName : metric.shortName,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
+            ),
           ),
+        )
+        .toList(),
+    onChanged: (metric) {
+      if (metric != null) {
+        HeatmapLogger.logFilterChange(
+          filterType: 'metric',
+          oldValue: selectedMetric,
+          newValue: metric,
+          component: 'MetricSelector',
         );
-      }).toList(),
-      onChanged: (metric) {
-        if (metric != null) {
-          onMetricChanged(metric);
-        }
-      },
-    );
-  }
+        AppLogger.debug(
+          'Metric selection (dropdown): ${metric.shortName} (${metric.displayName})',
+          tag: 'MetricSelector',
+        );
+        onMetricChanged(metric);
+      }
+    },
+  );
 }

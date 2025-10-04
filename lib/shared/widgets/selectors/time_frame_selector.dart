@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/logger.dart';
+import '../heatmap/heatmap_logger.dart';
 import '../inputs/app_segmented_control.dart';
 
 /// Enum for time frame options
@@ -93,6 +96,72 @@ enum TimeFrame {
 
 /// Widget for selecting time frames with customizable options
 class TimeFrameSelector extends StatelessWidget {
+  /// Constructor
+  const TimeFrameSelector({
+    required this.selectedTimeFrame,
+    required this.onTimeFrameChanged,
+    super.key,
+    this.availableTimeFrames,
+    this.compact = false,
+    this.primaryColor,
+    this.showDisplayNames = false,
+    this.title,
+  });
+
+  /// Factory constructor for portfolio context
+  factory TimeFrameSelector.portfolio({
+    required TimeFrame selectedTimeFrame,
+    required ValueChanged<TimeFrame> onTimeFrameChanged,
+    Key? key,
+    bool compact = false,
+    Color? primaryColor,
+    String? title,
+  }) => TimeFrameSelector(
+    key: key,
+    selectedTimeFrame: selectedTimeFrame,
+    onTimeFrameChanged: onTimeFrameChanged,
+    availableTimeFrames: TimeFrame.portfolioTimeFrames,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
+  /// Factory constructor for heatmap context
+  factory TimeFrameSelector.heatmap({
+    required TimeFrame selectedTimeFrame,
+    required ValueChanged<TimeFrame> onTimeFrameChanged,
+    Key? key,
+    bool compact = true,
+    Color? primaryColor,
+    String? title,
+  }) => TimeFrameSelector(
+    key: key,
+    selectedTimeFrame: selectedTimeFrame,
+    onTimeFrameChanged: onTimeFrameChanged,
+    availableTimeFrames: TimeFrame.heatmapTimeFrames,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
+  /// Factory constructor for trading context
+  factory TimeFrameSelector.trading({
+    required TimeFrame selectedTimeFrame,
+    required ValueChanged<TimeFrame> onTimeFrameChanged,
+    Key? key,
+    bool compact = true,
+    Color? primaryColor,
+    String? title,
+  }) => TimeFrameSelector(
+    key: key,
+    selectedTimeFrame: selectedTimeFrame,
+    onTimeFrameChanged: onTimeFrameChanged,
+    availableTimeFrames: TimeFrame.tradingTimeFrames,
+    compact: compact,
+    primaryColor: primaryColor,
+    title: title,
+  );
+
   /// Currently selected time frame
   final TimeFrame selectedTimeFrame;
 
@@ -114,81 +183,20 @@ class TimeFrameSelector extends StatelessWidget {
   /// Optional title for the selector
   final String? title;
 
-  /// Constructor
-  const TimeFrameSelector({
-    super.key,
-    required this.selectedTimeFrame,
-    required this.onTimeFrameChanged,
-    this.availableTimeFrames,
-    this.compact = false,
-    this.primaryColor,
-    this.showDisplayNames = false,
-    this.title,
-  });
-
-  /// Factory constructor for portfolio context
-  factory TimeFrameSelector.portfolio({
-    Key? key,
-    required TimeFrame selectedTimeFrame,
-    required ValueChanged<TimeFrame> onTimeFrameChanged,
-    bool compact = false,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return TimeFrameSelector(
-      key: key,
-      selectedTimeFrame: selectedTimeFrame,
-      onTimeFrameChanged: onTimeFrameChanged,
-      availableTimeFrames: TimeFrame.portfolioTimeFrames,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for heatmap context
-  factory TimeFrameSelector.heatmap({
-    Key? key,
-    required TimeFrame selectedTimeFrame,
-    required ValueChanged<TimeFrame> onTimeFrameChanged,
-    bool compact = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return TimeFrameSelector(
-      key: key,
-      selectedTimeFrame: selectedTimeFrame,
-      onTimeFrameChanged: onTimeFrameChanged,
-      availableTimeFrames: TimeFrame.heatmapTimeFrames,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
-  /// Factory constructor for trading context
-  factory TimeFrameSelector.trading({
-    Key? key,
-    required TimeFrame selectedTimeFrame,
-    required ValueChanged<TimeFrame> onTimeFrameChanged,
-    bool compact = true,
-    Color? primaryColor,
-    String? title,
-  }) {
-    return TimeFrameSelector(
-      key: key,
-      selectedTimeFrame: selectedTimeFrame,
-      onTimeFrameChanged: onTimeFrameChanged,
-      availableTimeFrames: TimeFrame.tradingTimeFrames,
-      compact: compact,
-      primaryColor: primaryColor,
-      title: title,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final timeFrames = availableTimeFrames ?? TimeFrame.portfolioTimeFrames;
+
+    HeatmapLogger.logRendering(
+      component: 'TimeFrameSelector',
+      phase: 'build',
+      itemCount: timeFrames.length,
+    );
+
+    AppLogger.debug(
+      'Building TimeFrameSelector: selected=${selectedTimeFrame.code}, compact=$compact, items=${timeFrames.length}',
+      tag: 'TimeFrameSelector',
+    );
 
     // Create children map for the selector
     final children = Map<TimeFrame, String>.fromEntries(
@@ -208,7 +216,19 @@ class TimeFrameSelector extends StatelessWidget {
       selector = AppSegmentedControl<TimeFrame>(
         selectedValue: selectedTimeFrame,
         children: children,
-        onValueChanged: onTimeFrameChanged,
+        onValueChanged: (timeFrame) {
+          HeatmapLogger.logFilterChange(
+            filterType: 'timeFrame',
+            oldValue: selectedTimeFrame,
+            newValue: timeFrame,
+            component: 'TimeFrameSelector',
+          );
+          AppLogger.debug(
+            'TimeFrame selection (segmented): ${timeFrame.code} (${timeFrame.displayName})',
+            tag: 'TimeFrameSelector',
+          );
+          onTimeFrameChanged(timeFrame);
+        },
         primaryColor: primaryColor,
       );
     }
@@ -236,63 +256,72 @@ class TimeFrameSelector extends StatelessWidget {
   Widget _buildCompactSelector(
     BuildContext context,
     List<TimeFrame> timeFrames,
-  ) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: timeFrames.map((timeFrame) {
-        final isSelected = timeFrame == selectedTimeFrame;
+  ) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: timeFrames.map((timeFrame) {
+      final isSelected = timeFrame == selectedTimeFrame;
 
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => onTimeFrameChanged(timeFrame),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              constraints: const BoxConstraints(
-                minHeight: 40,
-              ), // Better touch target
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HeatmapLogger.logFilterChange(
+              filterType: 'timeFrame',
+              oldValue: selectedTimeFrame,
+              newValue: timeFrame,
+              component: 'TimeFrameSelector',
+            );
+            AppLogger.debug(
+              'TimeFrame selection: ${timeFrame.code} (${timeFrame.displayName})',
+              tag: 'TimeFrameSelector',
+            );
+            onTimeFrameChanged(timeFrame);
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: 40,
+            ), // Better touch target
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (primaryColor ?? Theme.of(context).primaryColor)
+                  : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
                 color: isSelected
                     ? (primaryColor ?? Theme.of(context).primaryColor)
-                    : Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? (primaryColor ?? Theme.of(context).primaryColor)
-                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                  width: 1.5,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color:
-                              (primaryColor ?? Theme.of(context).primaryColor)
-                                  .withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                width: 1.5,
               ),
-              child: Center(
-                child: Text(
-                  showDisplayNames ? timeFrame.displayName : timeFrame.code,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).colorScheme.onSurface,
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    letterSpacing: 0.2,
-                  ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: (primaryColor ?? Theme.of(context).primaryColor)
+                            .withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                showDisplayNames ? timeFrame.displayName : timeFrame.code,
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
+        ),
+      );
+    }).toList(),
+  );
 }
