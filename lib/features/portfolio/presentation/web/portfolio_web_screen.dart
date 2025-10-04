@@ -176,7 +176,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
   /// Build heatmap content using dedicated heatmap page
   Widget _buildHeatmapContent(BuildContext context) {
     return BlocProvider(
-      create: (context) => PortfolioHeatmapCubit(ref as Ref),
+      create: (context) => PortfolioHeatmapCubit(),
       child: PortfolioHeatmapWebPage(
         userId: widget.userId,
         portfolioId: _currentPortfolioId!,

@@ -1,5 +1,4 @@
 ﻿import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import 'portfolio_heatmap_state.dart';
@@ -11,9 +10,7 @@ import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.d
 
 /// Portfolio Heatmap Cubit
 class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
-  final Ref _ref;
-
-  PortfolioHeatmapCubit(this._ref) : super(PortfolioHeatmapInitial());
+  PortfolioHeatmapCubit() : super(PortfolioHeatmapInitial());
 
   /// Load heatmap data for portfolio
   Future<void> loadHeatmapData({
