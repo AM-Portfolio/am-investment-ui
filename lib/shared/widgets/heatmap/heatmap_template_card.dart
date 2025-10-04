@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
-import 'heatmap_logger.dart';
 import 'heatmap_selector_card.dart';
 
 /// A reusable heatmap template card widget that displays data in a treemap or grid layout
@@ -41,11 +41,10 @@ class HeatmapTemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Log rendering performance
-    HeatmapLogger.logRendering(
-      component: 'HeatmapTemplateCard',
-      phase: 'build',
-      itemCount: data.tiles.length,
+    // Log rendering
+    AppLogger.debug(
+      'HeatmapTemplateCard: rendering ${data.tiles.length} tiles, loading=$isLoading',
+      tag: 'Heatmap.Template',
     );
 
     return Column(
@@ -401,16 +400,9 @@ class HeatmapTemplateCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // Log tile interaction
-        HeatmapLogger.logTileInteraction(
-          action: 'tile_tapped',
-          tileId: tile.id,
-          tileData: {
-            'name': tile.name,
-            'value': tile.value,
-            'performance': tile.performance,
-            'weightage': tile.weightage,
-          },
-          component: 'HeatmapTemplateCard',
+        AppLogger.debug(
+          'Heatmap tile tapped: ${tile.name} (${tile.performance})',
+          tag: 'Heatmap.Tile',
         );
 
         onTilePressed?.call();

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
-import '../heatmap/heatmap_logger.dart';
 import '../inputs/app_segmented_control.dart';
 
 /// Enum for different metric types that can be displayed
@@ -264,17 +263,10 @@ class MetricSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final metrics = availableMetrics ?? MetricType.portfolioMetrics;
 
-    HeatmapLogger.logRendering(
-      component: 'MetricSelector',
-      phase: 'build',
-      itemCount: metrics.length,
-    );
-
     AppLogger.debug(
-      'Building MetricSelector: selected=${selectedMetric.shortName}, compact=$compact, dropdown=$asDropdown, items=${metrics.length}',
-      tag: 'MetricSelector',
+      'MetricSelector: building with ${metrics.length} options, selected=${selectedMetric.shortName}',
+      tag: 'Heatmap.Metric',
     );
-
     Widget selector;
 
     if (asDropdown) {
@@ -322,15 +314,9 @@ class MetricSelector extends StatelessWidget {
       selectedValue: selectedMetric,
       children: children,
       onValueChanged: (metric) {
-        HeatmapLogger.logFilterChange(
-          filterType: 'metric',
-          oldValue: selectedMetric,
-          newValue: metric,
-          component: 'MetricSelector',
-        );
         AppLogger.debug(
-          'Metric selection (segmented): ${metric.shortName} (${metric.displayName})',
-          tag: 'MetricSelector',
+          'Metric changed: ${selectedMetric.shortName} → ${metric.shortName}',
+          tag: 'Heatmap.Filter',
         );
         onMetricChanged(metric);
       },
@@ -351,15 +337,9 @@ class MetricSelector extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            HeatmapLogger.logFilterChange(
-              filterType: 'metric',
-              oldValue: selectedMetric,
-              newValue: metric,
-              component: 'MetricSelector',
-            );
             AppLogger.debug(
-              'Metric selection (compact): ${metric.shortName} (${metric.displayName})',
-              tag: 'MetricSelector',
+              'Metric changed: ${selectedMetric.shortName} → ${metric.shortName}',
+              tag: 'Heatmap.Filter',
             );
             onMetricChanged(metric);
           },
@@ -455,15 +435,9 @@ class MetricSelector extends StatelessWidget {
         .toList(),
     onChanged: (metric) {
       if (metric != null) {
-        HeatmapLogger.logFilterChange(
-          filterType: 'metric',
-          oldValue: selectedMetric,
-          newValue: metric,
-          component: 'MetricSelector',
-        );
         AppLogger.debug(
-          'Metric selection (dropdown): ${metric.shortName} (${metric.displayName})',
-          tag: 'MetricSelector',
+          'Metric changed: ${selectedMetric.shortName} → ${metric.shortName}',
+          tag: 'Heatmap.Filter',
         );
         onMetricChanged(metric);
       }

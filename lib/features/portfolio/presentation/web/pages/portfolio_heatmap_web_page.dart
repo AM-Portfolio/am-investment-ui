@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
 
+import '../../../../../core/utils/logger.dart';
+import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
+import '../../../../../shared/widgets/selectors/selectors.dart';
+import '../../cubit/portfolio_analytics_cubit.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
-import '../../cubit/portfolio_analytics_cubit.dart';
-
-import '../../../../../shared/widgets/selectors/selectors.dart';
-import '../../../../../core/utils/logger.dart';
 
 class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
+  const PortfolioHeatmapWebPage({
+    required this.userId,
+    required this.portfolioId,
+    super.key,
+    this.portfolioName,
+  });
   final String userId;
   final String portfolioId;
   final String? portfolioName;
-
-  const PortfolioHeatmapWebPage({
-    super.key,
-    required this.userId,
-    required this.portfolioId,
-    this.portfolioName,
-  });
 
   @override
   ConsumerState<PortfolioHeatmapWebPage> createState() =>
@@ -113,6 +111,11 @@ class _PortfolioHeatmapWebPageState
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.debug(
+      'PortfolioHeatmapWebPage: building UI with timeframe=${_selectedTimeframe.code}, metric=${_selectedMetric.shortName}',
+      tag: 'PortfolioHeatmap.UI',
+    );
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -208,19 +211,12 @@ class _PortfolioHeatmapWebPageState
 
                     return ConfigurableHeatmapWidget(
                       data: state.heatmapData,
-                      showSelectors:
-                          true, // Let ConfigurableHeatmapWidget handle selectors
                       initialTimeFrame: _selectedTimeframe,
                       initialMetric: _selectedMetric,
                       initialSector: _selectedSector,
                       initialMarketCap: _selectedMarketCap,
                       onSelectorsChanged:
-                          ({
-                            TimeFrame? timeFrame,
-                            MetricType? metric,
-                            SectorType? sector,
-                            MarketCapType? marketCap,
-                          }) {
+                          ({timeFrame, metric, sector, marketCap}) {
                             // Update local state
                             if (timeFrame != null)
                               _selectedTimeframe = timeFrame;

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
+import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../selectors/selectors.dart';
-import 'heatmap_logger.dart';
 import 'heatmap_template_card.dart';
 
 /// A configurable heatmap widget that adapts based on platform and use case
@@ -84,16 +84,9 @@ class _ConfigurableHeatmapWidgetState
     super.initState();
 
     // Log widget initialization
-    HeatmapLogger.logInitialization(
-      component: 'ConfigurableHeatmapWidget',
-      investmentType: 'generic',
-      config: {
-        'showSelectors': widget.showSelectors,
-        'compact': widget.compact,
-        'hasData': widget.data != null,
-        'isLoading': widget.isLoading,
-        'hasError': widget.error != null,
-      },
+    AppLogger.debug(
+      'ConfigurableHeatmapWidget: initialized with selectors=${widget.showSelectors}, compact=${widget.compact}, hasData=${widget.data != null}',
+      tag: 'Heatmap.Widget',
     );
 
     _initializeSelectors();
@@ -107,11 +100,9 @@ class _ConfigurableHeatmapWidgetState
   }
 
   void _onTimeFrameChanged(TimeFrame timeFrame) {
-    HeatmapLogger.logFilterChange(
-      filterType: 'timeFrame',
-      oldValue: _selectedTimeFrame,
-      newValue: timeFrame,
-      component: 'ConfigurableHeatmapWidget',
+    AppLogger.debug(
+      'Heatmap timeframe: ${_selectedTimeFrame.code} → ${timeFrame.code}',
+      tag: 'Heatmap.Filter',
     );
 
     setState(() {
@@ -121,11 +112,9 @@ class _ConfigurableHeatmapWidgetState
   }
 
   void _onMetricChanged(MetricType metric) {
-    HeatmapLogger.logFilterChange(
-      filterType: 'metric',
-      oldValue: _selectedMetric,
-      newValue: metric,
-      component: 'ConfigurableHeatmapWidget',
+    AppLogger.debug(
+      'Heatmap metric: ${_selectedMetric.shortName} → ${metric.shortName}',
+      tag: 'Heatmap.Filter',
     );
 
     setState(() {
@@ -141,10 +130,9 @@ class _ConfigurableHeatmapWidgetState
   @override
   Widget build(BuildContext context) {
     // Log rendering phase
-    HeatmapLogger.logRendering(
-      component: 'ConfigurableHeatmapWidget',
-      phase: 'build',
-      itemCount: widget.data?.tiles.length,
+    AppLogger.debug(
+      'ConfigurableHeatmapWidget: rendering with ${widget.data?.tiles.length ?? 0} tiles',
+      tag: 'Heatmap.Render',
     );
 
     return Column(

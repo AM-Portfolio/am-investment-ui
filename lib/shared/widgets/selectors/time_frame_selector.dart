@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
-import '../heatmap/heatmap_logger.dart';
 import '../inputs/app_segmented_control.dart';
 
 /// Enum for time frame options
@@ -187,15 +186,9 @@ class TimeFrameSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeFrames = availableTimeFrames ?? TimeFrame.portfolioTimeFrames;
 
-    HeatmapLogger.logRendering(
-      component: 'TimeFrameSelector',
-      phase: 'build',
-      itemCount: timeFrames.length,
-    );
-
     AppLogger.debug(
-      'Building TimeFrameSelector: selected=${selectedTimeFrame.code}, compact=$compact, items=${timeFrames.length}',
-      tag: 'TimeFrameSelector',
+      'TimeFrameSelector: building with ${timeFrames.length} options, selected=${selectedTimeFrame.code}',
+      tag: 'Heatmap.TimeFrame',
     );
 
     // Create children map for the selector
@@ -217,15 +210,9 @@ class TimeFrameSelector extends StatelessWidget {
         selectedValue: selectedTimeFrame,
         children: children,
         onValueChanged: (timeFrame) {
-          HeatmapLogger.logFilterChange(
-            filterType: 'timeFrame',
-            oldValue: selectedTimeFrame,
-            newValue: timeFrame,
-            component: 'TimeFrameSelector',
-          );
           AppLogger.debug(
-            'TimeFrame selection (segmented): ${timeFrame.code} (${timeFrame.displayName})',
-            tag: 'TimeFrameSelector',
+            'TimeFrame changed: ${selectedTimeFrame.code} → ${timeFrame.code}',
+            tag: 'Heatmap.Filter',
           );
           onTimeFrameChanged(timeFrame);
         },
@@ -266,15 +253,9 @@ class TimeFrameSelector extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            HeatmapLogger.logFilterChange(
-              filterType: 'timeFrame',
-              oldValue: selectedTimeFrame,
-              newValue: timeFrame,
-              component: 'TimeFrameSelector',
-            );
             AppLogger.debug(
-              'TimeFrame selection: ${timeFrame.code} (${timeFrame.displayName})',
-              tag: 'TimeFrameSelector',
+              'TimeFrame changed: ${selectedTimeFrame.code} → ${timeFrame.code}',
+              tag: 'Heatmap.Filter',
             );
             onTimeFrameChanged(timeFrame);
           },
