@@ -22,6 +22,7 @@ class WebHeatmapDefaults {
     SelectorLayoutType? selectorLayout,
   }) => HeatmapConfig(
     selectors: SelectorConfig(
+      showTimeFrameSelector: false,
       showMarketCapSelector: false, // Less relevant for personal portfolios
       availableTimeFrames: TimeFrame.webTimeFrames,
       availableMetrics: MetricType.webMetrics,

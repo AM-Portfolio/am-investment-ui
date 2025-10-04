@@ -7,6 +7,7 @@ import '../../../core/utils/logger.dart';
 enum HeatmapColorSchemeType { performance, weightage, neutral, custom }
 
 /// UI-specific heatmap tile data that extends the core entity with display properties
+/// Supports hierarchical structure with children tiles
 class HeatmapTileData extends HeatmapTileEntity {
   HeatmapTileData({
     required super.id,
@@ -16,6 +17,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     required super.performance,
     super.value,
     super.metadata,
+    super.children,
     this.customColor,
     this.icon,
     this.imageUrl,
@@ -50,6 +52,7 @@ class HeatmapTileData extends HeatmapTileEntity {
       performance: entity.performance,
       value: entity.value,
       metadata: entity.metadata,
+      children: entity.children,
       customColor: customColor,
       icon: icon,
       imageUrl: imageUrl,
@@ -72,6 +75,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     performance: performance,
     value: value,
     metadata: metadata,
+    children: children,
   );
 
   /// Get display color based on performance and configuration
@@ -116,6 +120,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     double? performance,
     double? value,
     Map<String, dynamic>? metadata,
+    List<HeatmapTileEntity>? children,
     Color? customColor,
     IconData? icon,
     String? imageUrl,
@@ -129,6 +134,7 @@ class HeatmapTileData extends HeatmapTileEntity {
     performance: performance ?? this.performance,
     value: value ?? this.value,
     metadata: metadata ?? this.metadata,
+    children: children ?? this.children,
     customColor: customColor ?? this.customColor,
     icon: icon ?? this.icon,
     imageUrl: imageUrl ?? this.imageUrl,

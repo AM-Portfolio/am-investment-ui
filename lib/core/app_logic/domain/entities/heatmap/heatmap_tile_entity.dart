@@ -1,14 +1,7 @@
 /// Core heatmap tile entity - domain model for individual heatmap data points
 /// This is platform-agnostic and contains only business logic data
+/// Supports hierarchical structure with children tiles
 class HeatmapTileEntity {
-  final String id;
-  final String name;
-  final String displayName;
-  final double weightage;
-  final double performance;
-  final double? value;
-  final Map<String, dynamic>? metadata;
-
   const HeatmapTileEntity({
     required this.id,
     required this.name,
@@ -17,7 +10,33 @@ class HeatmapTileEntity {
     required this.performance,
     this.value,
     this.metadata,
+    this.children,
   });
+
+  /// Create from map for deserialization
+  factory HeatmapTileEntity.fromMap(Map<String, dynamic> map) =>
+      HeatmapTileEntity(
+        id: map['id'] ?? '',
+        name: map['name'] ?? '',
+        displayName: map['displayName'] ?? '',
+        weightage: map['weightage']?.toDouble() ?? 0.0,
+        performance: map['performance']?.toDouble() ?? 0.0,
+        value: map['value']?.toDouble(),
+        metadata: map['metadata'],
+        children: map['children'] != null
+            ? (map['children'] as List)
+                  .map((child) => HeatmapTileEntity.fromMap(child))
+                  .toList()
+            : null,
+      );
+  final String id;
+  final String name;
+  final String displayName;
+  final double weightage;
+  final double performance;
+  final double? value;
+  final Map<String, dynamic>? metadata;
+  final List<HeatmapTileEntity>? children;
 
   /// Helper getter for formatted performance with sign
   String get formattedPerformance =>
@@ -38,6 +57,18 @@ class HeatmapTileEntity {
   /// Helper getter to check if performance is neutral
   bool get isNeutral => performance == 0;
 
+  /// Helper getter to check if this tile has children
+  bool get hasChildren => children != null && children!.isNotEmpty;
+
+  /// Helper getter to get total number of children (recursive)
+  int get totalChildrenCount {
+    if (!hasChildren) return 0;
+    return children!.fold(
+      0,
+      (sum, child) => sum + 1 + child.totalChildrenCount,
+    );
+  }
+
   /// Create a copy with modified properties
   HeatmapTileEntity copyWith({
     String? id,
@@ -47,43 +78,29 @@ class HeatmapTileEntity {
     double? performance,
     double? value,
     Map<String, dynamic>? metadata,
-  }) {
-    return HeatmapTileEntity(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      displayName: displayName ?? this.displayName,
-      weightage: weightage ?? this.weightage,
-      performance: performance ?? this.performance,
-      value: value ?? this.value,
-      metadata: metadata ?? this.metadata,
-    );
-  }
+    List<HeatmapTileEntity>? children,
+  }) => HeatmapTileEntity(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    displayName: displayName ?? this.displayName,
+    weightage: weightage ?? this.weightage,
+    performance: performance ?? this.performance,
+    value: value ?? this.value,
+    metadata: metadata ?? this.metadata,
+    children: children ?? this.children,
+  );
 
   /// Convert to map for serialization
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'displayName': displayName,
-      'weightage': weightage,
-      'performance': performance,
-      'value': value,
-      'metadata': metadata,
-    };
-  }
-
-  /// Create from map for deserialization
-  factory HeatmapTileEntity.fromMap(Map<String, dynamic> map) {
-    return HeatmapTileEntity(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      displayName: map['displayName'] ?? '',
-      weightage: map['weightage']?.toDouble() ?? 0.0,
-      performance: map['performance']?.toDouble() ?? 0.0,
-      value: map['value']?.toDouble(),
-      metadata: map['metadata'],
-    );
-  }
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'displayName': displayName,
+    'weightage': weightage,
+    'performance': performance,
+    'value': value,
+    'metadata': metadata,
+    'children': children?.map((child) => child.toMap()).toList(),
+  };
 
   @override
   bool operator ==(Object other) {
@@ -99,17 +116,15 @@ class HeatmapTileEntity {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        displayName.hashCode ^
-        weightage.hashCode ^
-        performance.hashCode ^
-        value.hashCode;
-  }
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      displayName.hashCode ^
+      weightage.hashCode ^
+      performance.hashCode ^
+      value.hashCode;
 
   @override
-  String toString() {
-    return 'HeatmapTileEntity(id: $id, name: $name, displayName: $displayName, weightage: $weightage, performance: $performance, value: $value)';
-  }
+  String toString() =>
+      'HeatmapTileEntity(id: $id, name: $name, displayName: $displayName, weightage: $weightage, performance: $performance, value: $value)';
 }

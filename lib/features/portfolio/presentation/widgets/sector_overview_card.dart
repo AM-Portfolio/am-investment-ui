@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
-import '../../../../shared/widgets/heatmap/universal_heatmap_widget.dart';
+import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
 import '../../internal/domain/entities/portfolio_analytics.dart';
 import '../mappers/sector_heatmap_converter.dart';
 
