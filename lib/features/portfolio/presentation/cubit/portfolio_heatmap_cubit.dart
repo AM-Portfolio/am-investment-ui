@@ -53,19 +53,19 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         configuration: const HeatmapConfiguration(),
       );
 
-      emit(PortfolioHeatmapLoaded(
-        heatmapData: sampleData,
-        portfolioId: portfolioId,
-        timeFrame: timeFrame,
-        metric: metric,
-        sector: sector,
-        marketCap: marketCap,
-        lastUpdated: DateTime.now(),
-      ));
+      emit(
+        PortfolioHeatmapLoaded(
+          heatmapData: sampleData,
+          portfolioId: portfolioId,
+          timeFrame: timeFrame,
+          metric: metric,
+          sector: sector,
+          marketCap: marketCap,
+          lastUpdated: DateTime.now(),
+        ),
+      );
     } catch (e) {
-      emit(PortfolioHeatmapError(
-        message: 'Failed to load portfolio heatmap',
-      ));
+      emit(PortfolioHeatmapError(message: 'Failed to load portfolio heatmap'));
     }
   }
 
