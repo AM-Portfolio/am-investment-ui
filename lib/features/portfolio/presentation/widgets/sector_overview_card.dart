@@ -91,7 +91,7 @@ class SectorOverviewCard extends StatelessWidget {
               child: UniversalHeatmapWidget(
                 investmentType: InvestmentType.portfolio,
                 rawData: rawData,
-                config: ui_config.HeatmapConfig.dashboard(),
+                config: ui_config.HeatmapConfig.mobilePortfolio(),
                 templateType: UniversalTemplateType.minimal,
                 showSelectors: false,
                 compactMode: true,
