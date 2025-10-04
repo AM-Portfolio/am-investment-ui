@@ -5,7 +5,6 @@ import '../../../models/heatmap.dart';
 import '../../selectors/selectors.dart';
 import '../heatmap_config.dart' as ui_config;
 import 'config_manager.dart';
-import 'data_converters.dart';
 import 'template_factory.dart';
 import 'types.dart';
 
@@ -15,7 +14,7 @@ import 'types.dart';
 class UniversalHeatmapWidget extends StatelessWidget {
   const UniversalHeatmapWidget({
     required this.investmentType,
-    required this.rawData,
+    required this.heatmapData,
     required this.title,
     super.key,
     this.config,
@@ -31,8 +30,8 @@ class UniversalHeatmapWidget extends StatelessWidget {
   /// Investment type (portfolio, index, mutual funds, ETF)
   final InvestmentType investmentType;
 
-  /// Raw data to be converted to heatmap format
-  final Map<String, dynamic> rawData;
+  /// Heatmap data to be displayed
+  final HeatmapData heatmapData;
 
   /// Configuration overrides (optional, uses basic config if not provided)
   final ui_config.HeatmapConfig? config;
@@ -84,29 +83,11 @@ class UniversalHeatmapWidget extends StatelessWidget {
       tag: 'UniversalHeatmapWidget',
     );
 
-    // Convert raw data to heatmap data
-    final heatmapData =
-        UniversalHeatmapDataConverters.convertRawDataToHeatmapData(
-          investmentType: investmentType,
-          rawData: rawData,
-          title: title,
-          subtitle: investmentType.name,
-          isLoading: isLoading,
-          error: error,
-        );
-
     // Log complete heatmap data as JSON string
-    if (heatmapData != null) {
-      AppLogger.debug(
-        'Complete HeatmapData JSON: ${heatmapData.toJsonString()}',
-        tag: 'UniversalHeatmapWidget.HeatmapData',
-      );
-    } else {
-      AppLogger.warning(
-        'HeatmapData is null for investment type: ${investmentType.name}',
-        tag: 'UniversalHeatmapWidget.HeatmapData',
-      );
-    }
+    AppLogger.debug(
+      'Complete HeatmapData JSON: ${heatmapData.toJsonString()}',
+      tag: 'UniversalHeatmapWidget.HeatmapData',
+    );
 
     // Get effective config (use provided config or basic fallback)
     final effectiveConfig =
@@ -128,7 +109,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
     AppLogger.info(
       'UniversalHeatmapWidget build completed in ${buildDuration.inMilliseconds}ms - '
       'Investment: ${investmentType.name}, Template: ${templateType.name}, '
-      'Tiles: ${heatmapData?.tiles.length ?? 0}, Config: ${effectiveConfig.layoutType}',
+      'Tiles: ${heatmapData.tiles.length}, Config: ${effectiveConfig.layoutType}',
       tag: 'UniversalHeatmapWidget.Performance',
     );
 
@@ -139,20 +120,15 @@ class UniversalHeatmapWidget extends StatelessWidget {
   Widget _buildUniversalTemplate(
     BuildContext context,
     ui_config.HeatmapConfig effectiveConfig,
-    HeatmapData? heatmapData,
+    HeatmapData heatmapData,
   ) {
     AppLogger.debug(
       'Building universal template: layout=${effectiveConfig.layoutType}, '
-      'tiles=${heatmapData?.tiles.length ?? 0}, isLoading=$isLoading',
+      'tiles=${heatmapData.tiles.length}, isLoading=$isLoading',
       tag: 'UniversalHeatmapWidget.Template',
     );
 
-    final data =
-        heatmapData ??
-        UniversalHeatmapDataConverters.getEmptyData(
-          investmentType: investmentType,
-          title: title,
-        );
+    final data = heatmapData;
 
     // 1. Create Display Template (handles tile rendering)
     final displayTemplate =

@@ -251,34 +251,10 @@ class _PortfolioHeatmapWebPageState
       tag: 'PortfolioHeatmap.UI',
     );
 
-    // 3. Create raw data for universal widget
-    final rawData = <String, dynamic>{
-      'holdings': convertedHeatmapData.tiles
-          .map(
-            (tile) => {
-              'id': tile.id,
-              'name': tile.name,
-              'displayName': tile.displayName,
-              'weightage': tile.weightage,
-              'performance': tile.performance,
-              'value': tile.value,
-              'metadata': tile.metadata,
-            },
-          )
-          .toList(),
-      'metadata': {
-        'totalValue':
-            convertedHeatmapData.metadata.additionalInfo?['totalValue'] ?? 0.0,
-        'lastUpdated': convertedHeatmapData.metadata.lastUpdated
-            .toIso8601String(),
-        'dataSource': convertedHeatmapData.metadata.dataSource,
-      },
-    };
-
     // 4. Return UniversalHeatmapWidget with analytics-based data and converter configuration
     return UniversalHeatmapWidget(
       investmentType: InvestmentType.portfolio,
-      rawData: rawData,
+      heatmapData: convertedHeatmapData,
       config: convertedHeatmapData.configuration,
       title: 'Portfolio Sector Heatmap',
       showSelectors: true,
