@@ -104,7 +104,7 @@ class SectorHeatmapConverter {
       children: stockTiles.isNotEmpty ? stockTiles : null,
       metadata: {
         'type': 'sector',
-        'sector': sector,
+        'sectorName': sector.sectorName,
         'stockCount': sector.stockCount,
         'totalReturnAmount': sector.totalReturnAmount,
         'color': sector.color,
@@ -153,7 +153,7 @@ class SectorHeatmapConverter {
       value: stockValue,
       metadata: {
         'type': 'stock',
-        'stock': stock,
+        'symbol': stock.symbol,
         'parentSector': sector.sectorName,
         'sectorColor': sector.color,
         'companyName': stock.companyName,
