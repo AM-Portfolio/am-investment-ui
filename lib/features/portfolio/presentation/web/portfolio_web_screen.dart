@@ -6,6 +6,8 @@ import '../cubit/portfolio_state.dart';
 import '../../providers/portfolio_providers.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
 import '../cubit/portfolio_heatmap_cubit.dart';
+import '../cubit/portfolio_analytics_cubit.dart';
+import '../../../../core/utils/logger.dart';
 // Temporarily disabled imports
 // import 'pages/portfolio_overview_web_page.dart';
 // import 'pages/portfolio_holdings_web_page.dart';
@@ -175,13 +177,80 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
 
   /// Build heatmap content using dedicated heatmap page
   Widget _buildHeatmapContent(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PortfolioHeatmapCubit(),
-      child: PortfolioHeatmapWebPage(
-        userId: widget.userId,
-        portfolioId: _currentPortfolioId!,
-        portfolioName: widget.selectedPortfolioName,
-      ),
+    AppLogger.debug(
+      'Building heatmap content with analytics and heatmap cubits',
+      tag: 'PortfolioWebScreen',
+    );
+
+    final analyticsServiceAsync = ref.watch(portfolioAnalyticsServiceProvider);
+
+    return analyticsServiceAsync.when(
+      data: (analyticsService) {
+        AppLogger.info(
+          'Analytics service loaded, creating cubits',
+          tag: 'PortfolioWebScreen',
+        );
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) {
+                AppLogger.info(
+                  'Creating PortfolioAnalyticsCubit',
+                  tag: 'PortfolioWebScreen',
+                );
+                return PortfolioAnalyticsCubit(analyticsService);
+              },
+            ),
+            BlocProvider(
+              create: (context) {
+                AppLogger.info(
+                  'Creating PortfolioHeatmapCubit',
+                  tag: 'PortfolioWebScreen',
+                );
+                return PortfolioHeatmapCubit();
+              },
+            ),
+          ],
+          child: PortfolioHeatmapWebPage(
+            userId: widget.userId,
+            portfolioId: _currentPortfolioId!,
+            portfolioName: widget.selectedPortfolioName,
+          ),
+        );
+      },
+      loading: () {
+        AppLogger.debug(
+          'Analytics service loading...',
+          tag: 'PortfolioWebScreen',
+        );
+        return const Center(child: CircularProgressIndicator());
+      },
+      error: (error, stack) {
+        AppLogger.error(
+          'Failed to load analytics service',
+          tag: 'PortfolioWebScreen',
+          error: error,
+          stackTrace: stack,
+        );
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Failed to load analytics service: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.invalidate(portfolioAnalyticsServiceProvider);
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -6,6 +6,8 @@ import '../../../../../shared/widgets/selectors/time_frame_selector.dart';
 import '../../../../../shared/widgets/selectors/metric_selector.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
+import '../../cubit/portfolio_analytics_cubit.dart';
+
 import '../../../../../shared/widgets/selectors/selectors.dart';
 import '../../../../../core/utils/logger.dart';
 
@@ -61,14 +63,48 @@ class _PortfolioHeatmapWebPageState
       },
     );
 
-    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.loadHeatmapData(
-      portfolioId: widget.portfolioId,
-      timeFrame: _selectedTimeframe,
-      metric: _selectedMetric,
-      sector: _selectedSector ?? SectorType.all,
-      marketCap: _selectedMarketCap ?? MarketCapType.all,
+    // Step 1: First call PortfolioAnalyticsCubit.loadAnalytics as required
+    AppLogger.info(
+      'Step 1: Calling PortfolioAnalyticsCubit.loadAnalytics',
+      tag: 'PortfolioHeatmapWebPage',
     );
+
+    final portfolioAnalyticsCubit = context.read<PortfolioAnalyticsCubit>();
+    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
+
+    // Load analytics data first
+    portfolioAnalyticsCubit.loadAnalytics(widget.portfolioId).then((_) {
+      AppLogger.info(
+        'Analytics data loaded, now loading heatmap with real data',
+        tag: 'PortfolioHeatmapWebPage',
+      );
+
+      // Step 2: Then proceed with heatmap-specific data loading using the loaded analytics
+      portfolioHeatmapCubit.loadHeatmapData(
+        portfolioId: widget.portfolioId,
+        timeFrame: _selectedTimeframe,
+        metric: _selectedMetric,
+        sector: _selectedSector ?? SectorType.all,
+        marketCap: _selectedMarketCap ?? MarketCapType.all,
+        analyticsCubit: portfolioAnalyticsCubit,
+      );
+    }).catchError((error) {
+      AppLogger.error(
+        'Failed to load analytics, proceeding with heatmap fallback',
+        tag: 'PortfolioHeatmapWebPage',
+        error: error,
+      );
+
+      // Load heatmap even if analytics fails
+      portfolioHeatmapCubit.loadHeatmapData(
+        portfolioId: widget.portfolioId,
+        timeFrame: _selectedTimeframe,
+        metric: _selectedMetric,
+        sector: _selectedSector ?? SectorType.all,
+        marketCap: _selectedMarketCap ?? MarketCapType.all,
+        analyticsCubit: portfolioAnalyticsCubit,
+      );
+    });
 
     AppLogger.methodExit('_loadHeatmapData', tag: 'PortfolioHeatmapWebPage');
   }

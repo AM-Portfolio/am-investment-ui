@@ -1,16 +1,20 @@
 ﻿import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/material.dart';
 
 import 'portfolio_heatmap_state.dart';
+import 'portfolio_analytics_cubit.dart';
+import 'portfolio_analytics_state.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
 import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
 import '../../../../shared/models/heatmap/heatmap_tile_data.dart';
+import '../../../../shared/utils/sector_heatmap_converter.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/app_logic/domain/entities/heatmap/heatmap_data_entity.dart';
 
 /// Portfolio Heatmap Cubit
 class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
-  PortfolioHeatmapCubit() : super(PortfolioHeatmapInitial()) {
+  final PortfolioAnalyticsCubit? _analyticsCubit;
+
+  PortfolioHeatmapCubit([this._analyticsCubit]) : super(PortfolioHeatmapInitial()) {
     AppLogger.info(
       'PortfolioHeatmapCubit initialized',
       tag: 'PortfolioHeatmapCubit',
@@ -29,6 +33,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
     MetricType metric = MetricType.marketValue,
     SectorType sector = SectorType.all,
     MarketCapType marketCap = MarketCapType.all,
+    PortfolioAnalyticsCubit? analyticsCubit,
   }) async {
     AppLogger.methodEntry(
       'loadHeatmapData',
@@ -57,46 +62,53 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         'Starting heatmap data fetch',
         tag: 'PortfolioHeatmapCubit',
       );
-      // Simulating API call delay
-      await Future.delayed(const Duration(milliseconds: 500));
-      AppLogger.debug(
-        'Heatmap data fetch delay completed',
-        tag: 'PortfolioHeatmapCubit',
-      );
 
-      AppLogger.debug(
-        'Creating sample heatmap data',
-        tag: 'PortfolioHeatmapCubit',
-      );
-      final sampleData = HeatmapData(
-        id: 'portfolio-heatmap',
-        title: 'Portfolio Heatmap',
-        subtitle: 'Sector Performance Analysis',
-        tiles: [
-          HeatmapTileData(
-            id: 'technology',
-            name: 'technology',
-            displayName: 'Technology',
-            weightage: 36.0,
-            performance: 3.45,
-            value: 45000.0,
-            icon: Icons.computer,
-            metadata: {'allocation': 36.0},
-          ),
-        ],
-        metadata: HeatmapMetadata(
-          lastUpdated: DateTime.now(),
-          dataSource: 'portfolio_api',
-          additionalInfo: {'portfolioId': portfolioId},
-        ),
-        configuration: const HeatmapConfiguration(),
-      );
+      // Get analytics data from the analytics cubit or passed parameter
+      final usedAnalyticsCubit = analyticsCubit ?? _analyticsCubit;
+      
+      HeatmapData heatmapData;
+      
+      if (usedAnalyticsCubit != null) {
+        final analyticsState = usedAnalyticsCubit.state;
+        
+        if (analyticsState is PortfolioAnalyticsLoaded && analyticsState.heatmap != null) {
+          AppLogger.info(
+            'Using real analytics data from cubit',
+            tag: 'PortfolioHeatmapCubit',
+          );
+          
+          // Convert real analytics data to heatmap data
+          heatmapData = SectorHeatmapConverter.convertToHeatmapData(
+            heatmap: analyticsState.heatmap,
+            showSubCards: true,
+            title: 'Portfolio Heatmap',
+            subtitle: 'Sector Performance Analysis',
+          );
+          
+          AppLogger.info(
+            'Converted analytics data to heatmap: ${heatmapData.tiles.length} sectors found',
+            tag: 'PortfolioHeatmapCubit',
+          );
+        } else {
+          AppLogger.warning(
+            'Analytics data not loaded or no heatmap data available, using fallback',
+            tag: 'PortfolioHeatmapCubit',
+          );
+          heatmapData = _createFallbackHeatmapData(portfolioId);
+        }
+      } else {
+        AppLogger.warning(
+          'No analytics cubit available, using fallback data',
+          tag: 'PortfolioHeatmapCubit',
+        );
+        heatmapData = _createFallbackHeatmapData(portfolioId);
+      }
 
       AppLogger.info(
         'Heatmap data created successfully',
         tag: 'PortfolioHeatmapCubit',
       );
-      AppLogger.debug('Heatmap data details', tag: 'PortfolioHeatmapCubit');
+      AppLogger.debug('Heatmap data details: ${heatmapData.tiles.length} tiles', tag: 'PortfolioHeatmapCubit');
 
       AppLogger.stateChange(
         'PortfolioHeatmapLoading',
@@ -106,7 +118,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
 
       emit(
         PortfolioHeatmapLoaded(
-          heatmapData: sampleData,
+          heatmapData: heatmapData,
           portfolioId: portfolioId,
           timeFrame: timeFrame,
           metric: metric,
@@ -168,6 +180,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         metric: currentState.metric,
         sector: currentState.sector ?? SectorType.all,
         marketCap: currentState.marketCap ?? MarketCapType.all,
+        analyticsCubit: _analyticsCubit,
       );
 
       AppLogger.methodExit(
@@ -211,6 +224,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         metric: metric,
         sector: currentState.sector ?? SectorType.all,
         marketCap: currentState.marketCap ?? MarketCapType.all,
+        analyticsCubit: _analyticsCubit,
       );
 
       AppLogger.methodExit(
@@ -255,6 +269,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         metric: currentState.metric,
         sector: sector,
         marketCap: currentState.marketCap ?? MarketCapType.all,
+        analyticsCubit: _analyticsCubit,
       );
 
       AppLogger.methodExit(
@@ -299,6 +314,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         metric: currentState.metric,
         sector: currentState.sector ?? SectorType.all,
         marketCap: marketCap,
+        analyticsCubit: _analyticsCubit,
       );
 
       AppLogger.methodExit(
@@ -336,6 +352,7 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         metric: currentState.metric,
         sector: currentState.sector ?? SectorType.all,
         marketCap: currentState.marketCap ?? MarketCapType.all,
+        analyticsCubit: _analyticsCubit,
       );
 
       AppLogger.methodExit(
@@ -354,5 +371,36 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
         result: 'invalid_state',
       );
     }
+  }
+
+  /// Create fallback heatmap data when real data is not available
+  HeatmapData _createFallbackHeatmapData(String portfolioId) {
+    AppLogger.info(
+      'Creating fallback heatmap data',
+      tag: 'PortfolioHeatmapCubit',
+    );
+    
+    return HeatmapData(
+      id: 'portfolio-heatmap-fallback',
+      title: 'Portfolio Heatmap',
+      subtitle: 'Loading real data...',
+      tiles: [
+        HeatmapTileData(
+          id: 'loading',
+          name: 'loading',
+          displayName: 'Loading...',
+          weightage: 100.0,
+          performance: 0.0,
+          value: 0.0,
+          metadata: {'status': 'loading'},
+        ),
+      ],
+      metadata: HeatmapMetadata(
+        lastUpdated: DateTime.now(),
+        dataSource: 'fallback',
+        additionalInfo: {'portfolioId': portfolioId},
+      ),
+      configuration: const HeatmapConfiguration(),
+    );
   }
 }
