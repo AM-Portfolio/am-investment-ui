@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/utils/sector_heatmap_converter.dart';
 import '../../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
 import '../../../../../shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
 import '../../../../../shared/widgets/heatmap/universal_heatmap_widget.dart';
@@ -12,6 +11,7 @@ import '../../cubit/portfolio_analytics_cubit.dart';
 import '../../cubit/portfolio_analytics_state.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
+import '../../mappers/sector_heatmap_converter.dart';
 
 class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
   const PortfolioHeatmapWebPage({

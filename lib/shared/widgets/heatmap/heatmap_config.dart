@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/heatmap/heatmap_tile_data.dart';
 import '../selectors/selectors.dart';
 import 'configs/display_config.dart';
 import 'configs/interaction_config.dart';
@@ -79,16 +80,37 @@ class HeatmapConfig {
   );
 
   /// Create portfolio-specific configuration using WebHeatmapDefaults
-  factory HeatmapConfig.portfolio({String? title, Color? accentColor}) =>
-      WebHeatmapDefaults.portfolio(title: title, accentColor: accentColor);
+  factory HeatmapConfig.portfolio({
+    String? title,
+    Color? accentColor,
+    SelectorLayoutType? selectorLayout,
+  }) => WebHeatmapDefaults.portfolio(
+    title: title,
+    accentColor: accentColor,
+    selectorLayout: selectorLayout,
+  );
 
   /// Create analytics configuration using WebHeatmapDefaults
-  factory HeatmapConfig.analytics({String? title, Color? accentColor}) =>
-      WebHeatmapDefaults.analytics(title: title, accentColor: accentColor);
+  factory HeatmapConfig.analytics({
+    String? title,
+    Color? accentColor,
+    SelectorLayoutType? selectorLayout,
+  }) => WebHeatmapDefaults.analytics(
+    title: title,
+    accentColor: accentColor,
+    selectorLayout: selectorLayout,
+  );
 
   /// Create trading configuration using WebHeatmapDefaults
-  factory HeatmapConfig.trading({String? title, Color? accentColor}) =>
-      WebHeatmapDefaults.trading(title: title, accentColor: accentColor);
+  factory HeatmapConfig.trading({
+    String? title,
+    Color? accentColor,
+    SelectorLayoutType? selectorLayout,
+  }) => WebHeatmapDefaults.trading(
+    title: title,
+    accentColor: accentColor,
+    selectorLayout: selectorLayout,
+  );
 
   /// Create from any mobile default configuration
   factory HeatmapConfig.mobileDefaults(
@@ -246,6 +268,15 @@ class HeatmapConfig {
   double? get elevation => effectiveVisual.elevation;
   Duration? get animationDuration => effectiveVisual.animationDuration;
   double? get tileSpacing => effectiveVisual.tileSpacing;
+
+  // Additional missing properties for compatibility
+  double? get minTileWidth => effectiveLayout.compactView ? 80.0 : 120.0;
+  double? get maxTileWidth => effectiveLayout.compactView ? 180.0 : 300.0;
+  double? get minTileHeight => effectiveLayout.compactView ? 60.0 : 80.0;
+  double? get maxTileHeight => effectiveLayout.compactView ? 120.0 : 200.0;
+  EdgeInsets? get tileMargin => const EdgeInsets.all(1.0);
+  EdgeInsets? get tilePadding => const EdgeInsets.all(4.0);
+  HeatmapColorSchemeType get colorScheme => HeatmapColorSchemeType.performance;
 
   /// Copy this configuration with some sub-configs overridden
   HeatmapConfig copyWith({

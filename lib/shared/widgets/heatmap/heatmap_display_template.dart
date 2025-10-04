@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
 import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
@@ -237,7 +236,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
     final baseWidth = (weightage / 100) * containerWidth;
     final minWidth = data.configuration.minTileWidth ?? containerWidth * 0.15;
     final maxWidth = data.configuration.maxTileWidth ?? containerWidth * 0.45;
-    return baseWidth.clamp(minWidth, maxWidth);
+    return baseWidth.clamp(minWidth, maxWidth).toDouble();
   }
 
   double _calculateTileHeight(double weightage, double containerHeight) {
@@ -245,7 +244,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
     final minHeight =
         data.configuration.minTileHeight ?? containerHeight * 0.15;
     final maxHeight = data.configuration.maxTileHeight ?? containerHeight * 0.4;
-    return baseHeight.clamp(minHeight, maxHeight);
+    return baseHeight.clamp(minHeight, maxHeight).toDouble();
   }
 
   Widget _buildHeatmapTile(

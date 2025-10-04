@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
 import '../../../core/utils/logger.dart';
 
+/// Enum for heatmap color scheme types
+enum HeatmapColorSchemeType { performance, weightage, neutral, custom }
+
 /// UI-specific heatmap tile data that extends the core entity with display properties
 class HeatmapTileData extends HeatmapTileEntity {
-  final Color? customColor;
-  final IconData? icon;
-  final String? imageUrl;
-  final VoidCallback? onTap;
-  final Map<String, Widget>? customWidgets;
-
   HeatmapTileData({
     required super.id,
     required super.name,
@@ -59,19 +57,22 @@ class HeatmapTileData extends HeatmapTileEntity {
       customWidgets: customWidgets,
     );
   }
+  final Color? customColor;
+  final IconData? icon;
+  final String? imageUrl;
+  final VoidCallback? onTap;
+  final Map<String, Widget>? customWidgets;
 
   /// Convert to core entity
-  HeatmapTileEntity toEntity() {
-    return HeatmapTileEntity(
-      id: id,
-      name: name,
-      displayName: displayName,
-      weightage: weightage,
-      performance: performance,
-      value: value,
-      metadata: metadata,
-    );
-  }
+  HeatmapTileEntity toEntity() => HeatmapTileEntity(
+    id: id,
+    name: name,
+    displayName: displayName,
+    weightage: weightage,
+    performance: performance,
+    value: value,
+    metadata: metadata,
+  );
 
   /// Get display color based on performance and configuration
   Color getDisplayColor(
@@ -120,20 +121,18 @@ class HeatmapTileData extends HeatmapTileEntity {
     String? imageUrl,
     VoidCallback? onTap,
     Map<String, Widget>? customWidgets,
-  }) {
-    return HeatmapTileData(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      displayName: displayName ?? this.displayName,
-      weightage: weightage ?? this.weightage,
-      performance: performance ?? this.performance,
-      value: value ?? this.value,
-      metadata: metadata ?? this.metadata,
-      customColor: customColor ?? this.customColor,
-      icon: icon ?? this.icon,
-      imageUrl: imageUrl ?? this.imageUrl,
-      onTap: onTap ?? this.onTap,
-      customWidgets: customWidgets ?? this.customWidgets,
-    );
-  }
+  }) => HeatmapTileData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    displayName: displayName ?? this.displayName,
+    weightage: weightage ?? this.weightage,
+    performance: performance ?? this.performance,
+    value: value ?? this.value,
+    metadata: metadata ?? this.metadata,
+    customColor: customColor ?? this.customColor,
+    icon: icon ?? this.icon,
+    imageUrl: imageUrl ?? this.imageUrl,
+    onTap: onTap ?? this.onTap,
+    customWidgets: customWidgets ?? this.customWidgets,
+  );
 }

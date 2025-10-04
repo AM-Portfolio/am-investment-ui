@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
 import '../selectors/selectors.dart';
+import 'configs/selector_config.dart';
 
 /// Pure heatmap selector template - handles only selector UI and interactions
 /// Extracted for better modularity and reusability
@@ -204,7 +205,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           const SizedBox(width: 12),
         ],
         if (widget.showResetButton) _buildResetButton(context),
-      ].where((widget) => widget != null).toList(),
+      ],
     ),
   );
 
@@ -692,12 +693,4 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
       foregroundColor: widget.primaryColor ?? Theme.of(context).primaryColor,
     ),
   );
-}
-
-/// Different layout types for selector template
-enum SelectorLayoutType {
-  compact, // Horizontal compact layout with pills and dropdowns
-  expanded, // Full card layout with all selectors
-  pills, // Pill-based layout wrapped
-  dropdown, // All dropdowns in a row
 }

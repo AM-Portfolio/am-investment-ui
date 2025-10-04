@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart'
     as core_entities;
+import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../selectors/selectors.dart';
+import 'configs/selector_config.dart';
 import 'heatmap_config.dart' as ui_config;
 import 'heatmap_display_template.dart';
 import 'heatmap_layout_template.dart';
-import 'heatmap_logger.dart';
 import 'heatmap_selector_template.dart';
 
 /// Universal heatmap widget template that orchestrates 3 separate components based on config
@@ -71,22 +72,19 @@ class UniversalHeatmapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize logger
-    HeatmapLogger.initialize();
+    final buildStartTime = DateTime.now();
 
     // Log widget initialization
-    HeatmapLogger.logInitialization(
-      component: 'UniversalHeatmapWidget',
-      investmentType: investmentType.toString(),
-      config: {
-        'hasConfig': config != null,
-        'showSelectors': showSelectors,
-        'title': title,
-        'compactMode': compactMode,
-        'isLoading': isLoading,
-        'hasError': error != null,
-        'templateType': templateType.name,
-      },
+    AppLogger.info(
+      'UniversalHeatmapWidget build started for ${investmentType.toString()}',
+      tag: 'UniversalHeatmapWidget',
+    );
+
+    AppLogger.debug(
+      'Widget config: hasConfig=${config != null}, showSelectors=$showSelectors, '
+      'title=$title, compactMode=$compactMode, isLoading=$isLoading, '
+      'hasError=${error != null}, templateType=${templateType.name}',
+      tag: 'UniversalHeatmapWidget',
     );
 
     // Get effective configuration based on investment type
@@ -96,7 +94,22 @@ class UniversalHeatmapWidget extends StatelessWidget {
     final heatmapData = _convertRawDataToHeatmapData();
 
     // Create the 3 template components based on config
-    return _buildUniversalTemplate(context, effectiveConfig, heatmapData);
+    final widget = _buildUniversalTemplate(
+      context,
+      effectiveConfig,
+      heatmapData,
+    );
+
+    // Log build completion with performance metrics
+    final buildDuration = DateTime.now().difference(buildStartTime);
+    AppLogger.info(
+      'UniversalHeatmapWidget build completed in ${buildDuration.inMilliseconds}ms - '
+      'Investment: ${investmentType.name}, Template: ${templateType.name}, '
+      'Tiles: ${heatmapData?.tiles.length ?? 0}, Config: ${effectiveConfig.layoutType}',
+      tag: 'UniversalHeatmapWidget.Performance',
+    );
+
+    return widget;
   }
 
   /// Build the universal template by composing the 3 separate components
@@ -105,6 +118,12 @@ class UniversalHeatmapWidget extends StatelessWidget {
     ui_config.HeatmapConfig effectiveConfig,
     HeatmapData? heatmapData,
   ) {
+    AppLogger.debug(
+      'Building universal template: layout=${effectiveConfig.layoutType}, '
+      'tiles=${heatmapData?.tiles.length ?? 0}, isLoading=$isLoading',
+      tag: 'UniversalHeatmapWidget.Template',
+    );
+
     // 1. Create Display Template (handles tile rendering)
     final displayTemplate = HeatmapDisplayTemplate(
       data: heatmapData ?? _getEmptyData(),
@@ -114,9 +133,21 @@ class UniversalHeatmapWidget extends StatelessWidget {
       layout: _getDisplayLayout(effectiveConfig),
     );
 
+    AppLogger.debug(
+      'Display template created with layout=${_getDisplayLayout(effectiveConfig)}',
+      tag: 'UniversalHeatmapWidget.Template',
+    );
+
     // 2. Create Selector Template (handles filter UI)
     Widget? selectorTemplate;
     if (_shouldShowSelectors(effectiveConfig)) {
+      AppLogger.debug(
+        'Creating selector template with filters: timeFrame=${effectiveConfig.showTimeFrameSelector}, '
+        'metric=${effectiveConfig.showMetricSelector}, sector=${effectiveConfig.showSectorSelector}, '
+        'marketCap=${effectiveConfig.showMarketCapSelector}',
+        tag: 'UniversalHeatmapWidget.Template',
+      );
+
       selectorTemplate = HeatmapSelectorTemplate(
         initialTimeFrame: _getInitialTimeFrame(),
         initialMetric: _getInitialMetric(),
@@ -127,9 +158,16 @@ class UniversalHeatmapWidget extends StatelessWidget {
         showMetric: effectiveConfig.showMetricSelector,
         showSector: effectiveConfig.showSectorSelector,
         showMarketCap: effectiveConfig.showMarketCapSelector,
-        layout: _getSelectorLayout(effectiveConfig),
+        layout:
+            effectiveConfig.selectors?.selectorLayout ??
+            SelectorLayoutType.compact,
         primaryColor: effectiveConfig.accentColor,
         title: 'Filters',
+      );
+    } else {
+      AppLogger.debug(
+        'Skipping selector template creation - no selectors enabled',
+        tag: 'UniversalHeatmapWidget.Template',
       );
     }
 
@@ -151,9 +189,24 @@ class UniversalHeatmapWidget extends StatelessWidget {
     Widget displayWidget,
     Widget? selectorWidget,
   ) {
+    AppLogger.methodEntry(
+      '_createLayoutTemplate',
+      tag: 'UniversalHeatmapWidget.Layout',
+      params: {
+        'templateType': templateType.name,
+        'hasSelectors': selectorWidget != null,
+        'tilesCount': data.tiles.length,
+      },
+    );
+
+    Widget result;
     switch (templateType) {
       case UniversalTemplateType.minimal:
-        return HeatmapLayoutTemplate(
+        AppLogger.debug(
+          'Creating minimal layout template',
+          tag: 'UniversalHeatmapWidget.Layout',
+        );
+        result = HeatmapLayoutTemplate(
           data: data,
           displayWidget: displayWidget,
           title: title ?? _getDefaultTitle(),
@@ -161,9 +214,14 @@ class UniversalHeatmapWidget extends StatelessWidget {
           showSelectors: false,
           icon: _getInvestmentIcon(),
         );
+        break;
 
       case UniversalTemplateType.compact:
-        return HeatmapLayoutTemplate(
+        AppLogger.debug(
+          'Creating compact layout template with selectors=${selectorWidget != null}',
+          tag: 'UniversalHeatmapWidget.Layout',
+        );
+        result = HeatmapLayoutTemplate(
           data: data,
           displayWidget: displayWidget,
           selectorWidget: selectorWidget,
@@ -172,9 +230,14 @@ class UniversalHeatmapWidget extends StatelessWidget {
           icon: _getInvestmentIcon(),
           padding: const EdgeInsets.all(12),
         );
+        break;
 
       case UniversalTemplateType.full:
-        return HeatmapLayoutTemplate(
+        AppLogger.debug(
+          'Creating full layout template with all features enabled',
+          tag: 'UniversalHeatmapWidget.Layout',
+        );
+        result = HeatmapLayoutTemplate(
           data: data,
           displayWidget: displayWidget,
           selectorWidget: selectorWidget,
@@ -185,9 +248,14 @@ class UniversalHeatmapWidget extends StatelessWidget {
           headerActions: _getHeaderActions(context),
           padding: const EdgeInsets.all(16),
         );
+        break;
 
       case UniversalTemplateType.dashboard:
-        return HeatmapLayoutTemplate(
+        AppLogger.debug(
+          'Creating dashboard layout template optimized for widget display',
+          tag: 'UniversalHeatmapWidget.Layout',
+        );
+        result = HeatmapLayoutTemplate(
           data: data,
           displayWidget: displayWidget,
           selectorWidget: selectorWidget,
@@ -197,12 +265,26 @@ class UniversalHeatmapWidget extends StatelessWidget {
           icon: _getInvestmentIcon(),
           padding: const EdgeInsets.all(8),
         );
+        break;
 
       case UniversalTemplateType.adaptive:
         // Choose template based on screen size and config
-        return LayoutBuilder(
+        AppLogger.debug(
+          'Creating adaptive layout template based on screen constraints',
+          tag: 'UniversalHeatmapWidget.Layout',
+        );
+        result = LayoutBuilder(
           builder: (context, constraints) {
+            AppLogger.debug(
+              'Adaptive layout constraints: width=${constraints.maxWidth}',
+              tag: 'UniversalHeatmapWidget.Layout',
+            );
+
             if (constraints.maxWidth < 600) {
+              AppLogger.debug(
+                'Using mobile layout (width < 600px)',
+                tag: 'UniversalHeatmapWidget.Layout',
+              );
               return HeatmapLayoutTemplate(
                 data: data,
                 displayWidget: displayWidget,
@@ -214,6 +296,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
               );
             } else if (constraints.maxWidth < 1024) {
+              AppLogger.debug(
+                'Using tablet layout (600px <= width < 1024px)',
+                tag: 'UniversalHeatmapWidget.Layout',
+              );
               return HeatmapLayoutTemplate(
                 data: data,
                 displayWidget: displayWidget,
@@ -225,6 +311,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
               );
             } else {
+              AppLogger.debug(
+                'Using desktop layout (width >= 1024px)',
+                tag: 'UniversalHeatmapWidget.Layout',
+              );
               return HeatmapLayoutTemplate(
                 data: data,
                 displayWidget: displayWidget,
@@ -239,11 +329,25 @@ class UniversalHeatmapWidget extends StatelessWidget {
             }
           },
         );
+        break;
     }
+
+    AppLogger.methodExit(
+      '_createLayoutTemplate',
+      tag: 'UniversalHeatmapWidget.Layout',
+      result: 'Layout template created for ${templateType.name}',
+    );
+
+    return result;
   }
 
   /// Get effective configuration based on investment type and overrides
   ui_config.HeatmapConfig _getEffectiveConfig() {
+    AppLogger.debug(
+      'Determining effective config for ${investmentType.name}',
+      tag: 'UniversalHeatmapWidget.Config',
+    );
+
     ui_config.HeatmapConfig baseConfig;
 
     // Create base config based on investment type using new defaults system
@@ -270,13 +374,33 @@ class UniversalHeatmapWidget extends StatelessWidget {
         break;
     }
 
+    AppLogger.debug(
+      'Base config selected: layout=${baseConfig.layoutType}, '
+      'selectors enabled, compact=${baseConfig.compactView}',
+      tag: 'UniversalHeatmapWidget.Config',
+    );
+
     // Apply user-provided config overrides if available
     if (config != null) {
-      return _mergeConfigs(baseConfig, config!);
+      AppLogger.debug(
+        'Merging user-provided config overrides',
+        tag: 'UniversalHeatmapWidget.Config',
+      );
+      final result = _mergeConfigs(baseConfig, config!);
+      AppLogger.info(
+        'Final config: layout=${result.layoutType}, compact=${result.compactView}',
+        tag: 'UniversalHeatmapWidget.Config',
+      );
+      return result;
     }
 
     // Apply simple overrides using modifier methods
     if (showSelectors != null || compactMode != null) {
+      AppLogger.debug(
+        'Applying simple overrides: showSelectors=$showSelectors, compactMode=$compactMode',
+        tag: 'UniversalHeatmapWidget.Config',
+      );
+
       var modifiedConfig = baseConfig;
 
       if (compactMode != null) {
@@ -296,9 +420,17 @@ class UniversalHeatmapWidget extends StatelessWidget {
         modifiedConfig = modifiedConfig.withLayout(title: title);
       }
 
+      AppLogger.info(
+        'Modified config: layout=${modifiedConfig.layoutType}, compact=${modifiedConfig.compactView}',
+        tag: 'UniversalHeatmapWidget.Config',
+      );
       return modifiedConfig;
     }
 
+    AppLogger.info(
+      'Using base config: layout=${baseConfig.layoutType}, compact=${baseConfig.compactView}',
+      tag: 'UniversalHeatmapWidget.Config',
+    );
     return baseConfig;
   }
 
@@ -324,10 +456,9 @@ class UniversalHeatmapWidget extends StatelessWidget {
     }
 
     try {
-      HeatmapLogger.logDataLoading(
-        operation: 'convert_raw_data',
-        dataSize: rawData.length,
-        source: 'raw_data',
+      AppLogger.info(
+        'Converting raw data to heatmap format: ${rawData.length} items',
+        tag: 'UniversalHeatmapWidget.DataConversion',
       );
 
       final tiles = _convertRawDataToTiles();
@@ -348,15 +479,16 @@ class UniversalHeatmapWidget extends StatelessWidget {
         configuration: _getHeatmapConfiguration(),
       );
 
-      HeatmapLogger.logDataLoadingSuccess(
-        operation: 'convert_raw_data',
-        processingInfo: 'Converted ${tiles.length} tiles successfully',
+      AppLogger.info(
+        'Successfully converted ${tiles.length} tiles for ${investmentType.name} heatmap',
+        tag: 'UniversalHeatmapWidget.DataConversion',
       );
 
       return heatmapData;
     } catch (error, stackTrace) {
-      HeatmapLogger.logDataLoadingError(
-        operation: 'convert_raw_data',
+      AppLogger.error(
+        'Failed to convert raw data to heatmap format',
+        tag: 'UniversalHeatmapWidget.DataConversion',
         error: error,
         stackTrace: stackTrace,
       );
@@ -366,6 +498,11 @@ class UniversalHeatmapWidget extends StatelessWidget {
 
   /// Convert raw data to heatmap tiles based on investment type
   List<HeatmapTileData> _convertRawDataToTiles() {
+    AppLogger.debug(
+      'Converting raw data to tiles for ${investmentType.name}',
+      tag: 'UniversalHeatmapWidget.DataConversion',
+    );
+
     final tiles = <HeatmapTileData>[];
 
     switch (investmentType) {
@@ -383,11 +520,20 @@ class UniversalHeatmapWidget extends StatelessWidget {
         break;
     }
 
+    AppLogger.debug(
+      'Converted ${tiles.length} tiles for ${investmentType.name}',
+      tag: 'UniversalHeatmapWidget.DataConversion',
+    );
     return tiles;
   }
 
   /// Convert portfolio specific data
   List<HeatmapTileData> _convertPortfolioData() {
+    AppLogger.debug(
+      'Converting portfolio data from ${rawData.containsKey('holdings') ? (rawData['holdings'] as List).length : 0} holdings',
+      tag: 'UniversalHeatmapWidget.PortfolioData',
+    );
+
     final tiles = <HeatmapTileData>[];
 
     if (rawData.containsKey('holdings')) {
@@ -412,11 +558,20 @@ class UniversalHeatmapWidget extends StatelessWidget {
       }
     }
 
+    AppLogger.debug(
+      'Successfully converted ${tiles.length} portfolio holdings to tiles',
+      tag: 'UniversalHeatmapWidget.PortfolioData',
+    );
     return tiles;
   }
 
   /// Convert index specific data
   List<HeatmapTileData> _convertIndexData() {
+    AppLogger.debug(
+      'Converting index data from ${rawData.containsKey('components') ? (rawData['components'] as List).length : 0} components',
+      tag: 'UniversalHeatmapWidget.IndexData',
+    );
+
     final tiles = <HeatmapTileData>[];
 
     if (rawData.containsKey('components')) {
@@ -441,11 +596,20 @@ class UniversalHeatmapWidget extends StatelessWidget {
       }
     }
 
+    AppLogger.debug(
+      'Successfully converted ${tiles.length} index components to tiles',
+      tag: 'UniversalHeatmapWidget.IndexData',
+    );
     return tiles;
   }
 
   /// Convert mutual funds specific data
   List<HeatmapTileData> _convertMutualFundsData() {
+    AppLogger.debug(
+      'Converting mutual funds data from ${rawData.containsKey('funds') ? (rawData['funds'] as List).length : 0} funds',
+      tag: 'UniversalHeatmapWidget.MutualFundsData',
+    );
+
     final tiles = <HeatmapTileData>[];
 
     if (rawData.containsKey('funds')) {
@@ -470,11 +634,20 @@ class UniversalHeatmapWidget extends StatelessWidget {
       }
     }
 
+    AppLogger.debug(
+      'Successfully converted ${tiles.length} mutual funds to tiles',
+      tag: 'UniversalHeatmapWidget.MutualFundsData',
+    );
     return tiles;
   }
 
   /// Convert ETF specific data
   List<HeatmapTileData> _convertETFData() {
+    AppLogger.debug(
+      'Converting ETF data from ${rawData.containsKey('etfs') ? (rawData['etfs'] as List).length : 0} ETFs',
+      tag: 'UniversalHeatmapWidget.ETFData',
+    );
+
     final tiles = <HeatmapTileData>[];
 
     if (rawData.containsKey('etfs')) {
@@ -499,6 +672,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
       }
     }
 
+    AppLogger.debug(
+      'Successfully converted ${tiles.length} ETFs to tiles',
+      tag: 'UniversalHeatmapWidget.ETFData',
+    );
     return tiles;
   }
 
@@ -510,26 +687,16 @@ class UniversalHeatmapWidget extends StatelessWidget {
           config.showSectorSelector ||
           config.showMarketCapSelector);
 
-  /// Get display layout type - need to import the correct enum from display template
-  dynamic _getDisplayLayout(ui_config.HeatmapConfig config) {
+  /// Get display layout type - convert UI config layout to display template layout
+  HeatmapLayoutType _getDisplayLayout(ui_config.HeatmapConfig config) {
     // Convert UI config layout type to display template layout type
     switch (config.layoutType) {
       case ui_config.HeatmapLayoutType.treemap:
-        return 'treemap'; // Return string for now, adjust based on display template requirements
+        return HeatmapLayoutType.treemap;
       case ui_config.HeatmapLayoutType.grid:
-        return 'grid';
+        return HeatmapLayoutType.grid;
       case ui_config.HeatmapLayoutType.list:
-        return 'list';
-    }
-  }
-
-  SelectorLayoutType _getSelectorLayout(ui_config.HeatmapConfig config) {
-    if (config.compactView) {
-      return SelectorLayoutType.compact;
-    } else if (templateType == UniversalTemplateType.minimal) {
-      return SelectorLayoutType.pills;
-    } else {
-      return SelectorLayoutType.expanded;
+        return HeatmapLayoutType.list;
     }
   }
 
@@ -626,10 +793,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
       icon: const Icon(Icons.refresh),
       onPressed: () {
         // Refresh action - could trigger onFiltersChanged or custom callback
-        HeatmapLogger.logTileInteraction(
-          action: 'refresh_pressed',
-          tileId: 'header_action',
-          component: 'UniversalHeatmapWidget',
+        AppLogger.userAction(
+          'Refresh button pressed in heatmap header',
+          tag: 'UniversalHeatmapWidget.Interaction',
+          context: {'action': 'refresh_pressed', 'component': 'header'},
         );
       },
       tooltip: 'Refresh Data',
@@ -638,10 +805,10 @@ class UniversalHeatmapWidget extends StatelessWidget {
       icon: const Icon(Icons.share),
       onPressed: () {
         // Share action
-        HeatmapLogger.logTileInteraction(
-          action: 'share_pressed',
-          tileId: 'header_action',
-          component: 'UniversalHeatmapWidget',
+        AppLogger.userAction(
+          'Share button pressed in heatmap header',
+          tag: 'UniversalHeatmapWidget.Interaction',
+          context: {'action': 'share_pressed', 'component': 'header'},
         );
       },
       tooltip: 'Share Heatmap',

@@ -2,8 +2,8 @@
 
 import '../../../../core/utils/logger.dart';
 import '../../../../shared/models/heatmap/heatmap_ui_data.dart';
-import '../../../../shared/utils/sector_heatmap_converter.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
+import '../mappers/sector_heatmap_converter.dart';
 import 'portfolio_analytics_cubit.dart';
 import 'portfolio_analytics_state.dart';
 import 'portfolio_heatmap_state.dart';

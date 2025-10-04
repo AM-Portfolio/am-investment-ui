@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
+import '../../models/heatmap/heatmap_tile_data.dart';
 
 /// Pure heatmap layout template - handles header, legend, and overall structure
 /// Extracted for better modularity and composition
@@ -106,7 +107,7 @@ class HeatmapLayoutTemplate extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                effectiveTitle ?? 'Heatmap',
+                effectiveTitle,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),

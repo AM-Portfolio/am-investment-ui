@@ -1,6 +1,6 @@
-import '../../features/portfolio/internal/domain/entities/portfolio_analytics.dart';
-import '../models/heatmap.dart';
-import '../widgets/heatmap/heatmap_config.dart' as ui_config;
+import '../../../../shared/models/heatmap.dart';
+import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
+import '../../internal/domain/entities/portfolio_analytics.dart';
 
 /// Utility class to convert portfolio analytics data to generic heatmap data
 class SectorHeatmapConverter {
@@ -58,7 +58,7 @@ class SectorHeatmapConverter {
             id: sector.sectorName,
             name: sector.sectorName,
             displayName: _getSectorDisplayName(sector.sectorName),
-            weightage: weightage,
+            weightage: weightage.toDouble(),
             performance: avgPerformance,
             value: sectorValue,
             metadata: {
