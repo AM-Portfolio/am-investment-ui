@@ -200,7 +200,7 @@ class MarketCapSelector extends StatelessWidget {
   ) {
     return Wrap(
       spacing: 8,
-      runSpacing: 4,
+      runSpacing: 8,
       children: marketCaps.map((marketCap) {
         final isSelected = marketCap == selectedMarketCap;
 
@@ -208,20 +208,34 @@ class MarketCapSelector extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => onMarketCapChanged(marketCap),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              constraints: const BoxConstraints(
+                minHeight: 40,
+              ), // Better touch target
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: isSelected
                     ? (primaryColor ?? Theme.of(context).primaryColor)
-                    : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(16),
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
                       ? (primaryColor ?? Theme.of(context).primaryColor)
-                      : Colors.grey.shade300,
-                  width: 1,
+                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  width: 1.5,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color:
+                              (primaryColor ?? Theme.of(context).primaryColor)
+                                  .withOpacity(0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -229,21 +243,26 @@ class MarketCapSelector extends StatelessWidget {
                   if (showIcons) ...[
                     Icon(
                       marketCap.icon,
-                      size: 14,
-                      color: isSelected ? Colors.white : Colors.grey.shade600,
+                      size: 16,
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
                   ],
                   Text(
                     useDisplayNames
                         ? marketCap.displayName
                         : marketCap.shortName,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.grey.shade700,
-                      fontSize: 12,
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontSize: 14,
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w500,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../selectors/selectors.dart';
 import 'heatmap_selector_card.dart';
 import 'heatmap_template_card.dart';
+import 'advanced_heatmap_selector_card.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../../core/app_logic/domain/entities/heatmap/heatmap_entities.dart';
@@ -157,7 +158,7 @@ class _ConfigurableHeatmapWidgetState
   }
 
   Widget _buildFullSelectors(BuildContext context) {
-    return HeatmapSelectorCard(
+    return AdvancedHeatmapSelectorCard(
       config: HeatmapSelectorConfig(
         selectedTimeFrame: _selectedTimeFrame,
         selectedMetric: _selectedMetric,
@@ -190,8 +191,18 @@ class _ConfigurableHeatmapWidgetState
           _notifySelectorsChanged();
         },
       ),
-      title: widget.title,
       compact: widget.compact,
+      showResetButton: true,
+      showExportButton: false,
+      onReset: () {
+        setState(() {
+          _selectedTimeFrame = TimeFrame.oneYear;
+          _selectedMetric = MetricType.changePercent;
+          _selectedSector = SectorType.all;
+          _selectedMarketCap = MarketCapType.all;
+        });
+        _notifySelectorsChanged();
+      },
       margin: EdgeInsets.zero,
     );
   }

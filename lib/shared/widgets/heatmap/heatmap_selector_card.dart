@@ -158,12 +158,17 @@ class HeatmapSelectorCard extends StatelessWidget {
   Widget _buildSelectorGrid(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth > 800;
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isTablet = screenWidth > 600 && screenWidth <= 1024;
+        final isDesktop = screenWidth > 1024;
+        final isMobile = screenWidth <= 600;
 
-        if (isWide) {
+        if (isDesktop) {
           return _buildWideLayout(context);
+        } else if (isTablet) {
+          return _buildTabletLayout(context);
         } else {
-          return _buildNarrowLayout(context);
+          return _buildMobileLayout(context);
         }
       },
     );
@@ -222,7 +227,7 @@ class HeatmapSelectorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildNarrowLayout(BuildContext context) {
+  Widget _buildTabletLayout(BuildContext context) {
     return Column(
       children: [
         // First Row - Time Frame and Metric
@@ -270,6 +275,111 @@ class HeatmapSelectorCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Mobile-optimized Time Frame selector - using compact chips
+        _buildMobileSelectorSection(
+          context,
+          'Time Frame',
+          TimeFrameSelector(
+            selectedTimeFrame: config.selectedTimeFrame,
+            onTimeFrameChanged: callbacks.onTimeFrameChanged,
+            availableTimeFrames: TimeFrame.mobileTimeFrames,
+            compact: true,
+            primaryColor: primaryColor,
+          ),
+        ),
+        SizedBox(height: compact ? 12 : 16),
+
+        // Mobile-optimized Metric selector - using compact chips
+        _buildMobileSelectorSection(
+          context,
+          'Metric',
+          MetricSelector(
+            selectedMetric: config.selectedMetric,
+            onMetricChanged: callbacks.onMetricChanged,
+            availableMetrics: MetricType.mobileMetrics,
+            compact: true,
+            primaryColor: primaryColor,
+          ),
+        ),
+        SizedBox(height: compact ? 12 : 16),
+
+        // Advanced filters in expandable section
+        _buildAdvancedFiltersSection(context),
+      ],
+    );
+  }
+
+  Widget _buildMobileSelectorSection(
+    BuildContext context,
+    String title,
+    Widget selector,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: primaryColor ?? Theme.of(context).primaryColor,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(width: double.infinity, child: selector),
+      ],
+    );
+  }
+
+  Widget _buildAdvancedFiltersSection(BuildContext context) {
+    return ExpansionTile(
+      title: Text(
+        'Advanced Filters',
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: primaryColor ?? Theme.of(context).primaryColor,
+        ),
+      ),
+      leading: Icon(
+        Icons.tune,
+        color: primaryColor ?? Theme.of(context).primaryColor,
+        size: 20,
+      ),
+      childrenPadding: const EdgeInsets.only(top: 8, bottom: 16),
+      children: [
+        // Sector selector
+        _buildMobileSelectorSection(
+          context,
+          'Sector',
+          SectorSelector(
+            selectedSector: config.selectedSector,
+            onSectorChanged: callbacks.onSectorChanged,
+            availableSectors: SectorType.portfolioSectors,
+            compact: true,
+            primaryColor: primaryColor,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Market Cap selector
+        _buildMobileSelectorSection(
+          context,
+          'Market Cap',
+          MarketCapSelector(
+            selectedMarketCap: config.selectedMarketCap,
+            onMarketCapChanged: callbacks.onMarketCapChanged,
+            availableMarketCaps: MarketCapType.portfolioMarketCaps,
+            compact: true,
+            primaryColor: primaryColor,
+          ),
         ),
       ],
     );

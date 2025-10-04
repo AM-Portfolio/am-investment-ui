@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../shared/widgets/heatmap/configurable_heatmap_widget.dart';
-import '../../../../../shared/widgets/selectors/time_frame_selector.dart';
-import '../../../../../shared/widgets/selectors/metric_selector.dart';
+
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_heatmap_state.dart';
 import '../../cubit/portfolio_analytics_cubit.dart';
@@ -30,7 +29,7 @@ class PortfolioHeatmapWebPage extends ConsumerStatefulWidget {
 
 class _PortfolioHeatmapWebPageState
     extends ConsumerState<PortfolioHeatmapWebPage> {
-  MetricType _selectedMetric = MetricType.returns;
+  MetricType _selectedMetric = MetricType.changePercent;
   TimeFrame _selectedTimeframe = TimeFrame.oneYear;
   SectorType? _selectedSector;
   MarketCapType? _selectedMarketCap;
@@ -112,175 +111,13 @@ class _PortfolioHeatmapWebPageState
     AppLogger.methodExit('_loadHeatmapData', tag: 'PortfolioHeatmapWebPage');
   }
 
-  void _onMetricChanged(MetricType metric) {
-    AppLogger.userAction(
-      'Changed metric filter',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-    AppLogger.debug(
-      'Metric changed from ${_selectedMetric.name} to ${metric.name}',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-
-    setState(() {
-      _selectedMetric = metric;
-    });
-
-    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateMetric(metric);
-  }
-
-  void _onTimeframeChanged(TimeFrame timeframe) {
-    AppLogger.userAction(
-      'Changed timeframe filter',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-    AppLogger.debug(
-      'Timeframe changed from ${_selectedTimeframe.name} to ${timeframe.name}',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-
-    setState(() {
-      _selectedTimeframe = timeframe;
-    });
-
-    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateTimeFrame(timeframe);
-  }
-
-  void _onSectorChanged(SectorType? sector) {
-    AppLogger.userAction(
-      'Changed sector filter',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-    final oldSector = _selectedSector?.name ?? 'all';
-    final newSector = sector?.name ?? 'all';
-    AppLogger.debug(
-      'Sector changed from $oldSector to $newSector',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-
-    setState(() {
-      _selectedSector = sector;
-    });
-
-    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateSector(sector ?? SectorType.all);
-  }
-
-  void _onMarketCapChanged(MarketCapType? marketCap) {
-    AppLogger.userAction(
-      'Changed market cap filter',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-    final oldMarketCap = _selectedMarketCap?.name ?? 'all';
-    final newMarketCap = marketCap?.name ?? 'all';
-    AppLogger.debug(
-      'Market cap changed from $oldMarketCap to $newMarketCap',
-      tag: 'PortfolioHeatmapWebPage',
-    );
-
-    setState(() {
-      _selectedMarketCap = marketCap;
-    });
-
-    final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
-    portfolioHeatmapCubit.updateMarketCap(marketCap ?? MarketCapType.all);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Portfolio Heatmap'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Controls Row
-            Row(
-              children: [
-                // Metric Type Dropdown (Disabled)
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Metric',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<MetricType>(
-                        value: _selectedMetric,
-                        onChanged: null, // Disabled
-                        // onChanged: (MetricType? value) {
-                        //   if (value != null) {
-                        //     _onMetricChanged(value);
-                        //   }
-                        // },
-                        items: MetricType.values
-                            .map<DropdownMenuItem<MetricType>>(
-                              (MetricType type) => DropdownMenuItem<MetricType>(
-                                value: type,
-                                child: Text(type.displayName),
-                              ),
-                            )
-                            .toList(),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Timeframe Dropdown
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Timeframe',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<TimeFrame>(
-                        value: _selectedTimeframe,
-                        onChanged: (TimeFrame? value) {
-                          if (value != null) {
-                            _onTimeframeChanged(value);
-                          }
-                        },
-                        items: TimeFrame.values
-                            .map<DropdownMenuItem<TimeFrame>>(
-                              (TimeFrame timeframe) =>
-                                  DropdownMenuItem<TimeFrame>(
-                                    value: timeframe,
-                                    child: Text(timeframe.displayName),
-                                  ),
-                            )
-                            .toList(),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Heatmap Widget
             Expanded(
               child: StreamBuilder<PortfolioHeatmapState>(
                 stream: context.read<PortfolioHeatmapCubit>().stream,
@@ -371,7 +208,30 @@ class _PortfolioHeatmapWebPageState
 
                     return ConfigurableHeatmapWidget(
                       data: state.heatmapData,
-                      showSelectors: false, // Selectors are handled above
+                      showSelectors:
+                          true, // Let ConfigurableHeatmapWidget handle selectors
+                      initialTimeFrame: _selectedTimeframe,
+                      initialMetric: _selectedMetric,
+                      initialSector: _selectedSector,
+                      initialMarketCap: _selectedMarketCap,
+                      onSelectorsChanged:
+                          ({
+                            TimeFrame? timeFrame,
+                            MetricType? metric,
+                            SectorType? sector,
+                            MarketCapType? marketCap,
+                          }) {
+                            // Update local state
+                            if (timeFrame != null)
+                              _selectedTimeframe = timeFrame;
+                            if (metric != null) _selectedMetric = metric;
+                            if (sector != null) _selectedSector = sector;
+                            if (marketCap != null)
+                              _selectedMarketCap = marketCap;
+
+                            // Reload heatmap data with new selections
+                            _loadHeatmapData();
+                          },
                     );
                   }
 
@@ -414,11 +274,6 @@ class _PortfolioHeatmapWebPageState
                           color: Colors.grey,
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Portfolio Heatmap',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 8),
                         const Text(
                           'Loading portfolio data...',
                           style: TextStyle(color: Colors.grey),
