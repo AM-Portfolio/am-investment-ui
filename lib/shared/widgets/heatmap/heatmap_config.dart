@@ -7,8 +7,6 @@ import 'configs/interaction_config.dart';
 import 'configs/layout_config.dart' as layout_config;
 import 'configs/selector_config.dart';
 import 'configs/visual_config.dart';
-import 'templates/mobile_heatmap_defaults.dart';
-import 'templates/web_heatmap_defaults.dart';
 
 /// Main heatmap configuration that composes smaller, focused config objects
 /// This provides a clean API while breaking down complexity into manageable pieces
@@ -26,28 +24,6 @@ class HeatmapConfig {
 
   /// Create from web defaults configuration
   factory HeatmapConfig.fromWeb(HeatmapConfig webConfig) => webConfig;
-
-  /// Create portfolio-specific configuration using WebHeatmapDefaults
-  factory HeatmapConfig.portfolio({
-    String? title,
-    Color? accentColor,
-    SelectorLayoutType? selectorLayout,
-  }) => WebHeatmapDefaults.portfolio(
-    title: title,
-    accentColor: accentColor,
-    selectorLayout: selectorLayout,
-  );
-
-  /// Create mobile portfolio-specific configuration using MobileHeatmapDefaults
-  factory HeatmapConfig.mobilePortfolio({
-    String? title,
-    Color? accentColor,
-    SelectorLayoutType? selectorLayout,
-  }) => MobileHeatmapDefaults.portfolio(
-    title: title,
-    accentColor: accentColor,
-    selectorLayout: selectorLayout,
-  );
 
   /// Selector configuration (what selectors to show and their options) - nullable
   final SelectorConfig? selectors;

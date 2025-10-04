@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/models/heatmap.dart';
-import '../../../../shared/widgets/heatmap/configs/selector_config.dart';
-import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
 import '../../internal/domain/entities/portfolio_analytics.dart';
+import '../config/portfolio_heatmap_config.dart';
 
 /// Utility class to convert portfolio analytics data to generic heatmap data
 class SectorHeatmapConverter {
@@ -54,7 +53,7 @@ class SectorHeatmapConverter {
       lastUpdated: DateTime.now(),
       additionalInfo: const {},
     ),
-    configuration: _getHeatmapConfig(
+    configuration: PortfolioHeatmapConfig.getHeatmapConfig(
       title: title,
       showSubCards: showSubCards,
       accentColor: accentColor,
@@ -192,102 +191,12 @@ class SectorHeatmapConverter {
         'hasChildren': tiles.any((tile) => tile.hasChildren),
       },
     ),
-    configuration: _getHeatmapConfig(
+    configuration: PortfolioHeatmapConfig.getHeatmapConfig(
       title: title,
       showSubCards: showSubCards,
       accentColor: accentColor,
     ),
   );
-
-  /// Gets the appropriate heatmap configuration
-  static ui_config.HeatmapConfig _getHeatmapConfig({
-    required String title,
-    required bool showSubCards,
-    Color? accentColor,
-  }) {
-    // Load platform-specific default configuration
-    final defaultConfig = _loadPlatformDefaultConfig();
-    
-    // Apply portfolio-specific customizations
-    return _applyPortfolioConfig(
-      defaultConfig: defaultConfig,
-      title: title,
-      showSubCards: showSubCards,
-      accentColor: accentColor,
-    );
-  }
-
-  /// Loads platform-specific default configuration
-  static ui_config.HeatmapConfig _loadPlatformDefaultConfig() {
-    // Start with base web defaults or mobile defaults based on platform
-    // For now, using web defaults as base - this can be enhanced with platform detection
-    return ui_config.HeatmapConfig.webDefaults();
-  }
-
-  /// Applies portfolio-specific configuration on top of platform defaults
-  static ui_config.HeatmapConfig _applyPortfolioConfig({
-    required ui_config.HeatmapConfig defaultConfig,
-    required String title,
-    required bool showSubCards,
-    Color? accentColor,
-  }) {
-    if (showSubCards) {
-      // Desktop/Web portfolio configuration
-      return _applyDesktopPortfolioConfig(
-        defaultConfig: defaultConfig,
-        title: title,
-        accentColor: accentColor,
-      );
-    } else {
-      // Mobile portfolio configuration
-      return _applyMobilePortfolioConfig(
-        defaultConfig: defaultConfig,
-        title: title,
-        accentColor: accentColor,
-      );
-    }
-  }
-
-  /// Applies desktop/web portfolio specific configuration
-  static ui_config.HeatmapConfig _applyDesktopPortfolioConfig({
-    required ui_config.HeatmapConfig defaultConfig,
-    required String title,
-    Color? accentColor,
-  }) {
-    return defaultConfig.copyWith(
-      displayConfig: defaultConfig.displayConfig.copyWith(
-        title: title,
-        accentColor: accentColor,
-      ),
-      selectorConfig: defaultConfig.selectorConfig.copyWith(
-        layout: SelectorLayoutType.compact,
-        // Keep other selector defaults from platform config
-      ),
-      // Additional desktop-specific overrides can be added here
-    );
-  }
-
-  /// Applies mobile portfolio specific configuration
-  static ui_config.HeatmapConfig _applyMobilePortfolioConfig({
-    required ui_config.HeatmapConfig defaultConfig,
-    required String title,
-    Color? accentColor,
-  }) {
-    return defaultConfig.copyWith(
-      displayConfig: defaultConfig.displayConfig.copyWith(
-        title: title,
-        accentColor: accentColor,
-        // Mobile-specific display adjustments
-      ),
-      selectorConfig: defaultConfig.selectorConfig.copyWith(
-        layout: SelectorLayoutType.compact,
-        // Mobile-specific selector adjustments
-      ),
-      layoutConfig: defaultConfig.layoutConfig.copyWith(
-        // Mobile-specific layout adjustments (smaller tiles, different spacing, etc.)
-      ),
-    );
-  }
 
   /// Calculates the total value for a sector
   static double _calculateSectorValue(Sector sector) => sector.totalValue > 0
