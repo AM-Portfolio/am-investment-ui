@@ -67,9 +67,9 @@ class InvestmentTypeConfig {
       availableTimeFrames: TimeFrame.portfolioTimeFrames,
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.changeAmount,
-        MetricType.totalReturn,
-        MetricType.dayReturn,
+        MetricType.marketValue,
+        MetricType.returns,
+        MetricType.dailyReturns,
       ],
       availableSectors: SectorType.values,
       availableMarketCaps: MarketCapType.values,
@@ -99,8 +99,8 @@ class InvestmentTypeConfig {
       availableTimeFrames: TimeFrame.heatmapTimeFrames,
       availableMetrics: [
         MetricType.changePercent,
-        MetricType.changeAmount,
-        MetricType.dayReturn,
+        MetricType.marketValue,
+        MetricType.dailyReturns,
       ],
       availableSectors: SectorType.values,
       availableMarketCaps: MarketCapType.values,
