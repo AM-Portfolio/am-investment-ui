@@ -65,10 +65,11 @@ class TreemapLayoutBuilder extends HeatmapLayoutBuilder {
           top: rect.top,
           width: rect.width,
           height: rect.height,
-          child: buildHeatmapTile(
+          child: buildUnifiedHeatmapTileCard(
             context,
             tile,
             data,
+            HeatmapTileCardType.treemap,
             width: rect.width,
             height: rect.height,
             onTilePressed: onTilePressed,

@@ -43,108 +43,16 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
       itemCount: displayTiles.length,
       itemBuilder: (context, index) {
         final tile = displayTiles[index];
-        return _buildHierarchicalTile(
+        return buildUnifiedHeatmapTileCard(
           context,
           tile,
           data,
+          HeatmapTileCardType.grid,
           onTilePressed: onTilePressed,
           customTileBuilder: customTileBuilder,
         );
       },
     );
-  }
-
-  /// Builds a tile with visual indication of its hierarchy level
-  Widget _buildHierarchicalTile(
-    BuildContext context,
-    HeatmapTileData tile,
-    HeatmapData data, {
-    VoidCallback? onTilePressed,
-    Widget Function(HeatmapTileData tile)? customTileBuilder,
-  }) {
-    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
-
-    return Container(
-      decoration: BoxDecoration(
-        border: hierarchyLevel > 0
-            ? Border.all(color: Colors.grey.shade400)
-            : null,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Stack(
-        children: [
-          buildHeatmapTile(
-            context,
-            tile,
-            data,
-            onTilePressed: onTilePressed,
-            customTileBuilder: customTileBuilder,
-          ),
-          // Add hierarchy indicator
-          if (hierarchyLevel > 0)
-            Positioned(
-              top: 2,
-              left: 2,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'L${hierarchyLevel + 1}',
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// Calculates the hierarchy level of a tile (0 for root, 1 for first level children, etc.)
-  int _calculateHierarchyLevel(HeatmapTileData targetTile, HeatmapData data) {
-    final rootTiles = getUiTiles(data);
-
-    for (final rootTile in rootTiles) {
-      final level = _findTileLevel(rootTile, targetTile, 0);
-      if (level >= 0) return level;
-    }
-
-    return 0; // Default to root level if not found
-  }
-
-  /// Recursively finds the level of a target tile within a hierarchy
-  int _findTileLevel(
-    HeatmapTileData currentTile,
-    HeatmapTileData targetTile,
-    int currentLevel,
-  ) {
-    if (currentTile.id == targetTile.id) {
-      return currentLevel;
-    }
-
-    if (currentTile.children != null) {
-      for (final child in currentTile.children!) {
-        final childTile = child is HeatmapTileData
-            ? child
-            : HeatmapTileData.fromEntity(child);
-        final foundLevel = _findTileLevel(
-          childTile,
-          targetTile,
-          currentLevel + 1,
-        );
-        if (foundLevel >= 0) {
-          return foundLevel;
-        }
-      }
-    }
-
-    return -1; // Not found in this branch
   }
 
   /// Calculates optimal number of columns based on screen width and tile count

@@ -329,4 +329,413 @@ abstract class HeatmapLayoutBuilder {
     final luminance = backgroundColor.computeLuminance();
     return luminance > 0.5 ? Colors.black87 : Colors.white;
   }
+
+  /// Builds a unified heatmap tile card that adapts to different layout types
+  /// This replaces the individual tile builders in each layout for consistency
+  Widget buildUnifiedHeatmapTileCard(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data,
+    HeatmapTileCardType cardType, {
+    double? width,
+    double? height,
+    VoidCallback? onTilePressed,
+    Widget Function(HeatmapTileData tile)? customTileBuilder,
+  }) {
+    if (customTileBuilder != null) {
+      return GestureDetector(
+        onTap: onTilePressed,
+        child: customTileBuilder(tile),
+      );
+    }
+
+    switch (cardType) {
+      case HeatmapTileCardType.grid:
+        return _buildGridCard(
+          context,
+          tile,
+          data,
+          width,
+          height,
+          onTilePressed,
+        );
+      case HeatmapTileCardType.list:
+        return _buildListCard(
+          context,
+          tile,
+          data,
+          width,
+          height,
+          onTilePressed,
+        );
+      case HeatmapTileCardType.treemap:
+        return _buildTreemapCard(
+          context,
+          tile,
+          data,
+          width,
+          height,
+          onTilePressed,
+        );
+    }
+  }
+
+  /// Builds a card optimized for grid layout
+  Widget _buildGridCard(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data,
+    double? width,
+    double? height,
+    VoidCallback? onTilePressed,
+  ) {
+    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
+
+    return Container(
+      decoration: BoxDecoration(
+        border: hierarchyLevel > 0
+            ? Border.all(color: Colors.grey.shade400)
+            : null,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Stack(
+        children: [
+          buildHeatmapTile(
+            context,
+            tile,
+            data,
+            width: width,
+            height: height,
+            onTilePressed: onTilePressed,
+          ),
+          // Add hierarchy indicator
+          if (hierarchyLevel > 0)
+            Positioned(
+              top: 2,
+              left: 2,
+              child: _buildHierarchyIndicator(hierarchyLevel),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a card optimized for list layout
+  Widget _buildListCard(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data,
+    double? width,
+    double? height,
+    VoidCallback? onTilePressed,
+  ) {
+    final tileColor = getTileColor(tile, data);
+    final textColor = getTextColor(tileColor);
+    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
+
+    return GestureDetector(
+      onTap: onTilePressed,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: tileColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: _buildListCardContent(
+            context,
+            tile,
+            data,
+            width ?? 0,
+            height ?? 60,
+            textColor,
+            hierarchyLevel,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds a card optimized for treemap layout
+  Widget _buildTreemapCard(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data,
+    double? width,
+    double? height,
+    VoidCallback? onTilePressed,
+  ) {
+    // Treemap uses the standard tile with subtle hierarchy indication
+    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
+
+    return Stack(
+      children: [
+        buildHeatmapTile(
+          context,
+          tile,
+          data,
+          width: width,
+          height: height,
+          onTilePressed: onTilePressed,
+        ),
+        // Subtle hierarchy indicator for treemap
+        if (hierarchyLevel > 0)
+          Positioned(
+            bottom: 2,
+            right: 2,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Builds the content layout for list cards
+  Widget _buildListCardContent(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data,
+    double width,
+    double height,
+    Color textColor,
+    int hierarchyLevel,
+  ) {
+    final config = data.configuration;
+    final showSubCards = config.showSubCards;
+
+    return Row(
+      children: [
+        // Hierarchy indicator
+        if (hierarchyLevel > 0) ...[
+          Container(
+            width: 4 + (hierarchyLevel * 8.0),
+            height: height * 0.6,
+            decoration: BoxDecoration(
+              color: textColor.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+
+        // Leading section - Name and primary info
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Tile name with level indicator
+              Row(
+                children: [
+                  if (hierarchyLevel > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: textColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'L${hierarchyLevel + 1}',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      tile.name,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Weightage
+              if (config.showWeightage) ...[
+                const SizedBox(height: 2),
+                Text(
+                  '${tile.weightage.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: textColor.withOpacity(0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        // Trailing section - Performance and value metrics
+        if (showSubCards) ...[
+          // Performance
+          if (config.showPerformance)
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${tile.performance >= 0 ? '+' : ''}${tile.performance.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (height > 70)
+                    Text(
+                      'Performance',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                ],
+              ),
+            ),
+
+          // Value
+          if (config.showValue && tile.value != null)
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '\$${_formatValueForDisplay(tile.value!)}',
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (height > 70)
+                    Text(
+                      'Value',
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.7),
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  /// Builds a hierarchy indicator badge
+  Widget _buildHierarchyIndicator(int hierarchyLevel) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.8),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      'L${hierarchyLevel + 1}',
+      style: TextStyle(
+        fontSize: 8,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey.shade600,
+      ),
+    ),
+  );
+
+  /// Calculates the hierarchy level of a tile (0 for root, 1+ for children)
+  int _calculateHierarchyLevel(HeatmapTileData targetTile, HeatmapData data) {
+    final rootTiles = getUiTiles(data);
+
+    for (final rootTile in rootTiles) {
+      final level = _findTileLevel(rootTile, targetTile, 0);
+      if (level >= 0) return level;
+    }
+
+    return 0; // Default to root level if not found
+  }
+
+  /// Recursively finds the level of a target tile within a hierarchy
+  int _findTileLevel(
+    HeatmapTileData currentTile,
+    HeatmapTileData targetTile,
+    int currentLevel,
+  ) {
+    if (currentTile.id == targetTile.id) {
+      return currentLevel;
+    }
+
+    if (currentTile.children != null) {
+      for (final child in currentTile.children!) {
+        final childTile = child is HeatmapTileData
+            ? child
+            : HeatmapTileData.fromEntity(child);
+        final foundLevel = _findTileLevel(
+          childTile,
+          targetTile,
+          currentLevel + 1,
+        );
+        if (foundLevel >= 0) {
+          return foundLevel;
+        }
+      }
+    }
+
+    return -1; // Not found in this branch
+  }
+
+  /// Formats large values for display (e.g., 1234567 -> 1.23M)
+  String _formatValueForDisplay(double value) {
+    if (value >= 1000000000) {
+      return '${(value / 1000000000).toStringAsFixed(1)}B';
+    } else if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(1)}K';
+    } else {
+      return value.toStringAsFixed(0);
+    }
+  }
+}
+
+/// Enum defining the different card types for various layouts
+enum HeatmapTileCardType {
+  /// Optimized for grid display with hierarchy indicators
+  grid,
+
+  /// Optimized for list display with row-based layout
+  list,
+
+  /// Optimized for treemap display with space-efficient design
+  treemap,
 }
