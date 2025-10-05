@@ -451,193 +451,36 @@ class HeatmapDisplayTemplate extends StatelessWidget {
     }
   }).toList();
 
-  /// Logs comprehensive information about all heatmap tile data
-  /// Includes complete tile details, configuration, and hierarchical children structure
+  /// Logs basic information about heatmap tile data
+  /// Shows count of tiles, their names, and children count
   void _logAllChildrenHeatmapTileData() {
     if (data.tiles.isEmpty) {
       AppLogger.debug(
-        'No heatmap tiles available to log',
-        tag: 'Heatmap.Display.Complete',
+        'No heatmap tiles available',
+        tag: 'Heatmap.Display.Tiles',
       );
       return;
     }
 
     AppLogger.debug(
-      '================ COMPLETE HEATMAP DATA LOG ================',
-      tag: 'Heatmap.Display.Complete',
+      'Heatmap has ${data.tiles.length} tiles',
+      tag: 'Heatmap.Display.Tiles',
     );
 
-    // Log heatmap configuration
-    AppLogger.debug(
-      '--- Heatmap Configuration ---\n'
-      'ID: ${data.id}\n'
-      'Total Tiles: ${data.tiles.length}\n'
-      'Layout Type: $layout\n'
-      'Color Scheme: ${data.configuration.colorScheme.name}\n'
-      'Show Sub Cards: ${data.configuration.showSubCards}\n'
-      'Show Weightage: ${data.configuration.showWeightage}\n'
-      'Show Performance: ${data.configuration.showPerformance}\n'
-      'Show Value: ${data.configuration.showValue}\n'
-      'Min Tile Width: ${data.configuration.minTileWidth}\n'
-      'Max Tile Width: ${data.configuration.maxTileWidth}\n'
-      'Min Tile Height: ${data.configuration.minTileHeight}\n'
-      'Max Tile Height: ${data.configuration.maxTileHeight}',
-      tag: 'Heatmap.Display.Complete',
-    );
-
-    // Calculate total statistics
-    double totalWeightage = 0;
-    double totalPerformance = 0;
-    double? totalValue = 0;
-    var totalChildren = 0;
-    var tilesWithCustomColors = 0;
-
-    for (final tile in data.tiles) {
-      final uiTile = tile is HeatmapTileData
-          ? tile
-          : HeatmapTileData.fromEntity(tile);
-      totalWeightage += uiTile.weightage;
-      totalPerformance += uiTile.performance;
-      if (uiTile.value != null) {
-        totalValue = (totalValue ?? 0) + uiTile.value!;
-      } else {
-        totalValue = null;
-      }
-      totalChildren += uiTile.children?.length ?? 0;
-      if (uiTile.customColor != null) tilesWithCustomColors++;
-    }
-
-    AppLogger.debug(
-      '--- Aggregated Statistics ---\n'
-      'Total Weightage: ${totalWeightage.toStringAsFixed(2)}%\n'
-      'Average Performance: ${(totalPerformance / data.tiles.length).toStringAsFixed(2)}%\n'
-      'Total Value: ${totalValue?.toStringAsFixed(2) ?? 'N/A'}\n'
-      'Total Children Across All Tiles: $totalChildren\n'
-      'Tiles with Custom Colors: $tilesWithCustomColors/${data.tiles.length}',
-      tag: 'Heatmap.Display.Complete',
-    );
-
-    // Log each tile with complete details
+    // Log each tile with basic info
     for (var i = 0; i < data.tiles.length; i++) {
       final tile = data.tiles[i];
       final uiTile = tile is HeatmapTileData
           ? tile
           : HeatmapTileData.fromEntity(tile);
 
-      AppLogger.debug(
-        '========== TILE ${i + 1}/${data.tiles.length}: ${uiTile.name} ==========\n'
-        '🆔 ID: ${uiTile.id}\n'
-        '📛 Name: ${uiTile.name}\n'
-        '📈 Performance: ${uiTile.performance.toStringAsFixed(3)}%\n'
-        '⚖️ Weightage: ${uiTile.weightage.toStringAsFixed(3)}%\n'
-        '💰 Value: ${uiTile.value?.toStringAsFixed(2) ?? 'N/A'}\n'
-        '👥 Children Count: ${uiTile.children?.length ?? 0}\n'
-        '🎨 Custom Color: ${uiTile.customColor?.toString() ?? 'None'}\n'
-        '🔗 Tile Type: ${uiTile.runtimeType}\n'
-        '📊 Performance Range: ${uiTile.performance >= 0 ? 'Positive' : 'Negative'}\n'
-        '📏 Size Category: ${_getTileSizeCategory(uiTile.weightage)}',
-        tag: 'Heatmap.Display.Complete',
-      );
-
-      // Log complete children details if present
-      if (uiTile.children != null && uiTile.children!.isNotEmpty) {
-        AppLogger.debug(
-          '--- CHILDREN OF ${uiTile.name} (${uiTile.children!.length} total) ---',
-          tag: 'Heatmap.Display.Complete.Children',
-        );
-
-        double childrenTotalPerformance = 0;
-        double childrenTotalWeightage = 0;
-
-        for (var j = 0; j < uiTile.children!.length; j++) {
-          final child = uiTile.children![j];
-          final childUiTile = child is HeatmapTileData
-              ? child
-              : HeatmapTileData.fromEntity(child);
-          childrenTotalPerformance += childUiTile.performance;
-          childrenTotalWeightage += childUiTile.weightage;
-
-          AppLogger.debug(
-            '  📍 Child ${j + 1}/${uiTile.children!.length}:\n'
-            '    🆔 ID: ${childUiTile.id}\n'
-            '    📛 Name: ${childUiTile.name}\n'
-            '    📈 Performance: ${childUiTile.performance.toStringAsFixed(3)}%\n'
-            '    ⚖️ Weightage: ${childUiTile.weightage.toStringAsFixed(3)}%\n'
-            '    💰 Value: ${childUiTile.value?.toStringAsFixed(2) ?? 'N/A'}\n'
-            '    🎨 Custom Color: ${childUiTile.customColor?.toString() ?? 'None'}\n'
-            '    📊 Performance Impact: ${_getPerformanceImpact(childUiTile.performance)}',
-            tag: 'Heatmap.Display.Complete.Children',
-          );
-        }
-
-        final childrenUiTiles = uiTile.children!
-            .map(
-              (child) => child is HeatmapTileData
-                  ? child
-                  : HeatmapTileData.fromEntity(child),
-            )
-            .toList();
-
-        AppLogger.debug(
-          '  📋 Children Summary for ${uiTile.name}:\n'
-          '    📈 Average Performance: ${(childrenTotalPerformance / uiTile.children!.length).toStringAsFixed(2)}%\n'
-          '    ⚖️ Total Weightage: ${childrenTotalWeightage.toStringAsFixed(2)}%\n'
-          '    🎯 Best Performer: ${_getBestPerformer(childrenUiTiles)}\n'
-          '    📉 Worst Performer: ${_getWorstPerformer(childrenUiTiles)}',
-          tag: 'Heatmap.Display.Complete.Children',
-        );
-      } else {
-        AppLogger.debug(
-          '--- NO CHILDREN for ${uiTile.name} ---',
-          tag: 'Heatmap.Display.Complete.Children',
-        );
-      }
+      final childrenCount = uiTile.children?.length ?? 0;
 
       AppLogger.debug(
-        '========== END TILE ${i + 1} ==========',
-        tag: 'Heatmap.Display.Complete',
+        'Tile ${i + 1}: ${uiTile.name} ($childrenCount children)',
+        tag: 'Heatmap.Display.Tiles',
       );
     }
-
-    AppLogger.debug(
-      '================== END COMPLETE HEATMAP DATA LOG ==================',
-      tag: 'Heatmap.Display.Complete',
-    );
-  }
-
-  /// Helper method to categorize tile size based on weightage
-  String _getTileSizeCategory(double weightage) {
-    if (weightage >= 20) return 'Large (≥20%)';
-    if (weightage >= 10) return 'Medium (10-19%)';
-    if (weightage >= 5) return 'Small (5-9%)';
-    return 'Tiny (<5%)';
-  }
-
-  /// Helper method to categorize performance impact
-  String _getPerformanceImpact(double performance) {
-    if (performance >= 5) return 'High Positive (≥5%)';
-    if (performance >= 1) return 'Moderate Positive (1-4%)';
-    if (performance >= -1) return 'Neutral (-1% to 1%)';
-    if (performance >= -5) return 'Moderate Negative (-1% to -5%)';
-    return 'High Negative (≤-5%)';
-  }
-
-  /// Helper method to find best performing child
-  String _getBestPerformer(List<HeatmapTileData> children) {
-    if (children.isEmpty) return 'None';
-    final best = children.reduce(
-      (a, b) => a.performance > b.performance ? a : b,
-    );
-    return '${best.name} (${best.performance.toStringAsFixed(2)}%)';
-  }
-
-  /// Helper method to find worst performing child
-  String _getWorstPerformer(List<HeatmapTileData> children) {
-    if (children.isEmpty) return 'None';
-    final worst = children.reduce(
-      (a, b) => a.performance < b.performance ? a : b,
-    );
-    return '${worst.name} (${worst.performance.toStringAsFixed(2)}%)';
   }
 }
 
