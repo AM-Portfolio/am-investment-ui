@@ -97,7 +97,7 @@ class ApiClient {
   }
 
   /// Handle HTTP response
-  T _handleResponse<T>(http.Response response, T Function(data) parser) {
+  T _handleResponse<T>(http.Response response, T Function(dynamic data) parser) {
     AppLogger.debug(
       '📥 Response received - Status: ${response.statusCode}, Body length: ${response.body.length}',
       tag: 'ApiClient',
@@ -138,7 +138,7 @@ class ApiClient {
   /// Make GET request
   Future<T> get<T>(
     String endpoint, {
-    required T Function(data) parser,
+    required T Function(dynamic data) parser,
     Map<String, String>? headers,
     Map<String, dynamic>? queryParams,
   }) async {
@@ -191,7 +191,7 @@ class ApiClient {
   /// Make POST request
   Future<T> post<T>(
     String endpoint, {
-    required T Function(data) parser,
+    required T Function(dynamic data) parser,
     Map<String, String>? headers,
     Map<String, dynamic>? queryParams,
     body,
@@ -250,7 +250,7 @@ class ApiClient {
   /// Make PUT request
   Future<T> put<T>(
     String endpoint, {
-    required T Function(data) parser,
+    required T Function(dynamic data) parser,
     Map<String, String>? headers,
     Map<String, dynamic>? queryParams,
     body,
@@ -278,7 +278,7 @@ class ApiClient {
   /// Make DELETE request
   Future<T> delete<T>(
     String endpoint, {
-    required T Function(data) parser,
+    required T Function(dynamic data) parser,
     Map<String, String>? headers,
     Map<String, dynamic>? queryParams,
     body,
