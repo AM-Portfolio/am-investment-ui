@@ -1,55 +1,95 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
-import '../../core/ui/components.dart';
-import '../selectors/selectors.dart';
+import '../../widgets/selectors/heatmap_layout_selector.dart';
+import '../../widgets/selectors/market_cap_selector.dart';
+import '../../widgets/selectors/metric_selector.dart';
+import '../../widgets/selectors/sector_selector.dart';
+import '../../widgets/selectors/time_frame_selector.dart';
 import 'configs/selector_config.dart';
+import 'core/heatmap_selector_core.dart';
+import 'mobile/heatmap_selector_mobile.dart';
+import 'web/heatmap_selector_web.dart';
 
-/// Pure heatmap selector template - handles only selector UI and interactions
-/// Extracted for better modularity and reusability
+/// A template widget that provides adaptive heatmap selector functionality.
+///
+/// This widget acts as a smart wrapper that chooses between [HeatmapSelectorWeb]
+/// and [HeatmapSelectorMobile] based on screen size and configuration.
+///
+/// Key Features:
+/// - Automatically adapts between web and mobile implementations
+/// - Configurable breakpoints for responsive behavior
+/// - Smart layout selection based on screen size
+/// - Proper delegation to existing web/mobile components
+///
+/// Usage:
+/// ```dart
+/// HeatmapSelectorTemplate(
+///   core: myHeatmapCore,
+///   title: 'Stock Heatmap Filters',
+///   enableAdaptiveLayout: true,
+///   mobileBreakpoint: 768,
+/// )
+/// ```
 class HeatmapSelectorTemplate extends StatefulWidget {
   const HeatmapSelectorTemplate({
     super.key,
+    // New clean interface
+    this.core,
+    this.config,
+    this.enableAdaptiveLayout = true,
+    this.mobileBreakpoint = 768.0,
+    this.tabletBreakpoint = 1024.0,
+    this.forceLayout,
+    this.onLayoutChanged,
+    // Legacy interface for backwards compatibility
     this.initialTimeFrame,
     this.initialMetric,
     this.initialSector,
     this.initialMarketCap,
     this.initialLayout,
-    this.onTimeFrameChanged,
-    this.onMetricChanged,
-    this.onSectorChanged,
-    this.onMarketCapChanged,
-    this.onLayoutChanged,
     this.onFiltersChanged,
     this.showTimeFrame = true,
     this.showMetric = true,
     this.showSector = true,
     this.showMarketCap = true,
-    this.showLayout = false,
+    this.showLayout = true,
     this.layout = SelectorLayoutType.compact,
-    this.primaryColor,
-    this.title,
-    this.showResetButton = true,
     this.availableTimeFrames,
     this.availableMetrics,
     this.availableSectors,
     this.availableMarketCaps,
     this.availableLayouts,
+    // Common parameters
+    this.title,
+    this.primaryColor,
+    this.showResetButton = true,
   });
 
+  /// The core heatmap state manager (new interface)
+  final HeatmapSelectorCore? core;
+
+  /// Optional configuration - if null, auto-generates based on platform
+  final SelectorConfig? config;
+
+  /// Widget title displayed at the top
+  final String? title;
+
+  /// Primary color for theming
+  final Color? primaryColor;
+
+  /// Whether to show the reset button
+  final bool showResetButton;
+
+  /// Enable adaptive layout switching based on screen size
+  final bool enableAdaptiveLayout;
+
+  // Legacy interface parameters
   final TimeFrame? initialTimeFrame;
   final MetricType? initialMetric;
   final SectorType? initialSector;
   final MarketCapType? initialMarketCap;
   final HeatmapLayoutType? initialLayout;
-
-  final ValueChanged<TimeFrame>? onTimeFrameChanged;
-  final ValueChanged<MetricType>? onMetricChanged;
-  final ValueChanged<SectorType>? onSectorChanged;
-  final ValueChanged<MarketCapType>? onMarketCapChanged;
-  final ValueChanged<HeatmapLayoutType>? onLayoutChanged;
-
-  /// Combined callback for all filter changes
   final Function({
     TimeFrame? timeFrame,
     MetricType? metric,
@@ -58,23 +98,29 @@ class HeatmapSelectorTemplate extends StatefulWidget {
     HeatmapLayoutType? layout,
   })?
   onFiltersChanged;
-
   final bool showTimeFrame;
   final bool showMetric;
   final bool showSector;
   final bool showMarketCap;
   final bool showLayout;
   final SelectorLayoutType layout;
-  final Color? primaryColor;
-  final String? title;
-  final bool showResetButton;
-
-  // Available options from configuration
   final List<TimeFrame>? availableTimeFrames;
   final List<MetricType>? availableMetrics;
   final List<SectorType>? availableSectors;
   final List<MarketCapType>? availableMarketCaps;
   final List<HeatmapLayoutType>? availableLayouts;
+
+  /// Breakpoint below which mobile layout is used (in logical pixels)
+  final double mobileBreakpoint;
+
+  /// Breakpoint above which desktop layout is used (in logical pixels)
+  final double tabletBreakpoint;
+
+  /// Force a specific layout type (overrides adaptive behavior)
+  final SelectorLayoutType? forceLayout;
+
+  /// Callback when layout changes due to responsive behavior
+  final ValueChanged<SelectorLayoutType>? onLayoutChanged;
 
   @override
   State<HeatmapSelectorTemplate> createState() =>
@@ -82,545 +128,238 @@ class HeatmapSelectorTemplate extends StatefulWidget {
 }
 
 class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
-  late TimeFrame _selectedTimeFrame;
-  late MetricType _selectedMetric;
-  late SectorType _selectedSector;
-  late MarketCapType _selectedMarketCap;
-  late HeatmapLayoutType _selectedLayout;
+  late HeatmapSelectorCore _effectiveCore;
 
   @override
   void initState() {
     super.initState();
-    _initializeSelectors();
+
+    // Create core if not provided (legacy interface)
+    if (widget.core != null) {
+      _effectiveCore = widget.core!;
+    } else {
+      _effectiveCore = HeatmapSelectorCore(
+        initialTimeFrame: widget.initialTimeFrame,
+        initialMetric: widget.initialMetric,
+        initialSector: widget.initialSector,
+        initialMarketCap: widget.initialMarketCap,
+        initialLayout: widget.initialLayout,
+        availableTimeFrames: widget.availableTimeFrames,
+        availableMetrics: widget.availableMetrics,
+        availableSectors: widget.availableSectors,
+        availableMarketCaps: widget.availableMarketCaps,
+        availableLayouts: widget.availableLayouts,
+      );
+
+      // Set up legacy callback forwarding
+      _effectiveCore.addListener(_onCoreChanged);
+    }
 
     AppLogger.debug(
-      'HeatmapSelectorTemplate: initialized with layout=${widget.layout}',
-      tag: 'Heatmap.Selector',
+      'HeatmapSelectorTemplate: initialized with adaptive layout=${widget.enableAdaptiveLayout}',
+      tag: 'Heatmap.Selector.Template',
     );
   }
 
-  void _initializeSelectors() {
-    _selectedTimeFrame = widget.initialTimeFrame ?? TimeFrame.oneMonth;
-    _selectedMetric = widget.initialMetric ?? MetricType.changePercent;
-    _selectedSector = widget.initialSector ?? SectorType.all;
-    _selectedMarketCap = widget.initialMarketCap ?? MarketCapType.all;
-    _selectedLayout = widget.initialLayout ?? HeatmapLayoutType.treemap;
-  }
-
-  void _onTimeFrameChanged(TimeFrame timeFrame) {
-    setState(() {
-      _selectedTimeFrame = timeFrame;
-    });
-
-    AppLogger.debug(
-      'Selector timeframe changed: ${timeFrame.code}',
-      tag: 'Heatmap.Selector',
-    );
-
-    widget.onTimeFrameChanged?.call(timeFrame);
-    _notifyFiltersChanged();
-  }
-
-  void _onMetricChanged(MetricType metric) {
-    setState(() {
-      _selectedMetric = metric;
-    });
-
-    AppLogger.debug(
-      'Selector metric changed: ${metric.shortName}',
-      tag: 'Heatmap.Selector',
-    );
-
-    widget.onMetricChanged?.call(metric);
-    _notifyFiltersChanged();
-  }
-
-  void _onSectorChanged(SectorType sector) {
-    setState(() {
-      _selectedSector = sector;
-    });
-
-    AppLogger.debug(
-      'Selector sector changed: ${sector.name}',
-      tag: 'Heatmap.Selector',
-    );
-
-    widget.onSectorChanged?.call(sector);
-    _notifyFiltersChanged();
-  }
-
-  void _onMarketCapChanged(MarketCapType marketCap) {
-    setState(() {
-      _selectedMarketCap = marketCap;
-    });
-
-    AppLogger.debug(
-      'Selector market cap changed: ${marketCap.name}',
-      tag: 'Heatmap.Selector',
-    );
-
-    widget.onMarketCapChanged?.call(marketCap);
-    _notifyFiltersChanged();
-  }
-
-  void _onLayoutChanged(HeatmapLayoutType layout) {
-    setState(() {
-      _selectedLayout = layout;
-    });
-
-    AppLogger.debug(
-      'Selector layout changed: ${layout.displayName}',
-      tag: 'Heatmap.Selector',
-    );
-
-    widget.onLayoutChanged?.call(layout);
-    _notifyFiltersChanged();
-  }
-
-  void _resetFilters() {
-    setState(() {
-      _selectedTimeFrame = TimeFrame.oneMonth;
-      _selectedMetric = MetricType.changePercent;
-      _selectedSector = SectorType.all;
-      _selectedMarketCap = MarketCapType.all;
-      _selectedLayout = HeatmapLayoutType.treemap;
-    });
-
-    AppLogger.debug('Selector filters reset', tag: 'Heatmap.Selector');
-    _notifyFiltersChanged();
-  }
-
-  void _notifyFiltersChanged() {
+  void _onCoreChanged() {
     widget.onFiltersChanged?.call(
-      timeFrame: _selectedTimeFrame,
-      metric: _selectedMetric,
-      sector: _selectedSector,
-      marketCap: _selectedMarketCap,
-      layout: _selectedLayout,
+      timeFrame: _effectiveCore.selectedTimeFrame,
+      metric: _effectiveCore.selectedMetric,
+      sector: _effectiveCore.selectedSector,
+      marketCap: _effectiveCore.selectedMarketCap,
+      layout: _effectiveCore.selectedLayout,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    switch (widget.layout) {
-      case SelectorLayoutType.compact:
-        return _buildCompactLayout(context);
-      case SelectorLayoutType.expanded:
-        return _buildExpandedLayout(context);
-      case SelectorLayoutType.pills:
-        return _buildPillsLayout(context);
-      case SelectorLayoutType.dropdown:
-        return _buildDropdownLayout(context);
+  void dispose() {
+    if (widget.core == null) {
+      _effectiveCore.removeListener(_onCoreChanged);
+      _effectiveCore.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Determine the appropriate platform based on screen size
+  _PlatformType get _platformType {
+    if (!widget.enableAdaptiveLayout) {
+      // If adaptive layout is disabled, use web as default
+      return _PlatformType.web;
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (screenWidth < widget.mobileBreakpoint) {
+      return _PlatformType.mobile;
+    } else {
+      return _PlatformType.web;
     }
   }
 
-  Widget _buildCompactLayout(BuildContext context) => Container(
-    height: 60,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.1),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.03),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        if (widget.showTimeFrame) ...[
-          Expanded(flex: 3, child: _buildTimeFramePills(context)),
-          const SizedBox(width: 12),
-        ],
-        if (widget.showMetric) ...[
-          Expanded(flex: 2, child: _buildMetricDropdown(context)),
-          const SizedBox(width: 12),
-        ],
-        if (widget.showSector) ...[
-          Expanded(flex: 2, child: _buildSectorDropdown(context)),
-          const SizedBox(width: 12),
-        ],
-        if (widget.showMarketCap) ...[
-          Expanded(flex: 2, child: _buildMarketCapDropdown(context)),
-          const SizedBox(width: 12),
-        ],
-        if (widget.showLayout) ...[
-          Expanded(flex: 2, child: _buildLayoutDropdown(context)),
-          const SizedBox(width: 12),
-        ],
-        if (widget.showResetButton) _buildResetButton(context),
-      ],
-    ),
-  );
+  /// Get the appropriate configuration based on platform
+  SelectorConfig get _effectiveConfig {
+    if (widget.config != null) {
+      return widget.config!;
+    }
 
-  Widget _buildExpandedLayout(BuildContext context) => Card(
-    elevation: 2,
-    margin: const EdgeInsets.all(8),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.title != null) ...[
-            Text(
-              widget.title!,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: widget.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          _buildExpandedSelectors(context),
-          if (widget.showResetButton) ...[
-            const SizedBox(height: 16),
-            _buildExpandedResetButton(context),
-          ],
-        ],
-      ),
-    ),
-  );
+    // If legacy parameters are provided, create config from them
+    if (widget.core == null) {
+      return SelectorConfig(
+        showTimeFrameSelector: widget.showTimeFrame,
+        showMetricSelector: widget.showMetric,
+        showSectorSelector: widget.showSector,
+        showMarketCapSelector: widget.showMarketCap,
+        showLayoutSelector: widget.showLayout,
+        selectorLayout: widget.layout,
+        availableTimeFrames: widget.availableTimeFrames,
+        availableMetrics: widget.availableMetrics,
+        availableSectors: widget.availableSectors,
+        availableMarketCaps: widget.availableMarketCaps,
+        availableLayouts: widget.availableLayouts,
+      );
+    }
 
-  Widget _buildPillsLayout(BuildContext context) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: SelectorContainerConfigs.responsiveGrid(
-      children: [
-        if (widget.showTimeFrame) _buildTimeFramePills(context),
-        if (widget.showMetric) _buildMetricPills(context),
-        if (widget.showSector) _buildSectorPills(context),
-        if (widget.showMarketCap) _buildMarketCapPills(context),
-        if (widget.showLayout) _buildLayoutPills(context),
-      ],
-    ),
-  );
-
-  Widget _buildDropdownLayout(BuildContext context) => Container(
-    padding: const EdgeInsets.all(8),
-    child: Row(
-      children: [
-        if (widget.showTimeFrame) ...[
-          Expanded(child: _buildTimeFrameDropdown(context)),
-          const SizedBox(width: 8),
-        ],
-        if (widget.showMetric) ...[
-          Expanded(child: _buildMetricDropdown(context)),
-          const SizedBox(width: 8),
-        ],
-        if (widget.showSector) ...[
-          Expanded(child: _buildSectorDropdown(context)),
-          const SizedBox(width: 8),
-        ],
-        if (widget.showMarketCap) ...[
-          Expanded(child: _buildMarketCapDropdown(context)),
-          const SizedBox(width: 8),
-        ],
-        if (widget.showLayout) ...[
-          Expanded(child: _buildLayoutDropdown(context)),
-          const SizedBox(width: 8),
-        ],
-        if (widget.showResetButton) _buildIconResetButton(context),
-      ],
-    ),
-  );
-
-  Widget _buildTimeFramePills(BuildContext context) {
-    final timeFrames =
-        widget.availableTimeFrames ??
-        [
-          TimeFrame.oneDay,
-          TimeFrame.oneWeek,
-          TimeFrame.oneMonth,
-          TimeFrame.threeMonths,
-          TimeFrame.oneYear,
-        ];
-
-    return PillSelector<TimeFrame>(
-      items: timeFrames,
-      selectedItem: _selectedTimeFrame,
-      onSelectionChanged: _onTimeFrameChanged,
-      itemDisplayText: (timeFrame) => timeFrame.displayName,
-      primaryColor: widget.primaryColor,
-      scrollable: true,
-    );
+    // Auto-generate config based on platform
+    switch (_platformType) {
+      case _PlatformType.mobile:
+        return SelectorConfig.mobile();
+      case _PlatformType.web:
+        return SelectorConfig.web();
+    }
   }
 
-  Widget _buildMetricDropdown(BuildContext context) =>
-      CustomDropdown<MetricType>(
-        value: _selectedMetric,
-        primaryColor: widget.primaryColor,
-        hint: 'Metric',
-        items: (widget.availableMetrics ?? MetricType.heatmapMetrics)
-            .map(
-              (metric) => metric.toDropdownItem(
-                text: metric.shortName,
-                icon: metric.icon,
-                iconColor:
-                    (widget.primaryColor ?? Theme.of(context).primaryColor)
-                        .withOpacity(0.7),
-              ),
-            )
-            .toList(),
-        onChanged: (value) {
-          if (value != null) _onMetricChanged(value);
-        },
-      );
+  /// Get the appropriate layout type based on platform and config
+  SelectorLayoutType get _effectiveLayout {
+    if (widget.forceLayout != null) {
+      return widget.forceLayout!;
+    }
 
-  Widget _buildResetButton(BuildContext context) => ResetButton(
-    onPressed: _resetFilters,
-    style: ResetButtonStyle.compact,
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (screenWidth < widget.mobileBreakpoint) {
+      // Mobile: prefer compact layouts
+      return SelectorLayoutType.compact;
+    } else if (screenWidth < widget.tabletBreakpoint) {
+      // Tablet: prefer expanded or dropdown layouts
+      return _effectiveConfig.selectorLayout == SelectorLayoutType.compact
+          ? SelectorLayoutType.dropdown
+          : SelectorLayoutType.expanded;
+    } else {
+      // Desktop: use configured layout
+      return _effectiveConfig.selectorLayout;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final config = _effectiveConfig;
+
+    if (!config.hasSelectors) {
+      return const SizedBox.shrink();
+    }
+
+    final layout = _effectiveLayout;
+
+    // Notify layout changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onLayoutChanged?.call(layout);
+    });
+
+    switch (_platformType) {
+      case _PlatformType.mobile:
+        return _buildMobileSelector(config, layout);
+      case _PlatformType.web:
+        return _buildWebSelector(config, layout);
+    }
+  }
+
+  Widget _buildMobileSelector(
+    SelectorConfig config,
+    SelectorLayoutType layout,
+  ) => HeatmapSelectorMobile(
+    core: _effectiveCore,
+    showTimeFrame: config.showTimeFrameSelector,
+    showMetric: config.showMetricSelector,
+    showSector: config.showSectorSelector,
+    showMarketCap: config.showMarketCapSelector,
+    showLayout: config.showLayoutSelector,
     primaryColor: widget.primaryColor,
+    title: widget.title,
+    showResetButton: widget.showResetButton,
+    compactMode: layout == SelectorLayoutType.compact,
   );
 
-  Widget _buildExpandedSelectors(BuildContext context) => Column(
-    children: [
-      Row(
-        children: [
-          if (widget.showTimeFrame) ...[
-            Expanded(
-              child: TimeFrameSelector.heatmap(
-                selectedTimeFrame: _selectedTimeFrame,
-                onTimeFrameChanged: _onTimeFrameChanged,
-                primaryColor: widget.primaryColor,
-                title: 'Time Frame',
-              ),
-            ),
-            const SizedBox(width: 16),
-          ],
-          if (widget.showMetric)
-            Expanded(
-              child: MetricSelector.heatmap(
-                selectedMetric: _selectedMetric,
-                onMetricChanged: _onMetricChanged,
-                primaryColor: widget.primaryColor,
-                title: 'Metric',
-              ),
-            ),
-        ],
-      ),
-      if (widget.showSector || widget.showMarketCap) ...[
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            if (widget.showSector) ...[
-              Expanded(
-                child: SectorSelector.heatmap(
-                  selectedSector: _selectedSector,
-                  onSectorChanged: _onSectorChanged,
-                  primaryColor: widget.primaryColor,
-                  title: 'Sector',
-                ),
-              ),
-              const SizedBox(width: 16),
-            ],
-            if (widget.showMarketCap)
-              Expanded(
-                child: MarketCapSelector.heatmap(
-                  selectedMarketCap: _selectedMarketCap,
-                  onMarketCapChanged: _onMarketCapChanged,
-                  primaryColor: widget.primaryColor,
-                  title: 'Market Cap',
-                ),
-              ),
-          ],
-        ),
-      ],
-    ],
-  );
-
-  Widget _buildExpandedResetButton(BuildContext context) => Align(
-    alignment: Alignment.centerRight,
-    child: ResetButton(
-      onPressed: _resetFilters,
-      style: ResetButtonStyle.outlined,
-      primaryColor: widget.primaryColor,
-    ),
-  );
-
-  // Additional pill and dropdown builders for other selectors
-  Widget _buildMetricPills(BuildContext context) {
-    final metrics = widget.availableMetrics ?? MetricType.heatmapMetrics;
-    return PillSelector<MetricType>(
-      items: metrics,
-      selectedItem: _selectedMetric,
-      onSelectionChanged: _onMetricChanged,
-      itemDisplayText: (metric) => metric.shortName,
-      primaryColor: widget.primaryColor,
-    );
-  }
-
-  Widget _buildSectorPills(BuildContext context) {
-    final sectors =
-        widget.availableSectors ??
-        [
-          SectorType.all,
-          SectorType.technology,
-          SectorType.healthcare,
-          SectorType.finance,
-        ];
-    return PillSelector<SectorType>(
-      items: sectors,
-      selectedItem: _selectedSector,
-      onSelectionChanged: _onSectorChanged,
-      itemDisplayText: (sector) => sector.displayName,
-      primaryColor: widget.primaryColor,
-    );
-  }
-
-  Widget _buildMarketCapPills(BuildContext context) {
-    final marketCaps =
-        widget.availableMarketCaps ??
-        [
-          MarketCapType.all,
-          MarketCapType.largeCap,
-          MarketCapType.midCap,
-          MarketCapType.smallCap,
-        ];
-    return PillSelector<MarketCapType>(
-      items: marketCaps,
-      selectedItem: _selectedMarketCap,
-      onSelectionChanged: _onMarketCapChanged,
-      itemDisplayText: (marketCap) => marketCap.displayName,
-      primaryColor: widget.primaryColor,
-    );
-  }
-
-  Widget _buildLayoutPills(BuildContext context) {
-    final layouts =
-        widget.availableLayouts ??
-        [
-          HeatmapLayoutType.treemap,
-          HeatmapLayoutType.grid,
-          HeatmapLayoutType.list,
-        ];
-    return PillSelector<HeatmapLayoutType>(
-      items: layouts,
-      selectedItem: _selectedLayout,
-      onSelectionChanged: _onLayoutChanged,
-      itemDisplayText: (layout) => layout.displayName,
-      itemIcon: (layout) => layout.icon,
-      primaryColor: widget.primaryColor,
-    );
-  }
-
-  Widget _buildTimeFrameDropdown(
-    BuildContext context,
-  ) => CustomDropdown<TimeFrame>(
-    value: _selectedTimeFrame,
-    primaryColor: widget.primaryColor,
-    hint: 'Time Frame',
-    items:
-        (widget.availableTimeFrames ??
-                [
-                  TimeFrame.oneDay,
-                  TimeFrame.oneWeek,
-                  TimeFrame.oneMonth,
-                  TimeFrame.threeMonths,
-                  TimeFrame.oneYear,
-                ])
-            .map(
-              (timeFrame) =>
-                  timeFrame.toSimpleDropdownItem(text: timeFrame.displayName),
-            )
-            .toList(),
-    onChanged: (value) {
-      if (value != null) _onTimeFrameChanged(value);
-    },
-  );
-
-  Widget _buildSectorDropdown(BuildContext context) =>
-      CustomDropdown<SectorType>(
-        value: _selectedSector,
+  Widget _buildWebSelector(SelectorConfig config, SelectorLayoutType layout) =>
+      HeatmapSelectorWeb(
+        core: _effectiveCore,
+        showTimeFrame: config.showTimeFrameSelector,
+        showMetric: config.showMetricSelector,
+        showSector: config.showSectorSelector,
+        showMarketCap: config.showMarketCapSelector,
+        showLayout: config.showLayoutSelector,
+        layout: layout,
         primaryColor: widget.primaryColor,
-        hint: 'Sector',
-        items:
-            (widget.availableSectors ??
-                    [
-                      SectorType.all,
-                      SectorType.technology,
-                      SectorType.healthcare,
-                      SectorType.finance,
-                    ])
-                .map(
-                  (sector) => sector.toDropdownItem(
-                    text: sector.shortName,
-                    icon: sector.icon,
-                    iconColor:
-                        (widget.primaryColor ?? Theme.of(context).primaryColor)
-                            .withOpacity(0.7),
-                  ),
-                )
-                .toList(),
-        onChanged: (value) {
-          if (value != null) _onSectorChanged(value);
-        },
+        title: widget.title,
+        showResetButton: widget.showResetButton,
       );
+}
 
-  Widget _buildMarketCapDropdown(BuildContext context) =>
-      CustomDropdown<MarketCapType>(
-        value: _selectedMarketCap,
-        primaryColor: widget.primaryColor,
-        hint: 'Market Cap',
-        items:
-            (widget.availableMarketCaps ??
-                    [
-                      MarketCapType.all,
-                      MarketCapType.largeCap,
-                      MarketCapType.midCap,
-                      MarketCapType.smallCap,
-                    ])
-                .map(
-                  (marketCap) => marketCap.toDropdownItem(
-                    text: marketCap.shortName,
-                    icon: marketCap.icon,
-                    iconColor:
-                        (widget.primaryColor ?? Theme.of(context).primaryColor)
-                            .withOpacity(0.7),
-                  ),
-                )
-                .toList(),
-        onChanged: (value) {
-          if (value != null) _onMarketCapChanged(value);
-        },
-      );
+/// Internal enum to represent platform types
+enum _PlatformType { mobile, web }
 
-  Widget _buildIconResetButton(BuildContext context) =>
-      ResetButton(onPressed: _resetFilters, primaryColor: widget.primaryColor);
+/// Extension methods for easy template usage
+extension HeatmapSelectorTemplateExtensions on HeatmapSelectorTemplate {
+  /// Create a mobile-optimized template
+  static HeatmapSelectorTemplate mobile({
+    required HeatmapSelectorCore core,
+    String? title,
+    Color? primaryColor,
+    bool showResetButton = true,
+    SelectorConfig? config,
+  }) => HeatmapSelectorTemplate(
+    core: core,
+    title: title,
+    primaryColor: primaryColor,
+    showResetButton: showResetButton,
+    config: config ?? SelectorConfig.mobile(),
+    enableAdaptiveLayout: false,
+    forceLayout: SelectorLayoutType.compact,
+  );
 
-  Widget _buildLayoutDropdown(BuildContext context) =>
-      CustomDropdown<HeatmapLayoutType>(
-        value: _selectedLayout,
-        primaryColor: widget.primaryColor,
-        hint: 'Layout',
-        items:
-            (widget.availableLayouts ??
-                    [
-                      HeatmapLayoutType.treemap,
-                      HeatmapLayoutType.grid,
-                      HeatmapLayoutType.list,
-                    ])
-                .map(
-                  (layout) => layout.toDropdownItem(
-                    text: layout.displayName,
-                    icon: layout.icon,
-                    iconColor: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.color?.withOpacity(0.8),
-                  ),
-                )
-                .toList(),
-        onChanged: (value) {
-          if (value != null) _onLayoutChanged(value);
-        },
-      );
+  /// Create a web-optimized template
+  static HeatmapSelectorTemplate web({
+    required HeatmapSelectorCore core,
+    String? title,
+    Color? primaryColor,
+    bool showResetButton = true,
+    SelectorConfig? config,
+    SelectorLayoutType layout = SelectorLayoutType.expanded,
+  }) => HeatmapSelectorTemplate(
+    core: core,
+    title: title,
+    primaryColor: primaryColor,
+    showResetButton: showResetButton,
+    config: config ?? SelectorConfig.web(),
+    enableAdaptiveLayout: false,
+    forceLayout: layout,
+  );
+
+  /// Create a fully adaptive template that switches based on screen size
+  static HeatmapSelectorTemplate adaptive({
+    required HeatmapSelectorCore core,
+    String? title,
+    Color? primaryColor,
+    bool showResetButton = true,
+    double mobileBreakpoint = 768.0,
+    double tabletBreakpoint = 1024.0,
+    ValueChanged<SelectorLayoutType>? onLayoutChanged,
+  }) => HeatmapSelectorTemplate(
+    core: core,
+    title: title,
+    primaryColor: primaryColor,
+    showResetButton: showResetButton,
+    mobileBreakpoint: mobileBreakpoint,
+    tabletBreakpoint: tabletBreakpoint,
+    onLayoutChanged: onLayoutChanged,
+  );
 }
