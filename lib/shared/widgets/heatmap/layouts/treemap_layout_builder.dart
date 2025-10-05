@@ -19,10 +19,8 @@ class TreemapLayoutBuilder extends HeatmapLayoutBuilder {
     Widget Function(HeatmapTileData tile)? customTileBuilder,
     SectorType? selectedSector,
   }) {
-    // Get tiles based on selected sector using common base class method
-    final displayTiles = getTilesBasedOnSector(data, selectedSector);
-    final sortedTiles = List<HeatmapTileData>.from(displayTiles)
-      ..sort((a, b) => b.weightage.compareTo(a.weightage));
+    // Get tiles based on selected sector using common base class method (includes centralized sorting)
+    final sortedTiles = getTilesBasedOnSector(data, selectedSector);
 
     AppLogger.debug(
       'TreemapLayoutBuilder: building treemap with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}',

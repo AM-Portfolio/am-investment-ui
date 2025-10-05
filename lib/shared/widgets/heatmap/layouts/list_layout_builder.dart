@@ -19,9 +19,8 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     Widget Function(HeatmapTileData tile)? customTileBuilder,
     SectorType? selectedSector,
   }) {
-    // Get tiles based on selected sector using common base class method
-    final displayTiles = getTilesBasedOnSector(data, selectedSector);
-    final sortedTiles = _sortTilesForListView(displayTiles, data);
+    // Get tiles based on selected sector using common base class method (includes sorting)
+    final sortedTiles = getTilesBasedOnSector(data, selectedSector);
     final tileHeight = _calculateOptimalTileHeight(data, width);
 
     AppLogger.debug(
@@ -49,26 +48,6 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
         );
       },
     );
-  }
-
-  /// Sorts tiles for optimal list display based on configuration
-  List<HeatmapTileData> _sortTilesForListView(
-    List<HeatmapTileData> tiles,
-    HeatmapData data,
-  ) {
-    final config = data.configuration;
-
-    // Sort by different criteria based on what's being emphasized
-    if (config.colorScheme == HeatmapColorSchemeType.performance) {
-      // Sort by performance (best to worst)
-      return tiles..sort((a, b) => b.performance.compareTo(a.performance));
-    } else if (config.colorScheme == HeatmapColorSchemeType.weightage) {
-      // Sort by weightage (highest to lowest)
-      return tiles..sort((a, b) => b.weightage.compareTo(a.weightage));
-    } else {
-      // Default alphabetical sort for neutral views
-      return tiles..sort((a, b) => a.name.compareTo(b.name));
-    }
   }
 
   /// Calculates optimal tile height based on content and screen size

@@ -19,7 +19,7 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
     Widget Function(HeatmapTileData tile)? customTileBuilder,
     SectorType? selectedSector,
   }) {
-    // Get tiles based on selected sector using common base class method
+    // Get tiles based on selected sector using common base class method (includes centralized sorting)
     final displayTiles = getTilesBasedOnSector(data, selectedSector);
     final crossAxisCount = _calculateOptimalCrossAxisCount(
       context,

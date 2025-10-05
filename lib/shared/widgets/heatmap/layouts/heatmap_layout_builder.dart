@@ -191,48 +191,75 @@ abstract class HeatmapLayoutBuilder {
 
   /// Gets tiles based on selected sector for display
   /// Common logic used across all layout builders
+  /// Returns tiles sorted according to the heatmap configuration
   List<HeatmapTileData> getTilesBasedOnSector(
     HeatmapData data,
     SectorType? selectedSector,
   ) {
     final rootTiles = getUiTiles(data);
+    List<HeatmapTileData> resultTiles;
 
     if (selectedSector == null || selectedSector == SectorType.all) {
       // Show all parent sector tiles (no children)
-      return rootTiles;
-    }
-
-    if (selectedSector == SectorType.noGroup) {
+      resultTiles = rootTiles;
+    } else if (selectedSector == SectorType.noGroup) {
       // Show all children from all sectors (flattened)
       final allChildren = <HeatmapTileData>[];
       for (final tile in rootTiles) {
         addTileAndChildren(tile, allChildren, includeParent: false);
       }
-      return allChildren;
-    }
+      resultTiles = allChildren;
+    } else {
+      // Show specific sector tile and its children
+      final sectorName = selectedSector.displayName;
+      final specificSectorTiles = <HeatmapTileData>[];
 
-    // Show specific sector tile and its children
-    final sectorName = selectedSector.displayName;
-    final specificSectorTiles = <HeatmapTileData>[];
-
-    for (final tile in rootTiles) {
-      if (matchesSector(tile, sectorName)) {
-        // Add the sector tile itself
-        specificSectorTiles.add(tile);
-        // Add all its children
-        if (tile.children != null && tile.children!.isNotEmpty) {
-          for (final child in tile.children!) {
-            final childTile = child is HeatmapTileData
-                ? child
-                : HeatmapTileData.fromEntity(child);
-            specificSectorTiles.add(childTile);
+      for (final tile in rootTiles) {
+        if (matchesSector(tile, sectorName)) {
+          // Add the sector tile itself
+          specificSectorTiles.add(tile);
+          // Add all its children
+          if (tile.children != null && tile.children!.isNotEmpty) {
+            for (final child in tile.children!) {
+              final childTile = child is HeatmapTileData
+                  ? child
+                  : HeatmapTileData.fromEntity(child);
+              specificSectorTiles.add(childTile);
+            }
           }
+          break; // Found the sector, no need to continue
         }
-        break; // Found the sector, no need to continue
       }
+      resultTiles = specificSectorTiles;
     }
 
-    return specificSectorTiles;
+    // Apply centralized sorting based on configuration
+    return sortTiles(resultTiles, data);
+  }
+
+  /// Centralized sorting logic for all layout builders
+  /// Sorts tiles based on the heatmap configuration color scheme
+  List<HeatmapTileData> sortTiles(
+    List<HeatmapTileData> tiles,
+    HeatmapData data,
+  ) {
+    final config = data.configuration;
+
+    // Sort by different criteria based on what's being emphasized
+    switch (config.colorScheme) {
+      case HeatmapColorSchemeType.performance:
+        // Sort by performance (best to worst)
+        return tiles..sort((a, b) => b.performance.compareTo(a.performance));
+
+      case HeatmapColorSchemeType.weightage:
+        // Sort by weightage (highest to lowest)
+        return tiles..sort((a, b) => b.weightage.compareTo(a.weightage));
+
+      case HeatmapColorSchemeType.neutral:
+      case HeatmapColorSchemeType.custom:
+        // Default alphabetical sort for neutral/custom views
+        return tiles..sort((a, b) => a.name.compareTo(b.name));
+    }
   }
 
   /// Recursively adds a tile and all its children to the list
