@@ -5,6 +5,20 @@ import 'package:flutter/foundation.dart'
 
 /// A platform-adaptive card widget with consistent styling
 class AppCard extends StatelessWidget {
+  /// Constructor
+  const AppCard({
+    required this.child,
+    super.key,
+    this.title,
+    this.subtitle,
+    this.action,
+    this.padded = true,
+    this.fullWidth = true,
+    this.borderRadius,
+    this.elevation,
+    this.backgroundColor,
+  });
+
   /// Child widget to display inside the card
   final Widget child;
 
@@ -32,30 +46,15 @@ class AppCard extends StatelessWidget {
   /// Background color of the card
   final Color? backgroundColor;
 
-  /// Constructor
-  const AppCard({
-    super.key,
-    required this.child,
-    this.title,
-    this.subtitle,
-    this.action,
-    this.padded = true,
-    this.fullWidth = true,
-    this.borderRadius,
-    this.elevation,
-    this.backgroundColor,
-  });
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     // Platform-specific styling
-    final double defaultElevation = defaultTargetPlatform == TargetPlatform.iOS
+    final defaultElevation = defaultTargetPlatform == TargetPlatform.iOS
         ? 0
         : 1;
-    final BorderRadius defaultBorderRadius =
-        defaultTargetPlatform == TargetPlatform.iOS
+    final defaultBorderRadius = defaultTargetPlatform == TargetPlatform.iOS
         ? BorderRadius.circular(12)
         : BorderRadius.circular(8);
 
@@ -113,7 +112,7 @@ class AppCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor ?? CupertinoColors.systemBackground,
           borderRadius: borderRadius ?? defaultBorderRadius,
-          border: Border.all(color: CupertinoColors.systemGrey5, width: 1),
+          border: Border.all(color: CupertinoColors.systemGrey5),
         ),
         child: cardContent,
       );

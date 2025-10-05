@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 /// A modern logo widget for AM Investment
 class AppLogo extends StatelessWidget {
+  const AppLogo({super.key, this.size = 60, this.color});
   final double size;
   final Color? color;
-
-  const AppLogo({super.key, this.size = 60, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +34,7 @@ class AppLogo extends StatelessWidget {
           Container(
             width: size * 0.7,
             height: size * 0.7,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
             ),
@@ -59,11 +58,6 @@ class AppLogo extends StatelessWidget {
 
 /// A full logo with text for AM Investment
 class AppLogoWithText extends StatelessWidget {
-  final double logoSize;
-  final double fontSize;
-  final Color? color;
-  final bool vertical;
-
   const AppLogoWithText({
     super.key,
     this.logoSize = 60,
@@ -71,6 +65,10 @@ class AppLogoWithText extends StatelessWidget {
     this.color,
     this.vertical = false,
   });
+  final double logoSize;
+  final double fontSize;
+  final Color? color;
+  final bool vertical;
 
   @override
   Widget build(BuildContext context) {

@@ -6,9 +6,7 @@ import '../core/app_logic/services/auth_service.dart';
 part 'login_providers.g.dart';
 
 @riverpod
-AuthService authService(AuthServiceRef ref) {
-  return AuthService();
-}
+AuthService authService(AuthServiceRef ref) => AuthService();
 
 @riverpod
 class AuthStateNotifier extends _$AuthStateNotifier {
@@ -17,11 +15,11 @@ class AuthStateNotifier extends _$AuthStateNotifier {
 
   Future<void> login(String identifier, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    
+
     try {
       final authService = ref.read(authServiceProvider);
       final result = await authService.login(identifier, password);
-      
+
       if (result.isSuccess) {
         // Sync with the auth service state
         _syncWithAuthService(authService);
@@ -32,16 +30,13 @@ class AuthStateNotifier extends _$AuthStateNotifier {
         );
       }
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: error.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
-  
+
   void _syncWithAuthService(AuthService authService) {
     final serviceState = authService.currentState;
-    
+
     // The AuthService.currentState already returns the domain AuthState
     // so we can just sync the data directly
     state = state.copyWith(
@@ -69,10 +64,7 @@ class AuthStateNotifier extends _$AuthStateNotifier {
       await authService.initialize();
       _syncWithAuthService(authService);
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: error.toString(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: error.toString());
     }
   }
 }

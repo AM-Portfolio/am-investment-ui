@@ -270,8 +270,9 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
     if (width > 1200) return 8.0; // Desktop
     if (width > 900) return 6.0; // Large tablets
     if (width > 600) return 4.0; // Tablets
-    if (width > 400)
+    if (width > 400) {
       return 3.0; // Large phones - tighter spacing but still touchable
+    }
     if (width > 300) return 2.0; // Standard phones
     return 1.0; // Very small screens - minimal spacing
   }

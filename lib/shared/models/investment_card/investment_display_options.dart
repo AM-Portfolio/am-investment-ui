@@ -1,15 +1,5 @@
 /// Display options for investment card features
 class InvestmentDisplayOptions {
-  final bool showInvestmentDetails;
-  final bool showCurrentPrice;
-  final bool showQuantity;
-  final bool showAveragePrice;
-  final bool showChangeValue;
-  final bool showChangePercent;
-  final bool showPerformanceSection;
-  final bool showDefaultValue;
-  final bool showAdditionalInfo;
-
   const InvestmentDisplayOptions({
     this.showInvestmentDetails = true,
     this.showCurrentPrice = true,
@@ -21,6 +11,15 @@ class InvestmentDisplayOptions {
     this.showDefaultValue = true,
     this.showAdditionalInfo = true,
   });
+  final bool showInvestmentDetails;
+  final bool showCurrentPrice;
+  final bool showQuantity;
+  final bool showAveragePrice;
+  final bool showChangeValue;
+  final bool showChangePercent;
+  final bool showPerformanceSection;
+  final bool showDefaultValue;
+  final bool showAdditionalInfo;
 
   /// Default options showing all details
   static const InvestmentDisplayOptions full = InvestmentDisplayOptions();
@@ -41,9 +40,6 @@ class InvestmentDisplayOptions {
   static const InvestmentDisplayOptions watchlist = InvestmentDisplayOptions(
     showInvestmentDetails: false,
     showCurrentPrice: false,
-    showChangeValue: true,
-    showChangePercent: true,
-    showPerformanceSection: true,
   );
 
   /// Clean options for sector stock display
@@ -70,19 +66,16 @@ class InvestmentDisplayOptions {
     bool? showPerformanceSection,
     bool? showDefaultValue,
     bool? showAdditionalInfo,
-  }) {
-    return InvestmentDisplayOptions(
-      showInvestmentDetails:
-          showInvestmentDetails ?? this.showInvestmentDetails,
-      showCurrentPrice: showCurrentPrice ?? this.showCurrentPrice,
-      showQuantity: showQuantity ?? this.showQuantity,
-      showAveragePrice: showAveragePrice ?? this.showAveragePrice,
-      showChangeValue: showChangeValue ?? this.showChangeValue,
-      showChangePercent: showChangePercent ?? this.showChangePercent,
-      showPerformanceSection:
-          showPerformanceSection ?? this.showPerformanceSection,
-      showDefaultValue: showDefaultValue ?? this.showDefaultValue,
-      showAdditionalInfo: showAdditionalInfo ?? this.showAdditionalInfo,
-    );
-  }
+  }) => InvestmentDisplayOptions(
+    showInvestmentDetails: showInvestmentDetails ?? this.showInvestmentDetails,
+    showCurrentPrice: showCurrentPrice ?? this.showCurrentPrice,
+    showQuantity: showQuantity ?? this.showQuantity,
+    showAveragePrice: showAveragePrice ?? this.showAveragePrice,
+    showChangeValue: showChangeValue ?? this.showChangeValue,
+    showChangePercent: showChangePercent ?? this.showChangePercent,
+    showPerformanceSection:
+        showPerformanceSection ?? this.showPerformanceSection,
+    showDefaultValue: showDefaultValue ?? this.showDefaultValue,
+    showAdditionalInfo: showAdditionalInfo ?? this.showAdditionalInfo,
+  );
 }

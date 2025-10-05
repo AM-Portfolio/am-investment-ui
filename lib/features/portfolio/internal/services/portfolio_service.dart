@@ -16,15 +16,14 @@ import '../../../../core/utils/logger.dart';
 /// This service acts as a facade that combines core use cases
 /// to perform essential portfolio operations.
 class PortfolioService {
-  final GetPortfolioHoldings _getPortfolioHoldings;
-  final GetPortfolioSummary _getPortfolioSummary;
-  final GetPortfoliosList _getPortfoliosList;
-
   const PortfolioService(
     this._getPortfolioHoldings,
     this._getPortfolioSummary,
     this._getPortfoliosList,
   );
+  final GetPortfolioHoldings _getPortfolioHoldings;
+  final GetPortfolioSummary _getPortfolioSummary;
+  final GetPortfoliosList _getPortfoliosList;
 
   /// Retrieves portfolio holdings for the specified user
   /// Returns holdings data or throws an exception if retrieval fails

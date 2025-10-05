@@ -2,6 +2,18 @@ import 'package:flutter/material.dart';
 
 /// Wizard navigation widget with back and next buttons
 class WizardNavigation extends StatelessWidget {
+  const WizardNavigation({
+    required this.currentStep,
+    required this.totalSteps,
+    required this.canProceed,
+    super.key,
+    this.onBack,
+    this.onNext,
+    this.onCancel,
+    this.nextButtonText,
+    this.backButtonText,
+    this.cancelButtonText,
+  });
   final int currentStep;
   final int totalSteps;
   final bool canProceed;
@@ -12,23 +24,11 @@ class WizardNavigation extends StatelessWidget {
   final String? backButtonText;
   final String? cancelButtonText;
 
-  const WizardNavigation({
-    super.key,
-    required this.currentStep,
-    required this.totalSteps,
-    required this.canProceed,
-    this.onBack,
-    this.onNext,
-    this.onCancel,
-    this.nextButtonText,
-    this.backButtonText,
-    this.cancelButtonText,
-  });
-
   @override
   Widget build(BuildContext context) {
     final isLastStep = currentStep >= totalSteps - 1;
-    final effectiveNextText = nextButtonText ?? (isLastStep ? 'Finish' : 'Next');
+    final effectiveNextText =
+        nextButtonText ?? (isLastStep ? 'Finish' : 'Next');
     final effectiveBackText = backButtonText ?? 'Back';
     final effectiveCancelText = cancelButtonText ?? 'Cancel';
 
@@ -41,13 +41,11 @@ class WizardNavigation extends StatelessWidget {
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back),
             label: Text(effectiveBackText),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[600],
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
           )
         else
           const SizedBox.shrink(),
-        
+
         // Cancel and Next buttons
         Row(
           children: [
@@ -56,10 +54,7 @@ class WizardNavigation extends StatelessWidget {
                 onPressed: onCancel,
                 child: Text(
                   effectiveCancelText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ),
             if (onCancel != null) const SizedBox(width: 12),
@@ -71,7 +66,10 @@ class WizardNavigation extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: Text(
                 effectiveNextText,

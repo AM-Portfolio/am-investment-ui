@@ -8,9 +8,8 @@ import '../../../../core/utils/logger.dart';
 /// Routes to mobile or web specific portfolio screens based on platform
 /// Now uses PortfolioListWrapper for portfolio selection functionality
 class PortfolioScreen extends StatelessWidget {
+  const PortfolioScreen({required this.userId, super.key});
   final String userId;
-
-  const PortfolioScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class PortfolioScreen extends StatelessWidget {
     );
 
     // Determine if we're on mobile platform
-    final isMobile = !kIsWeb;
+    const isMobile = !kIsWeb;
 
     AppLogger.debug(
       'Using PortfolioListWrapper for ${isMobile ? 'mobile' : 'web'} platform',

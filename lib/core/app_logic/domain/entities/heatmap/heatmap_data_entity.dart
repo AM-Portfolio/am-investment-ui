@@ -3,19 +3,32 @@ import 'heatmap_tile_entity.dart';
 /// Core heatmap data entity - domain model for complete heatmap data
 /// This is platform-agnostic and contains only business logic
 class HeatmapDataEntity {
+  const HeatmapDataEntity({
+    required this.id,
+    required this.title,
+    required this.tiles,
+    required this.metadata,
+    this.subtitle,
+  });
+
+  /// Create from map for deserialization
+  factory HeatmapDataEntity.fromMap(Map<String, dynamic> map) =>
+      HeatmapDataEntity(
+        id: map['id'] ?? '',
+        title: map['title'] ?? '',
+        subtitle: map['subtitle'],
+        tiles:
+            (map['tiles'] as List<dynamic>?)
+                ?.map((tileMap) => HeatmapTileEntity.fromMap(tileMap))
+                .toList() ??
+            [],
+        metadata: HeatmapMetadata.fromMap(map['metadata'] ?? {}),
+      );
   final String id;
   final String title;
   final String? subtitle;
   final List<HeatmapTileEntity> tiles;
   final HeatmapMetadata metadata;
-
-  const HeatmapDataEntity({
-    required this.id,
-    required this.title,
-    this.subtitle,
-    required this.tiles,
-    required this.metadata,
-  });
 
   /// Helper getter to check if heatmap has data
   bool get hasData => tiles.isNotEmpty;
@@ -38,35 +51,30 @@ class HeatmapDataEntity {
   }
 
   /// Get top performing tiles
-  List<HeatmapTileEntity> getTopPerformers(int count) {
-    return tilesByPerformance.take(count).toList();
-  }
+  List<HeatmapTileEntity> getTopPerformers(int count) =>
+      tilesByPerformance.take(count).toList();
 
   /// Get worst performing tiles
-  List<HeatmapTileEntity> getBottomPerformers(int count) {
-    return tilesByPerformance.reversed.take(count).toList();
-  }
+  List<HeatmapTileEntity> getBottomPerformers(int count) =>
+      tilesByPerformance.reversed.take(count).toList();
 
   /// Filter tiles by performance threshold
   List<HeatmapTileEntity> filterByPerformance({
     double? minPerformance,
     double? maxPerformance,
-  }) {
-    return tiles.where((tile) {
-      if (minPerformance != null && tile.performance < minPerformance) {
-        return false;
-      }
-      if (maxPerformance != null && tile.performance > maxPerformance) {
-        return false;
-      }
-      return true;
-    }).toList();
-  }
+  }) => tiles.where((tile) {
+    if (minPerformance != null && tile.performance < minPerformance) {
+      return false;
+    }
+    if (maxPerformance != null && tile.performance > maxPerformance) {
+      return false;
+    }
+    return true;
+  }).toList();
 
   /// Calculate total weightage of all tiles
-  double get totalWeightage {
-    return tiles.fold(0.0, (sum, tile) => sum + tile.weightage);
-  }
+  double get totalWeightage =>
+      tiles.fold(0.0, (sum, tile) => sum + tile.weightage);
 
   /// Calculate average performance of all tiles
   double get averagePerformance {
@@ -94,41 +102,22 @@ class HeatmapDataEntity {
     String? subtitle,
     List<HeatmapTileEntity>? tiles,
     HeatmapMetadata? metadata,
-  }) {
-    return HeatmapDataEntity(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
-      tiles: tiles ?? this.tiles,
-      metadata: metadata ?? this.metadata,
-    );
-  }
+  }) => HeatmapDataEntity(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    subtitle: subtitle ?? this.subtitle,
+    tiles: tiles ?? this.tiles,
+    metadata: metadata ?? this.metadata,
+  );
 
   /// Convert to map for serialization
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'subtitle': subtitle,
-      'tiles': tiles.map((tile) => tile.toMap()).toList(),
-      'metadata': metadata.toMap(),
-    };
-  }
-
-  /// Create from map for deserialization
-  factory HeatmapDataEntity.fromMap(Map<String, dynamic> map) {
-    return HeatmapDataEntity(
-      id: map['id'] ?? '',
-      title: map['title'] ?? '',
-      subtitle: map['subtitle'],
-      tiles:
-          (map['tiles'] as List<dynamic>?)
-              ?.map((tileMap) => HeatmapTileEntity.fromMap(tileMap))
-              .toList() ??
-          [],
-      metadata: HeatmapMetadata.fromMap(map['metadata'] ?? {}),
-    );
-  }
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'subtitle': subtitle,
+    'tiles': tiles.map((tile) => tile.toMap()).toList(),
+    'metadata': metadata.toMap(),
+  };
 
   @override
   bool operator ==(Object other) {
@@ -143,27 +132,20 @@ class HeatmapDataEntity {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        subtitle.hashCode ^
-        tiles.length.hashCode ^
-        metadata.hashCode;
-  }
+  int get hashCode =>
+      id.hashCode ^
+      title.hashCode ^
+      subtitle.hashCode ^
+      tiles.length.hashCode ^
+      metadata.hashCode;
 
   @override
-  String toString() {
-    return 'HeatmapDataEntity(id: $id, title: $title, tiles: ${tiles.length}, metadata: $metadata)';
-  }
+  String toString() =>
+      'HeatmapDataEntity(id: $id, title: $title, tiles: ${tiles.length}, metadata: $metadata)';
 }
 
 /// Metadata for heatmap data - contains additional context information
 class HeatmapMetadata {
-  final DateTime lastUpdated;
-  final String dataSource;
-  final Map<String, dynamic>? additionalInfo;
-  final List<String>? tags;
-
   const HeatmapMetadata({
     required this.lastUpdated,
     required this.dataSource,
@@ -171,42 +153,40 @@ class HeatmapMetadata {
     this.tags,
   });
 
+  /// Create from map for deserialization
+  factory HeatmapMetadata.fromMap(Map<String, dynamic> map) => HeatmapMetadata(
+    lastUpdated: DateTime.fromMillisecondsSinceEpoch(
+      map['lastUpdated'] ?? DateTime.now().millisecondsSinceEpoch,
+    ),
+    dataSource: map['dataSource'] ?? '',
+    additionalInfo: map['additionalInfo'],
+    tags: map['tags']?.cast<String>(),
+  );
+  final DateTime lastUpdated;
+  final String dataSource;
+  final Map<String, dynamic>? additionalInfo;
+  final List<String>? tags;
+
   /// Create a copy with modified properties
   HeatmapMetadata copyWith({
     DateTime? lastUpdated,
     String? dataSource,
     Map<String, dynamic>? additionalInfo,
     List<String>? tags,
-  }) {
-    return HeatmapMetadata(
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-      dataSource: dataSource ?? this.dataSource,
-      additionalInfo: additionalInfo ?? this.additionalInfo,
-      tags: tags ?? this.tags,
-    );
-  }
+  }) => HeatmapMetadata(
+    lastUpdated: lastUpdated ?? this.lastUpdated,
+    dataSource: dataSource ?? this.dataSource,
+    additionalInfo: additionalInfo ?? this.additionalInfo,
+    tags: tags ?? this.tags,
+  );
 
   /// Convert to map for serialization
-  Map<String, dynamic> toMap() {
-    return {
-      'lastUpdated': lastUpdated.millisecondsSinceEpoch,
-      'dataSource': dataSource,
-      'additionalInfo': additionalInfo,
-      'tags': tags,
-    };
-  }
-
-  /// Create from map for deserialization
-  factory HeatmapMetadata.fromMap(Map<String, dynamic> map) {
-    return HeatmapMetadata(
-      lastUpdated: DateTime.fromMillisecondsSinceEpoch(
-        map['lastUpdated'] ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      dataSource: map['dataSource'] ?? '',
-      additionalInfo: map['additionalInfo'],
-      tags: map['tags']?.cast<String>(),
-    );
-  }
+  Map<String, dynamic> toMap() => {
+    'lastUpdated': lastUpdated.millisecondsSinceEpoch,
+    'dataSource': dataSource,
+    'additionalInfo': additionalInfo,
+    'tags': tags,
+  };
 
   @override
   bool operator ==(Object other) {
@@ -218,12 +198,9 @@ class HeatmapMetadata {
   }
 
   @override
-  int get hashCode {
-    return lastUpdated.hashCode ^ dataSource.hashCode;
-  }
+  int get hashCode => lastUpdated.hashCode ^ dataSource.hashCode;
 
   @override
-  String toString() {
-    return 'HeatmapMetadata(lastUpdated: $lastUpdated, dataSource: $dataSource, tags: $tags)';
-  }
+  String toString() =>
+      'HeatmapMetadata(lastUpdated: $lastUpdated, dataSource: $dataSource, tags: $tags)';
 }

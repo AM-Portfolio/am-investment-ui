@@ -15,12 +15,14 @@ class PortfolioListMapper {
 
     try {
       // Map individual portfolio items
-      final portfolioItems = dto.portfolios.map((itemDto) {
-        return PortfolioItem(
-          portfolioId: itemDto.portfolioId,
-          portfolioName: itemDto.portfolioName,
-        );
-      }).toList();
+      final portfolioItems = dto.portfolios
+          .map(
+            (itemDto) => PortfolioItem(
+              portfolioId: itemDto.portfolioId,
+              portfolioName: itemDto.portfolioName,
+            ),
+          )
+          .toList();
 
       // Create domain entity
       final portfolioList = PortfolioList(
@@ -54,12 +56,14 @@ class PortfolioListMapper {
 
     try {
       // Map individual portfolio items
-      final portfolioItemDtos = entity.portfolios.map((item) {
-        return PortfolioItemDto(
-          portfolioId: item.portfolioId,
-          portfolioName: item.portfolioName,
-        );
-      }).toList();
+      final portfolioItemDtos = entity.portfolios
+          .map(
+            (item) => PortfolioItemDto(
+              portfolioId: item.portfolioId,
+              portfolioName: item.portfolioName,
+            ),
+          )
+          .toList();
 
       // Create DTO
       final portfolioListDto = PortfolioListDto(portfolios: portfolioItemDtos);
@@ -81,13 +85,11 @@ class PortfolioListMapper {
   }
 
   /// Create empty PortfolioList for error scenarios
-  static PortfolioList createEmpty(String userId) {
-    return PortfolioList(
-      userId: userId,
-      portfolios: [],
-      lastUpdated: DateTime.now(),
-    );
-  }
+  static PortfolioList createEmpty(String userId) => PortfolioList(
+    userId: userId,
+    portfolios: [],
+    lastUpdated: DateTime.now(),
+  );
 
   /// Validate portfolio list data
   static bool isValidPortfolioList(PortfolioListDto dto) {

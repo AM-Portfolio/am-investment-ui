@@ -5,12 +5,8 @@ import '../../../../di/login_providers.dart';
 import '../../../../core/utils/logger.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key, this.onLogin});
   final Function(String userId)? onLogin;
-  
-  const LoginScreen({
-    super.key,
-    this.onLogin,
-  });
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -29,11 +25,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    AppLogger.userAction('Login attempt', tag: 'LoginScreen', context: {
-      'email': _emailController.text,
-      'hasPassword': _passwordController.text.isNotEmpty
-    });
-    
+    AppLogger.userAction(
+      'Login attempt',
+      tag: 'LoginScreen',
+      context: {
+        'email': _emailController.text,
+        'hasPassword': _passwordController.text.isNotEmpty,
+      },
+    );
+
     if (!_formKey.currentState!.validate()) {
       AppLogger.info('Login validation failed', tag: 'LoginScreen');
       return;
@@ -42,21 +42,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       AppLogger.info('Starting login process', tag: 'LoginScreen');
       // Use Riverpod authentication provider
-      await ref.read(authStateNotifierProvider.notifier).login(
-        _emailController.text,
-        _passwordController.text,
+      await ref
+          .read(authStateNotifierProvider.notifier)
+          .login(_emailController.text, _passwordController.text);
+
+      AppLogger.info(
+        'Login successful for user: ${_emailController.text}',
+        tag: 'LoginScreen',
       );
-      
-      AppLogger.info('Login successful for user: ${_emailController.text}', tag: 'LoginScreen');
-      
+
       // Call the optional callback for compatibility
       if (widget.onLogin != null) {
         widget.onLogin!(_emailController.text);
       }
     } catch (error) {
-      AppLogger.error('Login failed', tag: 'LoginScreen', error: error, 
-          stackTrace: StackTrace.current);
-      
+      AppLogger.error(
+        'Login failed',
+        tag: 'LoginScreen',
+        error: error,
+        stackTrace: StackTrace.current,
+      );
+
       // Error handling is managed by the provider, but show a snackbar for user feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,24 +77,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleDemoLogin() async {
     AppLogger.userAction('Demo login attempt', tag: 'LoginScreen');
-    
+
     try {
       AppLogger.info('Starting demo login process', tag: 'LoginScreen');
       // Demo login with predefined credentials
-      await ref.read(authStateNotifierProvider.notifier).login(
-        "ssd2658",
-        "password",
-      );
-      
+      await ref
+          .read(authStateNotifierProvider.notifier)
+          .login('ssd2658', 'password');
+
       AppLogger.info('Demo login successful', tag: 'LoginScreen');
-      
+
       // Call the optional callback for compatibility
       if (widget.onLogin != null) {
-        widget.onLogin!("ssd2658");
+        widget.onLogin!('ssd2658');
       }
     } catch (error) {
       AppLogger.error('Demo login failed', tag: 'LoginScreen', error: error);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -104,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateNotifierProvider);
     final isLoading = authState.isLoading;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
@@ -135,16 +140,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
                     Text(
                       'Welcome Back',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Sign in to your AM Investment account',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -201,7 +205,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : const Text(
@@ -220,7 +226,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: OutlinedButton(
                         onPressed: isLoading ? null : _handleDemoLogin,
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Theme.of(context).primaryColor),
+                          side: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

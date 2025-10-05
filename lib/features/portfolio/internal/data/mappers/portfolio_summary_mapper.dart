@@ -81,43 +81,40 @@ class PortfolioSummaryMapper {
   }
 
   /// Convert domain entity to API model (for updates/requests)
-  static PortfolioSummaryDto toApiModel(PortfolioSummary domainModel) {
-    return PortfolioSummaryDto(
-      totalValue: domainModel.totalValue,
-      investmentValue: domainModel.investmentValue,
-      todaysGain: domainModel.todayChange,
-      totalGain: domainModel.totalGainLoss,
-      totalGainPercentage: domainModel.totalGainLossPercentage,
-      todaysGainPercentage: domainModel.todayChangePercentage,
-      todayGainLossPercentage: domainModel.todayGainLossPercentage,
-      totalAssets: domainModel.totalAssets,
-      todayGainersCount: domainModel.todayGainersCount,
-      todayLosersCount: domainModel.todayLosersCount,
-      gainersCount: domainModel.gainersCount,
-      losersCount: domainModel.losersCount,
-      marketCapHoldings:
-          const {}, // Empty since not available in simplified model
-      sectorAllocation: _mapSectorAllocation(domainModel.sectorAllocation),
-      topPerformers: _mapTopPerformers(domainModel.topPerformers),
-      topLosers: _mapWorstPerformers(domainModel.worstPerformers),
-    );
-  }
+  static PortfolioSummaryDto toApiModel(PortfolioSummary domainModel) =>
+      PortfolioSummaryDto(
+        totalValue: domainModel.totalValue,
+        investmentValue: domainModel.investmentValue,
+        todaysGain: domainModel.todayChange,
+        totalGain: domainModel.totalGainLoss,
+        totalGainPercentage: domainModel.totalGainLossPercentage,
+        todaysGainPercentage: domainModel.todayChangePercentage,
+        todayGainLossPercentage: domainModel.todayGainLossPercentage,
+        totalAssets: domainModel.totalAssets,
+        todayGainersCount: domainModel.todayGainersCount,
+        todayLosersCount: domainModel.todayLosersCount,
+        gainersCount: domainModel.gainersCount,
+        losersCount: domainModel.losersCount,
+        marketCapHoldings:
+            const {}, // Empty since not available in simplified model
+        sectorAllocation: _mapSectorAllocation(domainModel.sectorAllocation),
+        topPerformers: _mapTopPerformers(domainModel.topPerformers),
+        topLosers: _mapWorstPerformers(domainModel.worstPerformers),
+      );
 
   /// Calculate total holdings across all market caps
   static int _calculateTotalHoldings(
     Map<String, List<MarketCapHoldingDto>> marketCapHoldings,
-  ) {
-    return marketCapHoldings.values.fold(
-      0,
-      (sum, holdings) => sum + holdings.length,
-    );
-  }
+  ) => marketCapHoldings.values.fold(
+    0,
+    (sum, holdings) => sum + holdings.length,
+  );
 
   /// Map sector allocation from domain to API
   static Map<String, double> _mapSectorAllocation(
     List<SectorAllocation> sectorAllocation,
   ) {
-    final Map<String, double> result = {};
+    final result = <String, double>{};
     for (final sector in sectorAllocation) {
       result[sector.sector] = sector.percentage;
     }
@@ -127,65 +124,58 @@ class PortfolioSummaryMapper {
   /// Map top performers from domain to API
   static List<ApiTopPerformer> _mapTopPerformers(
     List<TopPerformer> topPerformers,
-  ) {
-    return topPerformers
-        .map(
-          (performer) => ApiTopPerformer(
-            symbol: performer.symbol,
-            gainPercentage: performer.gainLossPercentage,
-            gainAmount: performer.gainLoss,
-          ),
-        )
-        .toList();
-  }
+  ) => topPerformers
+      .map(
+        (performer) => ApiTopPerformer(
+          symbol: performer.symbol,
+          gainPercentage: performer.gainLossPercentage,
+          gainAmount: performer.gainLoss,
+        ),
+      )
+      .toList();
 
   /// Map worst performers from domain to API
   static List<ApiTopLoser> _mapWorstPerformers(
     List<TopPerformer> worstPerformers,
-  ) {
-    return worstPerformers
-        .map(
-          (performer) => ApiTopLoser(
-            symbol: performer.symbol,
-            lossPercentage:
-                -performer.gainLossPercentage, // Convert to positive loss
-            lossAmount: -performer.gainLoss, // Convert to positive loss
-          ),
-        )
-        .toList();
-  }
+  ) => worstPerformers
+      .map(
+        (performer) => ApiTopLoser(
+          symbol: performer.symbol,
+          lossPercentage:
+              -performer.gainLossPercentage, // Convert to positive loss
+          lossAmount: -performer.gainLoss, // Convert to positive loss
+        ),
+      )
+      .toList();
 
   /// Create empty portfolio summary for error states
-  static PortfolioSummary createEmpty(String userId) {
-    return PortfolioSummary.empty(userId);
-  }
+  static PortfolioSummary createEmpty(String userId) =>
+      PortfolioSummary.empty(userId);
 
   /// Create mock portfolio summary with sample data
-  static PortfolioSummary createMock({String userId = 'mock-user'}) {
-    return PortfolioSummary(
-      userId: userId,
-      totalValue: 125000.0,
-      totalInvested: 100000.0,
-      investmentValue: 100000.0,
-      totalGainLoss: 25000.0,
-      totalGainLossPercentage: 25.0,
-      todayChange: 1500.0,
-      todayChangePercentage: 1.2,
-      todayGainLossPercentage: 1.2,
-      totalHoldings: 10,
-      totalAssets: 15,
-      todayGainersCount: 8,
-      todayLosersCount: 2,
-      gainersCount: 7,
-      losersCount: 3,
-      lastUpdated: DateTime.now(),
-    );
-  }
+  static PortfolioSummary createMock({String userId = 'mock-user'}) =>
+      PortfolioSummary(
+        userId: userId,
+        totalValue: 125000.0,
+        totalInvested: 100000.0,
+        investmentValue: 100000.0,
+        totalGainLoss: 25000.0,
+        totalGainLossPercentage: 25.0,
+        todayChange: 1500.0,
+        todayChangePercentage: 1.2,
+        todayGainLossPercentage: 1.2,
+        totalHoldings: 10,
+        totalAssets: 15,
+        todayGainersCount: 8,
+        todayLosersCount: 2,
+        gainersCount: 7,
+        losersCount: 3,
+        lastUpdated: DateTime.now(),
+      );
 
   /// Validation helper
-  static bool isValidApiResponse(PortfolioSummaryDto? apiModel) {
-    return apiModel != null &&
-        apiModel.totalValue >= 0 &&
-        apiModel.investmentValue >= 0;
-  }
+  static bool isValidApiResponse(PortfolioSummaryDto? apiModel) =>
+      apiModel != null &&
+      apiModel.totalValue >= 0 &&
+      apiModel.investmentValue >= 0;
 }

@@ -5,11 +5,11 @@ import 'failures.dart';
 /// Global exception handler that maps exceptions to failures
 class ExceptionHandler {
   /// Map various exceptions to appropriate failure types
-  static Failure mapExceptionToFailure(dynamic exception) {
+  static Failure mapExceptionToFailure(exception) {
     if (exception is DioException) {
       return _handleDioException(exception);
     } else if (exception is SocketException) {
-      return NetworkFailure(
+      return const NetworkFailure(
         'No internet connection. Please check your network.',
         code: 'NETWORK_ERROR',
       );
@@ -42,32 +42,35 @@ class ExceptionHandler {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return TimeoutFailure(
+        return const TimeoutFailure(
           'Connection timeout. Please try again.',
           code: 'TIMEOUT_ERROR',
         );
-      
+
       case DioExceptionType.badResponse:
-        return _handleHttpStatusCode(exception.response?.statusCode, exception.message);
-      
+        return _handleHttpStatusCode(
+          exception.response?.statusCode,
+          exception.message,
+        );
+
       case DioExceptionType.cancel:
-        return NetworkFailure(
+        return const NetworkFailure(
           'Request was cancelled',
           code: 'REQUEST_CANCELLED',
         );
-      
+
       case DioExceptionType.connectionError:
-        return NetworkFailure(
+        return const NetworkFailure(
           'Connection error. Please check your internet connection.',
           code: 'CONNECTION_ERROR',
         );
-      
+
       case DioExceptionType.badCertificate:
-        return NetworkFailure(
+        return const NetworkFailure(
           'Certificate verification failed',
           code: 'CERTIFICATE_ERROR',
         );
-      
+
       default:
         return NetworkFailure(
           exception.message ?? 'Network error occurred',
@@ -85,27 +88,24 @@ class ExceptionHandler {
           code: 'BAD_REQUEST',
         );
       case 401:
-        return AuthFailure(
+        return const AuthFailure(
           'Unauthorized: Please login again',
           code: 'UNAUTHORIZED',
         );
       case 403:
-        return PermissionFailure(
-          'Forbidden: You don\'t have permission to access this resource',
+        return const PermissionFailure(
+          "Forbidden: You don't have permission to access this resource",
           code: 'FORBIDDEN',
         );
       case 404:
-        return ServerFailure(
-          'Resource not found',
-          code: 'NOT_FOUND',
-        );
+        return const ServerFailure('Resource not found', code: 'NOT_FOUND');
       case 422:
         return ValidationFailure(
           'Validation failed: ${message ?? 'Invalid input data'}',
           code: 'VALIDATION_ERROR',
         );
       case 429:
-        return ServerFailure(
+        return const ServerFailure(
           'Too many requests. Please try again later.',
           code: 'RATE_LIMIT',
         );
@@ -113,7 +113,7 @@ class ExceptionHandler {
       case 502:
       case 503:
       case 504:
-        return ServerFailure(
+        return const ServerFailure(
           'Server error. Please try again later.',
           code: 'SERVER_ERROR',
         );

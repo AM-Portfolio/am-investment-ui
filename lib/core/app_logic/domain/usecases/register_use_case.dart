@@ -2,23 +2,22 @@ import '../entities/auth_result.dart';
 import '../repositories/auth_repository.dart';
 
 /// Use case for user registration operation
-/// 
+///
 /// Handles the business logic for user registration including validation
 /// and interaction with the authentication repository
 class RegisterUseCase {
+  const RegisterUseCase(this._authRepository);
   final AuthRepository _authRepository;
 
-  const RegisterUseCase(this._authRepository);
-
   /// Execute registration with user details
-  /// 
+  ///
   /// [name] User's full name
   /// [email] User's email address
   /// [password] User's password
   /// [confirmPassword] Password confirmation
   /// [username] Optional username
   /// [phone] Optional phone number
-  /// 
+  ///
   /// Returns [AuthResult] indicating success or failure
   Future<AuthResult> call(
     String name,
@@ -106,7 +105,10 @@ class RegisterUseCase {
 
     // Check if username is already taken
     if (username != null && username.trim().isNotEmpty) {
-      if (await _authRepository.isIdentifierTaken(username.trim(), 'username')) {
+      if (await _authRepository.isIdentifierTaken(
+        username.trim(),
+        'username',
+      )) {
         return const AuthResult.failure(
           error: 'This username is already taken',
           errorCode: 'USERNAME_TAKEN',
@@ -125,7 +127,7 @@ class RegisterUseCase {
     }
 
     // Delegate to repository
-    return await _authRepository.register(
+    return _authRepository.register(
       name.trim(),
       email.trim(),
       password,
@@ -135,21 +137,19 @@ class RegisterUseCase {
   }
 
   /// Validate email format
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-        .hasMatch(email);
-  }
+  bool _isValidEmail(String email) => RegExp(
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  ).hasMatch(email);
 
   /// Validate username format (alphanumeric and underscores only)
-  bool _isValidUsername(String username) {
-    return RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username);
-  }
+  bool _isValidUsername(String username) =>
+      RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username);
 
   /// Validate phone number format (basic validation)
   bool _isValidPhone(String phone) {
     // Remove all non-digit characters
     final digitsOnly = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    
+
     // Should start with + and have at least 10 digits after country code
     return RegExp(r'^\+\d{10,15}$').hasMatch(digitsOnly);
   }

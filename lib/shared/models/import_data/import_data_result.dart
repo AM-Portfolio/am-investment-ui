@@ -4,20 +4,18 @@ import 'broker_type.dart';
 
 /// Import data result
 class ImportDataResult {
-  final ImportDataOption option;
-  final DocumentType? documentType;
-  final BrokerType? brokerType;
-
   const ImportDataResult({
     required this.option,
     this.documentType,
     this.brokerType,
   });
+  final ImportDataOption option;
+  final DocumentType? documentType;
+  final BrokerType? brokerType;
 
   @override
-  String toString() {
-    return 'ImportDataResult(option: $option, documentType: $documentType, brokerType: $brokerType)';
-  }
+  String toString() =>
+      'ImportDataResult(option: $option, documentType: $documentType, brokerType: $brokerType)';
 
   @override
   bool operator ==(Object other) {
@@ -29,7 +27,5 @@ class ImportDataResult {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(option, documentType, brokerType);
-  }
+  int get hashCode => Object.hash(option, documentType, brokerType);
 }

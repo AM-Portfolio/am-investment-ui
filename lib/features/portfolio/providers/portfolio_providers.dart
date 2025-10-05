@@ -150,7 +150,7 @@ Future<PortfolioHoldings> portfolioHoldings(
   String userId,
 ) async {
   final useCase = await ref.watch(getPortfolioHoldingsProvider.future);
-  return await useCase.call(userId);
+  return useCase.call(userId);
 }
 
 @riverpod
@@ -160,7 +160,7 @@ Future<PortfolioHoldings> portfolioHoldingsById(
   String portfolioId,
 ) async {
   final useCase = await ref.watch(getPortfolioHoldingsProvider.future);
-  return await useCase.call(userId, portfolioId);
+  return useCase.call(userId, portfolioId);
 }
 
 @riverpod
@@ -169,7 +169,7 @@ Future<PortfolioSummary> portfolioSummary(
   String userId,
 ) async {
   final useCase = await ref.watch(getPortfolioSummaryProvider.future);
-  return await useCase.call(userId);
+  return useCase.call(userId);
 }
 
 @riverpod
@@ -197,7 +197,7 @@ Future<PortfolioAnalytics> portfolioAnalytics(
   PortfolioAnalyticsRequest request,
 ) async {
   final useCase = await ref.watch(getPortfolioAnalyticsProvider.future);
-  return await useCase.call(request);
+  return useCase.call(request);
 }
 
 @riverpod
@@ -206,7 +206,7 @@ Future<PortfolioAnalytics> portfolioAnalyticsWithDefaults(
   String portfolioId,
 ) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
-  return await service.getPortfolioAnalyticsWithDefaults(portfolioId);
+  return service.getPortfolioAnalyticsWithDefaults(portfolioId);
 }
 
 @riverpod
@@ -215,7 +215,7 @@ Future<Heatmap?> portfolioHeatmap(
   String portfolioId,
 ) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
-  return await service.getPortfolioHeatmap(portfolioId);
+  return service.getPortfolioHeatmap(portfolioId);
 }
 
 @riverpod
@@ -225,7 +225,7 @@ Future<Movers?> portfolioMovers(
   int limit = 10,
 }) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
-  return await service.getPortfolioMovers(portfolioId, limit: limit);
+  return service.getPortfolioMovers(portfolioId, limit: limit);
 }
 
 @riverpod
@@ -234,5 +234,5 @@ Future<AllocationData> portfolioAllocations(
   String portfolioId,
 ) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
-  return await service.getPortfolioAllocations(portfolioId);
+  return service.getPortfolioAllocations(portfolioId);
 }

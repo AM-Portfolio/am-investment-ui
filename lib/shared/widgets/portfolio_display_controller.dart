@@ -6,7 +6,7 @@ enum ChangeType {
   overall;
 
   String get displayName => switch (this) {
-    ChangeType.daily => 'Today\'s Change',
+    ChangeType.daily => "Today's Change",
     ChangeType.overall => 'Total P&L',
   };
 }
@@ -17,7 +17,7 @@ enum DisplayFormat {
   percentage;
 
   String get displayName => switch (this) {
-    DisplayFormat.value => 'Value (\$)',
+    DisplayFormat.value => r'Value ($)',
     DisplayFormat.percentage => 'Percentage (%)',
   };
 }
@@ -39,6 +39,17 @@ enum SortBy {
 
 /// Comprehensive widget for controlling portfolio display options
 class PortfolioDisplayController extends StatelessWidget {
+  const PortfolioDisplayController({
+    required this.selectedChangeType,
+    required this.selectedDisplayFormat,
+    required this.selectedSortBy,
+    required this.sortAscending,
+    required this.onChangeTypeChanged,
+    required this.onDisplayFormatChanged,
+    required this.onSortByChanged,
+    required this.onSortOrderChanged,
+    super.key,
+  });
   final ChangeType selectedChangeType;
   final DisplayFormat selectedDisplayFormat;
   final SortBy selectedSortBy;
@@ -48,108 +59,94 @@ class PortfolioDisplayController extends StatelessWidget {
   final ValueChanged<SortBy> onSortByChanged;
   final ValueChanged<bool> onSortOrderChanged;
 
-  const PortfolioDisplayController({
-    Key? key,
-    required this.selectedChangeType,
-    required this.selectedDisplayFormat,
-    required this.selectedSortBy,
-    required this.sortAscending,
-    required this.onChangeTypeChanged,
-    required this.onDisplayFormatChanged,
-    required this.onSortByChanged,
-    required this.onSortOrderChanged,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withOpacity(0.3),
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(
+        color: Theme.of(context).dividerColor.withOpacity(0.3),
+      ),
+    ),
+    child: Row(
+      children: [
+        // Display Toggle (Today/Total)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: selectedChangeType == ChangeType.daily
+                ? Theme.of(context).primaryColor.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: GestureDetector(
+            onTap: () => onChangeTypeChanged(
+              selectedChangeType == ChangeType.daily
+                  ? ChangeType.overall
+                  : ChangeType.daily,
+            ),
+            child: Text(
+              selectedChangeType == ChangeType.daily ? 'Today' : 'Total',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: selectedChangeType == ChangeType.daily
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).textTheme.bodyMedium?.color,
+              ),
+            ),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          // Display Toggle (Today/Total)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: selectedChangeType == ChangeType.daily
-                  ? Theme.of(context).primaryColor.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
+        const SizedBox(width: 8),
+
+        // Format Toggle (\$ / %)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: selectedDisplayFormat == DisplayFormat.value
+                ? Theme.of(context).primaryColor.withOpacity(0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: GestureDetector(
+            onTap: () => onDisplayFormatChanged(
+              selectedDisplayFormat == DisplayFormat.value
+                  ? DisplayFormat.percentage
+                  : DisplayFormat.value,
             ),
-            child: GestureDetector(
-              onTap: () => onChangeTypeChanged(
-                selectedChangeType == ChangeType.daily
-                    ? ChangeType.overall
-                    : ChangeType.daily,
-              ),
-              child: Text(
-                selectedChangeType == ChangeType.daily ? 'Today' : 'Total',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: selectedChangeType == ChangeType.daily
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).textTheme.bodyMedium?.color,
-                ),
+            child: Text(
+              selectedDisplayFormat == DisplayFormat.value ? r'$' : '%',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: selectedDisplayFormat == DisplayFormat.value
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+        ),
 
-          // Format Toggle (\$ / %)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: selectedDisplayFormat == DisplayFormat.value
-                  ? Theme.of(context).primaryColor.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: GestureDetector(
-              onTap: () => onDisplayFormatChanged(
-                selectedDisplayFormat == DisplayFormat.value
-                    ? DisplayFormat.percentage
-                    : DisplayFormat.value,
-              ),
-              child: Text(
-                selectedDisplayFormat == DisplayFormat.value ? '\$' : '%',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: selectedDisplayFormat == DisplayFormat.value
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).textTheme.bodyMedium?.color,
-                ),
-              ),
-            ),
-          ),
+        const Spacer(),
 
-          const Spacer(),
-
-          // Sort Options - Tap to cycle through
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSortButton(context, 'Name', SortBy.name),
-              const SizedBox(width: 12),
-              _buildSortButton(context, 'P&L', SortBy.profitLoss),
-              const SizedBox(width: 12),
-              _buildSortButton(context, 'P&L%', SortBy.profitLossPercentage),
-              const SizedBox(width: 12),
-              _buildSortButton(context, 'Value', SortBy.currentValue),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+        // Sort Options - Tap to cycle through
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSortButton(context, 'Name', SortBy.name),
+            const SizedBox(width: 12),
+            _buildSortButton(context, 'P&L', SortBy.profitLoss),
+            const SizedBox(width: 12),
+            _buildSortButton(context, 'P&L%', SortBy.profitLossPercentage),
+            const SizedBox(width: 12),
+            _buildSortButton(context, 'Value', SortBy.currentValue),
+          ],
+        ),
+      ],
+    ),
+  );
 
   Widget _buildSortButton(BuildContext context, String label, SortBy sortBy) {
     final isSelected = selectedSortBy == sortBy;
@@ -210,32 +207,29 @@ class PortfolioDisplayController extends StatelessWidget {
 /// @deprecated Use PortfolioDisplayController instead
 @Deprecated('Use PortfolioDisplayController instead')
 class ChangeDisplaySelector extends StatelessWidget {
+  const ChangeDisplaySelector({
+    required this.selectedType,
+    required this.selectedFormat,
+    required this.onTypeChanged,
+    required this.onFormatChanged,
+    super.key,
+  });
   final ChangeType selectedType;
   final DisplayFormat selectedFormat;
   final ValueChanged<ChangeType> onTypeChanged;
   final ValueChanged<DisplayFormat> onFormatChanged;
 
-  const ChangeDisplaySelector({
-    Key? key,
-    required this.selectedType,
-    required this.selectedFormat,
-    required this.onTypeChanged,
-    required this.onFormatChanged,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return PortfolioDisplayController(
-      selectedChangeType: selectedType,
-      selectedDisplayFormat: selectedFormat,
-      selectedSortBy: SortBy.name,
-      sortAscending: true,
-      onChangeTypeChanged: onTypeChanged,
-      onDisplayFormatChanged: onFormatChanged,
-      onSortByChanged: (_) {},
-      onSortOrderChanged: (_) {},
-    );
-  }
+  Widget build(BuildContext context) => PortfolioDisplayController(
+    selectedChangeType: selectedType,
+    selectedDisplayFormat: selectedFormat,
+    selectedSortBy: SortBy.name,
+    sortAscending: true,
+    onChangeTypeChanged: onTypeChanged,
+    onDisplayFormatChanged: onFormatChanged,
+    onSortByChanged: (_) {},
+    onSortOrderChanged: (_) {},
+  );
 }
 
 /// Legacy enum for backward compatibility

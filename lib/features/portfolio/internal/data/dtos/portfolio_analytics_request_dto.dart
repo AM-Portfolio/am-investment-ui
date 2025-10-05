@@ -5,11 +5,6 @@ part 'portfolio_analytics_request_dto.g.dart';
 /// DTO for portfolio analytics request
 @JsonSerializable()
 class PortfolioAnalyticsRequestDto {
-  final CoreIdentifiersDto coreIdentifiers;
-  final FeatureTogglesDto featureToggles;
-  final FeatureConfigurationDto featureConfiguration;
-  final PaginationDto pagination;
-
   const PortfolioAnalyticsRequestDto({
     required this.coreIdentifiers,
     required this.featureToggles,
@@ -19,6 +14,10 @@ class PortfolioAnalyticsRequestDto {
 
   factory PortfolioAnalyticsRequestDto.fromJson(Map<String, dynamic> json) =>
       _$PortfolioAnalyticsRequestDtoFromJson(json);
+  final CoreIdentifiersDto coreIdentifiers;
+  final FeatureTogglesDto featureToggles;
+  final FeatureConfigurationDto featureConfiguration;
+  final PaginationDto pagination;
 
   Map<String, dynamic> toJson() => _$PortfolioAnalyticsRequestDtoToJson(this);
 }
@@ -26,12 +25,11 @@ class PortfolioAnalyticsRequestDto {
 /// Core identifiers for the analytics request
 @JsonSerializable()
 class CoreIdentifiersDto {
-  final String portfolioId;
-
   const CoreIdentifiersDto({required this.portfolioId});
 
   factory CoreIdentifiersDto.fromJson(Map<String, dynamic> json) =>
       _$CoreIdentifiersDtoFromJson(json);
+  final String portfolioId;
 
   Map<String, dynamic> toJson() => _$CoreIdentifiersDtoToJson(this);
 }
@@ -39,11 +37,6 @@ class CoreIdentifiersDto {
 /// Feature toggles to control what analytics are included
 @JsonSerializable()
 class FeatureTogglesDto {
-  final bool includeHeatmap;
-  final bool includeMovers;
-  final bool includeSectorAllocation;
-  final bool includeMarketCapAllocation;
-
   const FeatureTogglesDto({
     required this.includeHeatmap,
     required this.includeMovers,
@@ -53,6 +46,10 @@ class FeatureTogglesDto {
 
   factory FeatureTogglesDto.fromJson(Map<String, dynamic> json) =>
       _$FeatureTogglesDtoFromJson(json);
+  final bool includeHeatmap;
+  final bool includeMovers;
+  final bool includeSectorAllocation;
+  final bool includeMarketCapAllocation;
 
   Map<String, dynamic> toJson() => _$FeatureTogglesDtoToJson(this);
 }
@@ -60,12 +57,11 @@ class FeatureTogglesDto {
 /// Configuration for analytics features
 @JsonSerializable()
 class FeatureConfigurationDto {
-  final int moversLimit;
-
   const FeatureConfigurationDto({required this.moversLimit});
 
   factory FeatureConfigurationDto.fromJson(Map<String, dynamic> json) =>
       _$FeatureConfigurationDtoFromJson(json);
+  final int moversLimit;
 
   Map<String, dynamic> toJson() => _$FeatureConfigurationDtoToJson(this);
 }
@@ -73,12 +69,6 @@ class FeatureConfigurationDto {
 /// Pagination configuration
 @JsonSerializable()
 class PaginationDto {
-  final int page;
-  final int size;
-  final String sortBy;
-  final String sortDirection;
-  final bool returnAllData;
-
   const PaginationDto({
     required this.page,
     required this.size,
@@ -89,6 +79,11 @@ class PaginationDto {
 
   factory PaginationDto.fromJson(Map<String, dynamic> json) =>
       _$PaginationDtoFromJson(json);
+  final int page;
+  final int size;
+  final String sortBy;
+  final String sortDirection;
+  final bool returnAllData;
 
   Map<String, dynamic> toJson() => _$PaginationDtoToJson(this);
 }

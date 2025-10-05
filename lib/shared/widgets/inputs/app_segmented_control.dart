@@ -5,6 +5,15 @@ import 'package:flutter/foundation.dart'
 
 /// A platform-adaptive segmented control widget
 class AppSegmentedControl<T extends Object> extends StatelessWidget {
+  /// Constructor
+  const AppSegmentedControl({
+    required this.selectedValue,
+    required this.children,
+    required this.onValueChanged,
+    super.key,
+    this.primaryColor,
+  });
+
   /// The currently selected value
   final T selectedValue;
 
@@ -16,15 +25,6 @@ class AppSegmentedControl<T extends Object> extends StatelessWidget {
 
   /// Primary color for the control
   final Color? primaryColor;
-
-  /// Constructor
-  const AppSegmentedControl({
-    super.key,
-    required this.selectedValue,
-    required this.children,
-    required this.onValueChanged,
-    this.primaryColor,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,27 +62,26 @@ class AppSegmentedControl<T extends Object> extends StatelessWidget {
 
     // Use SegmentedButton on Android/Web
     return SegmentedButton<T>(
-      segments: children.entries.map((entry) {
-        return ButtonSegment<T>(value: entry.key, label: Text(entry.value));
-      }).toList(),
+      segments: children.entries
+          .map(
+            (entry) =>
+                ButtonSegment<T>(value: entry.key, label: Text(entry.value)),
+          )
+          .toList(),
       selected: {selectedValue},
-      onSelectionChanged: (Set<T> selection) {
+      onSelectionChanged: (selection) {
         if (selection.isNotEmpty) {
           onValueChanged(selection.first);
         }
       },
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.resolveWith<Color>((
-          Set<WidgetState> states,
-        ) {
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) {
             return color;
           }
           return Colors.transparent;
         }),
-        foregroundColor: WidgetStateProperty.resolveWith<Color>((
-          Set<WidgetState> states,
-        ) {
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) {
             return Colors.white;
           }

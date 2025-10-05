@@ -6,12 +6,11 @@ part 'portfolio_list.g.dart';
 /// Domain entity representing a single portfolio item
 @freezed
 class PortfolioItem with _$PortfolioItem {
-  const PortfolioItem._();
-
   const factory PortfolioItem({
     required String portfolioId,
     required String portfolioName,
   }) = _PortfolioItem;
+  const PortfolioItem._();
 
   /// Create from JSON
   factory PortfolioItem.fromJson(Map<String, dynamic> json) =>
@@ -30,13 +29,12 @@ class PortfolioItem with _$PortfolioItem {
 /// Domain entity representing a list of portfolios
 @freezed
 class PortfolioList with _$PortfolioList {
-  const PortfolioList._();
-
   const factory PortfolioList({
     required String userId,
-    @Default([]) List<PortfolioItem> portfolios,
     required DateTime lastUpdated,
+    @Default([]) List<PortfolioItem> portfolios,
   }) = _PortfolioList;
+  const PortfolioList._();
 
   /// Create from JSON
   factory PortfolioList.fromJson(Map<String, dynamic> json) =>
@@ -76,17 +74,14 @@ class PortfolioList with _$PortfolioList {
   }
 
   /// Helper method to check if portfolio exists by ID
-  bool containsPortfolioId(String portfolioId) {
-    return portfolios.any((portfolio) => portfolio.portfolioId == portfolioId);
-  }
+  bool containsPortfolioId(String portfolioId) =>
+      portfolios.any((portfolio) => portfolio.portfolioId == portfolioId);
 
   /// Helper method to check if portfolio exists by name
-  bool containsPortfolioName(String portfolioName) {
-    return portfolios.any(
-      (portfolio) =>
-          portfolio.portfolioName.toLowerCase() == portfolioName.toLowerCase(),
-    );
-  }
+  bool containsPortfolioName(String portfolioName) => portfolios.any(
+    (portfolio) =>
+        portfolio.portfolioName.toLowerCase() == portfolioName.toLowerCase(),
+  );
 
   /// Helper method to get all valid portfolios
   List<PortfolioItem> get validPortfolios =>

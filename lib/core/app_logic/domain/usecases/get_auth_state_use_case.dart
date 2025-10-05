@@ -1,14 +1,13 @@
 import '../entities/auth_state.dart';
 import '../repositories/auth_repository.dart';
 
-/// Use case for getting authentication state 
-/// 
+/// Use case for getting authentication state
+///
 /// Handles the business logic for retrieving current authentication status
 /// and listening to authentication state changes
 class GetAuthStateUseCase {
-  final AuthRepository _authRepository;
-
   const GetAuthStateUseCase(this._authRepository);
+  final AuthRepository _authRepository;
 
   /// Get current authentication state
   AuthState get currentState => _authRepository.currentState;

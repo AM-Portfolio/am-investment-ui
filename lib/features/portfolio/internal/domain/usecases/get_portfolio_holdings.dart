@@ -4,9 +4,8 @@ import '../../../../../core/utils/logger.dart';
 
 /// Use case for getting portfolio holdings
 class GetPortfolioHoldings {
-  final PortfolioRepository _repository;
-
   const GetPortfolioHoldings(this._repository);
+  final PortfolioRepository _repository;
 
   /// Execute the use case
   Future<PortfolioHoldings> call(String userId, [String? portfolioId]) async {
@@ -63,17 +62,13 @@ class GetPortfolioHoldings {
   }
 
   /// Get portfolio holdings for user only (legacy method)
-  Future<PortfolioHoldings> callForUser(String userId) async {
-    return call(userId);
-  }
+  Future<PortfolioHoldings> callForUser(String userId) async => call(userId);
 
   /// Get portfolio holdings for specific portfolio
   Future<PortfolioHoldings> callForPortfolio(
     String userId,
     String portfolioId,
-  ) async {
-    return call(userId, portfolioId);
-  }
+  ) async => call(userId, portfolioId);
 
   /// Execute with stream for real-time updates
   Stream<PortfolioHoldings> watchHoldings(String userId) {

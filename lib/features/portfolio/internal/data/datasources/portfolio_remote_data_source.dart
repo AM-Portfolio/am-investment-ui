@@ -1,13 +1,13 @@
-import '../dtos/portfolio_holdings_dto.dart';
-import '../dtos/portfolio_summary_dto.dart';
+import '../../../../../config/app_config.dart';
+import '../../../../../core/network/api_client.dart';
+import '../../../../../core/utils/logger.dart';
 import '../dtos/portfolio_analytics_request_dto.dart';
 import '../dtos/portfolio_analytics_response_dto.dart';
+import '../dtos/portfolio_holdings_dto.dart';
 import '../dtos/portfolio_list_dto.dart';
-import '../../../../../core/utils/logger.dart';
-import '../../../../../core/network/api_client.dart';
-import '../../../../../config/app_config.dart';
-import '../mappers/portfolio_mapper.dart';
+import '../dtos/portfolio_summary_dto.dart';
 import '../mappers/portfolio_analytics_mapper.dart';
+import '../mappers/portfolio_mapper.dart';
 
 /// Abstract data source for portfolio data
 abstract class PortfolioRemoteDataSource {
@@ -43,14 +43,13 @@ abstract class PortfolioRemoteDataSource {
 ///
 /// Handles API calls for portfolio operations following clean architecture principles
 class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
-  final ApiClient _apiClient;
-  final PortfolioApiConfig _portfolioConfig;
-
   const PortfolioRemoteDataSourceImpl({
     required ApiClient apiClient,
     required PortfolioApiConfig portfolioConfig,
   }) : _apiClient = apiClient,
        _portfolioConfig = portfolioConfig;
+  final ApiClient _apiClient;
+  final PortfolioApiConfig _portfolioConfig;
 
   @override
   Future<PortfolioHoldingsDto> getPortfolioHoldings(String userId) async {
@@ -75,7 +74,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       final holdingsResponse = await _apiClient.get<PortfolioHoldingsDto>(
         fullUri,
         parser: (data) => PortfolioMapper.portfolioHoldingsFromJson(
-          data as Map<String, dynamic>,
+          data! as Map<String, dynamic>,
         ),
       );
 
@@ -132,7 +131,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       final holdingsResponse = await _apiClient.get<PortfolioHoldingsDto>(
         fullUri,
         parser: (data) => PortfolioMapper.portfolioHoldingsFromJson(
-          data as Map<String, dynamic>,
+          data! as Map<String, dynamic>,
         ),
       );
 
@@ -186,7 +185,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       final summaryResponse = await _apiClient.get<PortfolioSummaryDto>(
         fullUri,
         parser: (data) => PortfolioMapper.portfolioSummaryFromJson(
-          data as Map<String, dynamic>,
+          data! as Map<String, dynamic>,
         ),
       );
 
@@ -243,7 +242,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       final summaryResponse = await _apiClient.get<PortfolioSummaryDto>(
         fullUri,
         parser: (data) => PortfolioMapper.portfolioSummaryFromJson(
-          data as Map<String, dynamic>,
+          data! as Map<String, dynamic>,
         ),
       );
 
@@ -300,7 +299,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         baseUri,
         body: request.toJson(),
         parser: (data) {
-          final rawData = data as Map<String, dynamic>;
+          final rawData = data! as Map<String, dynamic>;
 
           // Log raw API response for debugging
           AppLogger.debug(
@@ -406,7 +405,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       final listResponse = await _apiClient.get<PortfolioListDto>(
         fullUri,
         parser: (data) =>
-            PortfolioMapper.portfolioListFromJson(data as List<dynamic>),
+            PortfolioMapper.portfolioListFromJson(data! as List<dynamic>),
       );
 
       AppLogger.info(

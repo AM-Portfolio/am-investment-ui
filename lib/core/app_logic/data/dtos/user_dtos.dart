@@ -11,9 +11,9 @@ class UserResponse with _$UserResponse {
     required String email,
     required String firstName,
     required String lastName,
+    required DateTime createdAt,
     String? phoneNumber,
     String? avatarUrl,
-    required DateTime createdAt,
     DateTime? updatedAt,
   }) = _UserResponse;
 

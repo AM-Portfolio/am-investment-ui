@@ -10,6 +10,18 @@ import '../../../../../core/utils/logger.dart';
 /// Web-optimized card widget to display portfolio holdings
 /// Features advanced sorting, pagination, and responsive design for web platforms
 class PortfolioHoldingsWebCard extends ConsumerStatefulWidget {
+  /// Constructor
+  const PortfolioHoldingsWebCard({
+    required this.userId,
+    super.key,
+    this.portfolioId,
+    this.showDetails = false,
+    this.maxHoldings = 25,
+    this.onHoldingTap,
+    this.onViewAll,
+    this.rowHeight,
+  });
+
   /// User ID for fetching portfolio data
   final String userId;
 
@@ -23,25 +35,13 @@ class PortfolioHoldingsWebCard extends ConsumerStatefulWidget {
   final int maxHoldings;
 
   /// Callback when a holding is tapped
-  final Function(dynamic)? onHoldingTap;
+  final Function()? onHoldingTap;
 
   /// Callback when "View All" button is tapped
   final VoidCallback? onViewAll;
 
   /// Row height for the table
   final double? rowHeight;
-
-  /// Constructor
-  const PortfolioHoldingsWebCard({
-    super.key,
-    required this.userId,
-    this.portfolioId,
-    this.showDetails = false,
-    this.maxHoldings = 25,
-    this.onHoldingTap,
-    this.onViewAll,
-    this.rowHeight,
-  });
 
   @override
   ConsumerState<PortfolioHoldingsWebCard> createState() =>
@@ -131,15 +131,14 @@ class _PortfolioHoldingsWebCardState
             );
 
             // Get holdings for current page
-            final List<PortfolioHolding> displayHoldings =
-                _sortedHoldings.isEmpty
+            final displayHoldings = _sortedHoldings.isEmpty
                 ? <PortfolioHolding>[]
                 : _sortedHoldings.sublist(startIndex, endIndex);
 
             // Responsive row height based on text size and scale factor
             final baseFontSize = theme.textTheme.bodyMedium?.fontSize ?? 14.0;
             final textScale = MediaQuery.textScaleFactorOf(context);
-            final double rowHeight = (baseFontSize * 2.6 * textScale)
+            final rowHeight = (baseFontSize * 2.6 * textScale)
                 .clamp(40.0, 64.0)
                 .toDouble();
 
@@ -167,7 +166,6 @@ class _PortfolioHoldingsWebCardState
                       children: [
                         // Compact header with title
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Icon(
                               Icons.account_balance,
@@ -197,9 +195,7 @@ class _PortfolioHoldingsWebCardState
                             columns: _buildColumns(),
                             initialSortColumnIndex:
                                 2, // Sort by current value initially
-                            initialSortDirection: SortDirection.descending,
                             onItemTap: widget.onHoldingTap,
-                            showDividers: true,
                             rowHeight: rowHeight,
                           ),
                         ),
@@ -462,7 +458,6 @@ class _PortfolioHoldingsWebCardState
       // Symbol column
       SortableColumn<PortfolioHolding>(
         title: 'Symbol',
-        flex: 1,
         sortBy: (holding) => holding.symbol,
         builder: (holding) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +484,6 @@ class _PortfolioHoldingsWebCardState
       // Quantity column
       SortableColumn<PortfolioHolding>(
         title: 'Qty',
-        flex: 1,
         sortBy: (holding) => holding.quantity,
         builder: (holding) =>
             Text(holding.quantity.toString(), overflow: TextOverflow.ellipsis),
@@ -498,7 +492,6 @@ class _PortfolioHoldingsWebCardState
       // Current Value column
       SortableColumn<PortfolioHolding>(
         title: 'Curr Value',
-        flex: 1,
         textAlign: TextAlign.end,
         sortBy: (holding) => holding.currentValue,
         builder: (holding) => Text(
@@ -512,7 +505,6 @@ class _PortfolioHoldingsWebCardState
       // Gain/Loss column
       SortableColumn<PortfolioHolding>(
         title: 'Gain/Loss',
-        flex: 1,
         textAlign: TextAlign.end,
         sortBy: (holding) => holding.totalGainLoss,
         builder: (holding) {

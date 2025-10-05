@@ -10,18 +10,9 @@ enum AppButtonType { primary, secondary, text }
 /// This widget provides a consistent API while rendering the appropriate
 /// native-looking button based on the platform.
 class AppButton extends PlatformWidget<Widget, Widget> {
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final AppButtonType type;
-  final IconData? icon;
-  final EdgeInsetsGeometry? padding;
-  final double? minWidth;
-  final double? height;
-
   const AppButton({
-    super.key,
     required this.text,
+    super.key,
     this.onPressed,
     this.isLoading = false,
     this.type = AppButtonType.primary,
@@ -30,6 +21,14 @@ class AppButton extends PlatformWidget<Widget, Widget> {
     this.minWidth,
     this.height,
   });
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final AppButtonType type;
+  final IconData? icon;
+  final EdgeInsetsGeometry? padding;
+  final double? minWidth;
+  final double? height;
 
   @override
   Widget buildIosWidget(BuildContext context) {

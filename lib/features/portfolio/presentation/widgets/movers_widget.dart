@@ -4,16 +4,15 @@ import '../../internal/domain/entities/portfolio_analytics.dart';
 /// Widget displaying top movers (gainers and losers) in the portfolio
 /// Shows stocks with highest gains and losses with performance metrics
 class MoversWidget extends StatefulWidget {
-  final Movers? movers;
-  final bool isLoading;
-  final String? error;
-
   const MoversWidget({
     super.key,
     this.movers,
     this.isLoading = false,
     this.error,
   });
+  final Movers? movers;
+  final bool isLoading;
+  final String? error;
 
   @override
   State<MoversWidget> createState() => _MoversWidgetState();
@@ -36,38 +35,36 @@ class _MoversWidgetState extends State<MoversWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.trending_up,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Top Movers',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(height: 350, child: _buildContent(context)),
-          ],
-        ),
+  Widget build(BuildContext context) => Card(
+    elevation: 4,
+    margin: const EdgeInsets.all(8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.trending_up,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Top Movers',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(height: 350, child: _buildContent(context)),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildContent(BuildContext context) {
     if (widget.isLoading) {
@@ -138,7 +135,7 @@ class _MoversWidgetState extends State<MoversWidget>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.trending_up, color: Colors.green, size: 16),
+                  const Icon(Icons.trending_up, color: Colors.green, size: 16),
                   const SizedBox(width: 4),
                   Text('Gainers (${widget.movers!.topGainers.length})'),
                 ],
@@ -148,7 +145,7 @@ class _MoversWidgetState extends State<MoversWidget>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.trending_down, color: Colors.red, size: 16),
+                  const Icon(Icons.trending_down, color: Colors.red, size: 16),
                   const SizedBox(width: 4),
                   Text('Losers (${widget.movers!.topLosers.length})'),
                 ],

@@ -6,20 +6,19 @@ import '../dialogs/dialogs.dart';
 
 /// Right-side floating quick actions with flying animations
 class RightFloatingQuickActions extends ConsumerStatefulWidget {
-  final String userId;
-  final String? portfolioId;
-  final Function(String)? onPortfolioCreated;
-  final Function(String)? onTradeDetailsAdded;
-  final Function(String)? onError;
-
   const RightFloatingQuickActions({
-    super.key,
     required this.userId,
+    super.key,
     this.portfolioId,
     this.onPortfolioCreated,
     this.onTradeDetailsAdded,
     this.onError,
   });
+  final String userId;
+  final String? portfolioId;
+  final Function(String)? onPortfolioCreated;
+  final Function(String)? onTradeDetailsAdded;
+  final Function(String)? onError;
 
   @override
   ConsumerState<RightFloatingQuickActions> createState() =>
@@ -40,18 +39,18 @@ class _RightFloatingQuickActionsState
   late Animation<double> _iconRotation;
 
   final List<QuickActionItem> _quickActions = [
-    QuickActionItem(
+    const QuickActionItem(
       id: 'add_stock',
       icon: Icons.add_circle_outline,
       label: 'Add Stock',
-      color: const Color(0xFF2196F3),
+      color: Color(0xFF2196F3),
       description: 'Add new stock to portfolio',
     ),
-    QuickActionItem(
+    const QuickActionItem(
       id: 'import_data',
       icon: Icons.upload_file,
       label: 'Import',
-      color: const Color(0xFFFF9800),
+      color: Color(0xFFFF9800),
       description: 'Import data from file',
     ),
   ];
@@ -133,90 +132,84 @@ class _RightFloatingQuickActionsState
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Overlay to close actions when tapping outside
-        if (_isExpanded)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _toggleActions,
-              child: Container(color: Colors.black.withOpacity(0.1)),
-            ),
+  Widget build(BuildContext context) => Stack(
+    children: [
+      // Overlay to close actions when tapping outside
+      if (_isExpanded)
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: _toggleActions,
+            child: Container(color: Colors.black.withOpacity(0.1)),
           ),
+        ),
 
-        // Flying actions panel
-        if (_isExpanded)
-          Positioned(
-            right: 80,
-            top: 20,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: _buildActionsPanel(),
-                ),
+      // Flying actions panel
+      if (_isExpanded)
+        Positioned(
+          right: 80,
+          top: 20,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: _buildActionsPanel(),
               ),
             ),
           ),
-
-        // Floating action button (trigger)
-        Positioned(right: 16, top: 16, child: _buildFloatingTrigger()),
-      ],
-    );
-  }
-
-  Widget _buildFloatingTrigger() {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
+
+      // Floating action button (trigger)
+      Positioned(right: 16, top: 16, child: _buildFloatingTrigger()),
+    ],
+  );
+
+  Widget _buildFloatingTrigger() => Container(
+    width: 56,
+    height: 56,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Theme.of(context).primaryColor,
+          Theme.of(context).primaryColor.withOpacity(0.8),
         ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _isProcessing ? null : _toggleActions,
-          borderRadius: BorderRadius.circular(28),
-          child: AnimatedBuilder(
-            animation: _iconRotation,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _iconRotation.value * 2 * 3.14159,
-                child: Icon(
-                  _isExpanded ? Icons.close : Icons.flash_on,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              );
-            },
+      borderRadius: BorderRadius.circular(28),
+      boxShadow: [
+        BoxShadow(
+          color: Theme.of(context).primaryColor.withOpacity(0.4),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isProcessing ? null : _toggleActions,
+        borderRadius: BorderRadius.circular(28),
+        child: AnimatedBuilder(
+          animation: _iconRotation,
+          builder: (context, child) => Transform.rotate(
+            angle: _iconRotation.value * 2 * 3.14159,
+            child: Icon(
+              _isExpanded ? Icons.close : Icons.flash_on,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildActionsPanel() {
     if (_isProcessing) {
@@ -336,85 +329,79 @@ class _RightFloatingQuickActionsState
     );
   }
 
-  Widget _buildActionItem(QuickActionItem action) {
-    return Container(
-      decoration: BoxDecoration(
+  Widget _buildActionItem(QuickActionItem action) => Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      color: action.color.withOpacity(0.08),
+      border: Border.all(color: action.color.withOpacity(0.2)),
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleQuickAction(action.id),
         borderRadius: BorderRadius.circular(16),
-        color: action.color.withOpacity(0.08),
-        border: Border.all(color: action.color.withOpacity(0.2), width: 1),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _handleQuickAction(action.id),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Icon container
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: action.color.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(action.icon, color: action.color, size: 24),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Icon container
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: action.color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: Icon(action.icon, color: action.color, size: 24),
+              ),
 
-                const SizedBox(width: 16),
+              const SizedBox(width: 16),
 
-                // Text content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        action.label,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+              // Text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      action.label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        action.description,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.7),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      action.description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
 
-                // Arrow indicator
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: action.color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    size: 16,
-                    color: action.color,
-                  ),
+              // Arrow indicator
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: action.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
+                child: Icon(Icons.arrow_forward, size: 16, color: action.color),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  void _handleQuickAction(String actionId) async {
+  Future<void> _handleQuickAction(String actionId) async {
     // Close the actions panel first
     _toggleActions();
 
@@ -483,7 +470,7 @@ class _RightFloatingQuickActionsState
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.white, size: 22),
+            const Icon(Icons.check_circle, color: Colors.white, size: 22),
             const SizedBox(width: 12),
             Expanded(
               child: Text(message, style: const TextStyle(fontSize: 16)),
@@ -502,12 +489,6 @@ class _RightFloatingQuickActionsState
 
 /// Data class for quick action items
 class QuickActionItem {
-  final String id;
-  final IconData icon;
-  final String label;
-  final Color color;
-  final String description;
-
   const QuickActionItem({
     required this.id,
     required this.icon,
@@ -515,4 +496,9 @@ class QuickActionItem {
     required this.color,
     required this.description,
   });
+  final String id;
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String description;
 }

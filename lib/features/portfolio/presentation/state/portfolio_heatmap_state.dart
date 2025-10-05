@@ -17,9 +17,8 @@ class PortfolioHeatmapInitial extends PortfolioHeatmapState {
 
 /// Loading state
 class PortfolioHeatmapLoading extends PortfolioHeatmapState {
-  final String message;
-
   const PortfolioHeatmapLoading({this.message = 'Loading...'});
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -27,13 +26,6 @@ class PortfolioHeatmapLoading extends PortfolioHeatmapState {
 
 /// Loaded state with data
 class PortfolioHeatmapLoaded extends PortfolioHeatmapState {
-  final HeatmapData data;
-  final String portfolioId;
-  final TimeFrame timeFrame;
-  final MetricType metric;
-  final SectorType sector;
-  final MarketCapType marketCap;
-
   const PortfolioHeatmapLoaded({
     required this.data,
     required this.portfolioId,
@@ -42,22 +34,34 @@ class PortfolioHeatmapLoaded extends PortfolioHeatmapState {
     required this.sector,
     required this.marketCap,
   });
+  final HeatmapData data;
+  final String portfolioId;
+  final TimeFrame timeFrame;
+  final MetricType metric;
+  final SectorType sector;
+  final MarketCapType marketCap;
 
   @override
-  List<Object?> get props => [data, portfolioId, timeFrame, metric, sector, marketCap];
+  List<Object?> get props => [
+    data,
+    portfolioId,
+    timeFrame,
+    metric,
+    sector,
+    marketCap,
+  ];
 }
 
 /// Error state
 class PortfolioHeatmapError extends PortfolioHeatmapState {
-  final String message;
-  final Object? error;
-  final StackTrace? stackTrace;
-
   const PortfolioHeatmapError({
     required this.message,
     this.error,
     this.stackTrace,
   });
+  final String message;
+  final Object? error;
+  final StackTrace? stackTrace;
 
   @override
   List<Object?> get props => [message, error, stackTrace];
@@ -65,9 +69,8 @@ class PortfolioHeatmapError extends PortfolioHeatmapState {
 
 /// Empty state
 class PortfolioHeatmapEmpty extends PortfolioHeatmapState {
-  final String message;
-
   const PortfolioHeatmapEmpty({this.message = 'No data available'});
+  final String message;
 
   @override
   List<Object?> get props => [message];

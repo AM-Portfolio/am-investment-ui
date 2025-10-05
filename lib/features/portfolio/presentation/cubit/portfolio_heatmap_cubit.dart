@@ -52,7 +52,6 @@ class PortfolioHeatmapCubit extends Cubit<PortfolioHeatmapState> {
           heatmapData = SectorHeatmapConverter.convertToHeatmapData(
             heatmap: analyticsState.heatmap,
             showSubCards: true,
-            title: 'Portfolio Heatmap',
             subtitle: 'Sector Performance Analysis',
           );
         } else {

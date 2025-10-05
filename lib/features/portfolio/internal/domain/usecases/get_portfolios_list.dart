@@ -4,9 +4,8 @@ import '../../../../../core/utils/logger.dart';
 
 /// Use case for getting portfolios list
 class GetPortfoliosList {
-  final PortfolioRepository _repository;
-
   const GetPortfoliosList(this._repository);
+  final PortfolioRepository _repository;
 
   /// Execute the use case
   Future<PortfolioList> call(String userId) async {
@@ -63,9 +62,7 @@ class GetPortfoliosList {
   }
 
   /// Get portfolios list with validation
-  Future<PortfolioList> execute(String userId) async {
-    return call(userId);
-  }
+  Future<PortfolioList> execute(String userId) async => call(userId);
 
   /// Check if user has any portfolios
   Future<bool> hasPortfolios(String userId) async {

@@ -8,9 +8,9 @@ import '../core/utils/logger.dart';
 /// Configuration service that loads and manages application configuration
 /// Similar to Spring Boot's configuration management
 class ConfigService with PropertyInjection {
-  static final ConfigService _instance = ConfigService._internal();
   factory ConfigService() => _instance;
   ConfigService._internal();
+  static final ConfigService _instance = ConfigService._internal();
 
   static AppConfig? _config;
   static bool _isInitialized = false;
@@ -32,11 +32,13 @@ class ConfigService with PropertyInjection {
         targetEnv = env.Environment.production;
         break;
       default:
-        print('Unknown environment: $environmentName, defaulting to development');
+        print(
+          'Unknown environment: $environmentName, defaulting to development',
+        );
         targetEnv = env.Environment.development;
         break;
     }
-    
+
     env.EnvironmentConfig.environment = targetEnv;
     print('Environment set to: ${targetEnv.name}');
   }
@@ -53,40 +55,91 @@ class ConfigService with PropertyInjection {
     final properties = AppProperties();
 
     // Set the environment in EnvironmentConfig based on properties
-    final environmentName = properties.getValue(PropertyKeys.environmentName, defaultValue: AppConstants.defaultEnvironmentName);
+    final environmentName = properties.getValue(
+      PropertyKeys.environmentName,
+      defaultValue: AppConstants.defaultEnvironmentName,
+    );
     _setEnvironmentFromString(environmentName);
 
     // Create config from properties using constants for keys and defaults
     _config = AppConfig(
-      defaultPort: properties.getIntValue(PropertyKeys.appDefaultPort, defaultValue: AppConstants.defaultPort),
+      defaultPort: properties.getIntValue(
+        PropertyKeys.appDefaultPort,
+        defaultValue: AppConstants.defaultPort,
+      ),
       api: ApiConfig(
-        baseUrl: properties.getValue(PropertyKeys.apiBaseUrl, defaultValue: AppConstants.defaultBaseUrl),
-        timeout: properties.getIntValue(PropertyKeys.apiTimeout, defaultValue: AppConstants.defaultTimeout),
-        useMockData: properties.getBoolValue(PropertyKeys.mockDataEnabled, defaultValue: AppConstants.defaultUseMockData),
+        baseUrl: properties.getValue(
+          PropertyKeys.apiBaseUrl,
+          defaultValue: AppConstants.defaultBaseUrl,
+        ),
+        timeout: properties.getIntValue(
+          PropertyKeys.apiTimeout,
+          defaultValue: AppConstants.defaultTimeout,
+        ),
+        useMockData: properties.getBoolValue(
+          PropertyKeys.mockDataEnabled,
+          defaultValue: AppConstants.defaultUseMockData,
+        ),
         portfolio: PortfolioApiConfig(
-          baseUrl: properties.getValue(PropertyKeys.apiPortfolioBaseUrl, defaultValue: AppConstants.defaultPortfolioBaseUrl),
-          holdingsResource: properties.getValue(PropertyKeys.apiPortfolioHoldingsResource, defaultValue: AppConstants.defaultHoldingsResource),
-          summaryResource: properties.getValue(PropertyKeys.apiPortfolioSummaryResource, defaultValue: AppConstants.defaultSummaryResource),
-          transactionsResource: properties.getValue(PropertyKeys.apiPortfolioTransactionsResource, defaultValue: AppConstants.defaultTransactionsResource),
+          baseUrl: properties.getValue(
+            PropertyKeys.apiPortfolioBaseUrl,
+            defaultValue: AppConstants.defaultPortfolioBaseUrl,
+          ),
+          holdingsResource: properties.getValue(
+            PropertyKeys.apiPortfolioHoldingsResource,
+            defaultValue: AppConstants.defaultHoldingsResource,
+          ),
+          summaryResource: properties.getValue(
+            PropertyKeys.apiPortfolioSummaryResource,
+            defaultValue: AppConstants.defaultSummaryResource,
+          ),
+          transactionsResource: properties.getValue(
+            PropertyKeys.apiPortfolioTransactionsResource,
+            defaultValue: AppConstants.defaultTransactionsResource,
+          ),
         ),
         document: DocumentApiConfig(
-          baseUrl: properties.getValue(PropertyKeys.apiDocumentBaseUrl, defaultValue: AppConstants.defaultDocumentBaseUrl),
-          connectTimeout: properties.getIntValue(PropertyKeys.apiDocumentConnectTimeout, defaultValue: AppConstants.defaultConnectTimeout),
-          receiveTimeout: properties.getIntValue(PropertyKeys.apiDocumentReceiveTimeout, defaultValue: AppConstants.defaultReceiveTimeout),
-          sendTimeout: properties.getIntValue(PropertyKeys.apiDocumentSendTimeout, defaultValue: AppConstants.defaultSendTimeout),
-          enabled: properties.getBoolValue(PropertyKeys.apiDocumentEnabled, defaultValue: AppConstants.defaultDocumentEnabled),
+          baseUrl: properties.getValue(
+            PropertyKeys.apiDocumentBaseUrl,
+            defaultValue: AppConstants.defaultDocumentBaseUrl,
+          ),
+          connectTimeout: properties.getIntValue(
+            PropertyKeys.apiDocumentConnectTimeout,
+            defaultValue: AppConstants.defaultConnectTimeout,
+          ),
+          receiveTimeout: properties.getIntValue(
+            PropertyKeys.apiDocumentReceiveTimeout,
+            defaultValue: AppConstants.defaultReceiveTimeout,
+          ),
+          sendTimeout: properties.getIntValue(
+            PropertyKeys.apiDocumentSendTimeout,
+            defaultValue: AppConstants.defaultSendTimeout,
+          ),
+          enabled: properties.getBoolValue(
+            PropertyKeys.apiDocumentEnabled,
+            defaultValue: AppConstants.defaultDocumentEnabled,
+          ),
         ),
       ),
       environment: EnvironmentConfig(
-        name: properties.getValue(PropertyKeys.environmentName, defaultValue: AppConstants.defaultEnvironmentName),
-        debugMode: properties.getBoolValue(PropertyKeys.environmentDebugMode, defaultValue: AppConstants.defaultDebugMode),
-        logLevel: properties.getValue(PropertyKeys.environmentLogLevel, defaultValue: AppConstants.defaultLogLevel),
+        name: properties.getValue(
+          PropertyKeys.environmentName,
+          defaultValue: AppConstants.defaultEnvironmentName,
+        ),
+        debugMode: properties.getBoolValue(
+          PropertyKeys.environmentDebugMode,
+          defaultValue: AppConstants.defaultDebugMode,
+        ),
+        logLevel: properties.getValue(
+          PropertyKeys.environmentLogLevel,
+          defaultValue: AppConstants.defaultLogLevel,
+        ),
       ),
     );
 
     // Initialize logger after configuration is loaded
     AppLogger.initialize();
-    
+
     _isInitialized = true;
 
     if (kDebugMode) {
@@ -98,7 +151,9 @@ class ConfigService with PropertyInjection {
   /// Get current configuration
   static AppConfig get config {
     if (!_isInitialized || _config == null) {
-      throw Exception('ConfigService not initialized. Call ConfigService.initialize() first.');
+      throw Exception(
+        'ConfigService not initialized. Call ConfigService.initialize() first.',
+      );
     }
     return _config!;
   }
@@ -110,19 +165,15 @@ class ConfigService with PropertyInjection {
   static int get defaultPort => config.defaultPort;
 
   /// Get Flutter run command with configured port
-  static String getFlutterRunCommand({String device = 'chrome'}) {
-    return 'flutter run -d $device --web-port ${config.defaultPort}';
-  }
+  static String getFlutterRunCommand({String device = 'chrome'}) =>
+      'flutter run -d $device --web-port ${config.defaultPort}';
 
   /// Get local URL with configured port
-  static String getLocalUrl() {
-    return 'http://localhost:${config.defaultPort}';
-  }
+  static String getLocalUrl() => 'http://localhost:${config.defaultPort}';
 
   /// Get property value directly
-  static String getProperty(String key, {String? defaultValue}) {
-    return AppProperties().getValue(key, defaultValue: defaultValue);
-  }
+  static String getProperty(String key, {String? defaultValue}) =>
+      AppProperties().getValue(key, defaultValue: defaultValue);
 
   /// Get portfolio holdings URL
   static String getPortfolioHoldingsUrl({required String userId}) {
@@ -164,8 +215,6 @@ class ConfigService with PropertyInjection {
     await AppProperties().reload(environment: environment);
     await initialize(environment: environment);
   }
-
-
 }
 
 /// Example usage with @Value-like annotation
@@ -174,7 +223,7 @@ class ExampleService with PropertyInjection {
   String get apiUrl => property('api.baseUrl');
   int get timeout => intProperty('api.timeout');
   bool get mockEnabled => boolProperty('mock.data.enabled');
-  
+
   void printConfig() {
     print('API URL: $apiUrl');
     print('Timeout: $timeout');

@@ -22,9 +22,8 @@ class PortfolioAnalyticsInitial extends PortfolioAnalyticsState {}
 
 /// Loading state when analytics data is being fetched
 class PortfolioAnalyticsLoading extends PortfolioAnalyticsState {
-  final Set<AnalyticsDataType> loadingTypes;
-
   const PortfolioAnalyticsLoading({this.loadingTypes = const {}});
+  final Set<AnalyticsDataType> loadingTypes;
 
   @override
   List<Object?> get props => [loadingTypes];
@@ -32,14 +31,6 @@ class PortfolioAnalyticsLoading extends PortfolioAnalyticsState {
 
 /// Loaded state with analytics data
 class PortfolioAnalyticsLoaded extends PortfolioAnalyticsState {
-  final SectorAllocation? sectorAllocation;
-  final MarketCapAllocation? marketCapAllocation;
-  final Heatmap? heatmap;
-  final Movers? movers;
-  final bool isRefreshing;
-  final Set<AnalyticsDataType> loadingTypes;
-  final Map<AnalyticsDataType, String> errors;
-
   const PortfolioAnalyticsLoaded({
     this.sectorAllocation,
     this.marketCapAllocation,
@@ -49,6 +40,13 @@ class PortfolioAnalyticsLoaded extends PortfolioAnalyticsState {
     this.loadingTypes = const {},
     this.errors = const {},
   });
+  final SectorAllocation? sectorAllocation;
+  final MarketCapAllocation? marketCapAllocation;
+  final Heatmap? heatmap;
+  final Movers? movers;
+  final bool isRefreshing;
+  final Set<AnalyticsDataType> loadingTypes;
+  final Map<AnalyticsDataType, String> errors;
 
   PortfolioAnalyticsLoaded copyWith({
     SectorAllocation? sectorAllocation,
@@ -58,17 +56,15 @@ class PortfolioAnalyticsLoaded extends PortfolioAnalyticsState {
     bool? isRefreshing,
     Set<AnalyticsDataType>? loadingTypes,
     Map<AnalyticsDataType, String>? errors,
-  }) {
-    return PortfolioAnalyticsLoaded(
-      sectorAllocation: sectorAllocation ?? this.sectorAllocation,
-      marketCapAllocation: marketCapAllocation ?? this.marketCapAllocation,
-      heatmap: heatmap ?? this.heatmap,
-      movers: movers ?? this.movers,
-      isRefreshing: isRefreshing ?? this.isRefreshing,
-      loadingTypes: loadingTypes ?? this.loadingTypes,
-      errors: errors ?? this.errors,
-    );
-  }
+  }) => PortfolioAnalyticsLoaded(
+    sectorAllocation: sectorAllocation ?? this.sectorAllocation,
+    marketCapAllocation: marketCapAllocation ?? this.marketCapAllocation,
+    heatmap: heatmap ?? this.heatmap,
+    movers: movers ?? this.movers,
+    isRefreshing: isRefreshing ?? this.isRefreshing,
+    loadingTypes: loadingTypes ?? this.loadingTypes,
+    errors: errors ?? this.errors,
+  );
 
   /// Check if a specific analytics type is loading
   bool isLoadingType(AnalyticsDataType type) => loadingTypes.contains(type);
@@ -80,13 +76,12 @@ class PortfolioAnalyticsLoaded extends PortfolioAnalyticsState {
   String? getErrorForType(AnalyticsDataType type) => errors[type];
 
   /// Check if all data is loaded (no loading states and no initial nulls)
-  bool get isAllDataLoaded {
-    return loadingTypes.isEmpty &&
-        sectorAllocation != null &&
-        marketCapAllocation != null &&
-        heatmap != null &&
-        movers != null;
-  }
+  bool get isAllDataLoaded =>
+      loadingTypes.isEmpty &&
+      sectorAllocation != null &&
+      marketCapAllocation != null &&
+      heatmap != null &&
+      movers != null;
 
   /// Check if any data is loading
   bool get isAnyDataLoading => loadingTypes.isNotEmpty || isRefreshing;
@@ -105,10 +100,9 @@ class PortfolioAnalyticsLoaded extends PortfolioAnalyticsState {
 
 /// Error state when analytics loading fails completely
 class PortfolioAnalyticsError extends PortfolioAnalyticsState {
+  const PortfolioAnalyticsError(this.message, {this.specificErrors = const {}});
   final String message;
   final Map<AnalyticsDataType, String> specificErrors;
-
-  const PortfolioAnalyticsError(this.message, {this.specificErrors = const {}});
 
   @override
   List<Object?> get props => [message, specificErrors];

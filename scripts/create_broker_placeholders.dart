@@ -24,9 +24,9 @@ void main() async {
 
   for (final broker in brokers) {
     await createPlaceholderLogo(
-      broker['name'] as String,
-      Color(broker['color'] as int),
-      broker['file'] as String,
+      broker['name']! as String,
+      Color(broker['color']! as int),
+      broker['file']! as String,
     );
   }
 

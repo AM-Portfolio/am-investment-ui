@@ -8,10 +8,10 @@ part 'auth_dtos.g.dart';
 @freezed
 class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
+    required String password,
     String? email,
     String? username,
     String? phone,
-    required String password,
   }) = _LoginRequest;
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) =>
@@ -51,9 +51,8 @@ class AuthResponse with _$AuthResponse {
 /// Token refresh request DTO
 @freezed
 class RefreshTokenRequest with _$RefreshTokenRequest {
-  const factory RefreshTokenRequest({
-    required String refreshToken,
-  }) = _RefreshTokenRequest;
+  const factory RefreshTokenRequest({required String refreshToken}) =
+      _RefreshTokenRequest;
 
   factory RefreshTokenRequest.fromJson(Map<String, dynamic> json) =>
       _$RefreshTokenRequestFromJson(json);
@@ -87,9 +86,8 @@ class ChangePasswordRequest with _$ChangePasswordRequest {
 /// Password reset request DTO
 @freezed
 class PasswordResetRequest with _$PasswordResetRequest {
-  const factory PasswordResetRequest({
-    required String email,
-  }) = _PasswordResetRequest;
+  const factory PasswordResetRequest({required String email}) =
+      _PasswordResetRequest;
 
   factory PasswordResetRequest.fromJson(Map<String, dynamic> json) =>
       _$PasswordResetRequestFromJson(json);

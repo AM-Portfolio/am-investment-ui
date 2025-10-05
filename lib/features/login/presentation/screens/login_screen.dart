@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../../../core/app_logic/services/auth_service.dart';
-import '../widgets/modern_login_form.dart';
 import '../widgets/animated_login_elements.dart';
-import '../widgets/login_background.dart';
 import '../widgets/app_logo.dart';
+import '../widgets/login_background.dart';
+import '../widgets/modern_login_form.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -171,146 +172,138 @@ class _LoginScreenState extends State<LoginScreen> {
     return _buildMobileLayout();
   }
 
-  Widget _buildWebLayout() {
-    return Center(
-      child: SingleChildScrollView(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 450),
-          padding: const EdgeInsets.all(24),
-          child: Card(
-            elevation: 8,
-            color: Colors.black.withOpacity(0.6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                children: [
-                  // Logo
-                  AnimatedLoginElements.fadeInAnimation(
-                    child: AnimatedLoginElements.scaleAnimation(
-                      child: const AppLogoWithText(
-                        logoSize: 70,
-                        fontSize: 28,
-                        color: Colors.white,
-                        vertical: true,
-                      ),
-                      delay: 0,
+  Widget _buildWebLayout() => Center(
+    child: SingleChildScrollView(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 450),
+        padding: const EdgeInsets.all(24),
+        child: Card(
+          elevation: 8,
+          color: Colors.black.withOpacity(0.6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: [
+                // Logo
+                AnimatedLoginElements.fadeInAnimation(
+                  child: AnimatedLoginElements.scaleAnimation(
+                    child: const AppLogoWithText(
+                      logoSize: 70,
+                      fontSize: 28,
+                      color: Colors.white,
+                      vertical: true,
                     ),
                     delay: 0,
                   ),
-                  const SizedBox(height: 40),
+                  delay: 0,
+                ),
+                const SizedBox(height: 40),
 
-                  // Login form
-                  _buildLoginForm(),
-                ],
-              ),
+                // Login form
+                _buildLoginForm(),
+              ],
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildMobileLayout() {
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              // Logo
-              AnimatedLoginElements.fadeInAnimation(
-                child: AnimatedLoginElements.scaleAnimation(
-                  child: const AppLogoWithText(
-                    logoSize: 70,
-                    fontSize: 28,
-                    color: Colors.white,
-                    vertical: true,
-                  ),
-                  delay: 0,
+  Widget _buildMobileLayout() => SafeArea(
+    child: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // Logo
+            AnimatedLoginElements.fadeInAnimation(
+              child: AnimatedLoginElements.scaleAnimation(
+                child: const AppLogoWithText(
+                  logoSize: 70,
+                  fontSize: 28,
+                  color: Colors.white,
+                  vertical: true,
                 ),
                 delay: 0,
               ),
-              const SizedBox(height: 40),
+              delay: 0,
+            ),
+            const SizedBox(height: 40),
 
-              // Login form with glass effect
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(24),
-                child: _buildLoginForm(),
+            // Login form with glass effect
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
-            ],
-          ),
+              padding: const EdgeInsets.all(24),
+              child: _buildLoginForm(),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildLoginForm() {
-    return AnimatedLoginElements.fadeInAnimation(
-      child: ModernLoginForm(
-        formKey: _formKey,
-        identifierController: _identifierController,
-        passwordController: _passwordController,
-        isLoading: _isLoading,
-        errorMessage: _errorMessage,
-        onLogin: _login,
-        onQuickLogin: _quickLogin,
-        onSsdLogin: _ssdLogin,
-        onForgotPassword: () {
-          // Navigate to forgot password screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Forgot password feature coming soon'),
-            ),
-          );
-        },
-        onRegister: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const RegisterScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(1.0, 0.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeInOutCubic;
-                    var tween = Tween(
-                      begin: begin,
-                      end: end,
-                    ).chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    );
-                  },
-            ),
-          );
-        },
-        selectedLoginMethod: _selectedLoginMethod,
-        onLoginMethodChanged: (Set<LoginMethod> selection) {
-          setState(() {
-            _selectedLoginMethod = selection.first;
-            // Clear the identifier field when switching login methods
-            _identifierController.clear();
-          });
-        },
-      ),
-      delay: 200,
-    );
-  }
+  Widget _buildLoginForm() => AnimatedLoginElements.fadeInAnimation(
+    child: ModernLoginForm(
+      formKey: _formKey,
+      identifierController: _identifierController,
+      passwordController: _passwordController,
+      isLoading: _isLoading,
+      errorMessage: _errorMessage,
+      onLogin: _login,
+      onQuickLogin: _quickLogin,
+      onSsdLogin: _ssdLogin,
+      onForgotPassword: () {
+        // Navigate to forgot password screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Forgot password feature coming soon')),
+        );
+      },
+      onRegister: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const RegisterScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOutCubic;
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+                  final offsetAnimation = animation.drive(tween);
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
+                },
+          ),
+        );
+      },
+      selectedLoginMethod: _selectedLoginMethod,
+      onLoginMethodChanged: (selection) {
+        setState(() {
+          _selectedLoginMethod = selection.first;
+          // Clear the identifier field when switching login methods
+          _identifierController.clear();
+        });
+      },
+    ),
+    delay: 200,
+  );
 }

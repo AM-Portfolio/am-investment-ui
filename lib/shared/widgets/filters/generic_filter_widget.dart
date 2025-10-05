@@ -4,38 +4,38 @@ import '../../core/filters/filter_models.dart';
 /// Generic filter widget that can be used across different features
 /// T represents the data type being filtered
 class GenericFilterWidget<T> extends StatefulWidget {
-  /// The list of items to filter
-  final List<T> items;
-  
-  /// Filter provider that handles the filtering logic
-  final FilterProvider<T> filterProvider;
-  
-  /// Callback when filters are applied
-  final Function(List<T>) onFiltersApplied;
-  
-  /// Callback when filters are reset
-  final VoidCallback? onFiltersReset;
-  
-  /// Whether to show the filter panel initially
-  final bool initiallyExpanded;
-  
-  /// Title for the filter widget
-  final String title;
-  
-  /// Icon for the filter widget
-  final IconData icon;
-  
   /// Constructor
   const GenericFilterWidget({
-    super.key,
     required this.items,
     required this.filterProvider,
     required this.onFiltersApplied,
+    super.key,
     this.onFiltersReset,
     this.initiallyExpanded = false,
     this.title = 'Filters',
     this.icon = Icons.filter_list,
   });
+
+  /// The list of items to filter
+  final List<T> items;
+
+  /// Filter provider that handles the filtering logic
+  final FilterProvider<T> filterProvider;
+
+  /// Callback when filters are applied
+  final Function(List<T>) onFiltersApplied;
+
+  /// Callback when filters are reset
+  final VoidCallback? onFiltersReset;
+
+  /// Whether to show the filter panel initially
+  final bool initiallyExpanded;
+
+  /// Title for the filter widget
+  final String title;
+
+  /// Icon for the filter widget
+  final IconData icon;
 
   @override
   State<GenericFilterWidget<T>> createState() => _GenericFilterWidgetState<T>();
@@ -46,7 +46,7 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
   List<FilterCriteria> _filters = [];
   List<T> _filteredItems = [];
   FilterOptions _filterOptions = const FilterOptions();
-  
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +55,7 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
     _initializeFilters();
     _extractFilterOptions();
   }
-  
+
   @override
   void didUpdateWidget(GenericFilterWidget<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -65,32 +65,32 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
       _applyFilters(); // Re-apply existing filters to new data
     }
   }
-  
+
   /// Initialize the filter criteria from the provider
   void _initializeFilters() {
     setState(() {
       _filters = widget.filterProvider.getFilterCriteria();
     });
   }
-  
+
   /// Extract available options for category filters
   void _extractFilterOptions() {
     setState(() {
       _filterOptions = widget.filterProvider.extractFilterOptions(widget.items);
     });
   }
-  
+
   /// Apply all active filters
   void _applyFilters() {
     final result = widget.filterProvider.applyFilters(widget.items, _filters);
-    
+
     setState(() {
       _filteredItems = result;
     });
-    
+
     widget.onFiltersApplied(_filteredItems);
   }
-  
+
   /// Reset all filters
   void _resetFilters() {
     setState(() {
@@ -98,17 +98,17 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
         filter.reset();
       }
     });
-    
+
     _applyFilters();
     if (widget.onFiltersReset != null) {
       widget.onFiltersReset!();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -128,7 +128,10 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
             },
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -149,7 +152,10 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
                       const SizedBox(width: 8),
                       if (_getActiveFilterCount() > 0)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
@@ -181,7 +187,7 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
               ),
             ),
           ),
-          
+
           // Filter content
           if (_isExpanded)
             Padding(
@@ -190,36 +196,52 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Divider(),
-                  
+
                   // Basic filters
                   _buildFilterSection(
                     'Basic Filters',
-                    _filters.where((f) => f.category == FilterCategory.basic).toList(),
+                    _filters
+                        .where((f) => f.category == FilterCategory.basic)
+                        .toList(),
                   ),
-                  
+
                   // Classification filters
-                  if (_filters.any((f) => f.category == FilterCategory.classification))
+                  if (_filters.any(
+                    (f) => f.category == FilterCategory.classification,
+                  ))
                     _buildFilterSection(
                       'Classification',
-                      _filters.where((f) => f.category == FilterCategory.classification).toList(),
+                      _filters
+                          .where(
+                            (f) => f.category == FilterCategory.classification,
+                          )
+                          .toList(),
                     ),
-                  
+
                   // Value filters
                   if (_filters.any((f) => f.category == FilterCategory.value))
                     _buildFilterSection(
                       'Value Filters',
-                      _filters.where((f) => f.category == FilterCategory.value).toList(),
+                      _filters
+                          .where((f) => f.category == FilterCategory.value)
+                          .toList(),
                     ),
-                  
+
                   // Performance filters
-                  if (_filters.any((f) => f.category == FilterCategory.performance))
+                  if (_filters.any(
+                    (f) => f.category == FilterCategory.performance,
+                  ))
                     _buildFilterSection(
                       'Performance',
-                      _filters.where((f) => f.category == FilterCategory.performance).toList(),
+                      _filters
+                          .where(
+                            (f) => f.category == FilterCategory.performance,
+                          )
+                          .toList(),
                     ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Apply filters button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -242,11 +264,11 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
       ),
     );
   }
-  
+
   /// Build a filter section with title and filters
   Widget _buildFilterSection(String title, List<FilterCriteria> filters) {
     if (filters.isEmpty) return const SizedBox.shrink();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,13 +283,13 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
         Wrap(
           spacing: 16.0,
           runSpacing: 16.0,
-          children: filters.map((filter) => _buildFilterWidget(filter)).toList(),
+          children: filters.map(_buildFilterWidget).toList(),
         ),
         const SizedBox(height: 16),
       ],
     );
   }
-  
+
   /// Build individual filter widget based on type
   Widget _buildFilterWidget(FilterCriteria filter) {
     switch (filter.type) {
@@ -281,131 +303,125 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
         return _buildPerformanceFilter(filter);
     }
   }
-  
+
   /// Build a text filter widget
-  Widget _buildTextFilter(FilterCriteria filter) {
-    return SizedBox(
-      width: 250,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            filter.displayName,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
+  Widget _buildTextFilter(FilterCriteria filter) => SizedBox(
+    width: 250,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          filter.displayName,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        TextField(
+          decoration: InputDecoration(
+            hintText: 'Search by ${filter.displayName.toLowerCase()}...',
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            suffixIcon: filter.textValue != null && filter.textValue!.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 16),
+                    onPressed: () {
+                      setState(() {
+                        filter.textValue = null;
+                        _applyFilters();
+                      });
+                    },
+                  )
+                : null,
           ),
-          const SizedBox(height: 4),
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search by ${filter.displayName.toLowerCase()}...',
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: filter.textValue != null && filter.textValue!.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 16),
-                      onPressed: () {
-                        setState(() {
-                          filter.textValue = null;
-                          _applyFilters();
-                        });
-                      },
-                    )
-                  : null,
-            ),
-            onChanged: (value) {
-              setState(() {
-                filter.textValue = value;
-                _applyFilters();
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-  
+          onChanged: (value) {
+            setState(() {
+              filter.textValue = value;
+              _applyFilters();
+            });
+          },
+        ),
+      ],
+    ),
+  );
+
   /// Build a range filter widget
-  Widget _buildRangeFilter(FilterCriteria filter) {
-    return SizedBox(
-      width: 300,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            filter.displayName,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
+  Widget _buildRangeFilter(FilterCriteria filter) => SizedBox(
+    width: 300,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          filter.displayName,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Min',
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    filter.minValue = double.tryParse(value);
+                    _applyFilters();
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Min',
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            const SizedBox(width: 8),
+            const Text('-'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Max',
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    setState(() {
-                      filter.minValue = double.tryParse(value);
-                      _applyFilters();
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text('-'),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Max',
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    setState(() {
-                      filter.maxValue = double.tryParse(value);
-                      _applyFilters();
-                    });
-                  },
                 ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    filter.maxValue = double.tryParse(value);
+                    _applyFilters();
+                  });
+                },
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
   /// Build a category filter widget
   Widget _buildCategoryFilter(FilterCriteria filter) {
-    List<String> options = [];
+    var options = <String>[];
     switch (filter.field) {
       case 'sector':
         options = _filterOptions.availableSectors;
@@ -417,7 +433,7 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
         options = _filterOptions.availableMarketCaps;
         break;
     }
-    
+
     return SizedBox(
       width: 250,
       child: Column(
@@ -426,9 +442,9 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
         children: [
           Text(
             filter.displayName,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Container(
@@ -440,7 +456,8 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: options.map((option) {
-                final isSelected = filter.selectedCategories?.contains(option) ?? false;
+                final isSelected =
+                    filter.selectedCategories?.contains(option) ?? false;
                 return CheckboxListTile(
                   dense: true,
                   title: Text(option),
@@ -464,70 +481,67 @@ class _GenericFilterWidgetState<T> extends State<GenericFilterWidget<T>> {
       ),
     );
   }
-  
+
   /// Build a performance filter widget
-  Widget _buildPerformanceFilter(FilterCriteria filter) {
-    return SizedBox(
-      width: 200,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            filter.displayName,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
+  Widget _buildPerformanceFilter(FilterCriteria filter) => SizedBox(
+    width: 200,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          filter.displayName,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: RadioListTile<bool?>(
+                dense: true,
+                title: const Text('Gains'),
+                value: true,
+                groupValue: filter.isPositive,
+                onChanged: (value) {
+                  setState(() {
+                    filter.isPositive = value;
+                    _applyFilters();
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Expanded(
-                child: RadioListTile<bool?>(
-                  dense: true,
-                  title: const Text('Gains'),
-                  value: true,
-                  groupValue: filter.isPositive,
-                  onChanged: (value) {
-                    setState(() {
-                      filter.isPositive = value;
-                      _applyFilters();
-                    });
-                  },
-                ),
+            Expanded(
+              child: RadioListTile<bool?>(
+                dense: true,
+                title: const Text('Losses'),
+                value: false,
+                groupValue: filter.isPositive,
+                onChanged: (value) {
+                  setState(() {
+                    filter.isPositive = value;
+                    _applyFilters();
+                  });
+                },
               ),
-              Expanded(
-                child: RadioListTile<bool?>(
-                  dense: true,
-                  title: const Text('Losses'),
-                  value: false,
-                  groupValue: filter.isPositive,
-                  onChanged: (value) {
-                    setState(() {
-                      filter.isPositive = value;
-                      _applyFilters();
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                filter.isPositive = null;
-                _applyFilters();
-              });
-            },
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
-    );
-  }
-  
+            ),
+          ],
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              filter.isPositive = null;
+              _applyFilters();
+            });
+          },
+          child: const Text('Clear'),
+        ),
+      ],
+    ),
+  );
+
   /// Get the number of active filters
-  int _getActiveFilterCount() {
-    return _filters.where((filter) => filter.isActive).length;
-  }
+  int _getActiveFilterCount() =>
+      _filters.where((filter) => filter.isActive).length;
 }

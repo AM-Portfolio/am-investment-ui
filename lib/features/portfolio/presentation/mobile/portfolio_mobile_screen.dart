@@ -14,20 +14,19 @@ import '../../../../core/utils/logger.dart';
 
 /// Mobile-optimized portfolio screen with bottom navigation and portfolio selection
 class PortfolioMobileScreen extends ConsumerWidget {
-  final String userId;
-  final String? selectedPortfolioId;
-  final String? selectedPortfolioName;
-  final List<PortfolioItem>? portfolios;
-  final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
-
   const PortfolioMobileScreen({
-    super.key,
     required this.userId,
+    super.key,
     this.selectedPortfolioId,
     this.selectedPortfolioName,
     this.portfolios,
     this.onPortfolioChanged,
   });
+  final String userId;
+  final String? selectedPortfolioId;
+  final String? selectedPortfolioName;
+  final List<PortfolioItem>? portfolios;
+  final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,26 +55,23 @@ class PortfolioMobileScreen extends ConsumerWidget {
         );
 
         return analyticsServiceAsync.when(
-          data: (analyticsService) {
-            return MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => PortfolioCubit(portfolioService),
-                ),
-                BlocProvider(
-                  create: (context) =>
-                      PortfolioAnalyticsCubit(analyticsService),
-                ),
-              ],
-              child: PortfolioMobileView(
-                userId: userId,
-                selectedPortfolioId: selectedPortfolioId,
-                selectedPortfolioName: selectedPortfolioName,
-                portfolios: portfolios,
-                onPortfolioChanged: onPortfolioChanged,
+          data: (analyticsService) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => PortfolioCubit(portfolioService),
               ),
-            );
-          },
+              BlocProvider(
+                create: (context) => PortfolioAnalyticsCubit(analyticsService),
+              ),
+            ],
+            child: PortfolioMobileView(
+              userId: userId,
+              selectedPortfolioId: selectedPortfolioId,
+              selectedPortfolioName: selectedPortfolioName,
+              portfolios: portfolios,
+              onPortfolioChanged: onPortfolioChanged,
+            ),
+          ),
           loading: () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
           error: (error, stack) {
@@ -142,20 +138,19 @@ class PortfolioMobileScreen extends ConsumerWidget {
 
 /// Internal mobile portfolio view with tab-based navigation and portfolio selection
 class PortfolioMobileView extends StatefulWidget {
-  final String userId;
-  final String? selectedPortfolioId;
-  final String? selectedPortfolioName;
-  final List<PortfolioItem>? portfolios;
-  final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
-
   const PortfolioMobileView({
-    super.key,
     required this.userId,
+    super.key,
     this.selectedPortfolioId,
     this.selectedPortfolioName,
     this.portfolios,
     this.onPortfolioChanged,
   });
+  final String userId;
+  final String? selectedPortfolioId;
+  final String? selectedPortfolioName;
+  final List<PortfolioItem>? portfolios;
+  final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
 
   @override
   State<PortfolioMobileView> createState() => _PortfolioMobileViewState();

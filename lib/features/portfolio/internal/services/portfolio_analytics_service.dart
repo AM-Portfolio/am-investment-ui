@@ -15,9 +15,8 @@ import '../../../../core/utils/logger.dart';
 /// This service acts as a facade that combines analytics use cases
 /// to perform comprehensive portfolio analysis operations.
 class PortfolioAnalyticsService {
-  final GetPortfolioAnalytics _getPortfolioAnalytics;
-
   const PortfolioAnalyticsService(this._getPortfolioAnalytics);
+  final GetPortfolioAnalytics _getPortfolioAnalytics;
 
   /// Retrieves comprehensive portfolio analytics for the specified portfolio
   /// Returns complete analytics data or throws an exception if retrieval fails
@@ -280,7 +279,7 @@ class PortfolioAnalyticsService {
       final analytics = await _getPortfolioAnalytics(request);
 
       // Check if requested features have data
-      bool isComplete = true;
+      var isComplete = true;
 
       if (request.featureToggles.includeHeatmap &&
           analytics.analytics.heatmap == null) {
@@ -346,78 +345,73 @@ class PortfolioAnalyticsService {
   }
 
   /// Creates a request with only heatmap feature enabled
-  PortfolioAnalyticsRequest _createHeatmapOnlyRequest(String portfolioId) {
-    return PortfolioAnalyticsRequest(
-      coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
-      featureToggles: const FeatureToggles(
-        includeHeatmap: true,
-        includeMovers: false,
-        includeSectorAllocation: false,
-        includeMarketCapAllocation: false,
-      ),
-      featureConfiguration: const FeatureConfiguration(moversLimit: 10),
-      pagination: const Pagination(
-        page: 1,
-        size: 50,
-        sortBy: 'performance',
-        sortDirection: 'desc',
-        returnAllData: false,
-      ),
-    );
-  }
+  PortfolioAnalyticsRequest _createHeatmapOnlyRequest(String portfolioId) =>
+      PortfolioAnalyticsRequest(
+        coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
+        featureToggles: const FeatureToggles(
+          includeHeatmap: true,
+          includeMovers: false,
+          includeSectorAllocation: false,
+          includeMarketCapAllocation: false,
+        ),
+        featureConfiguration: const FeatureConfiguration(moversLimit: 10),
+        pagination: const Pagination(
+          page: 1,
+          size: 50,
+          sortBy: 'performance',
+          sortDirection: 'desc',
+          returnAllData: false,
+        ),
+      );
 
   /// Creates a request with only movers feature enabled
   PortfolioAnalyticsRequest _createMoversOnlyRequest(
     String portfolioId, {
     int limit = 10,
-  }) {
-    return PortfolioAnalyticsRequest(
-      coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
-      featureToggles: const FeatureToggles(
-        includeHeatmap: false,
-        includeMovers: true,
-        includeSectorAllocation: false,
-        includeMarketCapAllocation: false,
-      ),
-      featureConfiguration: FeatureConfiguration(moversLimit: limit),
-      pagination: const Pagination(
-        page: 1,
-        size: 50,
-        sortBy: 'changePercent',
-        sortDirection: 'desc',
-        returnAllData: false,
-      ),
-    );
-  }
+  }) => PortfolioAnalyticsRequest(
+    coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
+    featureToggles: const FeatureToggles(
+      includeHeatmap: false,
+      includeMovers: true,
+      includeSectorAllocation: false,
+      includeMarketCapAllocation: false,
+    ),
+    featureConfiguration: FeatureConfiguration(moversLimit: limit),
+    pagination: const Pagination(
+      page: 1,
+      size: 50,
+      sortBy: 'changePercent',
+      sortDirection: 'desc',
+      returnAllData: false,
+    ),
+  );
 
   /// Creates a request with only allocation features enabled
-  PortfolioAnalyticsRequest _createAllocationOnlyRequest(String portfolioId) {
-    return PortfolioAnalyticsRequest(
-      coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
-      featureToggles: const FeatureToggles(
-        includeHeatmap: false,
-        includeMovers: false,
-        includeSectorAllocation: true,
-        includeMarketCapAllocation: true,
-      ),
-      featureConfiguration: const FeatureConfiguration(moversLimit: 10),
-      pagination: const Pagination(
-        page: 1,
-        size: 100,
-        sortBy: 'weightage',
-        sortDirection: 'desc',
-        returnAllData: false,
-      ),
-    );
-  }
+  PortfolioAnalyticsRequest _createAllocationOnlyRequest(String portfolioId) =>
+      PortfolioAnalyticsRequest(
+        coreIdentifiers: CoreIdentifiers(portfolioId: portfolioId),
+        featureToggles: const FeatureToggles(
+          includeHeatmap: false,
+          includeMovers: false,
+          includeSectorAllocation: true,
+          includeMarketCapAllocation: true,
+        ),
+        featureConfiguration: const FeatureConfiguration(moversLimit: 10),
+        pagination: const Pagination(
+          page: 1,
+          size: 100,
+          sortBy: 'weightage',
+          sortDirection: 'desc',
+          returnAllData: false,
+        ),
+      );
 }
 
 /// Data class for combined allocation information
 class AllocationData {
+  const AllocationData({this.sectorAllocation, this.marketCapAllocation});
   final SectorAllocation? sectorAllocation;
   final MarketCapAllocation? marketCapAllocation;
-
-  const AllocationData({this.sectorAllocation, this.marketCapAllocation});
 
   /// Returns true if both allocation types have data
   bool get hasCompleteData =>

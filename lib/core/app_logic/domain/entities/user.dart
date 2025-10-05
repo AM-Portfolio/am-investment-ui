@@ -6,8 +6,6 @@ part 'user.g.dart';
 /// Domain entity representing a user
 @freezed
 class User with _$User {
-  const User._();
-  
   const factory User({
     required String id,
     required String email,
@@ -22,6 +20,7 @@ class User with _$User {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _User;
+  const User._();
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

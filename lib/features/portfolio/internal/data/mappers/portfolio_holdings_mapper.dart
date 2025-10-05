@@ -6,10 +6,11 @@ import '../../domain/entities/portfolio_holding.dart';
 /// This provides isolation between external API structure and internal business logic
 class PortfolioHoldingsMapper {
   /// Convert API response to domain entity
-  static PortfolioHoldings fromApiModel(PortfolioHoldingsDto apiModel, String userId) {
-    final holdings = apiModel.equityHoldings
-        .map((apiHolding) => _mapEquityHolding(apiHolding))
-        .toList();
+  static PortfolioHoldings fromApiModel(
+    PortfolioHoldingsDto apiModel,
+    String userId,
+  ) {
+    final holdings = apiModel.equityHoldings.map(_mapEquityHolding).toList();
 
     return PortfolioHoldings(
       userId: userId,
@@ -21,30 +22,31 @@ class PortfolioHoldingsMapper {
   /// Convert domain entity to API model (for updates/requests)
   static PortfolioHoldingsDto toApiModel(PortfolioHoldings domainModel) {
     final apiHoldings = domainModel.holdings
-        .map((holding) => _mapToApiEquityHolding(holding))
+        .map(_mapToApiEquityHolding)
         .toList();
 
-    return PortfolioHoldingsDto(
-      equityHoldings: apiHoldings,
-    );
+    return PortfolioHoldingsDto(equityHoldings: apiHoldings);
   }
 
   /// Map individual equity holding from API to domain
   static PortfolioHolding _mapEquityHolding(EquityHoldingDto apiHolding) {
     // Map broker holdings
     final brokerHoldings = apiHolding.brokerPortfolios
-        .map((apiBroker) => BrokerHolding(
-              brokerId: apiBroker.brokerType,
-              brokerName: _formatBrokerName(apiBroker.brokerType),
-              quantity: apiBroker.quantity,
-              avgPrice: apiHolding.quantity > 0 
-                  ? apiHolding.investmentCost / apiHolding.quantity 
-                  : 0.0,
-              investedAmount: apiHolding.quantity > 0 
-                  ? (apiBroker.quantity / apiHolding.quantity) * apiHolding.investmentCost
-                  : 0.0,
-              lastUpdated: DateTime.now(),
-            ))
+        .map(
+          (apiBroker) => BrokerHolding(
+            brokerId: apiBroker.brokerType,
+            brokerName: _formatBrokerName(apiBroker.brokerType),
+            quantity: apiBroker.quantity,
+            avgPrice: apiHolding.quantity > 0
+                ? apiHolding.investmentCost / apiHolding.quantity
+                : 0.0,
+            investedAmount: apiHolding.quantity > 0
+                ? (apiBroker.quantity / apiHolding.quantity) *
+                      apiHolding.investmentCost
+                : 0.0,
+            lastUpdated: DateTime.now(),
+          ),
+        )
         .toList();
 
     return PortfolioHolding(
@@ -54,8 +56,8 @@ class PortfolioHoldingsMapper {
       sector: apiHolding.sector,
       industry: apiHolding.industry,
       quantity: apiHolding.quantity,
-      avgPrice: apiHolding.quantity > 0 
-          ? apiHolding.investmentCost / apiHolding.quantity 
+      avgPrice: apiHolding.quantity > 0
+          ? apiHolding.investmentCost / apiHolding.quantity
           : 0.0,
       currentPrice: apiHolding.currentPrice,
       investedAmount: apiHolding.investmentCost,
@@ -70,12 +72,16 @@ class PortfolioHoldingsMapper {
   }
 
   /// Map domain entity back to API model
-  static EquityHoldingDto _mapToApiEquityHolding(PortfolioHolding domainHolding) {
+  static EquityHoldingDto _mapToApiEquityHolding(
+    PortfolioHolding domainHolding,
+  ) {
     final apiBrokers = domainHolding.brokerHoldings
-        .map((broker) => BrokerHoldingDto(
-              brokerType: broker.brokerName,
-              quantity: broker.quantity,
-            ))
+        .map(
+          (broker) => BrokerHoldingDto(
+            brokerType: broker.brokerName,
+            quantity: broker.quantity,
+          ),
+        )
         .toList();
 
     return EquityHoldingDto(
@@ -83,7 +89,8 @@ class PortfolioHoldingsMapper {
       symbol: domainHolding.symbol,
       sector: domainHolding.sector,
       industry: domainHolding.industry,
-      marketCap: 'Unknown', // Default value since not available in simplified model
+      marketCap:
+          'Unknown', // Default value since not available in simplified model
       quantity: domainHolding.quantity,
       investmentCost: domainHolding.investedAmount,
       currentValue: domainHolding.currentValue,
@@ -128,12 +135,10 @@ class PortfolioHoldingsMapper {
   }
 
   /// Create empty portfolio for error states
-  static PortfolioHoldings createEmpty(String userId) {
-    return PortfolioHoldings.empty(userId);
-  }
+  static PortfolioHoldings createEmpty(String userId) =>
+      PortfolioHoldings.empty(userId);
 
   /// Validation helper
-  static bool isValidApiResponse(PortfolioHoldingsDto? apiModel) {
-    return apiModel != null && apiModel.equityHoldings.isNotEmpty;
-  }
+  static bool isValidApiResponse(PortfolioHoldingsDto? apiModel) =>
+      apiModel != null && apiModel.equityHoldings.isNotEmpty;
 }

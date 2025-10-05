@@ -1,6 +1,6 @@
 import '../entities/portfolio_holding.dart';
-import '../entities/portfolio_summary.dart';
 import '../entities/portfolio_list.dart';
+import '../entities/portfolio_summary.dart';
 
 /// Repository interface for portfolio data operations
 abstract class PortfolioRepository {

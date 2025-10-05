@@ -3,31 +3,29 @@ import 'package:collection/collection.dart';
 /// API response model for individual portfolio item in the list
 /// This model directly maps to the API response structure
 class PortfolioItemDto {
-  final String portfolioId;
-  final String portfolioName;
-
   const PortfolioItemDto({
     required this.portfolioId,
     required this.portfolioName,
   });
 
   /// Create from JSON
-  factory PortfolioItemDto.fromJson(Map<String, dynamic> json) {
-    return PortfolioItemDto(
-      portfolioId: json['portfolioId'] as String,
-      portfolioName: json['portfolioName'] as String,
-    );
-  }
+  factory PortfolioItemDto.fromJson(Map<String, dynamic> json) =>
+      PortfolioItemDto(
+        portfolioId: json['portfolioId'] as String,
+        portfolioName: json['portfolioName'] as String,
+      );
+  final String portfolioId;
+  final String portfolioName;
 
   /// Convert to JSON
-  Map<String, dynamic> toJson() {
-    return {'portfolioId': portfolioId, 'portfolioName': portfolioName};
-  }
+  Map<String, dynamic> toJson() => {
+    'portfolioId': portfolioId,
+    'portfolioName': portfolioName,
+  };
 
   @override
-  String toString() {
-    return 'PortfolioItemDto(portfolioId: $portfolioId, portfolioName: $portfolioName)';
-  }
+  String toString() =>
+      'PortfolioItemDto(portfolioId: $portfolioId, portfolioName: $portfolioName)';
 
   @override
   bool operator ==(Object other) {
@@ -44,25 +42,19 @@ class PortfolioItemDto {
 /// API response model for portfolio list
 /// This model directly maps to the API response structure for the list endpoint
 class PortfolioListDto {
-  final List<PortfolioItemDto> portfolios;
-
   const PortfolioListDto({required this.portfolios});
 
   /// Create from JSON array response
-  factory PortfolioListDto.fromJson(List<dynamic> json) {
-    return PortfolioListDto(
-      portfolios: json
-          .map(
-            (item) => PortfolioItemDto.fromJson(item as Map<String, dynamic>),
-          )
-          .toList(),
-    );
-  }
+  factory PortfolioListDto.fromJson(List<dynamic> json) => PortfolioListDto(
+    portfolios: json
+        .map((item) => PortfolioItemDto.fromJson(item as Map<String, dynamic>))
+        .toList(),
+  );
+  final List<PortfolioItemDto> portfolios;
 
   /// Convert to JSON array
-  List<Map<String, dynamic>> toJson() {
-    return portfolios.map((portfolio) => portfolio.toJson()).toList();
-  }
+  List<Map<String, dynamic>> toJson() =>
+      portfolios.map((portfolio) => portfolio.toJson()).toList();
 
   /// Check if the list is empty
   bool get isEmpty => portfolios.isEmpty;
@@ -74,9 +66,8 @@ class PortfolioListDto {
   int get count => portfolios.length;
 
   @override
-  String toString() {
-    return 'PortfolioListDto(portfolios: ${portfolios.length} items)';
-  }
+  String toString() =>
+      'PortfolioListDto(portfolios: ${portfolios.length} items)';
 
   @override
   bool operator ==(Object other) {

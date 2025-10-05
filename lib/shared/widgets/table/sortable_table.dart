@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 
 /// Column definition for sortable table
 class SortableColumn<T> {
+  /// Constructor
+  const SortableColumn({
+    required this.title,
+    required this.builder,
+    this.flex = 1,
+    this.sortBy,
+    this.textAlign,
+  });
+
   /// Column title
   final String title;
 
@@ -16,15 +25,6 @@ class SortableColumn<T> {
 
   /// Text alignment for this column
   final TextAlign? textAlign;
-
-  /// Constructor
-  const SortableColumn({
-    required this.title,
-    required this.builder,
-    this.flex = 1,
-    this.sortBy,
-    this.textAlign,
-  });
 }
 
 /// Sort direction enum
@@ -38,6 +38,22 @@ enum SortDirection {
 
 /// A reusable sortable table widget
 class SortableTable<T> extends StatefulWidget {
+  /// Constructor
+  const SortableTable({
+    required this.items,
+    required this.columns,
+    super.key,
+    this.initialSortColumnIndex = 0,
+    this.initialSortDirection = SortDirection.descending,
+    this.onItemTap,
+    this.showDividers = true,
+    this.rowHeight = 50.0,
+    this.headerTextStyle,
+    this.rowTextStyle,
+    this.headerBackgroundColor,
+    this.rowHoverColor,
+  });
+
   /// List of data items
   final List<T> items;
 
@@ -70,22 +86,6 @@ class SortableTable<T> extends StatefulWidget {
 
   /// Row hover color
   final Color? rowHoverColor;
-
-  /// Constructor
-  const SortableTable({
-    super.key,
-    required this.items,
-    required this.columns,
-    this.initialSortColumnIndex = 0,
-    this.initialSortDirection = SortDirection.descending,
-    this.onItemTap,
-    this.showDividers = true,
-    this.rowHeight = 50.0,
-    this.headerTextStyle,
-    this.rowTextStyle,
-    this.headerBackgroundColor,
-    this.rowHoverColor,
-  });
 
   @override
   State<SortableTable<T>> createState() => _SortableTableState<T>();
@@ -169,34 +169,32 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
   }
 
   /// Build a single table row
-  Widget _buildTableRow(T item, ThemeData theme) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
-        hoverColor: widget.rowHoverColor ?? theme.hoverColor,
-        child: SizedBox(
-          height: widget.rowHeight,
-          child: Row(
-            children: [
-              for (final column in widget.columns)
-                Expanded(
-                  flex: column.flex,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: DefaultTextStyle(
-                      style: widget.rowTextStyle ?? theme.textTheme.bodyMedium!,
-                      overflow: TextOverflow.ellipsis,
-                      child: column.builder(item),
-                    ),
+  Widget _buildTableRow(T item, ThemeData theme) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
+      hoverColor: widget.rowHoverColor ?? theme.hoverColor,
+      child: SizedBox(
+        height: widget.rowHeight,
+        child: Row(
+          children: [
+            for (final column in widget.columns)
+              Expanded(
+                flex: column.flex,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: DefaultTextStyle(
+                    style: widget.rowTextStyle ?? theme.textTheme.bodyMedium!,
+                    overflow: TextOverflow.ellipsis,
+                    child: column.builder(item),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -276,8 +274,6 @@ class _SortableTableState<T> extends State<SortableTable<T>> {
             // Table rows - use ListView.separated without shrinkWrap to enable proper scrolling
             Expanded(
               child: ListView.separated(
-                // Don't use shrinkWrap as it disables scrolling for large datasets
-                shrinkWrap: false,
                 // Enable physics for scrolling
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: _sortedItems.length,

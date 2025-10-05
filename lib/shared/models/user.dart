@@ -1,6 +1,16 @@
 /// Pure domain model for User (no JSON annotations)
 /// Used across portfolio, trade, profile, and other features
 class User {
+  const User({
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.createdAt,
+    this.phoneNumber,
+    this.avatarUrl,
+    this.updatedAt,
+  });
   final String id;
   final String email;
   final String firstName;
@@ -9,17 +19,6 @@ class User {
   final String? avatarUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
-
-  const User({
-    required this.id,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    this.phoneNumber,
-    this.avatarUrl,
-    required this.createdAt,
-    this.updatedAt,
-  });
 
   /// Get full name
   String get fullName => '$firstName $lastName';
@@ -53,18 +52,16 @@ class User {
     String? avatarUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) {
-    return User(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
+  }) => User(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    firstName: firstName ?? this.firstName,
+    lastName: lastName ?? this.lastName,
+    phoneNumber: phoneNumber ?? this.phoneNumber,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -81,21 +78,17 @@ class User {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(
-      id,
-      email,
-      firstName,
-      lastName,
-      phoneNumber,
-      avatarUrl,
-      createdAt,
-      updatedAt,
-    );
-  }
+  int get hashCode => Object.hash(
+    id,
+    email,
+    firstName,
+    lastName,
+    phoneNumber,
+    avatarUrl,
+    createdAt,
+    updatedAt,
+  );
 
   @override
-  String toString() {
-    return 'User(id: $id, email: $email, fullName: $fullName)';
-  }
+  String toString() => 'User(id: $id, email: $email, fullName: $fullName)';
 }

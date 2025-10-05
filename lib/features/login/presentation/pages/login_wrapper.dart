@@ -18,23 +18,23 @@ class _LoginWrapperState extends State<LoginWrapper> {
   String _userId = '';
   String _currentPage = 'Portfolio';
   bool _isInitialized = false;
-  
+
   // SharedPreferences keys
   static const String _authKey = 'is_authenticated';
   static const String _userIdKey = 'user_id';
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAuth();
   }
-  
+
   Future<void> _initializeAuth() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final isAuth = prefs.getBool(_authKey) ?? false;
       final userId = prefs.getString(_userIdKey) ?? '';
-      
+
       setState(() {
         _isAuthenticated = isAuth;
         _userId = userId;
@@ -43,16 +43,16 @@ class _LoginWrapperState extends State<LoginWrapper> {
     } catch (error) {
       setState(() {
         _isInitialized = true;
-      });  
+      });
     }
   }
 
-  void _handleLogin(String userId) async {
+  Future<void> _handleLogin(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_authKey, true);
       await prefs.setString(_userIdKey, userId);
-      
+
       setState(() {
         _isAuthenticated = true;
         _userId = userId;
@@ -66,7 +66,7 @@ class _LoginWrapperState extends State<LoginWrapper> {
     }
   }
 
-  void _handleLogout() async {
+  Future<void> _handleLogout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_authKey);
@@ -74,7 +74,7 @@ class _LoginWrapperState extends State<LoginWrapper> {
     } catch (error) {
       // Continue with logout even if SharedPreferences fails
     }
-    
+
     setState(() {
       _isAuthenticated = false;
       _userId = '';
@@ -107,42 +107,36 @@ class _LoginWrapperState extends State<LoginWrapper> {
     }
   }
 
-  Widget _buildPlaceholderScreen(String title) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.construction,
-            size: 64,
-            color: Theme.of(context).primaryColor.withOpacity(0.6),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '$title Coming Soon',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'This feature is under development.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildPlaceholderScreen(String title) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.construction,
+          size: 64,
+          color: Theme.of(context).primaryColor.withOpacity(0.6),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          '$title Coming Soon',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'This feature is under development.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     // Show loading screen while initializing authentication state
     if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    
+
     if (_isAuthenticated) {
       // For mobile platforms, use mobile layout, for web/desktop use web layout
       if (PlatformUtils.isMobile) {
@@ -155,7 +149,6 @@ class _LoginWrapperState extends State<LoginWrapper> {
         );
       } else {
         return WebLayout(
-          title: 'AM Investment',
           activeNavItem: _currentPage,
           onLogout: _handleLogout,
           onNavigate: _handleNavigation,

@@ -12,9 +12,8 @@ class HeatmapInitial extends HeatmapState {
 
 /// Loading state when data is being fetched
 class HeatmapLoading extends HeatmapState {
-  final String? message;
-
   const HeatmapLoading({this.message});
+  final String? message;
 
   @override
   bool operator ==(Object other) {
@@ -28,10 +27,9 @@ class HeatmapLoading extends HeatmapState {
 
 /// Success state when data is loaded successfully
 class HeatmapLoaded extends HeatmapState {
+  const HeatmapLoaded({required this.data, required this.lastUpdated});
   final HeatmapData data;
   final DateTime lastUpdated;
-
-  const HeatmapLoaded({required this.data, required this.lastUpdated});
 
   @override
   bool operator ==(Object other) {
@@ -47,11 +45,10 @@ class HeatmapLoaded extends HeatmapState {
 
 /// Error state when data loading fails
 class HeatmapError extends HeatmapState {
+  const HeatmapError({required this.message, this.error, this.stackTrace});
   final String message;
   final Object? error;
   final StackTrace? stackTrace;
-
-  const HeatmapError({required this.message, this.error, this.stackTrace});
 
   @override
   bool operator ==(Object other) {
@@ -67,10 +64,9 @@ class HeatmapError extends HeatmapState {
 
 /// Refreshing state when data is being refreshed
 class HeatmapRefreshing extends HeatmapState {
+  const HeatmapRefreshing({required this.currentData, this.message});
   final HeatmapData currentData;
   final String? message;
-
-  const HeatmapRefreshing({required this.currentData, this.message});
 
   @override
   bool operator ==(Object other) {
@@ -86,9 +82,8 @@ class HeatmapRefreshing extends HeatmapState {
 
 /// Empty state when no data is available
 class HeatmapEmpty extends HeatmapState {
-  final String message;
-
   const HeatmapEmpty({this.message = 'No data available'});
+  final String message;
 
   @override
   bool operator ==(Object other) {

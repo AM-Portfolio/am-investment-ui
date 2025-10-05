@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../selectors/heatmap_layout_selector.dart';
 import '../../selectors/selectors.dart';
 import '../configs/display_config.dart';
 import '../configs/interaction_config.dart';
