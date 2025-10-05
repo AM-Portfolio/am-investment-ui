@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
+import '../common/common.dart';
 import '../selectors/selectors.dart';
 import 'configs/selector_config.dart';
 
@@ -293,9 +294,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: Colors.grey.shade300),
     ),
-    child: Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    child: SelectorContainerConfigs.responsiveGrid(
       children: [
         if (widget.showTimeFrame) _buildTimeFramePills(context),
         if (widget.showMetric) _buildMetricPills(context),
@@ -346,129 +345,41 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           TimeFrame.oneYear,
         ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: timeFrames.map((timeFrame) {
-          final isSelected = _selectedTimeFrame == timeFrame;
-          return Container(
-            margin: const EdgeInsets.only(right: 6),
-            child: InkWell(
-              onTap: () => _onTimeFrameChanged(timeFrame),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? (widget.primaryColor ??
-                              Theme.of(context).primaryColor)
-                        : (widget.primaryColor ??
-                                  Theme.of(context).primaryColor)
-                              .withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  timeFrame.displayName,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : (widget.primaryColor ??
-                              Theme.of(context).primaryColor),
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+    return PillSelector<TimeFrame>(
+      items: timeFrames,
+      selectedItem: _selectedTimeFrame,
+      onSelectionChanged: _onTimeFrameChanged,
+      itemDisplayText: (timeFrame) => timeFrame.displayName,
+      primaryColor: widget.primaryColor,
+      scrollable: true,
     );
   }
 
-  Widget _buildMetricDropdown(BuildContext context) => Container(
-    height: 40,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-          .withOpacity(0.05),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.2),
-      ),
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<MetricType>(
+  Widget _buildMetricDropdown(BuildContext context) =>
+      CustomDropdown<MetricType>(
         value: _selectedMetric,
-        isExpanded: true,
-        icon: Icon(
-          Icons.expand_more,
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          size: 18,
-        ),
-        style: TextStyle(
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+        primaryColor: widget.primaryColor,
+        hint: 'Metric',
         items: (widget.availableMetrics ?? MetricType.heatmapMetrics)
             .map(
-              (metric) => DropdownMenuItem<MetricType>(
-                value: metric,
-                child: Row(
-                  children: [
-                    Icon(
-                      metric.icon,
-                      size: 14,
-                      color:
-                          (widget.primaryColor ??
-                                  Theme.of(context).primaryColor)
-                              .withOpacity(0.7),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(metric.shortName),
-                  ],
-                ),
+              (metric) => metric.toDropdownItem(
+                text: metric.shortName,
+                icon: metric.icon,
+                iconColor:
+                    (widget.primaryColor ?? Theme.of(context).primaryColor)
+                        .withOpacity(0.7),
               ),
             )
             .toList(),
         onChanged: (value) {
           if (value != null) _onMetricChanged(value);
         },
-      ),
-    ),
-  );
+      );
 
-  Widget _buildResetButton(BuildContext context) => InkWell(
-    onTap: _resetFilters,
-    borderRadius: BorderRadius.circular(12),
-    child: Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-              .withOpacity(0.3),
-        ),
-      ),
-      child: Icon(
-        Icons.refresh,
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.7),
-        size: 18,
-      ),
-    ),
+  Widget _buildResetButton(BuildContext context) => ResetButton(
+    onPressed: _resetFilters,
+    style: ResetButtonStyle.compact,
+    primaryColor: widget.primaryColor,
   );
 
   Widget _buildExpandedSelectors(BuildContext context) => Column(
@@ -529,55 +440,24 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
 
   Widget _buildExpandedResetButton(BuildContext context) => Align(
     alignment: Alignment.centerRight,
-    child: OutlinedButton.icon(
+    child: ResetButton(
       onPressed: _resetFilters,
-      icon: const Icon(Icons.refresh, size: 16),
-      label: const Text('Reset Filters'),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: widget.primaryColor,
-        side: BorderSide(
-          color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-              .withOpacity(0.5),
-        ),
-      ),
+      style: ResetButtonStyle.outlined,
+      primaryColor: widget.primaryColor,
     ),
   );
 
   // Additional pill and dropdown builders for other selectors
-  Widget _buildMetricPills(BuildContext context) => Wrap(
-    spacing: 6,
-    children: (widget.availableMetrics ?? MetricType.heatmapMetrics).map((
-      metric,
-    ) {
-      final isSelected = _selectedMetric == metric;
-      return InkWell(
-        onTap: () => _onMetricChanged(metric),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected
-                  ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                  : Colors.grey.shade400,
-            ),
-          ),
-          child: Text(
-            metric.shortName,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey.shade700,
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            ),
-          ),
-        ),
-      );
-    }).toList(),
-  );
+  Widget _buildMetricPills(BuildContext context) {
+    final metrics = widget.availableMetrics ?? MetricType.heatmapMetrics;
+    return PillSelector<MetricType>(
+      items: metrics,
+      selectedItem: _selectedMetric,
+      onSelectionChanged: _onMetricChanged,
+      itemDisplayText: (metric) => metric.shortName,
+      primaryColor: widget.primaryColor,
+    );
+  }
 
   Widget _buildSectorPills(BuildContext context) {
     final sectors =
@@ -588,37 +468,12 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           SectorType.healthcare,
           SectorType.finance,
         ];
-    return Wrap(
-      spacing: 6,
-      children: sectors.map((sector) {
-        final isSelected = _selectedSector == sector;
-        return InkWell(
-          onTap: () => _onSectorChanged(sector),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                    : Colors.grey.shade400,
-              ),
-            ),
-            child: Text(
-              sector.displayName,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey.shade700,
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+    return PillSelector<SectorType>(
+      items: sectors,
+      selectedItem: _selectedSector,
+      onSelectionChanged: _onSectorChanged,
+      itemDisplayText: (sector) => sector.displayName,
+      primaryColor: widget.primaryColor,
     );
   }
 
@@ -631,37 +486,12 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           MarketCapType.midCap,
           MarketCapType.smallCap,
         ];
-    return Wrap(
-      spacing: 6,
-      children: marketCaps.map((marketCap) {
-        final isSelected = _selectedMarketCap == marketCap;
-        return InkWell(
-          onTap: () => _onMarketCapChanged(marketCap),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                    : Colors.grey.shade400,
-              ),
-            ),
-            child: Text(
-              marketCap.displayName,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey.shade700,
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+    return PillSelector<MarketCapType>(
+      items: marketCaps,
+      selectedItem: _selectedMarketCap,
+      onSelectionChanged: _onMarketCapChanged,
+      itemDisplayText: (marketCap) => marketCap.displayName,
+      primaryColor: widget.primaryColor,
     );
   }
 
@@ -673,114 +503,46 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           HeatmapLayoutType.grid,
           HeatmapLayoutType.list,
         ];
-    return Wrap(
-      spacing: 6,
-      children: layouts.map((layout) {
-        final isSelected = _selectedLayout == layout;
-        return InkWell(
-          onTap: () => _onLayoutChanged(layout),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected
-                    ? (widget.primaryColor ?? Theme.of(context).primaryColor)
-                    : Colors.grey.shade400,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  layout.icon,
-                  size: 14,
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  layout.displayName,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey.shade700,
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+    return PillSelector<HeatmapLayoutType>(
+      items: layouts,
+      selectedItem: _selectedLayout,
+      onSelectionChanged: _onLayoutChanged,
+      itemDisplayText: (layout) => layout.displayName,
+      itemIcon: (layout) => layout.icon,
+      primaryColor: widget.primaryColor,
     );
   }
 
-  Widget _buildTimeFrameDropdown(BuildContext context) =>
-      DropdownButtonFormField<TimeFrame>(
-        value: _selectedTimeFrame,
-        decoration: const InputDecoration(
-          labelText: 'Time Frame',
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          border: OutlineInputBorder(),
-        ),
-        items:
-            (widget.availableTimeFrames ??
-                    [
-                      TimeFrame.oneDay,
-                      TimeFrame.oneWeek,
-                      TimeFrame.oneMonth,
-                      TimeFrame.threeMonths,
-                      TimeFrame.oneYear,
-                    ])
-                .map(
-                  (timeFrame) => DropdownMenuItem(
-                    value: timeFrame,
-                    child: Text(timeFrame.displayName),
-                  ),
-                )
-                .toList(),
-        onChanged: (value) {
-          if (value != null) _onTimeFrameChanged(value);
-        },
-      );
+  Widget _buildTimeFrameDropdown(
+    BuildContext context,
+  ) => CustomDropdown<TimeFrame>(
+    value: _selectedTimeFrame,
+    primaryColor: widget.primaryColor,
+    hint: 'Time Frame',
+    items:
+        (widget.availableTimeFrames ??
+                [
+                  TimeFrame.oneDay,
+                  TimeFrame.oneWeek,
+                  TimeFrame.oneMonth,
+                  TimeFrame.threeMonths,
+                  TimeFrame.oneYear,
+                ])
+            .map(
+              (timeFrame) =>
+                  timeFrame.toSimpleDropdownItem(text: timeFrame.displayName),
+            )
+            .toList(),
+    onChanged: (value) {
+      if (value != null) _onTimeFrameChanged(value);
+    },
+  );
 
-  Widget _buildSectorDropdown(BuildContext context) => Container(
-    height: 40,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-          .withOpacity(0.05),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.2),
-      ),
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<SectorType>(
+  Widget _buildSectorDropdown(BuildContext context) =>
+      CustomDropdown<SectorType>(
         value: _selectedSector,
-        isExpanded: true,
-        hint: Text(
-          'Sector',
-          style: TextStyle(
-            color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-                .withOpacity(0.7),
-            fontSize: 13,
-          ),
-        ),
-        icon: Icon(
-          Icons.expand_more,
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          size: 18,
-        ),
-        style: TextStyle(
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+        primaryColor: widget.primaryColor,
+        hint: 'Sector',
         items:
             (widget.availableSectors ??
                     [
@@ -790,72 +552,25 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
                       SectorType.finance,
                     ])
                 .map(
-                  (sector) => DropdownMenuItem<SectorType>(
-                    value: sector,
-                    child: Row(
-                      children: [
-                        Icon(
-                          sector.icon,
-                          size: 14,
-                          color:
-                              (widget.primaryColor ??
-                                      Theme.of(context).primaryColor)
-                                  .withOpacity(0.7),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            sector.shortName,
-                            style: const TextStyle(fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                  (sector) => sector.toDropdownItem(
+                    text: sector.shortName,
+                    icon: sector.icon,
+                    iconColor:
+                        (widget.primaryColor ?? Theme.of(context).primaryColor)
+                            .withOpacity(0.7),
                   ),
                 )
                 .toList(),
         onChanged: (value) {
           if (value != null) _onSectorChanged(value);
         },
-      ),
-    ),
-  );
+      );
 
-  Widget _buildMarketCapDropdown(BuildContext context) => Container(
-    height: 40,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-          .withOpacity(0.05),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.2),
-      ),
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<MarketCapType>(
+  Widget _buildMarketCapDropdown(BuildContext context) =>
+      CustomDropdown<MarketCapType>(
         value: _selectedMarketCap,
-        isExpanded: true,
-        hint: Text(
-          'Market Cap',
-          style: TextStyle(
-            color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-                .withOpacity(0.7),
-            fontSize: 13,
-          ),
-        ),
-        icon: Icon(
-          Icons.expand_more,
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          size: 18,
-        ),
-        style: TextStyle(
-          color: widget.primaryColor ?? Theme.of(context).primaryColor,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+        primaryColor: widget.primaryColor,
+        hint: 'Market Cap',
         items:
             (widget.availableMarketCaps ??
                     [
@@ -865,83 +580,28 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
                       MarketCapType.smallCap,
                     ])
                 .map(
-                  (marketCap) => DropdownMenuItem<MarketCapType>(
-                    value: marketCap,
-                    child: Row(
-                      children: [
-                        Icon(
-                          marketCap.icon,
-                          size: 14,
-                          color:
-                              (widget.primaryColor ??
-                                      Theme.of(context).primaryColor)
-                                  .withOpacity(0.7),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            marketCap.shortName,
-                            style: const TextStyle(fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                  (marketCap) => marketCap.toDropdownItem(
+                    text: marketCap.shortName,
+                    icon: marketCap.icon,
+                    iconColor:
+                        (widget.primaryColor ?? Theme.of(context).primaryColor)
+                            .withOpacity(0.7),
                   ),
                 )
                 .toList(),
         onChanged: (value) {
           if (value != null) _onMarketCapChanged(value);
         },
-      ),
-    ),
-  );
+      );
 
-  Widget _buildIconResetButton(BuildContext context) => IconButton(
-    onPressed: _resetFilters,
-    icon: const Icon(Icons.refresh),
-    tooltip: 'Reset Filters',
-    style: IconButton.styleFrom(
-      foregroundColor: widget.primaryColor ?? Theme.of(context).primaryColor,
-    ),
-  );
+  Widget _buildIconResetButton(BuildContext context) =>
+      ResetButton(onPressed: _resetFilters, primaryColor: widget.primaryColor);
 
-  Widget _buildLayoutDropdown(BuildContext context) => Container(
-    height: 40,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-          .withOpacity(0.05),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-            .withOpacity(0.2),
-      ),
-    ),
-    child: DropdownButtonHideUnderline(
-      child: DropdownButton<HeatmapLayoutType>(
+  Widget _buildLayoutDropdown(BuildContext context) =>
+      CustomDropdown<HeatmapLayoutType>(
         value: _selectedLayout,
-        isExpanded: true,
-        hint: Text(
-          'Layout',
-          style: TextStyle(
-            color: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
-            fontSize: 14,
-          ),
-        ),
-        icon: Icon(
-          Icons.arrow_drop_down,
-          color: (widget.primaryColor ?? Theme.of(context).primaryColor)
-              .withOpacity(0.7),
-          size: 18,
-        ),
-        style: TextStyle(
-          color: Theme.of(context).textTheme.bodyMedium?.color,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
+        primaryColor: widget.primaryColor,
+        hint: 'Layout',
         items:
             (widget.availableLayouts ??
                     [
@@ -950,29 +610,17 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
                       HeatmapLayoutType.list,
                     ])
                 .map(
-                  (layout) => DropdownMenuItem<HeatmapLayoutType>(
-                    value: layout,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          layout.icon,
-                          size: 16,
-                          color: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.color?.withOpacity(0.8),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(layout.displayName),
-                      ],
-                    ),
+                  (layout) => layout.toDropdownItem(
+                    text: layout.displayName,
+                    icon: layout.icon,
+                    iconColor: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.8),
                   ),
                 )
                 .toList(),
         onChanged: (value) {
           if (value != null) _onLayoutChanged(value);
         },
-      ),
-    ),
-  );
+      );
 }
