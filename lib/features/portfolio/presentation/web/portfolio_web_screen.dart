@@ -206,7 +206,9 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
                   'Creating PortfolioHeatmapCubit',
                   tag: 'PortfolioWebScreen',
                 );
-                return PortfolioHeatmapCubit();
+                return PortfolioHeatmapCubit(
+                  context.read<PortfolioAnalyticsCubit>(),
+                );
               },
             ),
           ],

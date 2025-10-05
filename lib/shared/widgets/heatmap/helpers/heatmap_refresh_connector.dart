@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/utils/logger.dart';
+import '../../selectors/heatmap_layout_selector.dart';
+import '../../selectors/sector_selector.dart';
+import '../contracts/heatmap_contracts.dart';
 import '../core/heatmap_display_core.dart';
 
 /// Helper class to connect HeatmapDisplayTemplate refresh functionality to existing cubits/providers
@@ -119,4 +123,44 @@ class HeatmapRefreshConnector {
       // You would implement this connection to your actual cubit
     },
   );
+
+  /// Connect using contract-based architecture (Recommended)
+  ///
+  /// This method uses the plugin architecture pattern where features provide
+  /// their own data and refresh implementations through contracts. This maintains
+  /// clean separation of concerns and follows vertical slicing principles.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final core = HeatmapRefreshConnector.connectWithContracts(
+  ///   dataContract: PortfolioHeatmapDataAdapter(portfolioCubit),
+  ///   refreshContract: PortfolioHeatmapRefreshAdapter(portfolioCubit),
+  ///   initialLayout: HeatmapLayoutType.grid,
+  /// );
+  ///
+  /// HeatmapDisplayTemplate(core: core)
+  /// ```
+  static HeatmapDisplayCore connectWithContracts({
+    required HeatmapDataContract dataContract,
+    required HeatmapRefreshContract refreshContract,
+    HeatmapLayoutType initialLayout = HeatmapLayoutType.treemap,
+    SectorType? initialSelectedSector,
+    VoidCallback? onTilePressed,
+  }) {
+    AppLogger.info(
+      'HeatmapRefreshConnector: connecting with contracts - '
+      'dataContract: ${dataContract.runtimeType}, '
+      'refreshContract: ${refreshContract.runtimeType}, '
+      'initialLayout: $initialLayout',
+      tag: 'Heatmap.Refresh.Connector',
+    );
+
+    return HeatmapDisplayCore.withContracts(
+      dataContract: dataContract,
+      refreshContract: refreshContract,
+      initialLayout: initialLayout,
+      initialSelectedSector: initialSelectedSector,
+      onTilePressed: onTilePressed,
+    );
+  }
 }

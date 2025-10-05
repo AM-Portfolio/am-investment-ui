@@ -70,17 +70,15 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
                     minHeight: listItem.height * 0.8, // Allow some flexibility
                   ),
                   margin: EdgeInsets.only(bottom: itemSpacing),
-                  child: Flexible(
-                    child: buildUnifiedHeatmapTileCard(
-                      context,
-                      listItem.tile,
-                      data,
-                      HeatmapTileCardType.list,
-                      width: width,
-                      height: listItem.height,
-                      onTilePressed: onTilePressed,
-                      customTileBuilder: customTileBuilder,
-                    ),
+                  child: buildUnifiedHeatmapTileCard(
+                    context,
+                    listItem.tile,
+                    data,
+                    HeatmapTileCardType.list,
+                    width: width,
+                    height: listItem.height,
+                    onTilePressed: onTilePressed,
+                    customTileBuilder: customTileBuilder,
                   ),
                 ),
               )

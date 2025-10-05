@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/utils/logger.dart';
+import '../../cubit/portfolio_analytics_cubit.dart';
 import '../../cubit/portfolio_cubit.dart';
 import '../../cubit/portfolio_heatmap_cubit.dart';
 import '../../cubit/portfolio_state.dart';
@@ -255,7 +256,8 @@ class _HeatmapTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider<PortfolioHeatmapCubit>(
-    create: (context) => PortfolioHeatmapCubit(),
+    create: (context) =>
+        PortfolioHeatmapCubit(context.read<PortfolioAnalyticsCubit>()),
     child: PortfolioHeatmapMobilePage(
       userId: userId,
       portfolioId: currentPortfolioId,

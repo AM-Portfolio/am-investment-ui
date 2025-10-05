@@ -47,6 +47,7 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
     with TickerProviderStateMixin {
   late AnimationController _refreshController;
   late Animation<double> _refreshAnimation;
+  bool _isDisposed = false;
 
   DisplayConfig get _config => widget.config ?? DisplayConfig.mobile();
 
@@ -71,19 +72,49 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
 
   @override
   void dispose() {
+    _isDisposed = true;
     widget.core.removeListener(_onCoreChanged);
     _refreshController.dispose();
     super.dispose();
   }
 
   void _onCoreChanged() {
+    AppLogger.debug(
+      'HeatmapDisplayMobile: core state changed - isLoading=${widget.core.isLoading}, hasError=${widget.core.hasError}, isEmpty=${widget.core.isEmpty}, tileCount=${widget.core.tileCount}',
+      tag: 'Heatmap.Display.Mobile.StateChange',
+    );
+
+    if (widget.core.hasError) {
+      AppLogger.warning(
+        'HeatmapDisplayMobile: core has error - ${widget.core.error}',
+        tag: 'Heatmap.Display.Mobile.StateChange',
+      );
+    }
+
+    if (widget.core.isEmpty) {
+      AppLogger.info(
+        'HeatmapDisplayMobile: core data is empty - no tiles to display',
+        tag: 'Heatmap.Display.Mobile.StateChange',
+      );
+    }
+
     if (mounted) {
       setState(() {});
+    } else {
+      AppLogger.warning(
+        'HeatmapDisplayMobile: core changed but widget not mounted',
+        tag: 'Heatmap.Display.Mobile.StateChange',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.debug(
+      'HeatmapDisplayMobile: building widget - isLoading=${widget.core.isLoading}, hasError=${widget.core.hasError}, isEmpty=${widget.core.isEmpty}, tileCount=${widget.core.tileCount}',
+      tag: 'Heatmap.Display.Mobile.Build',
+    );
+
     Widget content = Container(
       padding: widget.padding,
       child: _buildContent(context),
@@ -107,11 +138,37 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
   }
 
   Future<void> _handleRefresh() async {
+    AppLogger.info(
+      'HeatmapDisplayMobile: refresh initiated by user action',
+      tag: 'Heatmap.Display.Mobile.Refresh',
+    );
+
     try {
-      // Start refresh animation
-      _refreshController.forward();
+      // Start refresh animation - check if still mounted
+      if (mounted && !_isDisposed) {
+        _refreshController.forward();
+        AppLogger.debug(
+          'HeatmapDisplayMobile: refresh animation started',
+          tag: 'Heatmap.Display.Mobile.Refresh',
+        );
+      } else {
+        AppLogger.warning(
+          'HeatmapDisplayMobile: cannot start animation - mounted=$mounted, disposed=$_isDisposed',
+          tag: 'Heatmap.Display.Mobile.Refresh',
+        );
+      }
+
+      // Log current core state before refresh
+      AppLogger.debug(
+        'HeatmapDisplayMobile: pre-refresh state - isLoading=${widget.core.isLoading}, hasError=${widget.core.hasError}, isEmpty=${widget.core.isEmpty}, tileCount=${widget.core.tileCount}',
+        tag: 'Heatmap.Display.Mobile.Refresh',
+      );
 
       // Trigger actual data refresh through the core
+      AppLogger.info(
+        'HeatmapDisplayMobile: triggering core refresh',
+        tag: 'Heatmap.Display.Mobile.Refresh',
+      );
       widget.core.refresh();
 
       AppLogger.debug(
@@ -121,30 +178,69 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
 
       // Wait for the refresh to complete (simulated delay for UX)
       await Future.delayed(const Duration(milliseconds: 500));
+
+      // Log post-refresh state
+      AppLogger.debug(
+        'HeatmapDisplayMobile: post-refresh state - isLoading=${widget.core.isLoading}, hasError=${widget.core.hasError}, isEmpty=${widget.core.isEmpty}, tileCount=${widget.core.tileCount}',
+        tag: 'Heatmap.Display.Mobile.Refresh',
+      );
     } catch (error) {
       AppLogger.error(
         'HeatmapDisplayMobile: refresh failed - $error',
-        tag: 'Heatmap.Display.Mobile',
+        tag: 'Heatmap.Display.Mobile.Refresh',
+        error: error,
       );
     } finally {
-      // Reset animation
-      _refreshController.reset();
+      // Reset animation - only if controller is still valid and widget is mounted
+      if (mounted && !_isDisposed) {
+        _refreshController.reset();
+        AppLogger.debug(
+          'HeatmapDisplayMobile: refresh animation reset',
+          tag: 'Heatmap.Display.Mobile.Refresh',
+        );
+      } else {
+        AppLogger.warning(
+          'HeatmapDisplayMobile: cannot reset animation - mounted=$mounted, disposed=$_isDisposed',
+          tag: 'Heatmap.Display.Mobile.Refresh',
+        );
+      }
+
+      AppLogger.info(
+        'HeatmapDisplayMobile: refresh flow completed',
+        tag: 'Heatmap.Display.Mobile.Refresh',
+      );
     }
   }
 
   Widget _buildContent(BuildContext context) {
     if (widget.core.isLoading) {
+      AppLogger.debug(
+        'HeatmapDisplayMobile: rendering loading state',
+        tag: 'Heatmap.Display.Mobile.UI',
+      );
       return _buildLoadingState(context);
     }
 
     if (widget.core.hasError) {
+      AppLogger.warning(
+        'HeatmapDisplayMobile: rendering error state - ${widget.core.error}',
+        tag: 'Heatmap.Display.Mobile.UI',
+      );
       return _buildErrorState(context);
     }
 
     if (widget.core.isEmpty) {
+      AppLogger.info(
+        'HeatmapDisplayMobile: rendering empty state - no data available',
+        tag: 'Heatmap.Display.Mobile.UI',
+      );
       return _buildEmptyState(context);
     }
 
+    AppLogger.debug(
+      'HeatmapDisplayMobile: rendering heatmap with ${widget.core.tileCount} tiles',
+      tag: 'Heatmap.Display.Mobile.UI',
+    );
     return _buildHeatmap(context);
   }
 

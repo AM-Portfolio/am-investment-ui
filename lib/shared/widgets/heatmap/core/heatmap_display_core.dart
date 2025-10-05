@@ -7,6 +7,7 @@ import '../../../models/heatmap/heatmap_tile_data.dart';
 import '../../../models/heatmap/heatmap_ui_data.dart';
 import '../../selectors/heatmap_layout_selector.dart';
 import '../../selectors/sector_selector.dart';
+import '../contracts/heatmap_contracts.dart';
 import '../heatmap_config.dart' as ui_config;
 
 /// Core logic for heatmap display functionality
@@ -38,12 +39,59 @@ class HeatmapDisplayCore extends ChangeNotifier {
     );
   }
 
+  /// Contract-based constructor for plugin architecture
+  ///
+  /// This constructor allows features to provide their own data and refresh
+  /// implementations through contracts, maintaining clean separation of concerns.
+  ///
+  /// Usage:
+  /// ```dart
+  /// final core = HeatmapDisplayCore.withContracts(
+  ///   dataContract: myDataAdapter,
+  ///   refreshContract: myRefreshAdapter,
+  ///   initialLayout: HeatmapLayoutType.grid,
+  /// );
+  /// ```
+  HeatmapDisplayCore.withContracts({
+    required HeatmapDataContract dataContract,
+    required HeatmapRefreshContract refreshContract,
+    HeatmapLayoutType initialLayout = HeatmapLayoutType.treemap,
+    SectorType? initialSelectedSector,
+    this.onTilePressed,
+    this.onLayoutChanged,
+    this.onSectorChanged,
+  }) : onDataChanged = null,
+       onLoadingStateChanged = null,
+       onErrorChanged = null,
+       onRefreshRequested = null,
+       _dataContract = dataContract,
+       _refreshContract = refreshContract {
+    // Initialize state from contracts
+    _data = dataContract.currentData ?? _createEmptyHeatmapData();
+    _isLoading = dataContract.isLoading;
+    _error = dataContract.error;
+    _layout = initialLayout;
+    _selectedSector = initialSelectedSector;
+
+    // Subscribe to contract streams
+    _initializeContractStreams();
+
+    AppLogger.debug(
+      'HeatmapDisplayCore: initialized with contracts, ${_data.tiles.length} tiles',
+      tag: 'Heatmap.Display.Core',
+    );
+  }
+
   // Private state
   late HeatmapData _data;
   late bool _isLoading;
   String? _error;
   late HeatmapLayoutType _layout;
   SectorType? _selectedSector;
+
+  // Contract instances (for plugin architecture)
+  HeatmapDataContract? _dataContract;
+  HeatmapRefreshContract? _refreshContract;
 
   // Callbacks
   final VoidCallback? onTilePressed;
@@ -172,17 +220,43 @@ class HeatmapDisplayCore extends ChangeNotifier {
     setError(null);
     setLoading(true);
 
-    // Trigger the refresh callback if provided
-    if (onRefreshRequested != null) {
+    // Try contract-based refresh first
+    if (_refreshContract != null) {
+      _refreshContract!
+          .refresh()
+          .then((_) {
+            AppLogger.debug(
+              'HeatmapDisplayCore: contract refresh completed',
+              tag: 'Heatmap.Display.Core',
+            );
+          })
+          .catchError((error) {
+            AppLogger.error(
+              'HeatmapDisplayCore: contract refresh failed',
+              tag: 'Heatmap.Display.Core',
+              error: error,
+            );
+            setError('Refresh failed: ${error.toString()}');
+            setLoading(false);
+          });
+
+      AppLogger.debug(
+        'HeatmapDisplayCore: contract refresh triggered',
+        tag: 'Heatmap.Display.Core',
+      );
+    }
+    // Fallback to callback-based refresh
+    else if (onRefreshRequested != null) {
       onRefreshRequested!.call();
       AppLogger.debug(
         'HeatmapDisplayCore: refresh callback triggered',
         tag: 'Heatmap.Display.Core',
       );
-    } else {
-      // If no refresh callback is provided, auto-reset loading after a delay
+    }
+    // No refresh mechanism available
+    else {
       AppLogger.warning(
-        'HeatmapDisplayCore: no refresh callback provided, auto-resetting loading state',
+        'HeatmapDisplayCore: no refresh mechanism provided, auto-resetting loading state',
         tag: 'Heatmap.Display.Core',
       );
 
@@ -285,12 +359,40 @@ class HeatmapDisplayCore extends ChangeNotifier {
     );
   }
 
+  /// Initialize contract streams for plugin architecture
+  void _initializeContractStreams() {
+    final dataContract = _dataContract;
+
+    if (dataContract != null) {
+      // Listen to data stream changes
+      dataContract.dataStream.listen((data) {
+        if (data != null) {
+          updateData(data);
+        }
+      });
+
+      // Listen to loading stream changes
+      dataContract.loadingStream.listen(setLoading);
+
+      // Listen to error stream changes
+      dataContract.errorStream.listen(setError);
+    }
+
+    // Note: refreshContract streams are used by UI components directly
+    // The refresh functionality is triggered through the refresh() method
+  }
+
   @override
   void dispose() {
     AppLogger.debug(
       'HeatmapDisplayCore: disposed',
       tag: 'Heatmap.Display.Core',
     );
+
+    // Dispose contracts if present
+    _dataContract?.dispose();
+    _refreshContract?.dispose();
+
     super.dispose();
   }
 }

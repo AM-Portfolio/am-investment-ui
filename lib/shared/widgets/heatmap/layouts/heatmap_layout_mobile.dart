@@ -103,8 +103,8 @@ class HeatmapLayoutMobile extends StatelessWidget {
                         const SizedBox(height: 12),
                       ],
 
-                      // Main display content - expands to fill available space
-                      Expanded(
+                      // Main display content - flexible to accommodate available space
+                      Flexible(
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),

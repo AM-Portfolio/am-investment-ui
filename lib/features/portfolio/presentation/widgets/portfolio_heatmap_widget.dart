@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
+import '../../../../shared/widgets/heatmap/heatmap_display_template.dart';
+import '../../../../shared/widgets/heatmap/helpers/heatmap_refresh_connector.dart';
 import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
+import '../adapters/portfolio_heatmap_adapters.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_analytics_state.dart';
 import '../cubit/portfolio_heatmap_cubit.dart';
@@ -92,9 +95,18 @@ class _PortfolioHeatmapWidgetState
   MarketCapType? _selectedMarketCap;
   late HeatmapLayoutType _selectedLayout;
 
+  // Contract adapters for the new architecture
+  PortfolioHeatmapDataAdapter? _dataAdapter;
+  PortfolioHeatmapRefreshAdapter? _refreshAdapter;
+
   @override
   void initState() {
     super.initState();
+
+    AppLogger.info(
+      '🚀 PortfolioHeatmapWidget initState started',
+      tag: '${widget.config.logTag}.Init',
+    );
 
     // Initialize with config defaults
     _selectedMetric = MetricType.changePercent;
@@ -102,14 +114,36 @@ class _PortfolioHeatmapWidgetState
     _selectedLayout = widget.config.defaultLayout;
 
     AppLogger.info(
-      'PortfolioHeatmapWidget initialized',
+      'PortfolioHeatmapWidget initialized with config: ${widget.config.logTag}',
       tag: '${widget.config.logTag}.Init',
     );
     AppLogger.debug(
       'Parameters: userId=${widget.userId}, portfolioId=${widget.portfolioId}, portfolioName=${widget.portfolioName ?? 'null'}',
       tag: '${widget.config.logTag}.Init',
     );
+    AppLogger.debug(
+      'Initial selections: metric=${_selectedMetric.name}, timeframe=${_selectedTimeframe.name}, layout=${_selectedLayout.name}',
+      tag: '${widget.config.logTag}.Init',
+    );
+
+    AppLogger.info(
+      '📊 About to call _loadHeatmapData()',
+      tag: '${widget.config.logTag}.Init',
+    );
     _loadHeatmapData();
+
+    AppLogger.info(
+      '✅ PortfolioHeatmapWidget initState completed',
+      tag: '${widget.config.logTag}.Init',
+    );
+  }
+
+  @override
+  void dispose() {
+    // Clean up adapters
+    _dataAdapter?.dispose();
+    _refreshAdapter?.dispose();
+    super.dispose();
   }
 
   void _loadHeatmapData() {
@@ -129,11 +163,42 @@ class _PortfolioHeatmapWidgetState
     final portfolioHeatmapCubit = context.read<PortfolioHeatmapCubit>();
 
     // Load analytics data first
+    AppLogger.info(
+      'Starting analytics loading for portfolio: ${widget.portfolioId}',
+      tag: '${widget.config.logTag}.Data',
+    );
+
     portfolioAnalyticsCubit
         .loadAnalytics(widget.portfolioId)
         .then((_) {
           AppLogger.info(
-            'Analytics loaded, proceeding with heatmap data',
+            'Analytics loaded successfully, checking analytics state',
+            tag: '${widget.config.logTag}.Data',
+          );
+
+          final analyticsState = portfolioAnalyticsCubit.state;
+          AppLogger.debug(
+            'Analytics state: ${analyticsState.runtimeType}',
+            tag: '${widget.config.logTag}.Data',
+          );
+
+          if (analyticsState is PortfolioAnalyticsLoaded) {
+            AppLogger.info(
+              'Analytics data confirmed loaded, proceeding with heatmap data loading',
+              tag: '${widget.config.logTag}.Data',
+            );
+          } else {
+            AppLogger.warning(
+              'Analytics not in loaded state: ${analyticsState.runtimeType}',
+              tag: '${widget.config.logTag}.Data',
+            );
+          }
+
+          AppLogger.info(
+            'Calling portfolioHeatmapCubit.loadHeatmapData with params: '
+            'portfolioId=${widget.portfolioId}, timeFrame=${_selectedTimeframe.name}, '
+            'metric=${_selectedMetric.name}, sector=${_selectedSector?.name ?? 'all'}, '
+            'marketCap=${_selectedMarketCap?.name ?? 'all'}',
             tag: '${widget.config.logTag}.Data',
           );
 
@@ -144,6 +209,11 @@ class _PortfolioHeatmapWidgetState
             sector: _selectedSector ?? SectorType.all,
             marketCap: _selectedMarketCap ?? MarketCapType.all,
             analyticsCubit: portfolioAnalyticsCubit,
+          );
+
+          AppLogger.debug(
+            'portfolioHeatmapCubit.loadHeatmapData call completed',
+            tag: '${widget.config.logTag}.Data',
           );
         })
         .catchError((error) {
@@ -170,24 +240,58 @@ class _PortfolioHeatmapWidgetState
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Padding(padding: widget.config.padding, child: _buildHeatmapContent());
+  Widget build(BuildContext context) {
+    AppLogger.debug(
+      '🏗️ PortfolioHeatmapWidget build() called',
+      tag: '${widget.config.logTag}.Build',
+    );
+
+    return Padding(
+      padding: widget.config.padding,
+      child: _buildHeatmapContent(),
+    );
+  }
 
   /// Main heatmap content with state handling using dual cubit approach
-  Widget _buildHeatmapContent() => StreamBuilder<PortfolioHeatmapState>(
-    stream: context.read<PortfolioHeatmapCubit>().stream,
-    initialData: PortfolioHeatmapInitial(),
-    builder: (context, snapshot) {
-      final state = snapshot.data ?? PortfolioHeatmapInitial();
+  Widget _buildHeatmapContent() {
+    AppLogger.debug(
+      'Building heatmap content, getting cubit stream',
+      tag: '${widget.config.logTag}.UI',
+    );
 
-      AppLogger.debug(
-        'State update: ${state.runtimeType}',
-        tag: '${widget.config.logTag}.State',
-      );
+    return StreamBuilder<PortfolioHeatmapState>(
+      stream: context.read<PortfolioHeatmapCubit>().stream,
+      initialData: PortfolioHeatmapInitial(),
+      builder: (context, snapshot) {
+        final state = snapshot.data ?? PortfolioHeatmapInitial();
 
-      return _buildStateWidget(state);
-    },
-  );
+        AppLogger.debug(
+          'Heatmap state update: ${state.runtimeType}',
+          tag: '${widget.config.logTag}.State',
+        );
+
+        if (state is PortfolioHeatmapLoaded) {
+          AppLogger.info(
+            'Heatmap loaded with ${state.heatmapData.tiles.length} tiles',
+            tag: '${widget.config.logTag}.State',
+          );
+        } else if (state is PortfolioHeatmapLoading) {
+          AppLogger.info(
+            'Heatmap loading: ${state.message ?? "no message"}',
+            tag: '${widget.config.logTag}.State',
+          );
+        } else if (state is PortfolioHeatmapError) {
+          AppLogger.error(
+            'Heatmap error: ${state.message}',
+            tag: '${widget.config.logTag}.State',
+            error: state.details,
+          );
+        }
+
+        return _buildStateWidget(state);
+      },
+    );
+  }
 
   /// Routes to appropriate widget based on current state
   Widget _buildStateWidget(PortfolioHeatmapState state) {
@@ -210,25 +314,147 @@ class _PortfolioHeatmapWidgetState
     return _buildDefaultWidget();
   }
 
-  /// Builds loading state UI
-  Widget _buildLoadingWidget(PortfolioHeatmapLoading state) {
+  /// Builds loaded state UI with heatmap
+  Widget _buildLoadedWidget(PortfolioHeatmapLoaded state) {
     AppLogger.info(
-      'Showing loading: ${state.message ?? "Loading..."}',
+      'Building loaded heatmap widget with ${state.heatmapData.tiles.length} tiles',
       tag: '${widget.config.logTag}.UI',
     );
 
+    AppLogger.debug(
+      'Heatmap tiles data: ${state.heatmapData.tiles.map((t) => t.id).take(5).join(", ")}${state.heatmapData.tiles.length > 5 ? "..." : ""}',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    // Get analytics data from the cubit
+    final portfolioAnalyticsCubit = context.read<PortfolioAnalyticsCubit>();
+    final analyticsState = portfolioAnalyticsCubit.state;
+
+    // Check if analytics data is available
+    AppLogger.debug(
+      'Checking analytics data availability. Analytics state: ${analyticsState.runtimeType}',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    if (analyticsState is! PortfolioAnalyticsLoaded) {
+      AppLogger.warning(
+        'Analytics not in loaded state: ${analyticsState.runtimeType}',
+        tag: '${widget.config.logTag}.UI',
+      );
+      return const Center(child: Text('Analytics data is loading...'));
+    }
+
+    if (analyticsState.heatmap == null) {
+      AppLogger.warning(
+        'Analytics loaded but heatmap data is null',
+        tag: '${widget.config.logTag}.UI',
+      );
+      return const Center(child: Text('Analytics data is loading...'));
+    }
+
+    AppLogger.info(
+      'Analytics data confirmed available for heatmap display',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    // Use sector heatmap converter to convert analytics data
+    final convertedHeatmapData = SectorHeatmapConverter.convertToHeatmapData(
+      heatmap: analyticsState.heatmap,
+      showSubCards: widget.config.showSubCards,
+      title: widget.config.title,
+      subtitle: widget.config.subtitle,
+      accentColor: Theme.of(context).primaryColor,
+    );
+
+    AppLogger.debug(
+      'Converted heatmap data: ${convertedHeatmapData.tiles.length} tiles',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    // Create contract-based heatmap with refresh functionality
+    final cubit = context.read<PortfolioHeatmapCubit>();
+
+    AppLogger.debug(
+      'Creating heatmap contracts with cubit state: ${cubit.state.runtimeType}',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    // Initialize adapters if not already created
+    if (_dataAdapter == null) {
+      AppLogger.debug(
+        'Creating new PortfolioHeatmapDataAdapter',
+        tag: '${widget.config.logTag}.UI',
+      );
+      _dataAdapter = PortfolioHeatmapDataAdapter(cubit);
+    }
+
+    if (_refreshAdapter == null) {
+      AppLogger.debug(
+        'Creating new PortfolioHeatmapRefreshAdapter',
+        tag: '${widget.config.logTag}.UI',
+      );
+      _refreshAdapter = PortfolioHeatmapRefreshAdapter(cubit);
+    }
+
+    AppLogger.info(
+      'Connecting heatmap with contracts - layout: ${_selectedLayout.name}, sector: ${_selectedSector?.name ?? "all"}',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    final core = HeatmapRefreshConnector.connectWithContracts(
+      dataContract: _dataAdapter!,
+      refreshContract: _refreshAdapter!,
+      initialLayout: _selectedLayout,
+      initialSelectedSector: _selectedSector,
+      onTilePressed: () {
+        AppLogger.userAction(
+          'Heatmap tile pressed',
+          tag: '${widget.config.logTag}.Action',
+        );
+      },
+    );
+
+    AppLogger.debug(
+      'HeatmapDisplayTemplate about to be created with core',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    return SizedBox(
+      width: double.infinity,
+      child: HeatmapDisplayTemplate(core: core),
+    );
+  }
+
+  /// Builds empty state UI
+  Widget _buildEmptyWidget(PortfolioHeatmapEmpty state) {
+    AppLogger.info(
+      'Showing empty state: ${state.message}',
+      tag: '${widget.config.logTag}.UI',
+    );
+
+    final iconSize = widget.config.compactMode ? 64.0 : 80.0;
+    final textSize = widget.config.compactMode ? 16.0 : 18.0;
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            state.message ?? 'Loading heatmap data...',
-            style: const TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.info_outline, size: iconSize, color: Colors.orange),
+            const SizedBox(height: 16),
+            Text(
+              state.message,
+              style: TextStyle(color: Colors.orange, fontSize: textSize),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadHeatmapData,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -272,110 +498,25 @@ class _PortfolioHeatmapWidgetState
     );
   }
 
-  /// Builds loaded state UI with heatmap
-  Widget _buildLoadedWidget(PortfolioHeatmapLoaded state) {
+  /// Builds loading state UI
+  Widget _buildLoadingWidget(PortfolioHeatmapLoading state) {
     AppLogger.info(
-      'Showing heatmap: ${state.heatmapData.tiles.length} tiles',
+      'Showing loading: ${state.message ?? "Loading..."}',
       tag: '${widget.config.logTag}.UI',
     );
-
-    // Get analytics data from the cubit
-    final portfolioAnalyticsCubit = context.read<PortfolioAnalyticsCubit>();
-    final analyticsState = portfolioAnalyticsCubit.state;
-
-    // Check if analytics data is available
-    if (analyticsState is! PortfolioAnalyticsLoaded ||
-        analyticsState.heatmap == null) {
-      AppLogger.warning(
-        'Analytics data not available for heatmap display',
-        tag: '${widget.config.logTag}.UI',
-      );
-      return const Center(child: Text('Analytics data is loading...'));
-    }
-
-    // Use sector heatmap converter to convert analytics data
-    final convertedHeatmapData = SectorHeatmapConverter.convertToHeatmapData(
-      heatmap: analyticsState.heatmap,
-      showSubCards: widget.config.showSubCards,
-      title: widget.config.title,
-      subtitle: widget.config.subtitle,
-      accentColor: Theme.of(context).primaryColor,
-    );
-
-    AppLogger.debug(
-      'Converted heatmap data: ${convertedHeatmapData.tiles.length} tiles',
-      tag: '${widget.config.logTag}.UI',
-    );
-
-    // Create configuration with selected layout
-    final customConfig = convertedHeatmapData.configuration.copyWith(
-      layout: convertedHeatmapData.configuration.layout?.copyWith(
-        layoutType: _selectedLayout,
-      ),
-    );
-
-    // Return UniversalHeatmapWidget with configuration
-    return SizedBox(
-      width: double.infinity,
-      child: UniversalHeatmapWidget(
-        investmentType: InvestmentType.portfolio,
-        heatmapData: convertedHeatmapData,
-        config: customConfig,
-        title: widget.config.title,
-        showSelectors: widget.config.showSelectors,
-        compactMode: widget.config.compactMode,
-        selectedSector: _selectedSector,
-        onTilePressed: () {
-          AppLogger.userAction(
-            'Heatmap tile pressed',
-            tag: '${widget.config.logTag}.Action',
-          );
-        },
-        onFiltersChanged: ({timeFrame, metric, sector, marketCap, layout}) {
-          _onFiltersChanged(
-            timeFrame: timeFrame,
-            metric: metric,
-            sector: sector,
-            marketCap: marketCap,
-            layout: layout,
-          );
-        },
-        templateType: widget.config.templateType,
-      ),
-    );
-  }
-
-  /// Builds empty state UI
-  Widget _buildEmptyWidget(PortfolioHeatmapEmpty state) {
-    AppLogger.info(
-      'Showing empty state: ${state.message}',
-      tag: '${widget.config.logTag}.UI',
-    );
-
-    final iconSize = widget.config.compactMode ? 64.0 : 80.0;
-    final textSize = widget.config.compactMode ? 16.0 : 18.0;
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.folder_open, size: iconSize, color: Colors.grey),
-            const SizedBox(height: 24),
-            Text(
-              state.message,
-              style: TextStyle(fontSize: textSize, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add some investments to see the ${widget.config.compactMode ? '' : 'portfolio '}heatmap',
-              style: const TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(
+            state.message ?? 'Loading heatmap data...',
+            style: const TextStyle(color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -409,45 +550,5 @@ class _PortfolioHeatmapWidgetState
         ],
       ),
     );
-  }
-
-  /// Handles filter changes from heatmap selectors
-  void _onFiltersChanged({
-    TimeFrame? timeFrame,
-    MetricType? metric,
-    SectorType? sector,
-    MarketCapType? marketCap,
-    HeatmapLayoutType? layout,
-  }) {
-    AppLogger.debug(
-      'Filters: timeFrame=${timeFrame?.code}, metric=${metric?.name}, sector=${sector?.name}, marketCap=${marketCap?.name}, layout=${layout?.name}',
-      tag: '${widget.config.logTag}.Filter',
-    );
-
-    // Update local state
-    if (timeFrame != null) {
-      _selectedTimeframe = timeFrame;
-    }
-    if (metric != null) {
-      _selectedMetric = metric;
-    }
-    if (sector != null) {
-      _selectedSector = sector;
-    }
-    if (marketCap != null) {
-      _selectedMarketCap = marketCap;
-    }
-    if (layout != null) {
-      setState(() {
-        _selectedLayout = layout;
-      });
-      AppLogger.info(
-        'Layout changed to: ${layout.name}',
-        tag: '${widget.config.logTag}.Layout',
-      );
-    }
-
-    // Reload heatmap data with new selections
-    _loadHeatmapData();
   }
 }
