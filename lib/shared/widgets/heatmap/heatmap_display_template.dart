@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
+import '../selectors/heatmap_layout_selector.dart';
 
 /// Pure heatmap display template - handles only tile rendering and layout
 /// Extracted from HeatmapTemplateCard for better modularity
@@ -483,6 +484,3 @@ class HeatmapDisplayTemplate extends StatelessWidget {
     }
   }
 }
-
-/// Enum for different layout types in display template
-enum HeatmapLayoutType { treemap, grid, list }

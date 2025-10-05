@@ -4,7 +4,6 @@ import '../../models/heatmap/heatmap_tile_data.dart';
 import '../selectors/selectors.dart';
 import 'configs/display_config.dart';
 import 'configs/interaction_config.dart';
-import 'configs/layout_config.dart' as layout_config;
 import 'configs/selector_config.dart';
 import 'configs/visual_config.dart';
 
@@ -32,7 +31,7 @@ class HeatmapConfig {
   final DisplayConfig? display;
 
   /// Layout configuration (how to arrange the heatmap) - nullable
-  final layout_config.LayoutConfig? layout;
+  final HeatmapLayoutLa? layout;
 
   /// Interaction configuration (how users can interact) - nullable
   final InteractionConfig? interactions;
@@ -167,9 +166,7 @@ class HeatmapConfig {
     String? title,
   }) => copyWith(
     layout: effectiveLayout.copyWith(
-      layoutType: type != null
-          ? layout_config.HeatmapLayoutType.values[type.index]
-          : null,
+      layoutType: type,
       compactView: compact,
       customTitle: title,
       showTitle: title != null,
@@ -237,6 +234,3 @@ class HeatmapConfig {
   /// Check if this is a web configuration
   bool get isWeb => !compactView && showSectorSelector && showMarketCapSelector;
 }
-
-/// Enum for heatmap layout types (kept for backward compatibility)
-enum HeatmapLayoutType { treemap, grid, list }

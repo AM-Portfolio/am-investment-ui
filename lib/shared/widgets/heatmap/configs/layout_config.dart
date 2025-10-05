@@ -1,4 +1,6 @@
-/// Configuration for heatmap layout and visual structure
+import '../../selectors/heatmap_layout_selector.dart';
+
+/// Layout configuration for heatmap display
 /// Controls how the heatmap is arranged and displayed
 class LayoutConfig {
   const LayoutConfig({
@@ -89,11 +91,4 @@ class LayoutConfig {
   /// Check if layout is optimized for web
   bool get isWebOptimized =>
       layoutType == HeatmapLayoutType.treemap && !compactView;
-}
-
-/// Enum for heatmap layout types
-enum HeatmapLayoutType {
-  treemap, // Hierarchical tree map layout
-  grid, // Grid-based layout
-  list, // List-based layout
 }

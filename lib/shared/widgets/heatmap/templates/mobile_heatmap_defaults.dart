@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../selectors/heatmap_layout_selector.dart';
 import '../../selectors/selectors.dart';
 import '../configs/display_config.dart';
 import '../configs/interaction_config.dart';
@@ -36,6 +37,7 @@ class MobileHeatmapDefaults {
       showRefreshButton: false,
     ),
     layout: layout_config.LayoutConfig(
+      layoutType: HeatmapLayoutType.grid,
       compactView: true,
       customTitle: title ?? 'Portfolio',
     ),

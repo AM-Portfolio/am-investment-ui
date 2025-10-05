@@ -274,16 +274,10 @@ class UniversalHeatmapTemplateFactory {
 
   /// Convert UI config layout to display template layout
   static HeatmapLayoutType _convertToDisplayLayoutType(
-    ui_config.HeatmapLayoutType layoutType,
+    HeatmapLayoutType layoutType,
   ) {
-    switch (layoutType) {
-      case ui_config.HeatmapLayoutType.treemap:
-        return HeatmapLayoutType.treemap;
-      case ui_config.HeatmapLayoutType.grid:
-        return HeatmapLayoutType.grid;
-      case ui_config.HeatmapLayoutType.list:
-        return HeatmapLayoutType.list;
-    }
+    // Since both enums are now the same, no conversion needed
+    return layoutType;
   }
 
   /// Get header actions for full template
