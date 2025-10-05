@@ -23,12 +23,12 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     final sortedTiles = getTilesBasedOnSector(data, selectedSector);
 
     AppLogger.debug(
-      'ListLayoutBuilder: building weightage-based list with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}',
+      'ListLayoutBuilder: building uniform list with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}',
       tag: 'Heatmap.List',
     );
 
-    // Use weightage-based layout that fills the available height
-    return _buildWeightageBasedList(
+    // Use uniform layout with consistent item heights for easy list scanning
+    return _buildUniformList(
       context,
       sortedTiles,
       data,
@@ -39,8 +39,8 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     );
   }
 
-  /// Builds a weightage-based list that fills the available height
-  Widget _buildWeightageBasedList(
+  /// Builds a uniform list with consistent item heights for easy scanning
+  Widget _buildUniformList(
     BuildContext context,
     List<HeatmapTileData> tiles,
     HeatmapData data,
@@ -54,110 +54,95 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     }
 
     final listItems = _calculateListItemHeights(tiles, height, data);
+    final itemSpacing = _calculateResponsiveSpacing(height);
+    final padding = itemSpacing.clamp(2.0, 6.0);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(4),
-      child: Column(
-        children: listItems
-            .map(
-              (listItem) => Container(
-                height: listItem.height,
-                margin: const EdgeInsets.only(bottom: 4),
-                child: buildUnifiedHeatmapTileCard(
-                  context,
-                  listItem.tile,
-                  data,
-                  HeatmapTileCardType.list,
-                  width: width,
-                  height: listItem.height,
-                  onTilePressed: onTilePressed,
-                  customTileBuilder: customTileBuilder,
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: EdgeInsets.all(padding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: listItems
+              .map(
+                (listItem) => Container(
+                  constraints: BoxConstraints(
+                    maxHeight: listItem.height,
+                    minHeight: listItem.height * 0.8, // Allow some flexibility
+                  ),
+                  margin: EdgeInsets.only(bottom: itemSpacing),
+                  child: Flexible(
+                    child: buildUnifiedHeatmapTileCard(
+                      context,
+                      listItem.tile,
+                      data,
+                      HeatmapTileCardType.list,
+                      width: width,
+                      height: listItem.height,
+                      onTilePressed: onTilePressed,
+                      customTileBuilder: customTileBuilder,
+                    ),
+                  ),
                 ),
-              ),
-            )
-            .toList(),
+              )
+              .toList(),
+        ),
       ),
     );
   }
 
-  /// Calculates list item heights based on weightage distribution with mobile optimization
+  /// Calculates responsive spacing based on screen height
+  double _calculateResponsiveSpacing(double availableHeight) {
+    // Dynamic spacing based on available height to prevent overflow
+    final spacingRatio = availableHeight * 0.005; // 0.5% of available height
+
+    if (availableHeight > 600) {
+      return spacingRatio.clamp(
+        4.0,
+        8.0,
+      ); // Large screens - generous but controlled
+    } else if (availableHeight > 400) {
+      return spacingRatio.clamp(2.0, 6.0); // Medium screens - balanced
+    } else {
+      return spacingRatio.clamp(1.0, 4.0); // Small screens - compact spacing
+    }
+  }
+
+  /// Calculates uniform list item heights for consistent list appearance
   List<_ListItem> _calculateListItemHeights(
     List<HeatmapTileData> tiles,
     double availableHeight,
     HeatmapData data,
   ) {
-    final totalWeight = tiles.fold<double>(
-      0,
-      (sum, tile) => sum + tile.weightage,
-    );
+    // Use uniform height for all list items to maintain consistent list appearance
+    final uniformHeight = _calculateUniformItemHeight(availableHeight);
 
-    // Responsive padding and spacing based on available height
-    final padding = _calculateListPadding(availableHeight);
-    final itemSpacing = _calculateItemSpacing(availableHeight);
-    final minItemHeight = _calculateMinItemHeight(availableHeight);
-    final maxItemHeight = _calculateMaxItemHeight(availableHeight);
+    return tiles
+        .map((tile) => _ListItem(tile: tile, height: uniformHeight))
+        .toList();
+  }
 
-    final totalSpacing = (tiles.length - 1) * itemSpacing;
-    final usableHeight = availableHeight - padding - totalSpacing;
+  /// Calculates a uniform item height based on screen size for consistent list items
+  double _calculateUniformItemHeight(double availableHeight) {
+    // Calculate dynamic height based on available space and ensure it's reasonable
+    final baseHeight =
+        availableHeight * 0.08; // 8% of available height per item
 
-    if (totalWeight == 0) {
-      // Equal distribution when no weights
-      final equalHeight = (usableHeight / tiles.length).clamp(
-        minItemHeight,
-        maxItemHeight,
-      );
-      return tiles
-          .map((tile) => _ListItem(tile: tile, height: equalHeight))
-          .toList();
+    // Clamp to reasonable bounds to prevent overflow and ensure readability
+    if (availableHeight > 800) {
+      return baseHeight.clamp(
+        60.0,
+        80.0,
+      ); // Large screens - generous but controlled
+    } else if (availableHeight > 600) {
+      return baseHeight.clamp(50.0, 70.0); // Medium screens - balanced
+    } else if (availableHeight > 400) {
+      return baseHeight.clamp(40.0, 60.0); // Small screens - compact
+    } else {
+      return baseHeight.clamp(
+        30.0,
+        45.0,
+      ); // Very small screens - minimal but readable
     }
-
-    // Calculate heights based on weightage
-    final baseHeight = usableHeight * 0.6; // 60% for base heights
-    final variableHeight =
-        usableHeight * 0.4; // 40% for weightage-based variation
-
-    final baseHeightPerTile = baseHeight / tiles.length;
-
-    return tiles.map((tile) {
-      final weightRatio = tile.weightage / totalWeight;
-      final weightageContribution =
-          variableHeight * weightRatio * tiles.length; // Normalize
-      final totalHeight = baseHeightPerTile + weightageContribution;
-
-      return _ListItem(
-        tile: tile,
-        height: totalHeight.clamp(minItemHeight, maxItemHeight),
-      );
-    }).toList();
-  }
-
-  /// Calculates responsive padding for list layout
-  double _calculateListPadding(double availableHeight) {
-    if (availableHeight > 600) return 8.0; // Large screens
-    if (availableHeight > 400) return 6.0; // Medium screens
-    return 4.0; // Small screens
-  }
-
-  /// Calculates responsive item spacing
-  double _calculateItemSpacing(double availableHeight) {
-    if (availableHeight > 600) return 4.0; // Large screens
-    if (availableHeight > 400) return 3.0; // Medium screens
-    return 2.0; // Small screens - tight spacing
-  }
-
-  /// Calculates minimum item height based on screen size
-  double _calculateMinItemHeight(double availableHeight) {
-    if (availableHeight > 600) return 50.0; // Large screens - generous height
-    if (availableHeight > 400) return 45.0; // Medium screens
-    return 40.0; // Small screens - compact height
-  }
-
-  /// Calculates maximum item height based on screen size
-  double _calculateMaxItemHeight(double availableHeight) {
-    if (availableHeight > 800) return 140.0; // Very large screens
-    if (availableHeight > 600) return 120.0; // Large screens
-    if (availableHeight > 400) return 100.0; // Medium screens
-    return 80.0; // Small screens - prevent oversized items
   }
 }
 

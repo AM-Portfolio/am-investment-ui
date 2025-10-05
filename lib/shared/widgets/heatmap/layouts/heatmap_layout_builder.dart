@@ -543,141 +543,151 @@ abstract class HeatmapLayoutBuilder {
     final config = data.configuration;
     final showSubCards = config.showSubCards;
 
-    return Row(
-      children: [
-        // Hierarchy indicator
-        if (hierarchyLevel > 0) ...[
-          Container(
-            width: 4 + (hierarchyLevel * 8.0),
-            height: height * 0.6,
-            decoration: BoxDecoration(
-              color: textColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
+    // Determine if we're in a tight constraint situation
+    final isTightHeight = height < 50;
+    final dynamicFontSize = isTightHeight ? 11.0 : 14.0;
+    final compactMode = height < 40;
 
-        // Leading section - Name and primary info
-        Expanded(
-          flex: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Tile name with level indicator
-              Row(
-                children: [
-                  if (hierarchyLevel > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
-                      ),
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: BoxDecoration(
-                        color: textColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'L${hierarchyLevel + 1}',
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          // Hierarchy indicator - only show if not in compact mode
+          if (hierarchyLevel > 0 && !compactMode) ...[
+            Container(
+              width: 4 + (hierarchyLevel * 6.0),
+              height: (height * 0.6).clamp(8.0, 20.0),
+              decoration: BoxDecoration(
+                color: textColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(width: compactMode ? 4 : 8),
+          ],
+
+          // Leading section - Name and primary info
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Tile name with level indicator
+                Row(
+                  children: [
+                    if (hierarchyLevel > 0 && !isTightHeight)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 3,
+                          vertical: 1,
+                        ),
+                        margin: const EdgeInsets.only(right: 4),
+                        decoration: BoxDecoration(
+                          color: textColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'L${hierarchyLevel + 1}',
+                          style: TextStyle(
+                            fontSize: 7,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
                       ),
-                    ),
-                  Expanded(
-                    child: Text(
-                      tile.name,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        tile.name,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: dynamicFontSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                     ),
-                  ),
-                ],
-              ),
-
-              // Weightage
-              if (config.showWeightage) ...[
-                const SizedBox(height: 2),
-                Text(
-                  '${tile.weightage.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    color: textColor.withOpacity(0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  ],
                 ),
-              ],
-            ],
-          ),
-        ),
 
-        // Trailing section - Performance and value metrics
-        if (showSubCards) ...[
-          // Performance
-          if (config.showPerformance)
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                // Weightage - only show if not in tight height
+                if (config.showWeightage && !isTightHeight) ...[
+                  SizedBox(height: compactMode ? 1 : 2),
                   Text(
-                    '${tile.performance >= 0 ? '+' : ''}${tile.performance.toStringAsFixed(1)}%',
+                    '${tile.weightage.toStringAsFixed(1)}%',
                     style: TextStyle(
-                      color: textColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (height > 70)
-                    Text(
-                      'Performance',
-                      style: TextStyle(
-                        color: textColor.withOpacity(0.7),
-                        fontSize: 10,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                ],
-              ),
-            ),
-
-          // Value
-          if (config.showValue && tile.value != null)
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '\$${_formatValueForDisplay(tile.value!)}',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 13,
+                      color: textColor.withOpacity(0.8),
+                      fontSize: compactMode ? 9.0 : 12.0,
                       fontWeight: FontWeight.w500,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  if (height > 70)
+                ],
+              ],
+            ),
+          ),
+
+          // Trailing section - Performance and value metrics (simplified for tight constraints)
+          if (showSubCards && !compactMode) ...[
+            // Performance
+            if (config.showPerformance)
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      'Value',
+                      '${tile.performance >= 0 ? '+' : ''}${tile.performance.toStringAsFixed(1)}%',
                       style: TextStyle(
-                        color: textColor.withOpacity(0.7),
-                        fontSize: 10,
+                        color: textColor,
+                        fontSize: isTightHeight ? 11.0 : 13.0,
+                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                ],
+                    if (height > 50 && !isTightHeight)
+                      Text(
+                        'Performance',
+                        style: TextStyle(
+                          color: textColor.withOpacity(0.7),
+                          fontSize: 9,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
               ),
-            ),
+
+            // Value
+            if (config.showValue && tile.value != null)
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '\$${_formatValueForDisplay(tile.value!)}',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: isTightHeight ? 11.0 : 13.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (height > 50 && !isTightHeight)
+                      Text(
+                        'Value',
+                        style: TextStyle(
+                          color: textColor.withOpacity(0.7),
+                          fontSize: 9,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
