@@ -21,60 +21,143 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
   }) {
     // Get tiles based on selected sector using common base class method (includes sorting)
     final sortedTiles = getTilesBasedOnSector(data, selectedSector);
-    final tileHeight = _calculateOptimalTileHeight(data, width);
 
     AppLogger.debug(
-      'ListLayoutBuilder: building list with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}, tileHeight=$tileHeight',
+      'ListLayoutBuilder: building weightage-based list with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}',
       tag: 'Heatmap.List',
     );
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(4),
-      itemCount: sortedTiles.length,
-      itemBuilder: (context, index) {
-        final tile = sortedTiles[index];
-        return Container(
-          height: tileHeight,
-          margin: const EdgeInsets.only(bottom: 4),
-          child: buildUnifiedHeatmapTileCard(
-            context,
-            tile,
-            data,
-            HeatmapTileCardType.list,
-            width: width,
-            height: tileHeight,
-            onTilePressed: onTilePressed,
-            customTileBuilder: customTileBuilder,
-          ),
-        );
-      },
+    // Use weightage-based layout that fills the available height
+    return _buildWeightageBasedList(
+      context,
+      sortedTiles,
+      data,
+      width,
+      height,
+      onTilePressed: onTilePressed,
+      customTileBuilder: customTileBuilder,
     );
   }
 
-  /// Calculates optimal tile height based on content and screen size
-  double _calculateOptimalTileHeight(HeatmapData data, double width) {
-    final config = data.configuration;
-
-    // Base height depending on content density
-    double baseHeight = 60;
-
-    // Adjust for content complexity
-    if (config.showSubCards) {
-      baseHeight += 20; // More space for additional info
+  /// Builds a weightage-based list that fills the available height
+  Widget _buildWeightageBasedList(
+    BuildContext context,
+    List<HeatmapTileData> tiles,
+    HeatmapData data,
+    double width,
+    double height, {
+    VoidCallback? onTilePressed,
+    Widget Function(HeatmapTileData tile)? customTileBuilder,
+  }) {
+    if (tiles.isEmpty) {
+      return const Center(child: Text('No data available'));
     }
 
-    if (config.showPerformance && config.showValue) {
-      baseHeight += 15; // Extra space for multiple metrics
+    final listItems = _calculateListItemHeights(tiles, height, data);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(4),
+      child: Column(
+        children: listItems
+            .map(
+              (listItem) => Container(
+                height: listItem.height,
+                margin: const EdgeInsets.only(bottom: 4),
+                child: buildUnifiedHeatmapTileCard(
+                  context,
+                  listItem.tile,
+                  data,
+                  HeatmapTileCardType.list,
+                  width: width,
+                  height: listItem.height,
+                  onTilePressed: onTilePressed,
+                  customTileBuilder: customTileBuilder,
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  /// Calculates list item heights based on weightage distribution with mobile optimization
+  List<_ListItem> _calculateListItemHeights(
+    List<HeatmapTileData> tiles,
+    double availableHeight,
+    HeatmapData data,
+  ) {
+    final totalWeight = tiles.fold<double>(
+      0,
+      (sum, tile) => sum + tile.weightage,
+    );
+
+    // Responsive padding and spacing based on available height
+    final padding = _calculateListPadding(availableHeight);
+    final itemSpacing = _calculateItemSpacing(availableHeight);
+    final minItemHeight = _calculateMinItemHeight(availableHeight);
+    final maxItemHeight = _calculateMaxItemHeight(availableHeight);
+
+    final totalSpacing = (tiles.length - 1) * itemSpacing;
+    final usableHeight = availableHeight - padding - totalSpacing;
+
+    if (totalWeight == 0) {
+      // Equal distribution when no weights
+      final equalHeight = (usableHeight / tiles.length).clamp(
+        minItemHeight,
+        maxItemHeight,
+      );
+      return tiles
+          .map((tile) => _ListItem(tile: tile, height: equalHeight))
+          .toList();
     }
 
-    // Adjust for screen size
-    if (width > 800) {
-      baseHeight += 10; // Larger tiles on bigger screens
-    } else if (width < 400) {
-      baseHeight -= 10; // Smaller tiles on mobile
-    }
+    // Calculate heights based on weightage
+    final baseHeight = usableHeight * 0.6; // 60% for base heights
+    final variableHeight =
+        usableHeight * 0.4; // 40% for weightage-based variation
 
-    return baseHeight.clamp(50, 100);
+    final baseHeightPerTile = baseHeight / tiles.length;
+
+    return tiles.map((tile) {
+      final weightRatio = tile.weightage / totalWeight;
+      final weightageContribution =
+          variableHeight * weightRatio * tiles.length; // Normalize
+      final totalHeight = baseHeightPerTile + weightageContribution;
+
+      return _ListItem(
+        tile: tile,
+        height: totalHeight.clamp(minItemHeight, maxItemHeight),
+      );
+    }).toList();
+  }
+
+  /// Calculates responsive padding for list layout
+  double _calculateListPadding(double availableHeight) {
+    if (availableHeight > 600) return 8.0; // Large screens
+    if (availableHeight > 400) return 6.0; // Medium screens
+    return 4.0; // Small screens
+  }
+
+  /// Calculates responsive item spacing
+  double _calculateItemSpacing(double availableHeight) {
+    if (availableHeight > 600) return 4.0; // Large screens
+    if (availableHeight > 400) return 3.0; // Medium screens
+    return 2.0; // Small screens - tight spacing
+  }
+
+  /// Calculates minimum item height based on screen size
+  double _calculateMinItemHeight(double availableHeight) {
+    if (availableHeight > 600) return 50.0; // Large screens - generous height
+    if (availableHeight > 400) return 45.0; // Medium screens
+    return 40.0; // Small screens - compact height
+  }
+
+  /// Calculates maximum item height based on screen size
+  double _calculateMaxItemHeight(double availableHeight) {
+    if (availableHeight > 800) return 140.0; // Very large screens
+    if (availableHeight > 600) return 120.0; // Large screens
+    if (availableHeight > 400) return 100.0; // Medium screens
+    return 80.0; // Small screens - prevent oversized items
   }
 }
 
@@ -120,4 +203,12 @@ class ListLayoutConfig {
     padding: EdgeInsets.all(6),
     borderRadius: 10.0,
   );
+}
+
+/// Helper class for list item height calculations
+class _ListItem {
+  const _ListItem({required this.tile, required this.height});
+
+  final HeatmapTileData tile;
+  final double height;
 }

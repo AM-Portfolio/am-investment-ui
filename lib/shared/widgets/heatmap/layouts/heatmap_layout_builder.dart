@@ -169,7 +169,7 @@ abstract class HeatmapLayoutBuilder {
     );
   }
 
-  /// Calculates appropriate font size based on tile dimensions
+  /// Calculates appropriate font size based on tile dimensions with mobile optimization
   double calculateFontSize(
     double width,
     bool showSubCards, {
@@ -178,15 +178,40 @@ abstract class HeatmapLayoutBuilder {
   }) {
     double baseFontSize;
 
+    // Enhanced mobile-first font sizing
     if (isSmall) {
-      baseFontSize = showSubCards ? (width > 120 ? 8 : 7) : 10;
+      if (width < 80) {
+        baseFontSize = 6; // Very small tiles
+      } else if (width < 120) {
+        baseFontSize = showSubCards ? 7 : 9;
+      } else {
+        baseFontSize = showSubCards ? 8 : 10;
+      }
     } else if (isSecondary) {
-      baseFontSize = showSubCards ? (width > 120 ? 12 : 10) : 14;
+      if (width < 80) {
+        baseFontSize = 8; // Minimum readable size for secondary text
+      } else if (width < 120) {
+        baseFontSize = showSubCards ? 10 : 12;
+      } else if (width < 200) {
+        baseFontSize = showSubCards ? 12 : 14;
+      } else {
+        baseFontSize = showSubCards ? 14 : 16;
+      }
     } else {
-      baseFontSize = showSubCards ? (width > 120 ? 10 : 8) : 12;
+      // Primary text sizing
+      if (width < 80) {
+        baseFontSize = 9; // Minimum readable size for primary text
+      } else if (width < 120) {
+        baseFontSize = showSubCards ? 8 : 10;
+      } else if (width < 200) {
+        baseFontSize = showSubCards ? 10 : 12;
+      } else {
+        baseFontSize = showSubCards ? 12 : 14;
+      }
     }
 
-    return baseFontSize;
+    // Ensure minimum readable font size on all devices
+    return baseFontSize.clamp(6.0, 18.0);
   }
 
   /// Gets tiles based on selected sector for display
