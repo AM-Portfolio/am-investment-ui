@@ -41,50 +41,83 @@ class HeatmapLayoutMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppLogger.debug(
-      'HeatmapLayoutMobile: rendering mobile layout',
+      'HeatmapLayoutMobile: rendering enhanced full-screen mobile layout',
       tag: 'Heatmap.Layout.Mobile',
     );
 
     return Container(
-      color: backgroundColor,
-      padding: padding ?? const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          // Selectors section - full width on mobile
-          if (showSelectors && selectorWidget != null) ...[
-            selectorWidget!,
-            const SizedBox(height: 12),
-          ],
+      color: backgroundColor ?? Theme.of(context).colorScheme.surface,
+      child: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            // Selectors section as sliver - pinned to top when scrolling
+            if (showSelectors && selectorWidget != null)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SelectorHeaderDelegate(
+                  child: Container(
+                    color:
+                        backgroundColor ??
+                        Theme.of(context).colorScheme.surface,
+                    padding: EdgeInsets.fromLTRB(
+                      (padding?.horizontal ?? 16) / 2,
+                      8,
+                      (padding?.horizontal ?? 16) / 2,
+                      8,
+                    ),
+                    child: selectorWidget,
+                  ),
+                ),
+              ),
 
-          // Main heatmap card with mobile-optimized padding
-          Expanded(
-            child: Card(
-              elevation: 2, // Slightly less elevation for mobile
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(12), // Reduced padding for mobile
-                child: Column(
-                  children: [
-                    // Header section - mobile optimized
-                    if (showHeader) ...[
-                      customHeader ?? _buildMobileHeader(context),
-                      const SizedBox(height: 12),
+            // Main content area - expandable and scrollable
+            SliverFillRemaining(
+              child: Container(
+                padding: padding ?? const EdgeInsets.symmetric(horizontal: 8),
+                child: Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.only(top: 8, bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      // Header section - mobile optimized
+                      if (showHeader) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: customHeader ?? _buildMobileHeader(context),
+                        ),
+                      ],
+
+                      // Legend section - compact for mobile
+                      if (showLegend && data.configuration.showPerformance) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _buildMobileColorLegend(context),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Main display content - expands to fill available space
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: displayWidget,
+                        ),
+                      ),
                     ],
-
-                    // Legend section - compact for mobile
-                    if (showLegend && data.configuration.showPerformance) ...[
-                      _buildMobileColorLegend(context),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // Main display content
-                    Expanded(child: displayWidget),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -202,4 +235,28 @@ class HeatmapLayoutMobile extends StatelessWidget {
       ),
     ],
   );
+}
+
+/// Custom sliver persistent header delegate for selector widget
+class _SelectorHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _SelectorHeaderDelegate({required this.child});
+
+  final Widget child;
+
+  @override
+  double get minExtent => 60.0;
+
+  @override
+  double get maxExtent => 60.0;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => child;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      oldDelegate != this;
 }
