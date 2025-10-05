@@ -48,6 +48,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
     MetricType? metric,
     SectorType? sector,
     MarketCapType? marketCap,
+    HeatmapLayoutType? layout,
   })?
   onFiltersChanged;
 

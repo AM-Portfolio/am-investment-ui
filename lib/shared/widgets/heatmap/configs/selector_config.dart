@@ -17,6 +17,7 @@ class SelectorConfig {
     this.showMetricSelector = true,
     this.showSectorSelector = true,
     this.showMarketCapSelector = true,
+    this.showLayoutSelector = false,
 
     // Selector layout type
     this.selectorLayout = SelectorLayoutType.compact,
@@ -26,6 +27,7 @@ class SelectorConfig {
     this.availableMetrics,
     this.availableSectors,
     this.availableMarketCaps,
+    this.availableLayouts,
   });
 
   /// Mobile-optimized selector configuration
@@ -47,13 +49,23 @@ class SelectorConfig {
     List<MetricType>? metrics,
     List<SectorType>? sectors,
     List<MarketCapType>? marketCaps,
+    List<HeatmapLayoutType>? layouts,
     SelectorLayoutType? selectorLayout,
+    bool showLayoutSelector = true,
   }) => SelectorConfig(
+    showLayoutSelector: showLayoutSelector,
     selectorLayout: selectorLayout ?? SelectorLayoutType.expanded,
     availableTimeFrames: timeFrames ?? TimeFrame.webTimeFrames,
     availableMetrics: metrics ?? MetricType.webMetrics,
     availableSectors: sectors ?? SectorType.allSectors,
     availableMarketCaps: marketCaps ?? MarketCapType.allMarketCaps,
+    availableLayouts:
+        layouts ??
+        [
+          HeatmapLayoutType.treemap,
+          HeatmapLayoutType.grid,
+          HeatmapLayoutType.list,
+        ],
   );
 
   /// Minimal selector configuration (for widgets, previews)
@@ -69,14 +81,18 @@ class SelectorConfig {
   );
 
   /// Dashboard selector configuration
-  factory SelectorConfig.dashboard({SelectorLayoutType? selectorLayout}) =>
-      SelectorConfig(
-        showMetricSelector: false,
-        showSectorSelector: false,
-        showMarketCapSelector: false,
-        selectorLayout: selectorLayout ?? SelectorLayoutType.compact,
-        availableTimeFrames: TimeFrame.dashboardTimeFrames,
-      );
+  factory SelectorConfig.dashboard({
+    SelectorLayoutType? selectorLayout,
+    bool showLayoutSelector = true,
+  }) => SelectorConfig(
+    showMetricSelector: false,
+    showSectorSelector: false,
+    showMarketCapSelector: false,
+    showLayoutSelector: showLayoutSelector,
+    selectorLayout: selectorLayout ?? SelectorLayoutType.compact,
+    availableTimeFrames: TimeFrame.dashboardTimeFrames,
+    availableLayouts: [HeatmapLayoutType.treemap, HeatmapLayoutType.grid],
+  );
 
   /// Portfolio-specific selector configuration
   factory SelectorConfig.portfolio({SelectorLayoutType? selectorLayout}) =>
@@ -112,6 +128,7 @@ class SelectorConfig {
   final bool showMetricSelector;
   final bool showSectorSelector;
   final bool showMarketCapSelector;
+  final bool showLayoutSelector;
 
   // Selector layout type
   final SelectorLayoutType selectorLayout;
@@ -121,6 +138,7 @@ class SelectorConfig {
   final List<MetricType>? availableMetrics;
   final List<SectorType>? availableSectors;
   final List<MarketCapType>? availableMarketCaps;
+  final List<HeatmapLayoutType>? availableLayouts;
 
   /// Copy with modifications
   SelectorConfig copyWith({
@@ -128,21 +146,25 @@ class SelectorConfig {
     bool? showMetricSelector,
     bool? showSectorSelector,
     bool? showMarketCapSelector,
+    bool? showLayoutSelector,
     SelectorLayoutType? selectorLayout,
     List<TimeFrame>? availableTimeFrames,
     List<MetricType>? availableMetrics,
     List<SectorType>? availableSectors,
     List<MarketCapType>? availableMarketCaps,
+    List<HeatmapLayoutType>? availableLayouts,
   }) => SelectorConfig(
     showTimeFrameSelector: showTimeFrameSelector ?? this.showTimeFrameSelector,
     showMetricSelector: showMetricSelector ?? this.showMetricSelector,
     showSectorSelector: showSectorSelector ?? this.showSectorSelector,
     showMarketCapSelector: showMarketCapSelector ?? this.showMarketCapSelector,
+    showLayoutSelector: showLayoutSelector ?? this.showLayoutSelector,
     selectorLayout: selectorLayout ?? this.selectorLayout,
     availableTimeFrames: availableTimeFrames ?? this.availableTimeFrames,
     availableMetrics: availableMetrics ?? this.availableMetrics,
     availableSectors: availableSectors ?? this.availableSectors,
     availableMarketCaps: availableMarketCaps ?? this.availableMarketCaps,
+    availableLayouts: availableLayouts ?? this.availableLayouts,
   );
 
   /// Check if any selectors should be shown
@@ -150,14 +172,16 @@ class SelectorConfig {
       showTimeFrameSelector ||
       showMetricSelector ||
       showSectorSelector ||
-      showMarketCapSelector;
+      showMarketCapSelector ||
+      showLayoutSelector;
 
   /// Check if this is minimal configuration
   bool get isMinimal =>
       !showTimeFrameSelector &&
       !showMetricSelector &&
       !showSectorSelector &&
-      !showMarketCapSelector;
+      !showMarketCapSelector &&
+      !showLayoutSelector;
 
   /// Get count of visible selectors
   int get visibleSelectorCount {
@@ -166,6 +190,7 @@ class SelectorConfig {
     if (showMetricSelector) count++;
     if (showSectorSelector) count++;
     if (showMarketCapSelector) count++;
+    if (showLayoutSelector) count++;
     return count;
   }
 }

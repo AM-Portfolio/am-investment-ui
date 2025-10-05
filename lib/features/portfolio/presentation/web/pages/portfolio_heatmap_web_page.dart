@@ -34,6 +34,7 @@ class _PortfolioHeatmapWebPageState
   TimeFrame _selectedTimeframe = TimeFrame.oneYear;
   SectorType? _selectedSector;
   MarketCapType? _selectedMarketCap;
+  HeatmapLayoutType _selectedLayout = HeatmapLayoutType.treemap;
 
   @override
   void initState() {
@@ -251,11 +252,18 @@ class _PortfolioHeatmapWebPageState
       tag: 'PortfolioHeatmap.UI',
     );
 
-    // 4. Return UniversalHeatmapWidget with analytics-based data and converter configuration
+    // 4. Create custom configuration with selected layout
+    final customConfig = convertedHeatmapData.configuration.copyWith(
+      layout: convertedHeatmapData.configuration.layout?.copyWith(
+        layoutType: _selectedLayout,
+      ),
+    );
+
+    // 5. Return UniversalHeatmapWidget with analytics-based data and custom configuration
     return UniversalHeatmapWidget(
       investmentType: InvestmentType.portfolio,
       heatmapData: convertedHeatmapData,
-      config: convertedHeatmapData.configuration,
+      config: customConfig,
       title: 'Portfolio Sector Heatmap',
       showSelectors: true,
       compactMode: false,
@@ -265,12 +273,13 @@ class _PortfolioHeatmapWebPageState
           tag: 'PortfolioHeatmap.Action',
         );
       },
-      onFiltersChanged: ({timeFrame, metric, sector, marketCap}) {
+      onFiltersChanged: ({timeFrame, metric, sector, marketCap, layout}) {
         _onFiltersChanged(
           timeFrame: timeFrame,
           metric: metric,
           sector: sector,
           marketCap: marketCap,
+          layout: layout,
         );
       },
       templateType: UniversalTemplateType.full,
@@ -347,9 +356,10 @@ class _PortfolioHeatmapWebPageState
     MetricType? metric,
     SectorType? sector,
     MarketCapType? marketCap,
+    HeatmapLayoutType? layout,
   }) {
     AppLogger.debug(
-      'Filters: timeFrame=${timeFrame?.code}, metric=${metric?.shortName}, sector=${sector?.name}, marketCap=${marketCap?.name}',
+      'Filters: timeFrame=${timeFrame?.code}, metric=${metric?.shortName}, sector=${sector?.name}, marketCap=${marketCap?.name}, layout=${layout?.displayName}',
       tag: 'PortfolioHeatmap.Filter',
     );
 
@@ -358,6 +368,15 @@ class _PortfolioHeatmapWebPageState
     if (metric != null) _selectedMetric = metric;
     if (sector != null) _selectedSector = sector;
     if (marketCap != null) _selectedMarketCap = marketCap;
+    if (layout != null) {
+      setState(() {
+        _selectedLayout = layout;
+      });
+      AppLogger.info(
+        'Layout changed to: ${layout.displayName}',
+        tag: 'PortfolioHeatmap.Layout',
+      );
+    }
 
     // Reload heatmap data with new selections
     _loadHeatmapData();

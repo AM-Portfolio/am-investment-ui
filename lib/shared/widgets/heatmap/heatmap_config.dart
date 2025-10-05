@@ -4,6 +4,7 @@ import '../../models/heatmap/heatmap_tile_data.dart';
 import '../selectors/selectors.dart';
 import 'configs/display_config.dart';
 import 'configs/interaction_config.dart';
+import 'configs/layout_config.dart';
 import 'configs/selector_config.dart';
 import 'configs/visual_config.dart';
 
@@ -31,7 +32,7 @@ class HeatmapConfig {
   final DisplayConfig? display;
 
   /// Layout configuration (how to arrange the heatmap) - nullable
-  final HeatmapLayoutLa? layout;
+  final LayoutConfig? layout;
 
   /// Interaction configuration (how users can interact) - nullable
   final InteractionConfig? interactions;
@@ -46,8 +47,7 @@ class HeatmapConfig {
   DisplayConfig get effectiveDisplay => display ?? const DisplayConfig();
 
   /// Get effective layout configuration with fallbacks
-  layout_config.LayoutConfig get effectiveLayout =>
-      layout ?? const layout_config.LayoutConfig();
+  LayoutConfig get effectiveLayout => layout ?? const LayoutConfig();
 
   /// Get effective interaction configuration with fallbacks
   InteractionConfig get effectiveInteractions =>
@@ -114,7 +114,7 @@ class HeatmapConfig {
   HeatmapConfig copyWith({
     SelectorConfig? selectors,
     DisplayConfig? display,
-    layout_config.LayoutConfig? layout,
+    LayoutConfig? layout,
     InteractionConfig? interactions,
     VisualConfig? visual,
   }) => HeatmapConfig(

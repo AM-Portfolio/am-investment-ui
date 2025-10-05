@@ -13,15 +13,18 @@ class HeatmapSelectorTemplate extends StatefulWidget {
     this.initialMetric,
     this.initialSector,
     this.initialMarketCap,
+    this.initialLayout,
     this.onTimeFrameChanged,
     this.onMetricChanged,
     this.onSectorChanged,
     this.onMarketCapChanged,
+    this.onLayoutChanged,
     this.onFiltersChanged,
     this.showTimeFrame = true,
     this.showMetric = true,
     this.showSector = true,
     this.showMarketCap = true,
+    this.showLayout = false,
     this.layout = SelectorLayoutType.compact,
     this.primaryColor,
     this.title,
@@ -30,17 +33,20 @@ class HeatmapSelectorTemplate extends StatefulWidget {
     this.availableMetrics,
     this.availableSectors,
     this.availableMarketCaps,
+    this.availableLayouts,
   });
 
   final TimeFrame? initialTimeFrame;
   final MetricType? initialMetric;
   final SectorType? initialSector;
   final MarketCapType? initialMarketCap;
+  final HeatmapLayoutType? initialLayout;
 
   final ValueChanged<TimeFrame>? onTimeFrameChanged;
   final ValueChanged<MetricType>? onMetricChanged;
   final ValueChanged<SectorType>? onSectorChanged;
   final ValueChanged<MarketCapType>? onMarketCapChanged;
+  final ValueChanged<HeatmapLayoutType>? onLayoutChanged;
 
   /// Combined callback for all filter changes
   final Function({
@@ -48,6 +54,7 @@ class HeatmapSelectorTemplate extends StatefulWidget {
     MetricType? metric,
     SectorType? sector,
     MarketCapType? marketCap,
+    HeatmapLayoutType? layout,
   })?
   onFiltersChanged;
 
@@ -55,6 +62,7 @@ class HeatmapSelectorTemplate extends StatefulWidget {
   final bool showMetric;
   final bool showSector;
   final bool showMarketCap;
+  final bool showLayout;
   final SelectorLayoutType layout;
   final Color? primaryColor;
   final String? title;
@@ -65,6 +73,7 @@ class HeatmapSelectorTemplate extends StatefulWidget {
   final List<MetricType>? availableMetrics;
   final List<SectorType>? availableSectors;
   final List<MarketCapType>? availableMarketCaps;
+  final List<HeatmapLayoutType>? availableLayouts;
 
   @override
   State<HeatmapSelectorTemplate> createState() =>
@@ -76,6 +85,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
   late MetricType _selectedMetric;
   late SectorType _selectedSector;
   late MarketCapType _selectedMarketCap;
+  late HeatmapLayoutType _selectedLayout;
 
   @override
   void initState() {
@@ -93,6 +103,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
     _selectedMetric = widget.initialMetric ?? MetricType.changePercent;
     _selectedSector = widget.initialSector ?? SectorType.all;
     _selectedMarketCap = widget.initialMarketCap ?? MarketCapType.all;
+    _selectedLayout = widget.initialLayout ?? HeatmapLayoutType.treemap;
   }
 
   void _onTimeFrameChanged(TimeFrame timeFrame) {
@@ -151,12 +162,27 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
     _notifyFiltersChanged();
   }
 
+  void _onLayoutChanged(HeatmapLayoutType layout) {
+    setState(() {
+      _selectedLayout = layout;
+    });
+
+    AppLogger.debug(
+      'Selector layout changed: ${layout.displayName}',
+      tag: 'Heatmap.Selector',
+    );
+
+    widget.onLayoutChanged?.call(layout);
+    _notifyFiltersChanged();
+  }
+
   void _resetFilters() {
     setState(() {
       _selectedTimeFrame = TimeFrame.oneMonth;
       _selectedMetric = MetricType.changePercent;
       _selectedSector = SectorType.all;
       _selectedMarketCap = MarketCapType.all;
+      _selectedLayout = HeatmapLayoutType.treemap;
     });
 
     AppLogger.debug('Selector filters reset', tag: 'Heatmap.Selector');
@@ -169,6 +195,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
       metric: _selectedMetric,
       sector: _selectedSector,
       marketCap: _selectedMarketCap,
+      layout: _selectedLayout,
     );
   }
 
@@ -222,6 +249,10 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
           Expanded(flex: 2, child: _buildMarketCapDropdown(context)),
           const SizedBox(width: 12),
         ],
+        if (widget.showLayout) ...[
+          Expanded(flex: 2, child: _buildLayoutDropdown(context)),
+          const SizedBox(width: 12),
+        ],
         if (widget.showResetButton) _buildResetButton(context),
       ],
     ),
@@ -270,6 +301,7 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
         if (widget.showMetric) _buildMetricPills(context),
         if (widget.showSector) _buildSectorPills(context),
         if (widget.showMarketCap) _buildMarketCapPills(context),
+        if (widget.showLayout) _buildLayoutPills(context),
       ],
     ),
   );
@@ -292,6 +324,10 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
         ],
         if (widget.showMarketCap) ...[
           Expanded(child: _buildMarketCapDropdown(context)),
+          const SizedBox(width: 8),
+        ],
+        if (widget.showLayout) ...[
+          Expanded(child: _buildLayoutDropdown(context)),
           const SizedBox(width: 8),
         ],
         if (widget.showResetButton) _buildIconResetButton(context),
@@ -629,6 +665,59 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
     );
   }
 
+  Widget _buildLayoutPills(BuildContext context) {
+    final layouts =
+        widget.availableLayouts ??
+        [
+          HeatmapLayoutType.treemap,
+          HeatmapLayoutType.grid,
+          HeatmapLayoutType.list,
+        ];
+    return Wrap(
+      spacing: 6,
+      children: layouts.map((layout) {
+        final isSelected = _selectedLayout == layout;
+        return InkWell(
+          onTap: () => _onLayoutChanged(layout),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (widget.primaryColor ?? Theme.of(context).primaryColor)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? (widget.primaryColor ?? Theme.of(context).primaryColor)
+                    : Colors.grey.shade400,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  layout.icon,
+                  size: 14,
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  layout.displayName,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.grey.shade700,
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildTimeFrameDropdown(BuildContext context) =>
       DropdownButtonFormField<TimeFrame>(
         value: _selectedTimeFrame,
@@ -814,6 +903,76 @@ class _HeatmapSelectorTemplateState extends State<HeatmapSelectorTemplate> {
     tooltip: 'Reset Filters',
     style: IconButton.styleFrom(
       foregroundColor: widget.primaryColor ?? Theme.of(context).primaryColor,
+    ),
+  );
+
+  Widget _buildLayoutDropdown(BuildContext context) => Container(
+    height: 40,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: BoxDecoration(
+      color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+          .withOpacity(0.05),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+            .withOpacity(0.2),
+      ),
+    ),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<HeatmapLayoutType>(
+        value: _selectedLayout,
+        isExpanded: true,
+        hint: Text(
+          'Layout',
+          style: TextStyle(
+            color: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+            fontSize: 14,
+          ),
+        ),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: (widget.primaryColor ?? Theme.of(context).primaryColor)
+              .withOpacity(0.7),
+          size: 18,
+        ),
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        items:
+            (widget.availableLayouts ??
+                    [
+                      HeatmapLayoutType.treemap,
+                      HeatmapLayoutType.grid,
+                      HeatmapLayoutType.list,
+                    ])
+                .map(
+                  (layout) => DropdownMenuItem<HeatmapLayoutType>(
+                    value: layout,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          layout.icon,
+                          size: 16,
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(layout.displayName),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+        onChanged: (value) {
+          if (value != null) _onLayoutChanged(value);
+        },
+      ),
     ),
   );
 }

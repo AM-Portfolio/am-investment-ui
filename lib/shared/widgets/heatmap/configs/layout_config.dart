@@ -8,19 +8,28 @@ class LayoutConfig {
     this.compactView = false,
     this.showTitle = true,
     this.customTitle,
+    this.showLayoutSelector = false,
   });
 
   /// Mobile-optimized layout configuration
-  factory LayoutConfig.mobile({String? title}) => LayoutConfig(
+  factory LayoutConfig.mobile({
+    String? title,
+    bool showLayoutSelector = false,
+  }) => LayoutConfig(
     layoutType: HeatmapLayoutType.grid,
     compactView: true,
     showTitle: title != null,
     customTitle: title,
+    showLayoutSelector: showLayoutSelector,
   );
 
   /// Web-optimized layout configuration
-  factory LayoutConfig.web({String? title}) =>
-      LayoutConfig(showTitle: title != null, customTitle: title);
+  factory LayoutConfig.web({String? title, bool showLayoutSelector = true}) =>
+      LayoutConfig(
+        showTitle: title != null,
+        customTitle: title,
+        showLayoutSelector: showLayoutSelector,
+      );
 
   /// Minimal layout configuration (for widgets, previews)
   factory LayoutConfig.minimal({String? title}) => LayoutConfig(
@@ -31,8 +40,14 @@ class LayoutConfig {
   );
 
   /// Dashboard layout configuration
-  factory LayoutConfig.dashboard({String? title}) =>
-      LayoutConfig(showTitle: title != null, customTitle: title);
+  factory LayoutConfig.dashboard({
+    String? title,
+    bool showLayoutSelector = true,
+  }) => LayoutConfig(
+    showTitle: title != null,
+    customTitle: title,
+    showLayoutSelector: showLayoutSelector,
+  );
 
   /// Portfolio-specific layout configuration
   factory LayoutConfig.portfolio({String? title}) =>
@@ -57,6 +72,7 @@ class LayoutConfig {
   final bool compactView;
   final bool showTitle;
   final String? customTitle;
+  final bool showLayoutSelector;
 
   /// Copy with modifications
   LayoutConfig copyWith({
@@ -64,11 +80,13 @@ class LayoutConfig {
     bool? compactView,
     bool? showTitle,
     String? customTitle,
+    bool? showLayoutSelector,
   }) => LayoutConfig(
     layoutType: layoutType ?? this.layoutType,
     compactView: compactView ?? this.compactView,
     showTitle: showTitle ?? this.showTitle,
     customTitle: customTitle ?? this.customTitle,
+    showLayoutSelector: showLayoutSelector ?? this.showLayoutSelector,
   );
 
   /// Get effective title (custom or default)

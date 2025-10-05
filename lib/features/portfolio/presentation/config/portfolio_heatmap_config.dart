@@ -114,8 +114,14 @@ class PortfolioHeatmapConfig {
     return defaultConfig.copyWith(
       display: defaultConfig.display?.copyWith() ?? const DisplayConfig(),
       layout:
-          defaultConfig.layout?.copyWith(customTitle: title) ??
-          layout_config.LayoutConfig(customTitle: title),
+          defaultConfig.layout?.copyWith(
+            customTitle: title,
+            showLayoutSelector: true,
+          ) ??
+          layout_config.LayoutConfig(
+            customTitle: title,
+            showLayoutSelector: true,
+          ),
       visual:
           defaultConfig.visual?.copyWith(accentColor: accentColor) ??
           VisualConfig(accentColor: accentColor),
@@ -180,19 +186,19 @@ class PortfolioHeatmapConfig {
   /// Creates custom selector configuration for portfolio heatmap
   /// - Hides timeframe selector
   /// - Hides metric selector
-  /// - Hides sector selector
-  /// - Shows only market cap selector with custom options including "no group"
+  /// - Shows sector selector
+  /// - Shows market cap selector with custom options including "no group"
+  /// - Shows layout selector for switching between treemap, grid, and list views
   /// - Full control over selector behavior
   static SelectorConfig createPortfolioSelectorConfig() => SelectorConfig(
-    // Hide all selectors except market cap
+    // Hide all selectors except market cap, sector, and layout
     showTimeFrameSelector: false,
     showMetricSelector: false,
-    showSectorSelector: true,
-    showMarketCapSelector: true,
-
+    showLayoutSelector: true, // Enable layout selector
     // Custom market cap options including "no group" equivalent (all)
     availableMarketCaps: portfolioMarketCapOptions,
     availableSectors: portfolioSectorOptions,
+    availableLayouts: portfolioLayoutOptions,
   );
 
   /// Custom market cap options for portfolio heatmap
@@ -213,6 +219,15 @@ class PortfolioHeatmapConfig {
     SectorType.healthcare, // Healthcare sector
     SectorType.finance, // Finance sector
     SectorType.noGroup, // Consumer discretionary sector
+  ];
+
+  /// Custom layout options for portfolio heatmap
+  /// Provides different visualization options for users to choose from
+  static List<HeatmapLayoutType> get portfolioLayoutOptions => [
+    HeatmapLayoutType
+        .treemap, // Default treemap view (best for hierarchical data)
+    HeatmapLayoutType.grid, // Grid view (good for comparison)
+    HeatmapLayoutType.list, // List view (good for detailed information)
   ];
 
   /// Configuration presets for different portfolio types

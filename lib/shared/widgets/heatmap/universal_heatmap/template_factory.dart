@@ -46,6 +46,7 @@ class UniversalHeatmapTemplateFactory {
       MetricType? metric,
       SectorType? sector,
       MarketCapType? marketCap,
+      HeatmapLayoutType? layout,
     })?
     onFiltersChanged,
   }) {
@@ -77,11 +78,13 @@ class UniversalHeatmapTemplateFactory {
       initialMarketCap: UniversalHeatmapConfigManager.getInitialMarketCap(
         investmentType,
       ),
+      initialLayout: HeatmapLayoutType.treemap,
       onFiltersChanged: onFiltersChanged,
       showTimeFrame: config.showTimeFrameSelector,
       showMetric: config.showMetricSelector,
       showSector: config.showSectorSelector,
       showMarketCap: config.showMarketCapSelector,
+      showLayout: config.effectiveLayout.showLayoutSelector,
       layout: config.selectors?.selectorLayout ?? SelectorLayoutType.compact,
       primaryColor: config.accentColor,
       title: 'Filters',
@@ -89,6 +92,13 @@ class UniversalHeatmapTemplateFactory {
       availableMetrics: config.availableMetrics,
       availableSectors: config.availableSectors,
       availableMarketCaps: config.availableMarketCaps,
+      availableLayouts:
+          config.selectors?.availableLayouts ??
+          [
+            HeatmapLayoutType.treemap,
+            HeatmapLayoutType.grid,
+            HeatmapLayoutType.list,
+          ],
     );
   }
 
