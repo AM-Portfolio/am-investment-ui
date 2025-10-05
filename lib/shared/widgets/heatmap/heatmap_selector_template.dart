@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
-import '../common/common.dart';
+import '../../core/ui/components.dart';
 import '../selectors/selectors.dart';
 import 'configs/selector_config.dart';
 
