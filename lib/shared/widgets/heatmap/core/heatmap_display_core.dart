@@ -24,6 +24,7 @@ class HeatmapDisplayCore extends ChangeNotifier {
     this.onDataChanged,
     this.onLoadingStateChanged,
     this.onErrorChanged,
+    this.onRefreshRequested,
   }) {
     _data = initialData ?? _createEmptyHeatmapData();
     _isLoading = initialIsLoading;
@@ -51,6 +52,7 @@ class HeatmapDisplayCore extends ChangeNotifier {
   final ValueChanged<HeatmapData>? onDataChanged;
   final ValueChanged<bool>? onLoadingStateChanged;
   final ValueChanged<String?>? onErrorChanged;
+  final VoidCallback? onRefreshRequested;
 
   // Getters for current state
   HeatmapData get data => _data;
@@ -169,8 +171,32 @@ class HeatmapDisplayCore extends ChangeNotifier {
   void refresh() {
     setError(null);
     setLoading(true);
-    // Note: Actual data refresh should be handled by the consumer
-    // This method just sets the appropriate states
+
+    // Trigger the refresh callback if provided
+    if (onRefreshRequested != null) {
+      onRefreshRequested!.call();
+      AppLogger.debug(
+        'HeatmapDisplayCore: refresh callback triggered',
+        tag: 'Heatmap.Display.Core',
+      );
+    } else {
+      // If no refresh callback is provided, auto-reset loading after a delay
+      AppLogger.warning(
+        'HeatmapDisplayCore: no refresh callback provided, auto-resetting loading state',
+        tag: 'Heatmap.Display.Core',
+      );
+
+      // Simulate refresh completion after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        setLoading(false);
+        setError('Refresh functionality not implemented');
+      });
+    }
+
+    AppLogger.debug(
+      'HeatmapDisplayCore: refresh requested',
+      tag: 'Heatmap.Display.Core',
+    );
   }
 
   void reset() {

@@ -89,22 +89,47 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
       child: _buildContent(context),
     );
 
-    // Add pull-to-refresh if enabled
-    if (widget.enablePullToRefresh && !widget.core.isLoading) {
-      content = RefreshIndicator(onRefresh: _handleRefresh, child: content);
+    // Add pull-to-refresh if enabled and not in error/empty state
+    if (widget.enablePullToRefresh &&
+        !widget.core.isLoading &&
+        !widget.core.hasError &&
+        !widget.core.isEmpty) {
+      content = RefreshIndicator(
+        onRefresh: _handleRefresh,
+        // Ensure refresh indicator works with scrollable content
+        displacement: 60.0,
+        strokeWidth: 2.0,
+        child: content,
+      );
     }
 
     return content;
   }
 
   Future<void> _handleRefresh() async {
-    _refreshController.forward();
-    widget.core.refresh();
+    try {
+      // Start refresh animation
+      _refreshController.forward();
 
-    // Wait for animation to complete
-    await _refreshController.forward();
-    await Future.delayed(const Duration(milliseconds: 100));
-    _refreshController.reset();
+      // Trigger actual data refresh through the core
+      widget.core.refresh();
+
+      AppLogger.debug(
+        'HeatmapDisplayMobile: pull-to-refresh triggered',
+        tag: 'Heatmap.Display.Mobile',
+      );
+
+      // Wait for the refresh to complete (simulated delay for UX)
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (error) {
+      AppLogger.error(
+        'HeatmapDisplayMobile: refresh failed - $error',
+        tag: 'Heatmap.Display.Mobile',
+      );
+    } finally {
+      // Reset animation
+      _refreshController.reset();
+    }
   }
 
   Widget _buildContent(BuildContext context) {
@@ -225,59 +250,106 @@ class _HeatmapDisplayMobileState extends State<HeatmapDisplayMobile>
     ),
   );
 
-  Widget _buildHeatmap(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final width = constraints.maxWidth;
-      final height = constraints.maxHeight;
+  Widget _buildHeatmap(BuildContext context) {
+    // Build scrollable content for mobile with many items
+    final scrollableContent = _buildScrollableHeatmapContent(context);
 
-      final HeatmapLayoutBuilder layoutBuilder;
-
-      // Mobile-specific layout preferences
-      switch (widget.core.layout) {
-        case HeatmapLayoutType.treemap:
-          // On mobile, treemap might be less effective, but still supported
-          layoutBuilder = TreemapLayoutBuilder();
-          break;
-        case HeatmapLayoutType.grid:
-          // Grid layout works well on mobile
-          layoutBuilder = GridLayoutBuilder();
-          break;
-        case HeatmapLayoutType.list:
-          // List layout is excellent for mobile
-          layoutBuilder = ListLayoutBuilder();
-          break;
-      }
-
-      var heatmapWidget = layoutBuilder.build(
-        context,
-        widget.core.data,
-        width,
-        height,
-        onTilePressed: widget.core.handleTilePressed,
-        customTileBuilder: widget.customTileBuilder,
-        selectedSector: widget.core.selectedSector,
+    // Add header for non-compact mode
+    if (!widget.compactMode && _config.showHeader) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildMobileHeader(context),
+          const SizedBox(height: 12),
+          Expanded(child: scrollableContent),
+        ],
       );
+    }
 
-      // Add mobile-specific enhancements
-      if (widget.enableSwipeGestures) {
-        heatmapWidget = _addSwipeGestures(heatmapWidget);
-      }
+    return scrollableContent;
+  }
 
-      // Add header for non-compact mode
-      if (!widget.compactMode && _config.showHeader) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMobileHeader(context),
-            const SizedBox(height: 12),
-            Expanded(child: heatmapWidget),
-          ],
-        );
-      }
+  Widget _buildScrollableHeatmapContent(BuildContext context) {
+    final tileCount = widget.core.tileCount;
 
-      return heatmapWidget;
-    },
-  );
+    // For mobile, always make content scrollable to handle large datasets
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+
+          // Calculate dynamic height based on content and layout type
+          final calculatedHeight = _calculateContentHeight(width, tileCount);
+
+          final HeatmapLayoutBuilder layoutBuilder;
+
+          // Mobile-specific layout preferences
+          switch (widget.core.layout) {
+            case HeatmapLayoutType.treemap:
+              // On mobile, treemap might be less effective, but still supported
+              layoutBuilder = TreemapLayoutBuilder();
+              break;
+            case HeatmapLayoutType.grid:
+              // Grid layout works well on mobile - allow vertical scrolling
+              layoutBuilder = GridLayoutBuilder();
+              break;
+            case HeatmapLayoutType.list:
+              // List layout is excellent for mobile - natural vertical scrolling
+              layoutBuilder = ListLayoutBuilder();
+              break;
+          }
+
+          var heatmapWidget = layoutBuilder.build(
+            context,
+            widget.core.data,
+            width,
+            calculatedHeight,
+            onTilePressed: widget.core.handleTilePressed,
+            customTileBuilder: widget.customTileBuilder,
+            selectedSector: widget.core.selectedSector,
+          );
+
+          // Add mobile-specific enhancements
+          if (widget.enableSwipeGestures) {
+            heatmapWidget = _addSwipeGestures(heatmapWidget);
+          }
+
+          return heatmapWidget;
+        },
+      ),
+    );
+  }
+
+  /// Calculate appropriate content height based on layout type and item count
+  double _calculateContentHeight(double width, int tileCount) {
+    if (tileCount == 0) return 300.0; // Default height for empty state
+
+    switch (widget.core.layout) {
+      case HeatmapLayoutType.list:
+        // List layout: calculate height based on item count
+        // Each list item needs minimum height + spacing
+        final itemHeight = widget.minTileSize + widget.spacing;
+        return (tileCount * itemHeight) + (widget.spacing * 2);
+
+      case HeatmapLayoutType.grid:
+        // Grid layout: calculate height based on columns and rows
+        final availableWidth = width - (widget.padding.horizontal);
+        final itemWidth = widget.minTileSize + widget.spacing;
+        final columnsCount = (availableWidth / itemWidth).floor().clamp(1, 4);
+        final rowsCount = (tileCount / columnsCount).ceil();
+        final itemHeight = widget.minTileSize + widget.spacing;
+        return (rowsCount * itemHeight) + (widget.spacing * 2);
+
+      case HeatmapLayoutType.treemap:
+        // Treemap layout: provide flexible height that can expand
+        // Base height + additional height per item
+        const baseHeight = 400.0;
+        final additionalHeight = tileCount * 20.0; // 20px per additional item
+        return baseHeight + additionalHeight;
+    }
+  }
 
   Widget _buildMobileHeader(BuildContext context) => Row(
     children: [

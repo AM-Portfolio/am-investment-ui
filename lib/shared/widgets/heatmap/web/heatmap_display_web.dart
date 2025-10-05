@@ -201,59 +201,112 @@ class _HeatmapDisplayWebState extends State<HeatmapDisplayWeb> {
     ),
   );
 
-  Widget _buildHeatmap(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final width = constraints.maxWidth;
-      final height = constraints.maxHeight;
+  Widget _buildHeatmap(BuildContext context) {
+    // Build scrollable content for web with many items
+    final scrollableContent = _buildScrollableHeatmapContent(context);
 
-      final HeatmapLayoutBuilder layoutBuilder;
-
-      switch (widget.core.layout) {
-        case HeatmapLayoutType.treemap:
-          layoutBuilder = TreemapLayoutBuilder();
-          break;
-        case HeatmapLayoutType.grid:
-          layoutBuilder = GridLayoutBuilder();
-          break;
-        case HeatmapLayoutType.list:
-          layoutBuilder = ListLayoutBuilder();
-          break;
-      }
-
-      var heatmapWidget = layoutBuilder.build(
-        context,
-        widget.core.data,
-        width,
-        height,
-        onTilePressed: widget.core.handleTilePressed,
-        customTileBuilder: widget.customTileBuilder,
-        selectedSector: widget.core.selectedSector,
+    // Add header if configured
+    if (_config.showHeader) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 16),
+          Expanded(child: scrollableContent),
+        ],
       );
+    }
 
-      // Add web-specific enhancements
-      if (widget.enableHoverEffects) {
-        heatmapWidget = _addHoverEffects(heatmapWidget);
-      }
+    return scrollableContent;
+  }
 
-      if (widget.enableKeyboardNavigation) {
-        heatmapWidget = _addKeyboardNavigation(heatmapWidget);
-      }
+  Widget _buildScrollableHeatmapContent(BuildContext context) {
+    final tileCount = widget.core.tileCount;
 
-      // Add header if configured
-      if (_config.showHeader) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 16),
-            Expanded(child: heatmapWidget),
-          ],
-        );
-      }
+    // For large datasets, provide scrollable content
+    return Scrollbar(
+      thumbVisibility: tileCount > 20, // Show scrollbar for large datasets
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
 
-      return heatmapWidget;
-    },
-  );
+            // Calculate dynamic height based on content and layout type
+            final calculatedHeight = _calculateContentHeight(width, tileCount);
+
+            final HeatmapLayoutBuilder layoutBuilder;
+
+            switch (widget.core.layout) {
+              case HeatmapLayoutType.treemap:
+                layoutBuilder = TreemapLayoutBuilder();
+                break;
+              case HeatmapLayoutType.grid:
+                layoutBuilder = GridLayoutBuilder();
+                break;
+              case HeatmapLayoutType.list:
+                layoutBuilder = ListLayoutBuilder();
+                break;
+            }
+
+            var heatmapWidget = layoutBuilder.build(
+              context,
+              widget.core.data,
+              width,
+              calculatedHeight,
+              onTilePressed: widget.core.handleTilePressed,
+              customTileBuilder: widget.customTileBuilder,
+              selectedSector: widget.core.selectedSector,
+            );
+
+            // Add web-specific enhancements
+            if (widget.enableHoverEffects) {
+              heatmapWidget = _addHoverEffects(heatmapWidget);
+            }
+
+            if (widget.enableKeyboardNavigation) {
+              heatmapWidget = _addKeyboardNavigation(heatmapWidget);
+            }
+
+            return heatmapWidget;
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Calculate appropriate content height based on layout type and item count
+  double _calculateContentHeight(double width, int tileCount) {
+    if (tileCount == 0) return 400.0; // Default height for empty state
+
+    switch (widget.core.layout) {
+      case HeatmapLayoutType.list:
+        // List layout: calculate height based on item count
+        // Each list item needs minimum height + spacing
+        final itemHeight = widget.minTileSize + widget.spacing;
+        return (tileCount * itemHeight) + (widget.spacing * 2);
+
+      case HeatmapLayoutType.grid:
+        // Grid layout: calculate height based on columns and rows
+        final availableWidth = width - (widget.padding.horizontal);
+        final itemWidth = widget.minTileSize + widget.spacing;
+        final columnsCount = (availableWidth / itemWidth).floor().clamp(
+          2,
+          6,
+        ); // More columns on web
+        final rowsCount = (tileCount / columnsCount).ceil();
+        final itemHeight = widget.minTileSize + widget.spacing;
+        return (rowsCount * itemHeight) + (widget.spacing * 2);
+
+      case HeatmapLayoutType.treemap:
+        // Treemap layout: provide flexible height that can expand
+        // Base height + additional height per item (less aggressive than mobile)
+        const baseHeight = 600.0; // Larger base height for web
+        final additionalHeight = tileCount * 15.0; // 15px per additional item
+        return baseHeight + additionalHeight;
+    }
+  }
 
   Widget _buildHeader(BuildContext context) => Row(
     children: [
@@ -279,8 +332,20 @@ class _HeatmapDisplayWebState extends State<HeatmapDisplayWeb> {
       ),
       if (_config.showRefreshButton) ...[
         IconButton(
-          onPressed: () => widget.core.refresh(),
-          icon: const Icon(Icons.refresh),
+          onPressed: widget.core.isLoading
+              ? null
+              : () {
+                  widget.core.refresh();
+                  AppLogger.debug(
+                    'HeatmapDisplayWeb: refresh button pressed',
+                    tag: 'Heatmap.Display.Web',
+                  );
+                },
+          icon: AnimatedRotation(
+            turns: widget.core.isLoading ? 1 : 0,
+            duration: const Duration(milliseconds: 600),
+            child: const Icon(Icons.refresh),
+          ),
           tooltip: 'Refresh data',
         ),
       ],

@@ -49,6 +49,7 @@ class HeatmapDisplayTemplate extends StatefulWidget {
     this.customTileBuilder,
     this.layout = HeatmapLayoutType.treemap,
     this.selectedSector,
+    this.onRefreshRequested,
   });
 
   /// The core heatmap display state manager (new interface)
@@ -80,6 +81,7 @@ class HeatmapDisplayTemplate extends StatefulWidget {
   final Widget Function(HeatmapTileData tile)? customTileBuilder;
   final HeatmapLayoutType layout;
   final SectorType? selectedSector;
+  final VoidCallback? onRefreshRequested;
 
   @override
   State<HeatmapDisplayTemplate> createState() => _HeatmapDisplayTemplateState();
@@ -103,6 +105,7 @@ class _HeatmapDisplayTemplateState extends State<HeatmapDisplayTemplate> {
         initialLayout: widget.layout,
         initialSelectedSector: widget.selectedSector,
         onTilePressed: widget.onTilePressed,
+        onRefreshRequested: widget.onRefreshRequested,
       );
     }
 
