@@ -1,14 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'portfolio_analytics_state.dart';
-import '../../internal/domain/entities/portfolio_analytics.dart';
-import '../../internal/services/portfolio_analytics_service.dart';
+
 import '../../../../core/utils/logger.dart';
+import '../../internal/services/portfolio_analytics_service.dart';
+import 'portfolio_analytics_state.dart';
 
 class PortfolioAnalyticsCubit extends Cubit<PortfolioAnalyticsState> {
-  final PortfolioAnalyticsService _analyticsService;
-
   PortfolioAnalyticsCubit(this._analyticsService)
     : super(PortfolioAnalyticsInitial());
+  final PortfolioAnalyticsService _analyticsService;
 
   /// Load all analytics data for a portfolio
   Future<void> loadAnalytics(String portfolioId) async {

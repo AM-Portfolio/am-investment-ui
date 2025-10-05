@@ -1,22 +1,19 @@
-import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 
-enum Environment {
-  development,
-  preprod,
-  production,
-}
+import 'package:flutter/foundation.dart';
+
+enum Environment { development, preprod, production }
 
 class EnvironmentConfig {
   // Default to production initially, can be changed at runtime
   static Environment _environment = Environment.production;
-  
+
   // Listeners for environment changes
   static final List<Function(Environment)> _listeners = [];
-  
+
   // Get current environment
   static Environment get environment => _environment;
-  
+
   // Set environment with notification to listeners
   static set environment(Environment env) {
     if (_environment != env) {
@@ -26,24 +23,24 @@ class EnvironmentConfig {
       _notifyListeners();
     }
   }
-  
+
   // Add listener for environment changes
   static void addListener(Function(Environment) listener) {
     _listeners.add(listener);
   }
-  
+
   // Remove listener
   static void removeListener(Function(Environment) listener) {
     _listeners.remove(listener);
   }
-  
+
   // Notify all listeners of environment change
   static void _notifyListeners() {
     for (final listener in _listeners) {
       listener(_environment);
     }
   }
-  
+
   // API URLs
   static String get apiBaseUrl {
     switch (environment) {
@@ -68,7 +65,7 @@ class EnvironmentConfig {
         }
     }
   }
-  
+
   // Feature flags
   static bool get enableDebugFeatures {
     switch (environment) {
@@ -80,7 +77,7 @@ class EnvironmentConfig {
         return false;
     }
   }
-  
+
   // Environment-specific settings
   static Map<String, dynamic> get settings {
     switch (environment) {
@@ -107,7 +104,7 @@ class EnvironmentConfig {
         };
     }
   }
-  
+
   // Initialize environment based on build arguments
   static void setEnvironment(String env) {
     switch (env.toLowerCase()) {
@@ -122,7 +119,7 @@ class EnvironmentConfig {
         environment = Environment.production;
         break;
     }
-    
+
     debugPrint('Environment set to: ${environment.toString().split('.').last}');
     debugPrint('API URL: $apiBaseUrl');
   }

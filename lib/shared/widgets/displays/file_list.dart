@@ -3,35 +3,32 @@ import 'package:file_picker/file_picker.dart';
 
 /// Widget to display selected files
 class FileList extends StatelessWidget {
+  const FileList({required this.files, super.key, this.onRemoveFile});
   final List<PlatformFile> files;
   final Function(PlatformFile)? onRemoveFile;
 
-  const FileList({super.key, required this.files, this.onRemoveFile});
-
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              '${files.length} file(s) selected',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.green,
-              ),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            '${files.length} file(s) selected',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.green,
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        ...files.map((file) => _buildFileItem(file)),
-      ],
-    );
-  }
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      ...files.map(_buildFileItem),
+    ],
+  );
 
   Widget _buildFileItem(PlatformFile file) {
     final sizeInKB = (file.size / 1024).round();

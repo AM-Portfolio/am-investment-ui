@@ -2,6 +2,18 @@ import 'package:flutter/material.dart';
 
 /// Widget to display financial values with color-coded indicators
 class ValueIndicator extends StatelessWidget {
+  /// Constructor
+  const ValueIndicator({
+    required this.value,
+    required this.label,
+    super.key,
+    this.isPercentage = false,
+    this.showIndicator = true,
+    this.useCompactFormat = false,
+    this.valueStyle,
+    this.labelStyle,
+  });
+
   /// The value to display
   final double value;
 
@@ -22,18 +34,6 @@ class ValueIndicator extends StatelessWidget {
 
   /// Custom text style for the label
   final TextStyle? labelStyle;
-
-  /// Constructor
-  const ValueIndicator({
-    super.key,
-    required this.value,
-    required this.label,
-    this.isPercentage = false,
-    this.showIndicator = true,
-    this.useCompactFormat = false,
-    this.valueStyle,
-    this.labelStyle,
-  });
 
   @override
   Widget build(BuildContext context) {

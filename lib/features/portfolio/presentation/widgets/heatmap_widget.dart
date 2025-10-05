@@ -8,16 +8,15 @@ import '../../../../core/utils/logger.dart';
 /// Widget displaying comprehensive portfolio heatmap visualization
 /// Shows sector allocation overview and detailed sector information with expandable stock lists
 class HeatmapWidget extends StatelessWidget {
-  final Heatmap? heatmap;
-  final bool isLoading;
-  final String? error;
-
   const HeatmapWidget({
     super.key,
     this.heatmap,
     this.isLoading = false,
     this.error,
   });
+  final Heatmap? heatmap;
+  final bool isLoading;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +24,7 @@ class HeatmapWidget extends StatelessWidget {
     _logHeatmapData();
 
     // Enable sub-cards for both mobile and web to see how it looks
-    final showSubCards =
+    const showSubCards =
         true; // Always show sub-cards to test mobile appearance
 
     return SingleChildScrollView(
@@ -36,7 +35,6 @@ class HeatmapWidget extends StatelessWidget {
             heatmap: heatmap,
             isLoading: isLoading,
             error: error,
-            showSubCards: showSubCards,
           ),
 
           const SizedBox(height: 16),
@@ -132,7 +130,7 @@ class HeatmapWidget extends StatelessWidget {
 
       // Log first few stocks in each sector for detailed analysis
       final stocksToLog = sector.stocks.take(3).toList();
-      for (int i = 0; i < stocksToLog.length; i++) {
+      for (var i = 0; i < stocksToLog.length; i++) {
         final stock = stocksToLog[i];
         AppLogger.debug(
           'Stock ${i + 1} in ${sector.sectorName}: ${stock.symbol} - '

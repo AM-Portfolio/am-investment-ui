@@ -4,50 +4,47 @@ import '../../internal/domain/entities/portfolio_analytics.dart';
 /// Widget displaying market cap allocation of the portfolio
 /// Shows distribution of investments across different market cap segments
 class MarketCapAllocationWidget extends StatelessWidget {
-  final MarketCapAllocation? marketCapAllocation;
-  final bool isLoading;
-  final String? error;
-
   const MarketCapAllocationWidget({
     super.key,
     this.marketCapAllocation,
     this.isLoading = false,
     this.error,
   });
+  final MarketCapAllocation? marketCapAllocation;
+  final bool isLoading;
+  final String? error;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.insights,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Market Cap Allocation',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(height: 250, child: _buildContent(context)),
-          ],
-        ),
+  Widget build(BuildContext context) => Card(
+    elevation: 4,
+    margin: const EdgeInsets.all(8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.insights,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Market Cap Allocation',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(height: 250, child: _buildContent(context)),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildContent(BuildContext context) {
     if (isLoading) {
@@ -164,7 +161,9 @@ class MarketCapAllocationWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
                   value: segment.weightPercentage / 100,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
                 const SizedBox(height: 6),
@@ -205,15 +204,13 @@ class MarketCapAllocationWidget extends StatelessWidget {
     );
   }
 
-  Map<String, Color> _generateMarketCapColors() {
-    return {
-      'Large Cap': const Color(0xFF2196F3), // Blue
-      'Mid Cap': const Color(0xFF4CAF50), // Green
-      'Small Cap': const Color(0xFFFF9800), // Orange
-      'Micro Cap': const Color(0xFF9C27B0), // Purple
-      'Mega Cap': const Color(0xFF1976D2), // Dark Blue
-    };
-  }
+  Map<String, Color> _generateMarketCapColors() => {
+    'Large Cap': const Color(0xFF2196F3), // Blue
+    'Mid Cap': const Color(0xFF4CAF50), // Green
+    'Small Cap': const Color(0xFFFF9800), // Orange
+    'Micro Cap': const Color(0xFF9C27B0), // Purple
+    'Mega Cap': const Color(0xFF1976D2), // Dark Blue
+  };
 
   String _formatCurrency(double value) {
     if (value >= 10000000) {

@@ -3,58 +3,55 @@ import '../../internal/domain/entities/portfolio_summary.dart';
 
 /// Reusable portfolio summary widget that displays comprehensive portfolio metrics
 class PortfolioSummaryWidget extends StatelessWidget {
+  const PortfolioSummaryWidget({
+    required this.summary,
+    super.key,
+    this.onViewHoldings,
+    this.onViewAnalysis,
+  });
   final PortfolioSummary summary;
   final VoidCallback? onViewHoldings;
   final VoidCallback? onViewAnalysis;
 
-  const PortfolioSummaryWidget({
-    Key? key,
-    required this.summary,
-    this.onViewHoldings,
-    this.onViewAnalysis,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Main Portfolio Value Card with fixed values
-          _buildMainValueCard(context),
-          const SizedBox(height: 12),
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.all(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Main Portfolio Value Card with fixed values
+        _buildMainValueCard(context),
+        const SizedBox(height: 12),
 
-          // Dynamic Market Data Card
-          _buildDynamicMarketCard(context),
-          const SizedBox(height: 16),
+        // Dynamic Market Data Card
+        _buildDynamicMarketCard(context),
+        const SizedBox(height: 16),
 
-          // Quick Actions
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  'View Holdings',
-                  Icons.list_alt,
-                  onViewHoldings,
-                ),
+        // Quick Actions
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionCard(
+                context,
+                'View Holdings',
+                Icons.list_alt,
+                onViewHoldings,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildActionCard(
-                  context,
-                  'Analysis',
-                  Icons.analytics,
-                  onViewAnalysis,
-                ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildActionCard(
+                context,
+                'Analysis',
+                Icons.analytics,
+                onViewAnalysis,
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 
   /// Build the main portfolio value card with total value and percentage
   Widget _buildMainValueCard(BuildContext context) {
@@ -178,71 +175,69 @@ class PortfolioSummaryWidget extends StatelessWidget {
   }
 
   /// Build dynamic market data card that changes frequently
-  Widget _buildDynamicMarketCard(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Performance Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCompactPerformanceItem(
-                    context,
-                    'Today\'s Change',
-                    summary.formattedTodayChange,
-                    '${summary.todayChangePercentage.toStringAsFixed(2)}%',
-                    summary.isTodayPositive,
-                    Icons.today,
-                  ),
+  Widget _buildDynamicMarketCard(BuildContext context) => Card(
+    elevation: 3,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Performance Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildCompactPerformanceItem(
+                  context,
+                  "Today's Change",
+                  summary.formattedTodayChange,
+                  '${summary.todayChangePercentage.toStringAsFixed(2)}%',
+                  summary.isTodayPositive,
+                  Icons.today,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildCompactPerformanceItem(
-                    context,
-                    'Total Returns',
-                    summary.formattedGainLoss,
-                    '${summary.totalGainLossPercentage.toStringAsFixed(2)}%',
-                    summary.isProfitable,
-                    Icons.trending_up,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCompactPerformanceItem(
+                  context,
+                  'Total Returns',
+                  summary.formattedGainLoss,
+                  '${summary.totalGainLossPercentage.toStringAsFixed(2)}%',
+                  summary.isProfitable,
+                  Icons.trending_up,
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Gainers/Losers Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildCompactGainerLoserItem(
-                    context,
-                    'Today',
-                    summary.todayGainersCount,
-                    summary.todayLosersCount,
-                    Icons.today,
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Gainers/Losers Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildCompactGainerLoserItem(
+                  context,
+                  'Today',
+                  summary.todayGainersCount,
+                  summary.todayLosersCount,
+                  Icons.today,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildCompactGainerLoserItem(
-                    context,
-                    'Overall',
-                    summary.gainersCount,
-                    summary.losersCount,
-                    Icons.analytics,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCompactGainerLoserItem(
+                  context,
+                  'Overall',
+                  summary.gainersCount,
+                  summary.losersCount,
+                  Icons.analytics,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   /// Build compact performance item
   Widget _buildCompactPerformanceItem(
@@ -295,27 +290,25 @@ class PortfolioSummaryWidget extends StatelessWidget {
     String label,
     String value,
     Color color,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        value,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.bold,
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 
   /// Build compact gainer/loser item
   Widget _buildCompactGainerLoserItem(
@@ -324,47 +317,45 @@ class PortfolioSummaryWidget extends StatelessWidget {
     int gainersCount,
     int losersCount,
     IconData icon,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Icon(icon, size: 16, color: Colors.grey[600]),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+      const SizedBox(height: 4),
+      RichText(
+        text: TextSpan(
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           children: [
-            Icon(icon, size: 16, color: Colors.grey[600]),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            TextSpan(
+              text: gainersCount.toString(),
+              style: const TextStyle(color: Colors.green),
+            ),
+            TextSpan(
+              text: '/',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            TextSpan(
+              text: losersCount.toString(),
+              style: const TextStyle(color: Colors.red),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            children: [
-              TextSpan(
-                text: gainersCount.toString(),
-                style: const TextStyle(color: Colors.green),
-              ),
-              TextSpan(
-                text: '/',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              TextSpan(
-                text: losersCount.toString(),
-                style: const TextStyle(color: Colors.red),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 
   /// Format datetime for display
   String _formatDateTime(DateTime dateTime) {
@@ -387,29 +378,27 @@ class PortfolioSummaryWidget extends StatelessWidget {
     String title,
     IconData icon,
     VoidCallback? onTap,
-  ) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Icon(icon, size: 28, color: Theme.of(context).primaryColor),
-              const SizedBox(height: 6),
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+  ) => Card(
+    elevation: 2,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Icon(icon, size: 28, color: Theme.of(context).primaryColor),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }

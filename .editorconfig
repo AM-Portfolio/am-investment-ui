@@ -1,0 +1,71 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# Dart files
+[*.dart]
+indent_size = 2
+continuation_indent_size = 4
+# Prefer single-line method calls for better readability, especially for logging
+# Keep logger calls on single lines when possible
+max_line_length = 120
+# Allow longer lines for method calls like AppLogger.methodEntry with multiple parameters
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# XML files (Android)
+[*.xml]
+indent_size = 4
+
+# Gradle files
+[*.{gradle,gradle.kts}]
+indent_size = 4
+
+# Swift files (iOS)
+[*.swift]
+indent_size = 4
+
+# Kotlin files
+[*.{kt,kts}]
+indent_size = 4
+
+# Properties files
+[*.properties]
+indent_size = 4
+
+# Markdown files
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+
+# Batch files (Windows)
+[*.bat]
+end_of_line = crlf
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+
+# Web files
+[*.{html,css,js,ts}]
+indent_size = 2
+
+# Package files
+[{package.json,package-lock.json,pubspec.yaml,pubspec.lock}]
+indent_size = 2

@@ -1,51 +1,37 @@
 /// Portfolio analytics response model
 class PortfolioAnalytics {
-  final String portfolioId;
-  final DateTime timestamp;
-  final Analytics analytics;
-
   const PortfolioAnalytics({
     required this.portfolioId,
     required this.timestamp,
     required this.analytics,
   });
+  final String portfolioId;
+  final DateTime timestamp;
+  final Analytics analytics;
 }
 
 /// Analytics data container
 class Analytics {
-  final Heatmap? heatmap;
-  final Movers? movers;
-  final SectorAllocation? sectorAllocation;
-  final MarketCapAllocation? marketCapAllocation;
-
   const Analytics({
     this.heatmap,
     this.movers,
     this.sectorAllocation,
     this.marketCapAllocation,
   });
+  final Heatmap? heatmap;
+  final Movers? movers;
+  final SectorAllocation? sectorAllocation;
+  final MarketCapAllocation? marketCapAllocation;
 }
 
 /// Heatmap data for sector performance visualization
 class Heatmap {
-  final List<Sector> sectors;
-
   const Heatmap({required this.sectors});
+  final List<Sector> sectors;
 }
 
 /// Sector performance data
 class Sector {
-  final String sectorName;
-  final int performanceRank;
-  final double performance;
-  final double changePercent;
-  final double weightage;
-  final String color;
-  final int stockCount;
-  final double totalValue;
-  final double totalReturnAmount;
-  final List<Stock> stocks;
-
   const Sector({
     required this.sectorName,
     required this.performanceRank,
@@ -58,6 +44,16 @@ class Sector {
     required this.totalReturnAmount,
     required this.stocks,
   });
+  final String sectorName;
+  final int performanceRank;
+  final double performance;
+  final double changePercent;
+  final double weightage;
+  final String color;
+  final int stockCount;
+  final double totalValue;
+  final double totalReturnAmount;
+  final List<Stock> stocks;
 
   /// Helper getter for formatted performance
   String get formattedPerformance => '${performance.toStringAsFixed(2)}%';
@@ -75,17 +71,7 @@ class Sector {
 
 /// Stock data in portfolio
 class Stock {
-  final String symbol;
-  final String companyName;
-  final double lastPrice;
-  final double changeAmount;
-  final double changePercent;
-  final String sector;
-  final double? quantity;
-  final double? avgPrice;
-  final double? marketValue;
-  final double? totalReturn;
-  final double? weight; // Weight percentage in portfolio/sector
+  // Weight percentage in portfolio/sector
 
   const Stock({
     required this.symbol,
@@ -100,6 +86,17 @@ class Stock {
     this.totalReturn,
     this.weight,
   });
+  final String symbol;
+  final String companyName;
+  final double lastPrice;
+  final double changeAmount;
+  final double changePercent;
+  final String sector;
+  final double? quantity;
+  final double? avgPrice;
+  final double? marketValue;
+  final double? totalReturn;
+  final double? weight;
 
   /// Helper getter for formatted change percent
   String get formattedChangePercent =>
@@ -117,36 +114,33 @@ class Stock {
 
 /// Top movers (gainers and losers)
 class Movers {
+  const Movers({required this.topGainers, required this.topLosers});
   final List<Stock> topGainers;
   final List<Stock> topLosers;
-
-  const Movers({required this.topGainers, required this.topLosers});
 }
 
 /// Sector allocation breakdown
 class SectorAllocation {
-  final List<SectorWeight> sectorWeights;
-  final List<IndustryWeight> industryWeights;
-
   const SectorAllocation({
     required this.sectorWeights,
     required this.industryWeights,
   });
+  final List<SectorWeight> sectorWeights;
+  final List<IndustryWeight> industryWeights;
 }
 
 /// Sector weight information
 class SectorWeight {
-  final String sectorName;
-  final double weightPercentage;
-  final double marketCap;
-  final List<String> topStocks;
-
   const SectorWeight({
     required this.sectorName,
     required this.weightPercentage,
     required this.marketCap,
     required this.topStocks,
   });
+  final String sectorName;
+  final double weightPercentage;
+  final double marketCap;
+  final List<String> topStocks;
 
   /// Helper getter for formatted weight percentage
   String get formattedWeightPercentage =>
@@ -158,12 +152,6 @@ class SectorWeight {
 
 /// Industry weight information
 class IndustryWeight {
-  final String industryName;
-  final String parentSector;
-  final double weightPercentage;
-  final double marketCap;
-  final List<String> topStocks;
-
   const IndustryWeight({
     required this.industryName,
     required this.parentSector,
@@ -171,6 +159,11 @@ class IndustryWeight {
     required this.marketCap,
     required this.topStocks,
   });
+  final String industryName;
+  final String parentSector;
+  final double weightPercentage;
+  final double marketCap;
+  final List<String> topStocks;
 
   /// Helper getter for formatted weight percentage
   String get formattedWeightPercentage =>
@@ -182,19 +175,12 @@ class IndustryWeight {
 
 /// Market cap allocation breakdown
 class MarketCapAllocation {
-  final List<MarketCapSegment> segments;
-
   const MarketCapAllocation({required this.segments});
+  final List<MarketCapSegment> segments;
 }
 
 /// Market cap segment information
 class MarketCapSegment {
-  final String segmentName;
-  final double weightPercentage;
-  final double segmentValue;
-  final int numberOfStocks;
-  final List<String> topStocks;
-
   const MarketCapSegment({
     required this.segmentName,
     required this.weightPercentage,
@@ -202,6 +188,11 @@ class MarketCapSegment {
     required this.numberOfStocks,
     required this.topStocks,
   });
+  final String segmentName;
+  final double weightPercentage;
+  final double segmentValue;
+  final int numberOfStocks;
+  final List<String> topStocks;
 
   /// Helper getter for formatted weight percentage
   String get formattedWeightPercentage =>

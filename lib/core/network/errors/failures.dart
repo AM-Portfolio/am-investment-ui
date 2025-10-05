@@ -1,12 +1,12 @@
 /// Base failure class
 abstract class Failure {
+  const Failure(this.message, {this.code});
   final String message;
   final String? code;
-  
-  const Failure(this.message, {this.code});
-  
+
   @override
-  String toString() => 'Failure: $message${code != null ? ' (Code: $code)' : ''}';
+  String toString() =>
+      'Failure: $message${code != null ? ' (Code: $code)' : ''}';
 }
 
 /// Network-related failures

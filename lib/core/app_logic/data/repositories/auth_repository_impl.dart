@@ -9,27 +9,26 @@ import '../datasources/auth_storage_data_source.dart';
 import '../../../utils/logger.dart';
 
 /// Implementation of AuthRepository that combines multiple data sources
-/// 
+///
 /// Uses local data source for development/demo and remote data source for production
 /// Also handles persistent storage of authentication state
 class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl({
+    required AuthDataSource localDataSource,
+    required AuthDataSource remoteDataSource,
+    required AuthStorageDataSource storageDataSource,
+  }) : _localDataSource = localDataSource,
+       _remoteDataSource = remoteDataSource,
+       _storageDataSource = storageDataSource;
   final AuthDataSource _localDataSource;
   final AuthDataSource _remoteDataSource;
   final AuthStorageDataSource _storageDataSource;
 
   // Stream controller for auth state changes
   final _authStateController = StreamController<AuthState>.broadcast();
-  
+
   // Current auth state
   AuthState _currentState = const AuthState();
-
-  AuthRepositoryImpl({
-    required AuthDataSource localDataSource,
-    required AuthDataSource remoteDataSource,
-    required AuthStorageDataSource storageDataSource,
-  })  : _localDataSource = localDataSource,
-        _remoteDataSource = remoteDataSource,
-        _storageDataSource = storageDataSource;
 
   @override
   Stream<AuthState> get authStateChanges => _authStateController.stream;
@@ -40,108 +39,183 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> initialize() async {
     AppLogger.methodEntry('initialize', tag: 'AuthRepositoryImpl');
-    
+
     try {
       AppLogger.info('Initializing AuthRepository', tag: 'AuthRepositoryImpl');
-      
+
       // Try to restore session from storage
-      AppLogger.debug('Checking for existing session in storage', tag: 'AuthRepositoryImpl');
+      AppLogger.debug(
+        'Checking for existing session in storage',
+        tag: 'AuthRepositoryImpl',
+      );
       final storedAuthState = await _storageDataSource.loadAuthData();
-      
+
       if (storedAuthState != null && storedAuthState.isAuthenticated) {
         // Check if token is expired
         if (storedAuthState.isTokenExpired) {
-          AppLogger.info('Stored token is expired, attempting refresh', tag: 'AuthRepositoryImpl');
-          
+          AppLogger.info(
+            'Stored token is expired, attempting refresh',
+            tag: 'AuthRepositoryImpl',
+          );
+
           try {
             // Try to refresh token
             final result = await refreshToken();
             if (!result.isSuccess) {
-              AppLogger.warning('Token refresh failed, clearing stored session', tag: 'AuthRepositoryImpl');
+              AppLogger.warning(
+                'Token refresh failed, clearing stored session',
+                tag: 'AuthRepositoryImpl',
+              );
               await _storageDataSource.clearAuthData();
               _updateAuthState(const AuthState());
             }
           } catch (e) {
-            AppLogger.warning('Token refresh error, clearing stored session', tag: 'AuthRepositoryImpl');
+            AppLogger.warning(
+              'Token refresh error, clearing stored session',
+              tag: 'AuthRepositoryImpl',
+            );
             await _storageDataSource.clearAuthData();
             _updateAuthState(const AuthState());
           }
         } else {
           // Token is still valid, restore session
-          AppLogger.info('Restored valid session for user: ${storedAuthState.currentUser?.email}', 
-              tag: 'AuthRepositoryImpl');
+          AppLogger.info(
+            'Restored valid session for user: ${storedAuthState.currentUser?.email}',
+            tag: 'AuthRepositoryImpl',
+          );
           _updateAuthState(storedAuthState);
-          
+
           // If token needs refresh soon, do it proactively
           if (storedAuthState.needsTokenRefresh) {
-            AppLogger.debug('Token needs refresh soon, refreshing proactively', tag: 'AuthRepositoryImpl');
+            AppLogger.debug(
+              'Token needs refresh soon, refreshing proactively',
+              tag: 'AuthRepositoryImpl',
+            );
             refreshToken().catchError((e) {
-              AppLogger.warning('Proactive token refresh failed', tag: 'AuthRepositoryImpl', error: e);
+              AppLogger.warning(
+                'Proactive token refresh failed',
+                tag: 'AuthRepositoryImpl',
+                error: e,
+              );
               return const AuthResult.failure(error: 'Token refresh failed');
             });
           }
         }
       } else {
-        AppLogger.debug('No valid session found in storage', tag: 'AuthRepositoryImpl');
+        AppLogger.debug(
+          'No valid session found in storage',
+          tag: 'AuthRepositoryImpl',
+        );
         _updateAuthState(const AuthState());
       }
-      
-      AppLogger.methodExit('initialize', tag: 'AuthRepositoryImpl', result: 'success');
+
+      AppLogger.methodExit(
+        'initialize',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
     } catch (e) {
-      AppLogger.error('Error initializing auth repository', tag: 'AuthRepositoryImpl',
-          error: e, stackTrace: StackTrace.current);
-      
+      AppLogger.error(
+        'Error initializing auth repository',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+
       // Clear any potentially corrupted data and start fresh
       await _storageDataSource.clearAuthData();
       _updateAuthState(const AuthState());
-      
-      AppLogger.methodExit('initialize', tag: 'AuthRepositoryImpl', result: 'error_cleared');
+
+      AppLogger.methodExit(
+        'initialize',
+        tag: 'AuthRepositoryImpl',
+        result: 'error_cleared',
+      );
     }
   }
 
   @override
   Future<AuthResult> login(String identifier, String password) async {
-    AppLogger.methodEntry('login', tag: 'AuthRepositoryImpl', 
-        params: {'identifier': identifier});
-    AppLogger.userAction('User attempting login', tag: 'AuthRepositoryImpl',
-        context: {'identifier': identifier});
-    
+    AppLogger.methodEntry(
+      'login',
+      tag: 'AuthRepositoryImpl',
+      params: {'identifier': identifier},
+    );
+    AppLogger.userAction(
+      'User attempting login',
+      tag: 'AuthRepositoryImpl',
+      context: {'identifier': identifier},
+    );
+
     try {
       _updateAuthState(_currentState.copyWith(isLoading: true));
       AppLogger.stateChange('idle', 'loading', tag: 'AuthRepositoryImpl');
 
       AuthDataResponse response;
-      
+
       // In debug mode or for test users, try local data source first
-      if (kDebugMode || identifier.contains('test') || identifier.contains('demo')) {
-        AppLogger.debug('Using local data source for authentication', tag: 'AuthRepositoryImpl');
-        
+      if (kDebugMode ||
+          identifier.contains('test') ||
+          identifier.contains('demo')) {
+        AppLogger.debug(
+          'Using local data source for authentication',
+          tag: 'AuthRepositoryImpl',
+        );
+
         try {
           response = await _localDataSource.login(identifier, password);
-          AppLogger.info('Local authentication successful', tag: 'AuthRepositoryImpl');
+          AppLogger.info(
+            'Local authentication successful',
+            tag: 'AuthRepositoryImpl',
+          );
         } catch (e) {
           // If local auth fails in debug mode, don't try remote
           if (kDebugMode) {
-            AppLogger.warning('Local authentication failed in debug mode', tag: 'AuthRepositoryImpl');
-            _updateAuthState(_currentState.copyWith(
-              isLoading: false,
-              errorMessage: e.toString(),
-            ));
-            AppLogger.stateChange('loading', 'error', tag: 'AuthRepositoryImpl');
-            AppLogger.methodExit('login', tag: 'AuthRepositoryImpl', result: 'failure');
+            AppLogger.warning(
+              'Local authentication failed in debug mode',
+              tag: 'AuthRepositoryImpl',
+            );
+            _updateAuthState(
+              _currentState.copyWith(
+                isLoading: false,
+                errorMessage: e.toString(),
+              ),
+            );
+            AppLogger.stateChange(
+              'loading',
+              'error',
+              tag: 'AuthRepositoryImpl',
+            );
+            AppLogger.methodExit(
+              'login',
+              tag: 'AuthRepositoryImpl',
+              result: 'failure',
+            );
             return AuthResult.failure(error: e.toString());
           }
-          
+
           // In release mode, fall back to remote
-          AppLogger.debug('Local authentication failed, trying remote', tag: 'AuthRepositoryImpl');
+          AppLogger.debug(
+            'Local authentication failed, trying remote',
+            tag: 'AuthRepositoryImpl',
+          );
           response = await _remoteDataSource.login(identifier, password);
-          AppLogger.info('Remote authentication successful', tag: 'AuthRepositoryImpl');
+          AppLogger.info(
+            'Remote authentication successful',
+            tag: 'AuthRepositoryImpl',
+          );
         }
       } else {
         // Production mode - use remote data source
-        AppLogger.debug('Using remote data source for authentication', tag: 'AuthRepositoryImpl');
+        AppLogger.debug(
+          'Using remote data source for authentication',
+          tag: 'AuthRepositoryImpl',
+        );
         response = await _remoteDataSource.login(identifier, password);
-        AppLogger.info('Remote authentication successful', tag: 'AuthRepositoryImpl');
+        AppLogger.info(
+          'Remote authentication successful',
+          tag: 'AuthRepositoryImpl',
+        );
       }
 
       // Save authentication data to storage
@@ -160,24 +234,38 @@ class AuthRepositoryImpl implements AuthRepository {
         refreshToken: response.refreshToken,
         tokenExpiresAt: response.expiresAt,
       );
-      
+
       _updateAuthState(newAuthState);
-      AppLogger.stateChange('loading', 'authenticated', tag: 'AuthRepositoryImpl');
-      AppLogger.userAction('User login successful', tag: 'AuthRepositoryImpl',
-          context: {'userId': response.user.id, 'userEmail': response.user.email});
-      AppLogger.methodExit('login', tag: 'AuthRepositoryImpl', result: 'success');
+      AppLogger.stateChange(
+        'loading',
+        'authenticated',
+        tag: 'AuthRepositoryImpl',
+      );
+      AppLogger.userAction(
+        'User login successful',
+        tag: 'AuthRepositoryImpl',
+        context: {'userId': response.user.id, 'userEmail': response.user.email},
+      );
+      AppLogger.methodExit(
+        'login',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
 
       return const AuthResult.success();
     } catch (e) {
       final errorMessage = e.toString().replaceFirst('Exception: ', '');
       AppLogger.error('Login failed', tag: 'AuthRepositoryImpl', error: e);
-      
-      _updateAuthState(_currentState.copyWith(
-        isLoading: false,
-        errorMessage: errorMessage,
-      ));
+
+      _updateAuthState(
+        _currentState.copyWith(isLoading: false, errorMessage: errorMessage),
+      );
       AppLogger.stateChange('loading', 'error', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('login', tag: 'AuthRepositoryImpl', result: 'failure');
+      AppLogger.methodExit(
+        'login',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
 
       return AuthResult.failure(error: errorMessage);
     }
@@ -191,29 +279,62 @@ class AuthRepositoryImpl implements AuthRepository {
     String? username,
     String? phone,
   }) async {
-    AppLogger.methodEntry('register', tag: 'AuthRepositoryImpl',
-        params: {'name': name, 'email': email, 'username': username, 'phone': phone});
-    AppLogger.userAction('User attempting registration', tag: 'AuthRepositoryImpl',
-        context: {'email': email, 'name': name});
-    
+    AppLogger.methodEntry(
+      'register',
+      tag: 'AuthRepositoryImpl',
+      params: {
+        'name': name,
+        'email': email,
+        'username': username,
+        'phone': phone,
+      },
+    );
+    AppLogger.userAction(
+      'User attempting registration',
+      tag: 'AuthRepositoryImpl',
+      context: {'email': email, 'name': name},
+    );
+
     try {
       _updateAuthState(_currentState.copyWith(isLoading: true));
       AppLogger.stateChange('idle', 'loading', tag: 'AuthRepositoryImpl');
 
       AuthDataResponse response;
-      
+
       // In debug mode, use local data source
       if (kDebugMode) {
-        AppLogger.debug('Using local data source for registration', tag: 'AuthRepositoryImpl');
-        response = await _localDataSource.register(name, email, password,
-            username: username, phone: phone);
-        AppLogger.info('Local registration successful', tag: 'AuthRepositoryImpl');
+        AppLogger.debug(
+          'Using local data source for registration',
+          tag: 'AuthRepositoryImpl',
+        );
+        response = await _localDataSource.register(
+          name,
+          email,
+          password,
+          username: username,
+          phone: phone,
+        );
+        AppLogger.info(
+          'Local registration successful',
+          tag: 'AuthRepositoryImpl',
+        );
       } else {
         // Production mode - use remote data source
-        AppLogger.debug('Using remote data source for registration', tag: 'AuthRepositoryImpl');
-        response = await _remoteDataSource.register(name, email, password,
-            username: username, phone: phone);
-        AppLogger.info('Remote registration successful', tag: 'AuthRepositoryImpl');
+        AppLogger.debug(
+          'Using remote data source for registration',
+          tag: 'AuthRepositoryImpl',
+        );
+        response = await _remoteDataSource.register(
+          name,
+          email,
+          password,
+          username: username,
+          phone: phone,
+        );
+        AppLogger.info(
+          'Remote registration successful',
+          tag: 'AuthRepositoryImpl',
+        );
       }
 
       // Save authentication data to storage
@@ -232,24 +353,42 @@ class AuthRepositoryImpl implements AuthRepository {
         refreshToken: response.refreshToken,
         tokenExpiresAt: response.expiresAt,
       );
-      
+
       _updateAuthState(newAuthState);
-      AppLogger.stateChange('loading', 'authenticated', tag: 'AuthRepositoryImpl');
-      AppLogger.userAction('User registration successful', tag: 'AuthRepositoryImpl',
-          context: {'userId': response.user.id, 'userEmail': response.user.email});
-      AppLogger.methodExit('register', tag: 'AuthRepositoryImpl', result: 'success');
+      AppLogger.stateChange(
+        'loading',
+        'authenticated',
+        tag: 'AuthRepositoryImpl',
+      );
+      AppLogger.userAction(
+        'User registration successful',
+        tag: 'AuthRepositoryImpl',
+        context: {'userId': response.user.id, 'userEmail': response.user.email},
+      );
+      AppLogger.methodExit(
+        'register',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
 
       return const AuthResult.success();
     } catch (e) {
       final errorMessage = e.toString().replaceFirst('Exception: ', '');
-      AppLogger.error('Registration failed', tag: 'AuthRepositoryImpl', error: e);
-      
-      _updateAuthState(_currentState.copyWith(
-        isLoading: false,
-        errorMessage: errorMessage,
-      ));
+      AppLogger.error(
+        'Registration failed',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+
+      _updateAuthState(
+        _currentState.copyWith(isLoading: false, errorMessage: errorMessage),
+      );
       AppLogger.stateChange('loading', 'error', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('register', tag: 'AuthRepositoryImpl', result: 'failure');
+      AppLogger.methodExit(
+        'register',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
 
       return AuthResult.failure(error: errorMessage);
     }
@@ -259,64 +398,118 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     AppLogger.methodEntry('logout', tag: 'AuthRepositoryImpl');
     AppLogger.userAction('User logging out', tag: 'AuthRepositoryImpl');
-    
+
     try {
       AppLogger.info('Clearing authentication data', tag: 'AuthRepositoryImpl');
       await _storageDataSource.clearAuthData();
-      
+
       _updateAuthState(const AuthState());
-      AppLogger.stateChange('authenticated', 'unauthenticated', tag: 'AuthRepositoryImpl');
+      AppLogger.stateChange(
+        'authenticated',
+        'unauthenticated',
+        tag: 'AuthRepositoryImpl',
+      );
       AppLogger.info('User logout successful', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('logout', tag: 'AuthRepositoryImpl', result: 'success');
+      AppLogger.methodExit(
+        'logout',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
     } catch (e) {
-      AppLogger.error('Error during logout', tag: 'AuthRepositoryImpl', error: e);
-      
+      AppLogger.error(
+        'Error during logout',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+
       // Still clear local state even if storage operations fail
       _updateAuthState(const AuthState());
-      AppLogger.stateChange('authenticated', 'unauthenticated', tag: 'AuthRepositoryImpl', 
-          event: 'force_logout');
-      AppLogger.methodExit('logout', tag: 'AuthRepositoryImpl', result: 'error_but_cleared');
+      AppLogger.stateChange(
+        'authenticated',
+        'unauthenticated',
+        tag: 'AuthRepositoryImpl',
+        event: 'force_logout',
+      );
+      AppLogger.methodExit(
+        'logout',
+        tag: 'AuthRepositoryImpl',
+        result: 'error_but_cleared',
+      );
     }
   }
 
   @override
   Future<List<User>> getTestUsers() async {
     AppLogger.methodEntry('getTestUsers', tag: 'AuthRepositoryImpl');
-    
+
     try {
       final testUsers = await _localDataSource.getTestUsers();
-      AppLogger.methodExit('getTestUsers', tag: 'AuthRepositoryImpl', 
-          result: '${testUsers.length} users');
+      AppLogger.methodExit(
+        'getTestUsers',
+        tag: 'AuthRepositoryImpl',
+        result: '${testUsers.length} users',
+      );
       return testUsers;
     } catch (e) {
-      AppLogger.error('Failed to get test users', tag: 'AuthRepositoryImpl', error: e);
-      AppLogger.methodExit('getTestUsers', tag: 'AuthRepositoryImpl', result: 'error');
+      AppLogger.error(
+        'Failed to get test users',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'getTestUsers',
+        tag: 'AuthRepositoryImpl',
+        result: 'error',
+      );
       return [];
     }
   }
 
   @override
   Future<bool> isIdentifierTaken(String identifier, String type) async {
-    AppLogger.methodEntry('isIdentifierTaken', tag: 'AuthRepositoryImpl',
-        params: {'identifier': identifier, 'type': type});
-    
+    AppLogger.methodEntry(
+      'isIdentifierTaken',
+      tag: 'AuthRepositoryImpl',
+      params: {'identifier': identifier, 'type': type},
+    );
+
     try {
       // In debug mode, check local data source
       if (kDebugMode) {
-        final taken = await _localDataSource.isIdentifierTaken(identifier, type);
-        AppLogger.methodExit('isIdentifierTaken', tag: 'AuthRepositoryImpl',
-            result: taken ? 'taken' : 'available');
+        final taken = await _localDataSource.isIdentifierTaken(
+          identifier,
+          type,
+        );
+        AppLogger.methodExit(
+          'isIdentifierTaken',
+          tag: 'AuthRepositoryImpl',
+          result: taken ? 'taken' : 'available',
+        );
         return taken;
       } else {
         // Production mode - check remote data source
-        final taken = await _remoteDataSource.isIdentifierTaken(identifier, type);
-        AppLogger.methodExit('isIdentifierTaken', tag: 'AuthRepositoryImpl',
-            result: taken ? 'taken' : 'available');
+        final taken = await _remoteDataSource.isIdentifierTaken(
+          identifier,
+          type,
+        );
+        AppLogger.methodExit(
+          'isIdentifierTaken',
+          tag: 'AuthRepositoryImpl',
+          result: taken ? 'taken' : 'available',
+        );
         return taken;
       }
     } catch (e) {
-      AppLogger.error('Failed to check identifier availability', tag: 'AuthRepositoryImpl', error: e);
-      AppLogger.methodExit('isIdentifierTaken', tag: 'AuthRepositoryImpl', result: 'error');
+      AppLogger.error(
+        'Failed to check identifier availability',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'isIdentifierTaken',
+        tag: 'AuthRepositoryImpl',
+        result: 'error',
+      );
       // On error, assume not taken to allow user to proceed
       return false;
     }
@@ -325,17 +518,23 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<AuthResult> refreshToken() async {
     AppLogger.methodEntry('refreshToken', tag: 'AuthRepositoryImpl');
-    
+
     if (_currentState.accessToken == null) {
       AppLogger.warning('No token to refresh', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('refreshToken', tag: 'AuthRepositoryImpl', result: 'no_token');
+      AppLogger.methodExit(
+        'refreshToken',
+        tag: 'AuthRepositoryImpl',
+        result: 'no_token',
+      );
       return const AuthResult.failure(error: 'No token to refresh');
     }
 
     try {
       final dataSource = kDebugMode ? _localDataSource : _remoteDataSource;
-      final newToken = await dataSource.refreshToken(_currentState.accessToken!);
-      
+      final newToken = await dataSource.refreshToken(
+        _currentState.accessToken!,
+      );
+
       // Update storage with new token
       await _storageDataSource.updateTokenData(
         token: newToken,
@@ -343,63 +542,121 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       // Update auth state
-      _updateAuthState(_currentState.copyWith(
-        accessToken: newToken,
-        tokenExpiresAt: DateTime.now().add(const Duration(hours: 24)),
-      ));
+      _updateAuthState(
+        _currentState.copyWith(
+          accessToken: newToken,
+          tokenExpiresAt: DateTime.now().add(const Duration(hours: 24)),
+        ),
+      );
 
       AppLogger.info('Token refresh successful', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('refreshToken', tag: 'AuthRepositoryImpl', result: 'success');
+      AppLogger.methodExit(
+        'refreshToken',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
       return const AuthResult.success();
     } catch (e) {
       final errorMessage = e.toString().replaceFirst('Exception: ', '');
-      AppLogger.error('Token refresh failed', tag: 'AuthRepositoryImpl', error: e);
-      AppLogger.methodExit('refreshToken', tag: 'AuthRepositoryImpl', result: 'failure');
+      AppLogger.error(
+        'Token refresh failed',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'refreshToken',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
       return AuthResult.failure(error: errorMessage);
     }
   }
 
   @override
-  Future<AuthResult> changePassword(String oldPassword, String newPassword) async {
+  Future<AuthResult> changePassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
     AppLogger.methodEntry('changePassword', tag: 'AuthRepositoryImpl');
-    
+
     if (_currentState.accessToken == null) {
-      AppLogger.warning('No token for password change', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('changePassword', tag: 'AuthRepositoryImpl', result: 'no_token');
+      AppLogger.warning(
+        'No token for password change',
+        tag: 'AuthRepositoryImpl',
+      );
+      AppLogger.methodExit(
+        'changePassword',
+        tag: 'AuthRepositoryImpl',
+        result: 'no_token',
+      );
       return const AuthResult.failure(error: 'Not authenticated');
     }
 
     try {
       final dataSource = kDebugMode ? _localDataSource : _remoteDataSource;
-      await dataSource.changePassword(_currentState.accessToken!, oldPassword, newPassword);
-      
+      await dataSource.changePassword(
+        _currentState.accessToken!,
+        oldPassword,
+        newPassword,
+      );
+
       AppLogger.info('Password change successful', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('changePassword', tag: 'AuthRepositoryImpl', result: 'success');
+      AppLogger.methodExit(
+        'changePassword',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
       return const AuthResult.success();
     } catch (e) {
       final errorMessage = e.toString().replaceFirst('Exception: ', '');
-      AppLogger.error('Password change failed', tag: 'AuthRepositoryImpl', error: e);
-      AppLogger.methodExit('changePassword', tag: 'AuthRepositoryImpl', result: 'failure');
+      AppLogger.error(
+        'Password change failed',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'changePassword',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
       return AuthResult.failure(error: errorMessage);
     }
   }
 
   @override
   Future<AuthResult> requestPasswordReset(String email) async {
-    AppLogger.methodEntry('requestPasswordReset', tag: 'AuthRepositoryImpl',
-        params: {'email': email});
-    
+    AppLogger.methodEntry(
+      'requestPasswordReset',
+      tag: 'AuthRepositoryImpl',
+      params: {'email': email},
+    );
+
     try {
       final dataSource = kDebugMode ? _localDataSource : _remoteDataSource;
       await dataSource.requestPasswordReset(email);
-      
-      AppLogger.info('Password reset request successful', tag: 'AuthRepositoryImpl');
-      AppLogger.methodExit('requestPasswordReset', tag: 'AuthRepositoryImpl', result: 'success');
+
+      AppLogger.info(
+        'Password reset request successful',
+        tag: 'AuthRepositoryImpl',
+      );
+      AppLogger.methodExit(
+        'requestPasswordReset',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
       return const AuthResult.success();
     } catch (e) {
       final errorMessage = e.toString().replaceFirst('Exception: ', '');
-      AppLogger.error('Password reset request failed', tag: 'AuthRepositoryImpl', error: e);
-      AppLogger.methodExit('requestPasswordReset', tag: 'AuthRepositoryImpl', result: 'failure');
+      AppLogger.error(
+        'Password reset request failed',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'requestPasswordReset',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
       return AuthResult.failure(error: errorMessage);
     }
   }

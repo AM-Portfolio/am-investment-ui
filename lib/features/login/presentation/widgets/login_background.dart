@@ -6,15 +6,15 @@ class LoginBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Create gradient background
-    final Rect rect = Offset.zero & size;
-    final Paint paint = Paint()
-      ..shader = LinearGradient(
+    final rect = Offset.zero & size;
+    final paint = Paint()
+      ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFF1A237E), // Deep indigo
-          const Color(0xFF3949AB), // Indigo
-          const Color(0xFF1E88E5), // Blue
+          Color(0xFF1A237E), // Deep indigo
+          Color(0xFF3949AB), // Indigo
+          Color(0xFF1E88E5), // Blue
         ],
       ).createShader(rect);
 
@@ -26,11 +26,11 @@ class LoginBackgroundPainter extends CustomPainter {
 
   void _drawAbstractShapes(Canvas canvas, Size size) {
     // First blob - top right
-    final Paint blobPaint1 = Paint()
+    final blobPaint1 = Paint()
       ..color = const Color(0x15FFFFFF)
       ..style = PaintingStyle.fill;
 
-    final Path blob1 = Path()
+    final blob1 = Path()
       ..moveTo(size.width * 0.7, 0)
       ..quadraticBezierTo(
         size.width * 0.85,
@@ -44,11 +44,11 @@ class LoginBackgroundPainter extends CustomPainter {
     canvas.drawPath(blob1, blobPaint1);
 
     // Second blob - middle right
-    final Paint blobPaint2 = Paint()
+    final blobPaint2 = Paint()
       ..color = const Color(0x20FFFFFF)
       ..style = PaintingStyle.fill;
 
-    final Path blob2 = Path()
+    final blob2 = Path()
       ..moveTo(size.width * 0.6, size.height * 0.35)
       ..quadraticBezierTo(
         size.width * 0.8,
@@ -67,11 +67,11 @@ class LoginBackgroundPainter extends CustomPainter {
     canvas.drawPath(blob2, blobPaint2);
 
     // Third blob - bottom left
-    final Paint blobPaint3 = Paint()
+    final blobPaint3 = Paint()
       ..color = const Color(0x18FFFFFF)
       ..style = PaintingStyle.fill;
 
-    final Path blob3 = Path()
+    final blob3 = Path()
       ..moveTo(0, size.height * 0.7)
       ..quadraticBezierTo(
         size.width * 0.2,
@@ -85,7 +85,7 @@ class LoginBackgroundPainter extends CustomPainter {
     canvas.drawPath(blob3, blobPaint3);
 
     // Small circles
-    final Paint circlePaint = Paint()
+    final circlePaint = Paint()
       ..color = const Color(0x10FFFFFF)
       ..style = PaintingStyle.fill;
 
@@ -108,23 +108,20 @@ class LoginBackgroundPainter extends CustomPainter {
 
 /// A widget that displays the login background with gradient and abstract shapes.
 class LoginBackground extends StatelessWidget {
+  const LoginBackground({required this.child, super.key});
   final Widget child;
 
-  const LoginBackground({super.key, required this.child});
-
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Background
-        CustomPaint(
-          painter: LoginBackgroundPainter(),
-          size: Size.infinite,
-          child: Container(),
-        ),
-        // Content
-        child,
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Stack(
+    children: [
+      // Background
+      CustomPaint(
+        painter: LoginBackgroundPainter(),
+        size: Size.infinite,
+        child: Container(),
+      ),
+      // Content
+      child,
+    ],
+  );
 }

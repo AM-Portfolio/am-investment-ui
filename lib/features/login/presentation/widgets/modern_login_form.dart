@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/buttons/app_button.dart';
 import '../../../../shared/widgets/inputs/app_text_field.dart';
-import '../../../../core/utils/validators.dart';
 
 /// A modern styled login form with improved UI/UX
 class ModernLoginForm extends StatelessWidget {
+  const ModernLoginForm({
+    required this.formKey,
+    required this.identifierController,
+    required this.passwordController,
+    required this.isLoading,
+    required this.onLogin,
+    required this.onQuickLogin,
+    required this.onForgotPassword,
+    required this.onRegister,
+    required this.selectedLoginMethod,
+    required this.onLoginMethodChanged,
+    super.key,
+    this.errorMessage,
+    this.onSsdLogin,
+  });
   final GlobalKey<FormState> formKey;
   final TextEditingController identifierController;
   final TextEditingController passwordController;
@@ -18,186 +34,161 @@ class ModernLoginForm extends StatelessWidget {
   final LoginMethod selectedLoginMethod;
   final Function(Set<LoginMethod>) onLoginMethodChanged;
 
-  const ModernLoginForm({
-    super.key,
-    required this.formKey,
-    required this.identifierController,
-    required this.passwordController,
-    required this.isLoading,
-    this.errorMessage,
-    required this.onLogin,
-    required this.onQuickLogin,
-    this.onSsdLogin,
-    required this.onForgotPassword,
-    required this.onRegister,
-    required this.selectedLoginMethod,
-    required this.onLoginMethodChanged,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Login method selector
-          _buildLoginMethodSelector(context),
-          const SizedBox(height: 24),
+  Widget build(BuildContext context) => Form(
+    key: formKey,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Login method selector
+        _buildLoginMethodSelector(context),
+        const SizedBox(height: 24),
 
-          // Identifier field (email, username, or phone)
-          _buildIdentifierField(),
-          const SizedBox(height: 16),
+        // Identifier field (email, username, or phone)
+        _buildIdentifierField(),
+        const SizedBox(height: 16),
 
-          // Password field with improved styling
-          _buildPasswordField(context),
-          const SizedBox(height: 8),
+        // Password field with improved styling
+        _buildPasswordField(context),
+        const SizedBox(height: 8),
 
-          // Forgot password link
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: onForgotPassword,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white70,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              child: const Text(
-                'Forgot Password?',
-                style: TextStyle(fontSize: 14),
-              ),
+        // Forgot password link
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: onForgotPassword,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+            child: const Text(
+              'Forgot Password?',
+              style: TextStyle(fontSize: 14),
             ),
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 16),
 
-          // Error message
-          if (errorMessage != null)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.error.withOpacity(0.3),
-                ),
-              ),
-              child: Text(
-                errorMessage!,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
+        // Error message
+        if (errorMessage != null)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.error.withOpacity(0.3),
               ),
             ),
-          if (errorMessage != null) const SizedBox(height: 16),
-
-          // Login button
-          AppButton(
-            text: 'Login',
-            isLoading: isLoading,
-            onPressed: onLogin,
-            type: AppButtonType.primary,
-            height: 52,
+            child: Text(
+              errorMessage!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          const SizedBox(height: 16),
+        if (errorMessage != null) const SizedBox(height: 16),
 
-          // Quick login button
+        // Login button
+        AppButton(
+          text: 'Login',
+          isLoading: isLoading,
+          onPressed: onLogin,
+          height: 52,
+        ),
+        const SizedBox(height: 16),
+
+        // Quick login button
+        AppButton(
+          text: 'Quick Login (Demo User)',
+          onPressed: isLoading ? null : onQuickLogin,
+          type: AppButtonType.secondary,
+          height: 52,
+        ),
+        const SizedBox(height: 16),
+
+        // SSD2658 login button
+        if (onSsdLogin != null)
           AppButton(
-            text: 'Quick Login (Demo User)',
-            onPressed: isLoading ? null : onQuickLogin,
+            text: 'Login as SSD2658',
+            onPressed: isLoading ? null : onSsdLogin,
             type: AppButtonType.secondary,
             height: 52,
           ),
-          const SizedBox(height: 16),
+        const SizedBox(height: 24),
 
-          // SSD2658 login button
-          if (onSsdLogin != null)
-            AppButton(
-              text: 'Login as SSD2658',
-              onPressed: isLoading ? null : onSsdLogin,
-              type: AppButtonType.secondary,
-              height: 52,
+        // Register link
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Don't have an account?",
+              style: TextStyle(color: Colors.white70),
             ),
-          const SizedBox(height: 24),
-
-          // Register link
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Don't have an account?",
-                style: TextStyle(color: Colors.white70),
+            TextButton(
+              onPressed: onRegister,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
-              TextButton(
-                onPressed: onRegister,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                child: const Text(
-                  'Register',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+              child: const Text(
+                'Register',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 
   // Build modern login method selector
-  Widget _buildLoginMethodSelector(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: SegmentedButton<LoginMethod>(
-        segments: const [
-          ButtonSegment<LoginMethod>(
-            value: LoginMethod.email,
-            label: Text('Email'),
-            icon: Icon(Icons.email, size: 18),
-          ),
-          ButtonSegment<LoginMethod>(
-            value: LoginMethod.username,
-            label: Text('Username'),
-            icon: Icon(Icons.person, size: 18),
-          ),
-          ButtonSegment<LoginMethod>(
-            value: LoginMethod.phone,
-            label: Text('Phone'),
-            icon: Icon(Icons.phone, size: 18),
-          ),
-        ],
-        selected: {selectedLoginMethod},
-        onSelectionChanged: onLoginMethodChanged,
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Colors.white.withOpacity(0.2);
-            }
-            return Colors.transparent;
-          }),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Colors.white;
-            }
-            return Colors.white70;
-          }),
-          visualDensity: VisualDensity.compact,
+  Widget _buildLoginMethodSelector(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    padding: const EdgeInsets.all(4),
+    child: SegmentedButton<LoginMethod>(
+      segments: const [
+        ButtonSegment<LoginMethod>(
+          value: LoginMethod.email,
+          label: Text('Email'),
+          icon: Icon(Icons.email, size: 18),
         ),
+        ButtonSegment<LoginMethod>(
+          value: LoginMethod.username,
+          label: Text('Username'),
+          icon: Icon(Icons.person, size: 18),
+        ),
+        ButtonSegment<LoginMethod>(
+          value: LoginMethod.phone,
+          label: Text('Phone'),
+          icon: Icon(Icons.phone, size: 18),
+        ),
+      ],
+      selected: {selectedLoginMethod},
+      onSelectionChanged: onLoginMethodChanged,
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white.withOpacity(0.2);
+          }
+          return Colors.transparent;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white;
+          }
+          return Colors.white70;
+        }),
+        visualDensity: VisualDensity.compact,
       ),
-    );
-  }
+    ),
+  );
 
   // Build dynamic identifier field based on selected login method
   Widget _buildIdentifierField() {
@@ -243,17 +234,15 @@ class ModernLoginForm extends StatelessWidget {
   }
 
   // Build password field with improved styling
-  Widget _buildPasswordField(BuildContext context) {
-    return _buildStyledTextField(
-      controller: passwordController,
-      labelText: 'Password',
-      hintText: 'Enter your password',
-      obscureText: true,
-      textInputAction: TextInputAction.done,
-      validator: Validators.validatePassword,
-      prefix: const Icon(Icons.lock_outline),
-    );
-  }
+  Widget _buildPasswordField(BuildContext context) => _buildStyledTextField(
+    controller: passwordController,
+    labelText: 'Password',
+    hintText: 'Enter your password',
+    obscureText: true,
+    textInputAction: TextInputAction.done,
+    validator: Validators.validatePassword,
+    prefix: const Icon(Icons.lock_outline),
+  );
 
   // Helper method to create styled text fields
   Widget _buildStyledTextField({
@@ -266,49 +255,44 @@ class ModernLoginForm extends StatelessWidget {
     String? Function(String?)? validator,
     Widget? prefix,
     ValueChanged<String>? onSubmitted,
-  }) {
-    return Theme(
-      data: ThemeData(
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.1),
-          contentPadding: const EdgeInsets.all(16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.white30, width: 1),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.redAccent.withOpacity(0.5),
-              width: 1,
-            ),
-          ),
-          labelStyle: const TextStyle(color: Colors.white70),
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+  }) => Theme(
+    data: ThemeData(
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        contentPadding: const EdgeInsets.all(16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.white30),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.redAccent.withOpacity(0.5)),
+        ),
+        labelStyle: const TextStyle(color: Colors.white70),
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
       ),
-      child: AppTextField(
-        controller: controller,
-        labelText: labelText,
-        hintText: hintText,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        validator: validator,
-        prefix: prefix,
-        onSubmitted: onSubmitted,
-      ),
-    );
-  }
+    ),
+    child: AppTextField(
+      controller: controller,
+      labelText: labelText,
+      hintText: hintText,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      validator: validator,
+      prefix: prefix,
+      onSubmitted: onSubmitted,
+    ),
+  );
 
   // Username validation helper
   String? _validateUsername(String? value) {

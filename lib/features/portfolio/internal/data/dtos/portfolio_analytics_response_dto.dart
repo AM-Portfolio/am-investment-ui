@@ -5,10 +5,6 @@ part 'portfolio_analytics_response_dto.g.dart';
 /// DTO for portfolio analytics response
 @JsonSerializable()
 class PortfolioAnalyticsResponseDto {
-  final String? portfolioId;
-  final String? timestamp;
-  final AnalyticsDto? analytics;
-
   const PortfolioAnalyticsResponseDto({
     this.portfolioId,
     this.timestamp,
@@ -17,6 +13,9 @@ class PortfolioAnalyticsResponseDto {
 
   factory PortfolioAnalyticsResponseDto.fromJson(Map<String, dynamic> json) =>
       _$PortfolioAnalyticsResponseDtoFromJson(json);
+  final String? portfolioId;
+  final String? timestamp;
+  final AnalyticsDto? analytics;
 
   Map<String, dynamic> toJson() => _$PortfolioAnalyticsResponseDtoToJson(this);
 }
@@ -24,11 +23,6 @@ class PortfolioAnalyticsResponseDto {
 /// Analytics data container
 @JsonSerializable()
 class AnalyticsDto {
-  final HeatmapDto? heatmap;
-  final MoversDto? movers;
-  final SectorAllocationDto? sectorAllocation;
-  final MarketCapAllocationDto? marketCapAllocation;
-
   const AnalyticsDto({
     this.heatmap,
     this.movers,
@@ -38,6 +32,10 @@ class AnalyticsDto {
 
   factory AnalyticsDto.fromJson(Map<String, dynamic> json) =>
       _$AnalyticsDtoFromJson(json);
+  final HeatmapDto? heatmap;
+  final MoversDto? movers;
+  final SectorAllocationDto? sectorAllocation;
+  final MarketCapAllocationDto? marketCapAllocation;
 
   Map<String, dynamic> toJson() => _$AnalyticsDtoToJson(this);
 }
@@ -45,12 +43,11 @@ class AnalyticsDto {
 /// Heatmap data for sector performance
 @JsonSerializable()
 class HeatmapDto {
-  final List<SectorDto>? sectors;
-
   const HeatmapDto({this.sectors});
 
   factory HeatmapDto.fromJson(Map<String, dynamic> json) =>
       _$HeatmapDtoFromJson(json);
+  final List<SectorDto>? sectors;
 
   Map<String, dynamic> toJson() => _$HeatmapDtoToJson(this);
 }
@@ -58,17 +55,6 @@ class HeatmapDto {
 /// Sector performance data
 @JsonSerializable()
 class SectorDto {
-  final String? sectorName;
-  final int? performanceRank;
-  final double? performance;
-  final double? changePercent;
-  final double? weightage;
-  final String? color;
-  final int? stockCount;
-  final double? totalValue;
-  final double? totalReturnAmount;
-  final List<StockDto>? stocks;
-
   const SectorDto({
     this.sectorName,
     this.performanceRank,
@@ -84,6 +70,16 @@ class SectorDto {
 
   factory SectorDto.fromJson(Map<String, dynamic> json) =>
       _$SectorDtoFromJson(json);
+  final String? sectorName;
+  final int? performanceRank;
+  final double? performance;
+  final double? changePercent;
+  final double? weightage;
+  final String? color;
+  final int? stockCount;
+  final double? totalValue;
+  final double? totalReturnAmount;
+  final List<StockDto>? stocks;
 
   Map<String, dynamic> toJson() => _$SectorDtoToJson(this);
 }
@@ -91,17 +87,7 @@ class SectorDto {
 /// Stock data in sector - supports multiple JSON formats
 @JsonSerializable()
 class StockDto {
-  final String? symbol;
-  final String? companyName;
-  final double? lastPrice;
-  final double? changeAmount;
-  final double? changePercent;
-  final String? sector;
-  final double? quantity;
-  final double? avgPrice;
-  final double? marketValue;
-  final double? totalReturn;
-  final double? weight; // Additional field for weight percentage
+  // Additional field for weight percentage
 
   const StockDto({
     this.symbol,
@@ -118,25 +104,34 @@ class StockDto {
   });
 
   /// Custom factory to handle multiple JSON formats
-  factory StockDto.fromJson(Map<String, dynamic> json) {
-    return StockDto(
-      symbol: json['symbol'] as String?,
-      // Handle both 'companyName' and 'name' fields
-      companyName: (json['companyName'] ?? json['name']) as String?,
-      // Handle both 'lastPrice' and 'price' fields
-      lastPrice: (json['lastPrice'] ?? json['price'])?.toDouble(),
-      // Handle both 'changeAmount' and 'change' fields
-      changeAmount: (json['changeAmount'] ?? json['change'])?.toDouble(),
-      changePercent: json['changePercent']?.toDouble(),
-      sector: json['sector'] as String?,
-      quantity: json['quantity']?.toDouble(),
-      avgPrice: json['avgPrice']?.toDouble(),
-      // Handle both 'marketValue' and 'value' fields
-      marketValue: (json['marketValue'] ?? json['value'])?.toDouble(),
-      totalReturn: json['totalReturn']?.toDouble(),
-      weight: json['weight']?.toDouble(),
-    );
-  }
+  factory StockDto.fromJson(Map<String, dynamic> json) => StockDto(
+    symbol: json['symbol'] as String?,
+    // Handle both 'companyName' and 'name' fields
+    companyName: (json['companyName'] ?? json['name']) as String?,
+    // Handle both 'lastPrice' and 'price' fields
+    lastPrice: (json['lastPrice'] ?? json['price'])?.toDouble(),
+    // Handle both 'changeAmount' and 'change' fields
+    changeAmount: (json['changeAmount'] ?? json['change'])?.toDouble(),
+    changePercent: json['changePercent']?.toDouble(),
+    sector: json['sector'] as String?,
+    quantity: json['quantity']?.toDouble(),
+    avgPrice: json['avgPrice']?.toDouble(),
+    // Handle both 'marketValue' and 'value' fields
+    marketValue: (json['marketValue'] ?? json['value'])?.toDouble(),
+    totalReturn: json['totalReturn']?.toDouble(),
+    weight: json['weight']?.toDouble(),
+  );
+  final String? symbol;
+  final String? companyName;
+  final double? lastPrice;
+  final double? changeAmount;
+  final double? changePercent;
+  final String? sector;
+  final double? quantity;
+  final double? avgPrice;
+  final double? marketValue;
+  final double? totalReturn;
+  final double? weight;
 
   Map<String, dynamic> toJson() => _$StockDtoToJson(this);
 }
@@ -144,13 +139,12 @@ class StockDto {
 /// Movers data (top gainers and losers)
 @JsonSerializable()
 class MoversDto {
-  final List<StockDto>? topGainers;
-  final List<StockDto>? topLosers;
-
   const MoversDto({this.topGainers, this.topLosers});
 
   factory MoversDto.fromJson(Map<String, dynamic> json) =>
       _$MoversDtoFromJson(json);
+  final List<StockDto>? topGainers;
+  final List<StockDto>? topLosers;
 
   Map<String, dynamic> toJson() => _$MoversDtoToJson(this);
 }
@@ -158,13 +152,12 @@ class MoversDto {
 /// Sector allocation data
 @JsonSerializable()
 class SectorAllocationDto {
-  final List<SectorWeightDto>? sectorWeights;
-  final List<IndustryWeightDto>? industryWeights;
-
   const SectorAllocationDto({this.sectorWeights, this.industryWeights});
 
   factory SectorAllocationDto.fromJson(Map<String, dynamic> json) =>
       _$SectorAllocationDtoFromJson(json);
+  final List<SectorWeightDto>? sectorWeights;
+  final List<IndustryWeightDto>? industryWeights;
 
   Map<String, dynamic> toJson() => _$SectorAllocationDtoToJson(this);
 }
@@ -172,11 +165,6 @@ class SectorAllocationDto {
 /// Sector weight data
 @JsonSerializable()
 class SectorWeightDto {
-  final String? sectorName;
-  final double? weightPercentage;
-  final double? marketCap;
-  final List<String>? topStocks;
-
   const SectorWeightDto({
     this.sectorName,
     this.weightPercentage,
@@ -186,6 +174,10 @@ class SectorWeightDto {
 
   factory SectorWeightDto.fromJson(Map<String, dynamic> json) =>
       _$SectorWeightDtoFromJson(json);
+  final String? sectorName;
+  final double? weightPercentage;
+  final double? marketCap;
+  final List<String>? topStocks;
 
   Map<String, dynamic> toJson() => _$SectorWeightDtoToJson(this);
 }
@@ -193,12 +185,6 @@ class SectorWeightDto {
 /// Industry weight data
 @JsonSerializable()
 class IndustryWeightDto {
-  final String? industryName;
-  final String? parentSector;
-  final double? weightPercentage;
-  final double? marketCap;
-  final List<String>? topStocks;
-
   const IndustryWeightDto({
     this.industryName,
     this.parentSector,
@@ -209,6 +195,11 @@ class IndustryWeightDto {
 
   factory IndustryWeightDto.fromJson(Map<String, dynamic> json) =>
       _$IndustryWeightDtoFromJson(json);
+  final String? industryName;
+  final String? parentSector;
+  final double? weightPercentage;
+  final double? marketCap;
+  final List<String>? topStocks;
 
   Map<String, dynamic> toJson() => _$IndustryWeightDtoToJson(this);
 }
@@ -216,12 +207,11 @@ class IndustryWeightDto {
 /// Market cap allocation data
 @JsonSerializable()
 class MarketCapAllocationDto {
-  final List<MarketCapSegmentDto>? segments;
-
   const MarketCapAllocationDto({this.segments});
 
   factory MarketCapAllocationDto.fromJson(Map<String, dynamic> json) =>
       _$MarketCapAllocationDtoFromJson(json);
+  final List<MarketCapSegmentDto>? segments;
 
   Map<String, dynamic> toJson() => _$MarketCapAllocationDtoToJson(this);
 }
@@ -229,12 +219,6 @@ class MarketCapAllocationDto {
 /// Market cap segment data
 @JsonSerializable()
 class MarketCapSegmentDto {
-  final String? segmentName;
-  final double? weightPercentage;
-  final double? segmentValue;
-  final int? numberOfStocks;
-  final List<String>? topStocks;
-
   const MarketCapSegmentDto({
     this.segmentName,
     this.weightPercentage,
@@ -245,6 +229,11 @@ class MarketCapSegmentDto {
 
   factory MarketCapSegmentDto.fromJson(Map<String, dynamic> json) =>
       _$MarketCapSegmentDtoFromJson(json);
+  final String? segmentName;
+  final double? weightPercentage;
+  final double? segmentValue;
+  final int? numberOfStocks;
+  final List<String>? topStocks;
 
   Map<String, dynamic> toJson() => _$MarketCapSegmentDtoToJson(this);
 }

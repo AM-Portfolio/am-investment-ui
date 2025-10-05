@@ -1,17 +1,5 @@
 /// Core investment data model
 class InvestmentData {
-  final String symbol;
-  final String name;
-  final double currentValue;
-  final double investedAmount;
-  final double avgPrice;
-  final int quantity;
-  final double currentPrice;
-  final double changeValue;
-  final double changePercent;
-  final bool isPositive;
-  final String? additionalInfo;
-
   const InvestmentData({
     required this.symbol,
     required this.name,
@@ -25,6 +13,17 @@ class InvestmentData {
     required this.isPositive,
     this.additionalInfo,
   });
+  final String symbol;
+  final String name;
+  final double currentValue;
+  final double investedAmount;
+  final double avgPrice;
+  final int quantity;
+  final double currentPrice;
+  final double changeValue;
+  final double changePercent;
+  final bool isPositive;
+  final String? additionalInfo;
 
   /// Create a copy with modified values
   InvestmentData copyWith({
@@ -39,21 +38,19 @@ class InvestmentData {
     double? changePercent,
     bool? isPositive,
     String? additionalInfo,
-  }) {
-    return InvestmentData(
-      symbol: symbol ?? this.symbol,
-      name: name ?? this.name,
-      currentValue: currentValue ?? this.currentValue,
-      investedAmount: investedAmount ?? this.investedAmount,
-      avgPrice: avgPrice ?? this.avgPrice,
-      quantity: quantity ?? this.quantity,
-      currentPrice: currentPrice ?? this.currentPrice,
-      changeValue: changeValue ?? this.changeValue,
-      changePercent: changePercent ?? this.changePercent,
-      isPositive: isPositive ?? this.isPositive,
-      additionalInfo: additionalInfo ?? this.additionalInfo,
-    );
-  }
+  }) => InvestmentData(
+    symbol: symbol ?? this.symbol,
+    name: name ?? this.name,
+    currentValue: currentValue ?? this.currentValue,
+    investedAmount: investedAmount ?? this.investedAmount,
+    avgPrice: avgPrice ?? this.avgPrice,
+    quantity: quantity ?? this.quantity,
+    currentPrice: currentPrice ?? this.currentPrice,
+    changeValue: changeValue ?? this.changeValue,
+    changePercent: changePercent ?? this.changePercent,
+    isPositive: isPositive ?? this.isPositive,
+    additionalInfo: additionalInfo ?? this.additionalInfo,
+  );
 
   @override
   String toString() =>
@@ -77,19 +74,17 @@ class InvestmentData {
   }
 
   @override
-  int get hashCode {
-    return Object.hash(
-      symbol,
-      name,
-      currentValue,
-      investedAmount,
-      avgPrice,
-      quantity,
-      currentPrice,
-      changeValue,
-      changePercent,
-      isPositive,
-      additionalInfo,
-    );
-  }
+  int get hashCode => Object.hash(
+    symbol,
+    name,
+    currentValue,
+    investedAmount,
+    avgPrice,
+    quantity,
+    currentPrice,
+    changeValue,
+    changePercent,
+    isPositive,
+    additionalInfo,
+  );
 }

@@ -5,50 +5,47 @@ import '../../../../core/utils/logger.dart';
 /// Widget displaying sectorial allocation of the portfolio
 /// Shows distribution of investments across different sectors using bars
 class SectorialAllocationWidget extends StatelessWidget {
-  final SectorAllocation? sectorAllocation;
-  final bool isLoading;
-  final String? error;
-
   const SectorialAllocationWidget({
     super.key,
     this.sectorAllocation,
     this.isLoading = false,
     this.error,
   });
+  final SectorAllocation? sectorAllocation;
+  final bool isLoading;
+  final String? error;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.donut_small,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Sector Allocation',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(height: 300, child: _buildContent(context)),
-          ],
-        ),
+  Widget build(BuildContext context) => Card(
+    elevation: 4,
+    margin: const EdgeInsets.all(8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.donut_small,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Sector Allocation',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(height: 300, child: _buildContent(context)),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildContent(BuildContext context) {
     if (isLoading) {
@@ -174,7 +171,9 @@ class SectorialAllocationWidget extends StatelessWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: sectorWeight.weightPercentage / 100,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(colors[index]),
                 ),
                 const SizedBox(height: 4),
@@ -208,7 +207,7 @@ class SectorialAllocationWidget extends StatelessWidget {
     ];
 
     final colors = <Color>[];
-    for (int i = 0; i < count; i++) {
+    for (var i = 0; i < count; i++) {
       colors.add(baseColors[i % baseColors.length]);
     }
     return colors;

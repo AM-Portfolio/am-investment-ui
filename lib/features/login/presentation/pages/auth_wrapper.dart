@@ -34,7 +34,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     });
   }
 
-  void _handleLogin(String userId) async {
+  Future<void> _handleLogin(String userId) async {
     // The login is already handled by the Riverpod providers
     // This callback is just for compatibility with LoginScreen
     setState(() {
@@ -42,7 +42,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     });
   }
 
-  void _handleLogout() async {
+  Future<void> _handleLogout() async {
     await ref.read(authStateNotifierProvider.notifier).logout();
     setState(() {
       _currentPage = 'Portfolio';
@@ -77,30 +77,28 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     }
   }
 
-  Widget _buildPlaceholderScreen(String title) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.construction,
-            size: 64,
-            color: Theme.of(context).primaryColor.withOpacity(0.6),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '$title Coming Soon',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'This feature is under development.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildPlaceholderScreen(String title) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.construction,
+          size: 64,
+          color: Theme.of(context).primaryColor.withOpacity(0.6),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          '$title Coming Soon',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'This feature is under development.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -6,9 +6,8 @@ import '../../internal/services/portfolio_service.dart';
 import '../../../../core/utils/logger.dart';
 
 class PortfolioCubit extends Cubit<PortfolioState> {
-  final PortfolioService _portfolioService;
-
   PortfolioCubit(this._portfolioService) : super(PortfolioInitial());
+  final PortfolioService _portfolioService;
 
   Future<void> loadPortfolio(String userId) async {
     AppLogger.methodEntry(

@@ -6,8 +6,6 @@ part 'portfolio_holding.g.dart';
 /// Domain entity representing a portfolio holding
 @freezed
 class PortfolioHolding with _$PortfolioHolding {
-  const PortfolioHolding._();
-  
   const factory PortfolioHolding({
     required String id,
     required String symbol,
@@ -26,16 +24,17 @@ class PortfolioHolding with _$PortfolioHolding {
     required double portfolioWeight,
     @Default([]) List<BrokerHolding> brokerHoldings,
   }) = _PortfolioHolding;
+  const PortfolioHolding._();
 
   factory PortfolioHolding.fromJson(Map<String, dynamic> json) =>
       _$PortfolioHoldingFromJson(json);
 
   /// Check if the holding is profitable
   bool get isProfitable => totalGainLoss >= 0;
-  
+
   /// Check if today's performance is positive
   bool get isTodayPositive => todayChange >= 0;
-  
+
   /// Get the primary broker holding (with most quantity)
   BrokerHolding? get primaryBroker {
     if (brokerHoldings.isEmpty) return null;
@@ -62,54 +61,54 @@ class BrokerHolding with _$BrokerHolding {
 /// Domain entity representing portfolio holdings collection
 @freezed
 class PortfolioHoldings with _$PortfolioHoldings {
-  const PortfolioHoldings._();
-  
   const factory PortfolioHoldings({
     required String userId,
     required List<PortfolioHolding> holdings,
     required DateTime lastUpdated,
   }) = _PortfolioHoldings;
+  const PortfolioHoldings._();
 
   factory PortfolioHoldings.fromJson(Map<String, dynamic> json) =>
       _$PortfolioHoldingsFromJson(json);
 
-  factory PortfolioHoldings.empty(String userId) {
-    return PortfolioHoldings(
-      userId: userId,
-      holdings: const [],
-      lastUpdated: DateTime.now(),
-    );
-  }
+  factory PortfolioHoldings.empty(String userId) => PortfolioHoldings(
+    userId: userId,
+    holdings: const [],
+    lastUpdated: DateTime.now(),
+  );
 
   /// Check if portfolio is empty
   bool get isEmpty => holdings.isEmpty;
-  
+
   /// Get total number of holdings
   int get totalHoldings => holdings.length;
-  
+
   /// Calculate total portfolio value
-  double get totalValue => holdings.fold(0.0, (sum, holding) => sum + holding.currentValue);
-  
+  double get totalValue =>
+      holdings.fold(0.0, (sum, holding) => sum + holding.currentValue);
+
   /// Calculate total invested amount
-  double get totalInvested => holdings.fold(0.0, (sum, holding) => sum + holding.investedAmount);
-  
+  double get totalInvested =>
+      holdings.fold(0.0, (sum, holding) => sum + holding.investedAmount);
+
   /// Calculate total gain/loss
   double get totalGainLoss => totalValue - totalInvested;
-  
+
   /// Calculate total gain/loss percentage
-  double get totalGainLossPercentage => 
+  double get totalGainLossPercentage =>
       totalInvested > 0 ? (totalGainLoss / totalInvested) * 100 : 0.0;
-  
+
   /// Calculate today's total change
-  double get todayTotalChange => holdings.fold(0.0, (sum, holding) => sum + holding.todayChange);
-  
+  double get todayTotalChange =>
+      holdings.fold(0.0, (sum, holding) => sum + holding.todayChange);
+
   /// Calculate today's total change percentage
-  double get todayTotalChangePercentage => 
+  double get todayTotalChangePercentage =>
       totalInvested > 0 ? (todayTotalChange / totalInvested) * 100 : 0.0;
 
   /// Group holdings by sector
   Map<String, List<PortfolioHolding>> get holdingsBySector {
-    final Map<String, List<PortfolioHolding>> sectors = {};
+    final sectors = <String, List<PortfolioHolding>>{};
     for (final holding in holdings) {
       sectors.putIfAbsent(holding.sector, () => []).add(holding);
     }
@@ -119,19 +118,22 @@ class PortfolioHoldings with _$PortfolioHoldings {
   /// Get top performing holdings
   List<PortfolioHolding> getTopPerformers(int count) {
     final sorted = List<PortfolioHolding>.from(holdings);
-    sorted.sort((a, b) => b.totalGainLossPercentage.compareTo(a.totalGainLossPercentage));
+    sorted.sort(
+      (a, b) => b.totalGainLossPercentage.compareTo(a.totalGainLossPercentage),
+    );
     return sorted.take(count).toList();
   }
 
   /// Get worst performing holdings
   List<PortfolioHolding> getWorstPerformers(int count) {
     final sorted = List<PortfolioHolding>.from(holdings);
-    sorted.sort((a, b) => a.totalGainLossPercentage.compareTo(b.totalGainLossPercentage));
+    sorted.sort(
+      (a, b) => a.totalGainLossPercentage.compareTo(b.totalGainLossPercentage),
+    );
     return sorted.take(count).toList();
   }
 
   /// Filter holdings by sector
-  List<PortfolioHolding> getHoldingsBySector(String sector) {
-    return holdings.where((holding) => holding.sector == sector).toList();
-  }
+  List<PortfolioHolding> getHoldingsBySector(String sector) =>
+      holdings.where((holding) => holding.sector == sector).toList();
 }

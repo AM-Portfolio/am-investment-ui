@@ -3,20 +3,19 @@ import 'package:flutter/material.dart';
 /// Mobile-optimized layout widget with bottom navigation and app bar
 /// Used for mobile platforms (Android and iOS)
 class MobileLayout extends StatefulWidget {
-  final String title;
-  final String activeNavItem;
-  final VoidCallback onLogout;
-  final Function(String) onNavigate;
-  final Widget child;
-
   const MobileLayout({
-    super.key,
     required this.title,
     required this.activeNavItem,
     required this.onLogout,
     required this.onNavigate,
     required this.child,
+    super.key,
   });
+  final String title;
+  final String activeNavItem;
+  final VoidCallback onLogout;
+  final Function(String) onNavigate;
+  final Widget child;
 
   @override
   State<MobileLayout> createState() => _MobileLayoutState();
@@ -65,35 +64,27 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey[600],
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart),
-            label: 'Portfolio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up),
-            label: 'Trade',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Market',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.article), label: 'News'),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    body: widget.child,
+    bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Colors.grey[600],
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.pie_chart),
+          label: 'Portfolio',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'Trade'),
+        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Market'),
+        BottomNavigationBarItem(icon: Icon(Icons.article), label: 'News'),
+      ],
+    ),
+  );
 }

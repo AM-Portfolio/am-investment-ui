@@ -12,14 +12,13 @@ import '../web/portfolio_web_screen.dart';
 /// Wrapper widget that handles portfolio list loading and selection
 /// Provides portfolio selection functionality for both mobile and web screens
 class PortfolioListWrapper extends ConsumerStatefulWidget {
-  final String userId;
-  final bool isMobile;
-
   const PortfolioListWrapper({
-    super.key,
     required this.userId,
     required this.isMobile,
+    super.key,
   });
+  final String userId;
+  final bool isMobile;
 
   @override
   ConsumerState<PortfolioListWrapper> createState() =>
@@ -85,16 +84,14 @@ class _PortfolioListWrapperState extends ConsumerState<PortfolioListWrapper> {
   }
 
   /// Builds the widget when portfolio service is loaded
-  Widget _buildWithPortfolioService(dynamic portfolioService) {
-    return BlocProvider(
-      create: (context) =>
-          PortfolioCubit(portfolioService)..loadPortfoliosList(widget.userId),
-      child: BlocConsumer<PortfolioCubit, PortfolioState>(
-        listener: _handlePortfolioStateChange,
-        builder: _buildPortfolioContent,
-      ),
-    );
-  }
+  Widget _buildWithPortfolioService(portfolioService) => BlocProvider(
+    create: (context) =>
+        PortfolioCubit(portfolioService)..loadPortfoliosList(widget.userId),
+    child: BlocConsumer<PortfolioCubit, PortfolioState>(
+      listener: _handlePortfolioStateChange,
+      builder: _buildPortfolioContent,
+    ),
+  );
 
   /// Handles portfolio state changes
   void _handlePortfolioStateChange(BuildContext context, PortfolioState state) {
@@ -155,101 +152,100 @@ class _PortfolioListWrapperState extends ConsumerState<PortfolioListWrapper> {
     if (widget.isMobile) {
       return PortfolioMobileScreen(
         userId: widget.userId,
-        selectedPortfolioId: selectedPortfolioId!,
-        selectedPortfolioName: selectedPortfolioName!,
+        selectedPortfolioId: selectedPortfolioId,
+        selectedPortfolioName: selectedPortfolioName,
         portfolios: portfolios,
         onPortfolioChanged: _onPortfolioChanged,
       );
     } else {
-      return PortfolioWebScreen(userId: selectedPortfolioId!);
+      return PortfolioWebScreen(
+        userId: widget.userId,
+        selectedPortfolioId: selectedPortfolioId,
+        selectedPortfolioName: selectedPortfolioName,
+        portfolios: portfolios,
+        onPortfolioChanged: _onPortfolioChanged,
+      );
     }
   }
 
   /// Builds loading screen
-  Widget _buildLoadingScreen() {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading portfolios...'),
-          ],
-        ),
+  Widget _buildLoadingScreen() => const Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Loading portfolios...'),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   /// Builds error screen with retry functionality
-  Widget _buildRetryErrorScreen(BuildContext context, String message) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            const Text('Failed to load portfolios'),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _retryLoadPortfolios(context),
-              child: const Text('Retry'),
-            ),
-          ],
+  Widget _buildRetryErrorScreen(BuildContext context, String message) =>
+      Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text('Failed to load portfolios'),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => _retryLoadPortfolios(context),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Builds empty portfolios screen
-  Widget _buildEmptyPortfoliosScreen() {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.account_balance_wallet_outlined,
-              size: 64,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text('No portfolios found'),
-            SizedBox(height: 8),
-            Text('Create a portfolio to get started'),
-          ],
-        ),
+  Widget _buildEmptyPortfoliosScreen() => const Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 16),
+          Text('No portfolios found'),
+          SizedBox(height: 8),
+          Text('Create a portfolio to get started'),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   /// Builds error screen for service initialization failure
-  Widget _buildErrorScreen(Object error, StackTrace? stack) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Failed to initialize: $error'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => ref.invalidate(portfolioServiceProvider),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+  Widget _buildErrorScreen(Object error, StackTrace? stack) => Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text('Failed to initialize: $error'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => ref.invalidate(portfolioServiceProvider),
+            child: const Text('Retry'),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   /// Retries loading portfolios
   void _retryLoadPortfolios(BuildContext context) {

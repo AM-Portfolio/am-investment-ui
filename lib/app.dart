@@ -9,26 +9,20 @@ class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp(
-      title: 'AM Investment',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        // Configure theme based on platform/screen size
-        visualDensity: _getVisualDensity(),
-      ),
-      darkTheme: ThemeData.dark(
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
-      home: const LoginWrapper(),
-      // Add error handling
-      builder: (context, child) {
-        return _AppErrorBoundary(child: child ?? const SizedBox.shrink());
-      },
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
+    title: 'AM Investment',
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+      useMaterial3: true,
+      // Configure theme based on platform/screen size
+      visualDensity: _getVisualDensity(),
+    ),
+    darkTheme: ThemeData.dark(useMaterial3: true),
+    home: const LoginWrapper(),
+    // Add error handling
+    builder: (context, child) =>
+        _AppErrorBoundary(child: child ?? const SizedBox.shrink()),
+  );
 
   /// Get visual density based on platform
   VisualDensity _getVisualDensity() {
@@ -44,7 +38,5 @@ class _AppErrorBoundary extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return child;
-  }
+  Widget build(BuildContext context) => child;
 }

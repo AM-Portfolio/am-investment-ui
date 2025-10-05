@@ -7,23 +7,6 @@ import '../platform_widget.dart';
 /// This widget provides a consistent API while rendering the appropriate
 /// native-looking text field based on the platform.
 class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
-  final TextEditingController? controller;
-  final String? labelText;
-  final String? hintText;
-  final String? errorText;
-  final bool obscureText;
-  final TextInputType keyboardType;
-  final TextInputAction? textInputAction;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
-  final VoidCallback? onEditingComplete;
-  final FormFieldValidator<String>? validator;
-  final bool autofocus;
-  final FocusNode? focusNode;
-  final EdgeInsetsGeometry? contentPadding;
-  final Widget? prefix;
-  final Widget? suffix;
-
   const AppTextField({
     super.key,
     this.controller,
@@ -43,6 +26,22 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
     this.prefix,
     this.suffix,
   });
+  final TextEditingController? controller;
+  final String? labelText;
+  final String? hintText;
+  final String? errorText;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onEditingComplete;
+  final FormFieldValidator<String>? validator;
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final EdgeInsetsGeometry? contentPadding;
+  final Widget? prefix;
+  final Widget? suffix;
 
   @override
   CupertinoTextField buildIosWidget(BuildContext context) {
@@ -71,7 +70,6 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
           color: errorText != null
               ? CupertinoColors.systemRed
               : CupertinoColors.systemGrey,
-          width: 1.0,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -79,28 +77,26 @@ class AppTextField extends PlatformWidget<CupertinoTextField, TextField> {
   }
 
   @override
-  TextField buildMaterialWidget(BuildContext context) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
-        contentPadding: contentPadding ?? const EdgeInsets.all(16),
-        prefixIcon: prefix,
-        suffixIcon: suffix,
-        border: const OutlineInputBorder(),
-      ),
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      onEditingComplete: onEditingComplete,
-      autofocus: autofocus,
-      focusNode: focusNode,
-    );
-  }
+  TextField buildMaterialWidget(BuildContext context) => TextField(
+    controller: controller,
+    decoration: InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      errorText: errorText,
+      contentPadding: contentPadding ?? const EdgeInsets.all(16),
+      prefixIcon: prefix,
+      suffixIcon: suffix,
+      border: const OutlineInputBorder(),
+    ),
+    obscureText: obscureText,
+    keyboardType: keyboardType,
+    textInputAction: textInputAction,
+    onChanged: onChanged,
+    onSubmitted: onSubmitted,
+    onEditingComplete: onEditingComplete,
+    autofocus: autofocus,
+    focusNode: focusNode,
+  );
 
   @override
   Widget buildWebWidget(BuildContext context) {

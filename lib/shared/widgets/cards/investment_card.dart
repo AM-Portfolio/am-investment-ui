@@ -3,14 +3,9 @@ import '../../models/investment_card/models.dart';
 
 /// Clean investment card using structured models
 class InvestmentCard extends StatelessWidget {
-  final InvestmentData data;
-  final InvestmentCardConfig config;
-  final InvestmentCardStyle style;
-  final InvestmentDisplayOptions displayOptions;
-
   const InvestmentCard({
-    super.key,
     required this.data,
+    super.key,
     this.config = const InvestmentCardConfig(),
     this.style = InvestmentCardStyle.regular,
     this.displayOptions = InvestmentDisplayOptions.full,
@@ -18,7 +13,6 @@ class InvestmentCard extends StatelessWidget {
 
   /// Legacy constructor for backward compatibility
   InvestmentCard.legacy({
-    super.key,
     required String symbol,
     required String name,
     required double currentValue,
@@ -29,6 +23,7 @@ class InvestmentCard extends StatelessWidget {
     required double changeValue,
     required double changePercent,
     required bool isPositive,
+    super.key,
     VoidCallback? onTap,
     Widget? leadingIcon,
     Widget? trailingWidget,
@@ -81,67 +76,63 @@ class InvestmentCard extends StatelessWidget {
          showQuantity: showQuantity,
          showAveragePrice: showAveragePrice,
        );
+  final InvestmentData data;
+  final InvestmentCardConfig config;
+  final InvestmentCardStyle style;
+  final InvestmentDisplayOptions displayOptions;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: style.margin ?? const EdgeInsets.only(bottom: 8),
-      color: style.cardColor,
-      child: InkWell(
-        onTap: config.onTap,
-        borderRadius: style.borderRadius ?? BorderRadius.circular(8),
-        child: Padding(
-          padding: style.padding ?? const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              _buildTopRow(),
-              const SizedBox(height: 12),
-              if (config.additionalWidgets != null) ...[
-                ...config.additionalWidgets!,
-                const SizedBox(height: 8),
-              ],
-              config.customBottomWidget ?? _buildBottomRow(),
+  Widget build(BuildContext context) => Card(
+    margin: style.margin ?? const EdgeInsets.only(bottom: 8),
+    color: style.cardColor,
+    child: InkWell(
+      onTap: config.onTap,
+      borderRadius: style.borderRadius ?? BorderRadius.circular(8),
+      child: Padding(
+        padding: style.padding ?? const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildTopRow(),
+            const SizedBox(height: 12),
+            if (config.additionalWidgets != null) ...[
+              ...config.additionalWidgets!,
+              const SizedBox(height: 8),
             ],
-          ),
+            config.customBottomWidget ?? _buildBottomRow(),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildTopRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildLeftSection(),
-        config.trailingWidget ??
-            (displayOptions.showDefaultValue
-                ? _buildValueDisplay()
-                : const SizedBox.shrink()),
-      ],
-    );
-  }
+  Widget _buildTopRow() => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      _buildLeftSection(),
+      config.trailingWidget ??
+          (displayOptions.showDefaultValue
+              ? _buildValueDisplay()
+              : const SizedBox.shrink()),
+    ],
+  );
 
-  Widget _buildLeftSection() {
-    return Row(
-      children: [
-        config.leadingIcon ?? _buildDefaultIcon(),
-        const SizedBox(width: 12),
-        _buildTitleSection(),
-      ],
-    );
-  }
+  Widget _buildLeftSection() => Row(
+    children: [
+      config.leadingIcon ?? _buildDefaultIcon(),
+      const SizedBox(width: 12),
+      _buildTitleSection(),
+    ],
+  );
 
-  Widget _buildTitleSection() {
-    return Column(
-      crossAxisAlignment: style.leftAlignment,
-      children: [
-        _buildSymbolText(),
-        _buildNameText(),
-        if (data.additionalInfo != null && displayOptions.showAdditionalInfo)
-          _buildAdditionalInfo(),
-      ],
-    );
-  }
+  Widget _buildTitleSection() => Column(
+    crossAxisAlignment: style.leftAlignment,
+    children: [
+      _buildSymbolText(),
+      _buildNameText(),
+      if (data.additionalInfo != null && displayOptions.showAdditionalInfo)
+        _buildAdditionalInfo(),
+    ],
+  );
 
   Widget _buildSymbolText() => Text(
     data.symbol,
@@ -190,26 +181,22 @@ class InvestmentCard extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (displayOptions.showInvestmentDetails) _buildInvestmentDetails(),
-        if (displayOptions.showPerformanceSection) _buildPerformanceSection(),
-      ],
-    );
-  }
+  Widget _buildBottomRow() => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      if (displayOptions.showInvestmentDetails) _buildInvestmentDetails(),
+      if (displayOptions.showPerformanceSection) _buildPerformanceSection(),
+    ],
+  );
 
-  Widget _buildInvestmentDetails() {
-    return Column(
-      crossAxisAlignment: style.leftAlignment,
-      children: [
-        _buildInvestmentAmount(),
-        const SizedBox(height: 2),
-        _buildDetailsRow(),
-      ],
-    );
-  }
+  Widget _buildInvestmentDetails() => Column(
+    crossAxisAlignment: style.leftAlignment,
+    children: [
+      _buildInvestmentAmount(),
+      const SizedBox(height: 2),
+      _buildDetailsRow(),
+    ],
+  );
 
   Widget _buildInvestmentAmount() => Row(
     children: [
@@ -224,16 +211,14 @@ class InvestmentCard extends StatelessWidget {
     ],
   );
 
-  Widget _buildDetailsRow() {
-    return Row(
-      children: [
-        if (displayOptions.showAveragePrice) ..._buildAveragePrice(),
-        if (displayOptions.showQuantity && displayOptions.showAveragePrice)
-          const SizedBox(width: 8),
-        if (displayOptions.showQuantity) ..._buildQuantityInfo(),
-      ],
-    );
-  }
+  Widget _buildDetailsRow() => Row(
+    children: [
+      if (displayOptions.showAveragePrice) ..._buildAveragePrice(),
+      if (displayOptions.showQuantity && displayOptions.showAveragePrice)
+        const SizedBox(width: 8),
+      if (displayOptions.showQuantity) ..._buildQuantityInfo(),
+    ],
+  );
 
   List<Widget> _buildAveragePrice() => [
     Icon(

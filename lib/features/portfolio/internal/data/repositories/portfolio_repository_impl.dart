@@ -18,6 +18,8 @@ import '../../../../../core/utils/logger.dart';
 /// - Provides streams for real-time updates
 /// - Implements caching and error handling
 class PortfolioRepositoryImpl implements PortfolioRepository {
+  PortfolioRepositoryImpl({required PortfolioRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
   final PortfolioRemoteDataSource _remoteDataSource;
 
   // Stream controllers for real-time updates
@@ -31,9 +33,6 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
   PortfolioSummary? _cachedSummary;
   PortfolioList? _cachedPortfolioList;
   String? _lastUserId;
-
-  PortfolioRepositoryImpl({required PortfolioRemoteDataSource remoteDataSource})
-    : _remoteDataSource = remoteDataSource;
 
   @override
   Future<PortfolioHoldings> getPortfolioHoldings(String userId) async {

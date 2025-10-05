@@ -5,9 +5,8 @@ import '../../../../../core/utils/logger.dart';
 
 /// Use case for getting portfolio analytics
 class GetPortfolioAnalytics {
-  final PortfolioAnalyticsRepository _repository;
-
   const GetPortfolioAnalytics(this._repository);
+  final PortfolioAnalyticsRepository _repository;
 
   /// Execute the use case
   Future<PortfolioAnalytics> call(PortfolioAnalyticsRequest request) async {

@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 /// A sidebar component for portfolio navigation
 class PortfolioSidebar extends StatelessWidget {
+  /// Constructor
+  const PortfolioSidebar({
+    required this.currentPage,
+    required this.onPageSelected,
+    super.key,
+  });
+
   /// Current selected page
   final String currentPage;
 
   /// Callback when a page is selected
   final Function(String) onPageSelected;
-
-  /// Constructor
-  const PortfolioSidebar({
-    super.key,
-    required this.currentPage,
-    required this.onPageSelected,
-  });
 
   @override
   Widget build(BuildContext context) {

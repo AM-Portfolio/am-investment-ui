@@ -18,7 +18,7 @@ class PortfolioMockDataProvider {
   static Future<PortfolioSummaryDtos> getMockPortfolioSummary() async {
     try {
       final summaryData = await _loadMockSummaryData();
-      
+
       // Use mapper to convert API model to domain model
       return _convertSummaryJsonToApiModel(summaryData);
     } catch (e) {
@@ -34,7 +34,7 @@ class PortfolioMockDataProvider {
   static Future<PortfolioHoldingsDto> getMockPortfolioHoldings() async {
     try {
       final holdingsData = await _loadMockHoldingsData();
-      
+
       // Use mapper to convert API model to domain model
       return _convertHoldingsJsonToApiModel(holdingsData);
     } catch (e) {
@@ -53,7 +53,9 @@ class PortfolioMockDataProvider {
     }
 
     try {
-      final mockDataString = await rootBundle.loadString(AssetPaths.mockPortfolioSummary);
+      final mockDataString = await rootBundle.loadString(
+        AssetPaths.mockPortfolioSummary,
+      );
       _cachedSummaryData = jsonDecode(mockDataString) as Map<String, dynamic>;
       return _cachedSummaryData!;
     } catch (e) {
@@ -69,7 +71,9 @@ class PortfolioMockDataProvider {
     }
 
     try {
-      final mockDataString = await rootBundle.loadString(AssetPaths.mockPortfolioHoldings);
+      final mockDataString = await rootBundle.loadString(
+        AssetPaths.mockPortfolioHoldings,
+      );
       _cachedHoldingsData = jsonDecode(mockDataString) as Map<String, dynamic>;
       return _cachedHoldingsData!;
     } catch (e) {
@@ -79,137 +83,169 @@ class PortfolioMockDataProvider {
   }
 
   /// Convert summary JSON data to API model
-  static PortfolioSummaryDtos _convertSummaryJsonToApiModel(Map<String, dynamic> json) {
-    return PortfolioSummaryDtos(
-      totalValue: (json['currentValue'] as num?)?.toDouble() ?? 0.0,
-      investmentValue: (json['investmentValue'] as num?)?.toDouble() ?? 0.0,
-      todaysGain: (json['todayGainLoss'] as num?)?.toDouble() ?? 0.0,
-      totalGain: (json['totalGainLoss'] as num?)?.toDouble() ?? 0.0,
-      totalGainPercentage: (json['totalGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
-      todaysGainPercentage: (json['todayGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
-      marketCapHoldings: _convertToApiMarketCapHoldings(json['marketCapHoldings']),
-      sectorAllocation: _extractSectorAllocation(json['sectorialHoldings']),
-      topPerformers: _extractTopPerformers(json),
-      topLosers: _extractTopLosers(json),
-    );
-  }
+  static PortfolioSummaryDtos _convertSummaryJsonToApiModel(
+    Map<String, dynamic> json,
+  ) => PortfolioSummaryDtos(
+    totalValue: (json['currentValue'] as num?)?.toDouble() ?? 0.0,
+    investmentValue: (json['investmentValue'] as num?)?.toDouble() ?? 0.0,
+    todaysGain: (json['todayGainLoss'] as num?)?.toDouble() ?? 0.0,
+    totalGain: (json['totalGainLoss'] as num?)?.toDouble() ?? 0.0,
+    totalGainPercentage:
+        (json['totalGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
+    todaysGainPercentage:
+        (json['todayGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
+    marketCapHoldings: _convertToApiMarketCapHoldings(
+      json['marketCapHoldings'],
+    ),
+    sectorAllocation: _extractSectorAllocation(json['sectorialHoldings']),
+    topPerformers: _extractTopPerformers(json),
+    topLosers: _extractTopLosers(json),
+  );
 
   /// Convert holdings JSON data to API model
-  static PortfolioHoldingsDto _convertHoldingsJsonToApiModel(Map<String, dynamic> json) {
+  static PortfolioHoldingsDto _convertHoldingsJsonToApiModel(
+    Map<String, dynamic> json,
+  ) {
     final equityHoldings = (json['equityHoldings'] as List? ?? [])
-        .map((holding) => EquityHoldingDto(
-              isin: holding['isin'] as String? ?? '',
-              symbol: holding['symbol'] as String? ?? '',
-              sector: holding['sector'] as String? ?? '',
-              industry: holding['industry'] as String? ?? '',
-              marketCap: holding['marketCap'] as String? ?? '',
-              quantity: (holding['quantity'] as num?)?.toDouble() ?? 0.0,
-              investmentCost: (holding['investmentCost'] as num?)?.toDouble() ?? 0.0,
-              currentValue: (holding['currentValue'] as num?)?.toDouble() ?? 0.0,
-              weightInPortfolio: (holding['weightInPortfolio'] as num?)?.toDouble() ?? 0.0,
-              gainLoss: (holding['gainLoss'] as num?)?.toDouble() ?? 0.0,
-              gainLossPercentage: (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0,
-              todayGainLoss: (holding['todayGainLoss'] as num?)?.toDouble() ?? 0.0,
-              todayGainLossPercentage: (holding['todayGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
-              currentPrice: (holding['currentPrice'] as num?)?.toDouble() ?? 0.0,
-              percentageChange: (holding['percentageChange'] as num?)?.toDouble() ?? 0.0,
-              brokerPortfolios: (holding['brokerPortfolios'] as List? ?? [])
-                  .map((broker) => BrokerHoldingDto(
-                        brokerType: broker['brokerType'] as String? ?? '',
-                        quantity: (broker['quantity'] as num?)?.toDouble() ?? 0.0,
-                      ))
-                  .toList(),
-            ))
+        .map(
+          (holding) => EquityHoldingDto(
+            isin: holding['isin'] as String? ?? '',
+            symbol: holding['symbol'] as String? ?? '',
+            sector: holding['sector'] as String? ?? '',
+            industry: holding['industry'] as String? ?? '',
+            marketCap: holding['marketCap'] as String? ?? '',
+            quantity: (holding['quantity'] as num?)?.toDouble() ?? 0.0,
+            investmentCost:
+                (holding['investmentCost'] as num?)?.toDouble() ?? 0.0,
+            currentValue: (holding['currentValue'] as num?)?.toDouble() ?? 0.0,
+            weightInPortfolio:
+                (holding['weightInPortfolio'] as num?)?.toDouble() ?? 0.0,
+            gainLoss: (holding['gainLoss'] as num?)?.toDouble() ?? 0.0,
+            gainLossPercentage:
+                (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0,
+            todayGainLoss:
+                (holding['todayGainLoss'] as num?)?.toDouble() ?? 0.0,
+            todayGainLossPercentage:
+                (holding['todayGainLossPercentage'] as num?)?.toDouble() ?? 0.0,
+            currentPrice: (holding['currentPrice'] as num?)?.toDouble() ?? 0.0,
+            percentageChange:
+                (holding['percentageChange'] as num?)?.toDouble() ?? 0.0,
+            brokerPortfolios: (holding['brokerPortfolios'] as List? ?? [])
+                .map(
+                  (broker) => BrokerHoldingDto(
+                    brokerType: broker['brokerType'] as String? ?? '',
+                    quantity: (broker['quantity'] as num?)?.toDouble() ?? 0.0,
+                  ),
+                )
+                .toList(),
+          ),
+        )
         .toList();
 
     return PortfolioHoldingsDto(equityHoldings: equityHoldings);
   }
 
   /// Convert market cap holdings from JSON to API model
-  static Map<String, List<MarketCapHoldingDto>> _convertToApiMarketCapHoldings(dynamic value) {
+  static Map<String, List<MarketCapHoldingDto>> _convertToApiMarketCapHoldings(
+    value,
+  ) {
     if (value == null) return {};
-    
-    final Map<String, List<MarketCapHoldingDto>> result = {};
+
+    final result = <String, List<MarketCapHoldingDto>>{};
     final map = value as Map<String, dynamic>;
-    
+
     for (final entry in map.entries) {
       final holdings = (entry.value as List? ?? [])
-          .map((h) => MarketCapHoldingDto(
-                isin: h['isin'] as String? ?? '',
-                symbol: h['symbol'] as String? ?? '',
-                sector: h['sector'] as String? ?? '',
-                industry: h['industry'] as String? ?? '',
-                marketCap: h['marketCap'] as String? ?? entry.key,
-                quantity: (h['quantity'] as num?)?.toDouble() ?? 0.0,
-                investmentCost: (h['investmentCost'] as num?)?.toDouble() ?? 0.0,
-                brokerPortfolios: (h['brokerPortfolios'] as List? ?? [])
-                    .map((b) => BrokerHoldingDto(
-                          brokerType: b['brokerType'] as String? ?? '',
-                          quantity: (b['quantity'] as num?)?.toDouble() ?? 0.0,
-                        ))
-                    .toList(),
-              ))
+          .map(
+            (h) => MarketCapHoldingDto(
+              isin: h['isin'] as String? ?? '',
+              symbol: h['symbol'] as String? ?? '',
+              sector: h['sector'] as String? ?? '',
+              industry: h['industry'] as String? ?? '',
+              marketCap: h['marketCap'] as String? ?? entry.key,
+              quantity: (h['quantity'] as num?)?.toDouble() ?? 0.0,
+              investmentCost: (h['investmentCost'] as num?)?.toDouble() ?? 0.0,
+              brokerPortfolios: (h['brokerPortfolios'] as List? ?? [])
+                  .map(
+                    (b) => BrokerHoldingDto(
+                      brokerType: b['brokerType'] as String? ?? '',
+                      quantity: (b['quantity'] as num?)?.toDouble() ?? 0.0,
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
           .toList();
       result[entry.key] = holdings;
     }
-    
+
     return result;
   }
 
   /// Extract sector allocation from sectorial holdings
-  static Map<String, double> _extractSectorAllocation(dynamic value) {
+  static Map<String, double> _extractSectorAllocation(value) {
     if (value == null) return {};
-    
-    final Map<String, double> result = {};
+
+    final result = <String, double>{};
     final map = value as Map<String, dynamic>;
-    
+
     for (final entry in map.entries) {
       if (entry.key.isEmpty) continue; // Skip empty sector names
-      
-      double totalInvestment = 0.0;
+
+      var totalInvestment = 0.0;
       final holdings = entry.value as List? ?? [];
-      
+
       for (final holding in holdings) {
-        totalInvestment += (holding['investmentCost'] as num?)?.toDouble() ?? 0.0;
+        totalInvestment +=
+            (holding['investmentCost'] as num?)?.toDouble() ?? 0.0;
       }
-      
+
       if (totalInvestment > 0) {
         result[entry.key] = totalInvestment;
       }
     }
-    
+
     // Convert to percentages
-    final totalInvestment = result.values.fold(0.0, (sum, value) => sum + value);
+    final totalInvestment = result.values.fold(
+      0.0,
+      (sum, value) => sum + value,
+    );
     if (totalInvestment > 0) {
       result.updateAll((key, value) => (value / totalInvestment) * 100);
     }
-    
+
     return result;
   }
 
   /// Extract top performers from holdings data
-  static List<ApiTopPerformer> _extractTopPerformers(Map<String, dynamic> json) {
+  static List<ApiTopPerformer> _extractTopPerformers(
+    Map<String, dynamic> json,
+  ) {
     final performers = <ApiTopPerformer>[];
-    
+
     // Extract from market cap holdings
-    final marketCapHoldings = json['marketCapHoldings'] as Map<String, dynamic>? ?? {};
-    
+    final marketCapHoldings =
+        json['marketCapHoldings'] as Map<String, dynamic>? ?? {};
+
     for (final category in marketCapHoldings.values) {
       final holdings = category as List? ?? [];
       for (final holding in holdings) {
-        final gainPercentage = (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0;
+        final gainPercentage =
+            (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0;
         final gainAmount = (holding['gainLoss'] as num?)?.toDouble() ?? 0.0;
-        
+
         if (gainPercentage > 0) {
-          performers.add(ApiTopPerformer(
-            symbol: holding['symbol'] as String? ?? '',
-            gainPercentage: gainPercentage,
-            gainAmount: gainAmount,
-          ));
+          performers.add(
+            ApiTopPerformer(
+              symbol: holding['symbol'] as String? ?? '',
+              gainPercentage: gainPercentage,
+              gainAmount: gainAmount,
+            ),
+          );
         }
       }
     }
-    
+
     // Sort by gain percentage and take top 5
     performers.sort((a, b) => b.gainPercentage.compareTo(a.gainPercentage));
     return performers.take(5).toList();
@@ -218,26 +254,30 @@ class PortfolioMockDataProvider {
   /// Extract top losers from holdings data
   static List<ApiTopLoser> _extractTopLosers(Map<String, dynamic> json) {
     final losers = <ApiTopLoser>[];
-    
+
     // Extract from market cap holdings
-    final marketCapHoldings = json['marketCapHoldings'] as Map<String, dynamic>? ?? {};
-    
+    final marketCapHoldings =
+        json['marketCapHoldings'] as Map<String, dynamic>? ?? {};
+
     for (final category in marketCapHoldings.values) {
       final holdings = category as List? ?? [];
       for (final holding in holdings) {
-        final gainPercentage = (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0;
+        final gainPercentage =
+            (holding['gainLossPercentage'] as num?)?.toDouble() ?? 0.0;
         final gainAmount = (holding['gainLoss'] as num?)?.toDouble() ?? 0.0;
-        
+
         if (gainPercentage < 0) {
-          losers.add(ApiTopLoser(
-            symbol: holding['symbol'] as String? ?? '',
-            lossPercentage: gainPercentage.abs(),
-            lossAmount: gainAmount.abs(),
-          ));
+          losers.add(
+            ApiTopLoser(
+              symbol: holding['symbol'] as String? ?? '',
+              lossPercentage: gainPercentage.abs(),
+              lossAmount: gainAmount.abs(),
+            ),
+          );
         }
       }
     }
-    
+
     // Sort by loss percentage and take top 5
     losers.sort((a, b) => b.lossPercentage.compareTo(a.lossPercentage));
     return losers.take(5).toList();
@@ -246,7 +286,8 @@ class PortfolioMockDataProvider {
   /// Generate random gain amount
   static double _generateRandomGain(double baseValue, {bool isDaily = false}) {
     final maxPercent = isDaily ? 5.0 : 20.0; // Daily: ±5%, Total: ±20%
-    final randomPercent = (DateTime.now().millisecondsSinceEpoch % 100 - 50) / 50 * maxPercent;
+    final randomPercent =
+        (DateTime.now().millisecondsSinceEpoch % 100 - 50) / 50 * maxPercent;
     return baseValue * randomPercent / 100;
   }
 
@@ -255,7 +296,6 @@ class PortfolioMockDataProvider {
     final maxPercent = isDaily ? 5.0 : 20.0;
     return (DateTime.now().millisecondsSinceEpoch % 100 - 50) / 50 * maxPercent;
   }
-
 
   /// Clear cached mock data (useful for testing or refreshing)
   static void clearCache() {
@@ -279,22 +319,24 @@ class PortfolioMockDataProvider {
     try {
       final summaryData = await _loadMockSummaryData();
       final holdingsData = await _loadMockHoldingsData();
-      
-      final marketCapHoldings = summaryData['marketCapHoldings'] as Map<String, dynamic>? ?? {};
+
+      final marketCapHoldings =
+          summaryData['marketCapHoldings'] as Map<String, dynamic>? ?? {};
       final equityHoldings = holdingsData['equityHoldings'] as List? ?? [];
-      
-      int totalHoldings = 0;
+
+      var totalHoldings = 0;
       for (final holdings in marketCapHoldings.values) {
         totalHoldings += (holdings as List).length;
       }
-      
+
       return {
         'totalValue': summaryData['currentValue'],
         'investmentValue': summaryData['investmentValue'],
         'marketCapCategories': marketCapHoldings.keys.length,
         'totalHoldings': totalHoldings,
         'equityHoldingsCount': equityHoldings.length,
-        'sectorialHoldingsCount': (summaryData['sectorialHoldings'] as Map?)?.keys.length ?? 0,
+        'sectorialHoldingsCount':
+            (summaryData['sectorialHoldings'] as Map?)?.keys.length ?? 0,
         'summaryDataSize': summaryData.toString().length,
         'holdingsDataSize': holdingsData.toString().length,
       };

@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Styling configuration for investment card
 class InvestmentCardStyle {
-  final EdgeInsets? padding;
-  final EdgeInsets? margin;
-  final BorderRadius? borderRadius;
-  final Color? cardColor;
-  final CrossAxisAlignment leftAlignment;
-  final CrossAxisAlignment rightAlignment;
-
   const InvestmentCardStyle({
     this.padding,
     this.margin,
@@ -17,6 +10,12 @@ class InvestmentCardStyle {
     this.leftAlignment = CrossAxisAlignment.start,
     this.rightAlignment = CrossAxisAlignment.end,
   });
+  final EdgeInsets? padding;
+  final EdgeInsets? margin;
+  final BorderRadius? borderRadius;
+  final Color? cardColor;
+  final CrossAxisAlignment leftAlignment;
+  final CrossAxisAlignment rightAlignment;
 
   /// Default style for regular cards
   static const InvestmentCardStyle regular = InvestmentCardStyle(
@@ -38,14 +37,12 @@ class InvestmentCardStyle {
     Color? cardColor,
     CrossAxisAlignment? leftAlignment,
     CrossAxisAlignment? rightAlignment,
-  }) {
-    return InvestmentCardStyle(
-      padding: padding ?? this.padding,
-      margin: margin ?? this.margin,
-      borderRadius: borderRadius ?? this.borderRadius,
-      cardColor: cardColor ?? this.cardColor,
-      leftAlignment: leftAlignment ?? this.leftAlignment,
-      rightAlignment: rightAlignment ?? this.rightAlignment,
-    );
-  }
+  }) => InvestmentCardStyle(
+    padding: padding ?? this.padding,
+    margin: margin ?? this.margin,
+    borderRadius: borderRadius ?? this.borderRadius,
+    cardColor: cardColor ?? this.cardColor,
+    leftAlignment: leftAlignment ?? this.leftAlignment,
+    rightAlignment: rightAlignment ?? this.rightAlignment,
+  );
 }

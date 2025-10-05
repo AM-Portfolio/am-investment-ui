@@ -7,16 +7,15 @@ import '../../../../core/utils/logger.dart';
 /// Widget displaying detailed sector information with expandable stock lists
 /// Shows sector rank, total value, weightage and expandable stock details
 class SectorDetailsCard extends StatefulWidget {
-  final Heatmap? heatmap;
-  final bool isLoading;
-  final String? error;
-
   const SectorDetailsCard({
     super.key,
     this.heatmap,
     this.isLoading = false,
     this.error,
   });
+  final Heatmap? heatmap;
+  final bool isLoading;
+  final String? error;
 
   @override
   State<SectorDetailsCard> createState() => _SectorDetailsCardState();
@@ -26,38 +25,36 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
   final Set<String> _expandedSectors = <String>{};
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.list_alt,
-                  color: Theme.of(context).primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Sector Details',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildContent(context),
-          ],
-        ),
+  Widget build(BuildContext context) => Card(
+    elevation: 4,
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.list_alt,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Sector Details',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildContent(context),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildContent(BuildContext context) {
     AppLogger.debug(
@@ -161,7 +158,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
     );
 
     // Log each sector's raw data
-    for (int i = 0; i < sectors.length; i++) {
+    for (var i = 0; i < sectors.length; i++) {
       final sector = sectors[i];
       AppLogger.debug(
         'Sector ${i + 1}: ${sector.sectorName} - '
@@ -172,7 +169,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       );
 
       // Log individual stock data in this sector
-      for (int j = 0; j < sector.stocks.length && j < 3; j++) {
+      for (var j = 0; j < sector.stocks.length && j < 3; j++) {
         // Log first 3 stocks
         final stock = sector.stocks[j];
         AppLogger.debug(
@@ -189,7 +186,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
     }
 
     // Calculate total portfolio value using improved logic
-    double totalValue = sectors.fold(0.0, (sum, sector) {
+    final totalValue = sectors.fold(0.0, (sum, sector) {
       AppLogger.debug(
         'Processing sector ${sector.sectorName} with totalValue: ${sector.totalValue}',
         tag: 'SectorDetailsCard',
@@ -205,13 +202,13 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       }
 
       // Fallback calculation
-      double sectorValue = sector.stocks.fold(0.0, (sectorSum, stock) {
-        double stockValue = 0.0;
+      final sectorValue = sector.stocks.fold(0.0, (sectorSum, stock) {
+        var stockValue = 0.0;
 
         if (stock.marketValue != null && stock.marketValue! > 0) {
           stockValue = stock.marketValue!;
           AppLogger.debug(
-            'Using marketValue ${stockValue} for ${stock.symbol}',
+            'Using marketValue $stockValue for ${stock.symbol}',
             tag: 'SectorDetailsCard',
           );
         } else if (stock.quantity != null &&
@@ -219,7 +216,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
             stock.lastPrice > 0) {
           stockValue = stock.quantity! * stock.lastPrice;
           AppLogger.debug(
-            'Calculated value ${stockValue} (qty: ${stock.quantity} × price: ${stock.lastPrice}) for ${stock.symbol}',
+            'Calculated value $stockValue (qty: ${stock.quantity} × price: ${stock.lastPrice}) for ${stock.symbol}',
             tag: 'SectorDetailsCard',
           );
         } else {
@@ -234,7 +231,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
       });
 
       AppLogger.debug(
-        'Calculated fallback sectorValue: ${sectorValue} for ${sector.sectorName}',
+        'Calculated fallback sectorValue: $sectorValue for ${sector.sectorName}',
         tag: 'SectorDetailsCard',
       );
 
@@ -242,22 +239,22 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
     });
 
     AppLogger.info(
-      'Total portfolio value calculated: ${totalValue}',
+      'Total portfolio value calculated: $totalValue',
       tag: 'SectorDetailsCard',
     );
 
     // Create sector info with calculations
-    List<SectorInfo> sectorInfos = sectors.map((sector) {
+    final sectorInfos = sectors.map((sector) {
       AppLogger.debug(
         'Creating SectorInfo for ${sector.sectorName}',
         tag: 'SectorDetailsCard',
       );
 
       // Use the same calculation logic
-      double sectorValue = sector.totalValue > 0
+      final sectorValue = sector.totalValue > 0
           ? sector.totalValue
           : sector.stocks.fold(0.0, (sum, stock) {
-              double stockValue = 0.0;
+              var stockValue = 0.0;
               if (stock.marketValue != null && stock.marketValue! > 0) {
                 stockValue = stock.marketValue!;
               } else if (stock.quantity != null && stock.quantity! > 0) {
@@ -267,25 +264,25 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
             });
 
       AppLogger.debug(
-        'Sector ${sector.sectorName} calculated value: ${sectorValue}',
+        'Sector ${sector.sectorName} calculated value: $sectorValue',
         tag: 'SectorDetailsCard',
       );
 
       // Use sector.weightage if available, otherwise calculate
-      double weightage = sector.weightage > 0
+      final weightage = sector.weightage > 0
           ? sector.weightage
           : (totalValue > 0 ? (sectorValue / totalValue) * 100 : 0);
 
       AppLogger.debug(
-        'Sector ${sector.sectorName} weightage: ${weightage}% '
+        'Sector ${sector.sectorName} weightage: $weightage% '
         '(raw: ${sector.weightage}, calculated: ${totalValue > 0 ? (sectorValue / totalValue) * 100 : 0})',
         tag: 'SectorDetailsCard',
       );
 
-      double avgPerformance = _calculateSectorPerformance(sector);
+      final avgPerformance = _calculateSectorPerformance(sector);
 
       AppLogger.debug(
-        'Sector ${sector.sectorName} average performance: ${avgPerformance}%',
+        'Sector ${sector.sectorName} average performance: $avgPerformance%',
         tag: 'SectorDetailsCard',
       );
 
@@ -525,10 +522,8 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
         changeValue: stock.changeAmount, // Direct from backend
         changePercent: stock.changePercent, // Direct from backend
         isPositive: stock.changeAmount >= 0, // Based on backend change amount
-        additionalInfo: null, // Don't show in additional info
       ),
       config: InvestmentCardConfig(
-        currencySymbol: '₹',
         trailingWidget: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -563,7 +558,7 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
   double _calculateSectorPerformance(Sector sector) {
     if (sector.stocks.isEmpty) return 0.0;
 
-    double totalPerformance = sector.stocks.fold(
+    final totalPerformance = sector.stocks.fold(
       0.0,
       (sum, stock) => sum + stock.changePercent,
     );
@@ -594,15 +589,14 @@ class _SectorDetailsCardState extends State<SectorDetailsCard> {
 }
 
 class SectorInfo {
-  final Sector sector;
-  final double totalValue;
-  final double weightage;
-  final double performance;
-
   SectorInfo({
     required this.sector,
     required this.totalValue,
     required this.weightage,
     required this.performance,
   });
+  final Sector sector;
+  final double totalValue;
+  final double weightage;
+  final double performance;
 }

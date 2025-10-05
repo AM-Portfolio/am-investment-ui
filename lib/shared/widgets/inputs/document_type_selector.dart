@@ -3,48 +3,41 @@ import '../../models/import_data/import_data_models.dart';
 
 /// Widget for selecting document types
 class DocumentTypeSelector extends StatelessWidget {
+  const DocumentTypeSelector({
+    required this.selectedDocumentType,
+    required this.onDocumentTypeSelected,
+    super.key,
+  });
   final DocumentType? selectedDocumentType;
   final ValueChanged<DocumentType> onDocumentTypeSelected;
 
-  const DocumentTypeSelector({
-    super.key,
-    required this.selectedDocumentType,
-    required this.onDocumentTypeSelected,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Select document type:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...DocumentType.values
-            .map((docType) => _buildDocumentTypeOption(docType)),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Select document type:',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 16),
+      ...DocumentType.values.map(_buildDocumentTypeOption),
+    ],
+  );
 
   Widget _buildDocumentTypeOption(DocumentType docType) {
     final isSelected = selectedDocumentType == docType;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected 
-              ? const Color(0xFFFF9800) 
+          color: isSelected
+              ? const Color(0xFFFF9800)
               : Colors.grey.withOpacity(0.3),
           width: isSelected ? 2 : 1,
         ),
-        color: isSelected 
+        color: isSelected
             ? const Color(0xFFFF9800).withOpacity(0.05)
             : Colors.transparent,
       ),
@@ -79,8 +72,10 @@ class DocumentTypeSelector extends StatelessWidget {
                         docType.label,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected 
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: isSelected
                               ? const Color(0xFFFF9800)
                               : Colors.grey[800],
                         ),
@@ -88,10 +83,7 @@ class DocumentTypeSelector extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         docType.description,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       ),
                     ],
                   ),

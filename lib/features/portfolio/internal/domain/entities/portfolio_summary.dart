@@ -6,8 +6,6 @@ part 'portfolio_summary.g.dart';
 /// Domain entity representing portfolio summary
 @freezed
 class PortfolioSummary with _$PortfolioSummary {
-  const PortfolioSummary._();
-
   const factory PortfolioSummary({
     required String userId,
     required double totalValue,
@@ -29,30 +27,29 @@ class PortfolioSummary with _$PortfolioSummary {
     @Default([]) List<TopPerformer> topPerformers,
     @Default([]) List<TopPerformer> worstPerformers,
   }) = _PortfolioSummary;
+  const PortfolioSummary._();
 
   factory PortfolioSummary.fromJson(Map<String, dynamic> json) =>
       _$PortfolioSummaryFromJson(json);
 
-  factory PortfolioSummary.empty(String userId) {
-    return PortfolioSummary(
-      userId: userId,
-      totalValue: 0.0,
-      totalInvested: 0.0,
-      investmentValue: 0.0,
-      totalGainLoss: 0.0,
-      totalGainLossPercentage: 0.0,
-      todayChange: 0.0,
-      todayChangePercentage: 0.0,
-      todayGainLossPercentage: 0.0,
-      totalHoldings: 0,
-      totalAssets: 0,
-      todayGainersCount: 0,
-      todayLosersCount: 0,
-      gainersCount: 0,
-      losersCount: 0,
-      lastUpdated: DateTime.now(),
-    );
-  }
+  factory PortfolioSummary.empty(String userId) => PortfolioSummary(
+    userId: userId,
+    totalValue: 0.0,
+    totalInvested: 0.0,
+    investmentValue: 0.0,
+    totalGainLoss: 0.0,
+    totalGainLossPercentage: 0.0,
+    todayChange: 0.0,
+    todayChangePercentage: 0.0,
+    todayGainLossPercentage: 0.0,
+    totalHoldings: 0,
+    totalAssets: 0,
+    todayGainersCount: 0,
+    todayLosersCount: 0,
+    gainersCount: 0,
+    losersCount: 0,
+    lastUpdated: DateTime.now(),
+  );
 
   /// Check if portfolio is profitable
   bool get isProfitable => totalGainLoss >= 0;

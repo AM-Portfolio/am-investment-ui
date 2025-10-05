@@ -36,7 +36,7 @@ Generic data structure for heatmap visualization.
 **Key Classes:**
 - `HeatmapData`: Container for all heatmap information
 - `HeatmapTileData`: Individual tile data with performance and weightage
-- `HeatmapConfiguration`: Display and behavior settings
+- `HeatmapConfig`: Display and behavior settings
 - `HeatmapLayout`: Layout options (treemap, grid, list)
 - `HeatmapColorScheme`: Color scheme options
 
@@ -56,7 +56,7 @@ final heatmapData = HeatmapData(
     ),
     // ... more tiles
   ],
-  configuration: HeatmapConfiguration.web(), // or .mobile()
+  configuration: HeatmapConfig.web(), // or .mobile()
 );
 ```
 
@@ -79,7 +79,7 @@ final heatmapData = HeatmapData(
 #### Custom Configuration
 
 ```dart
-HeatmapConfiguration(
+HeatmapConfig(
   showSubCards: true,
   showPerformance: true,
   showWeightage: true,
@@ -181,7 +181,7 @@ The `SectorOverviewCard` has been refactored to use the shared `HeatmapCard`. It
 If migrating from existing heatmap implementations:
 
 1. Transform your data to `HeatmapTileData` format
-2. Choose appropriate `HeatmapConfiguration`
+2. Choose appropriate `HeatmapConfig`
 3. Replace custom tile building with `HeatmapCard`
 4. Update any interaction handling
 5. Test responsive behavior on different screen sizes

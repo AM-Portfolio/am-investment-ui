@@ -8,27 +8,25 @@ class PortfolioLogoutHandler {
   static void showLogoutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Logout'),
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                await _performLogout(context);
-              },
-            ),
-          ],
-        );
-      },
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Logout'),
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await _performLogout(context);
+            },
+          ),
+        ],
+      ),
     );
   }
 

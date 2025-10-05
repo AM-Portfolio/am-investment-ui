@@ -1,52 +1,51 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/app_logic/services/auth_service.dart';
-import '../common/user_dropdown_menu.dart';
+import '../components.dart';
 
 /// A layout component specifically designed for web interfaces
 /// Includes header navigation and footer
 class WebLayout extends StatelessWidget {
-  /// The main content of the page
-  final Widget child;
-
-  /// The title to display in the header (only used for page title, not displayed)
-  final String title;
-  
-  /// The currently active navigation item
-  final String activeNavItem;
-
-  /// Callback when logout is requested
-  final VoidCallback? onLogout;
-  
-  /// Callback when navigation is requested
-  final void Function(String navItem)? onNavigate;
-
   /// Constructor
   const WebLayout({
-    super.key,
     required this.child,
+    super.key,
     this.title = 'AM Investment', // Title parameter kept for compatibility
     this.activeNavItem = 'Dashboard',
     this.onLogout,
     this.onNavigate,
   });
 
+  /// The main content of the page
+  final Widget child;
+
+  /// The title to display in the header (only used for page title, not displayed)
+  final String title;
+
+  /// The currently active navigation item
+  final String activeNavItem;
+
+  /// Callback when logout is requested
+  final VoidCallback? onLogout;
+
+  /// Callback when navigation is requested
+  final void Function(String navItem)? onNavigate;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // Header with navigation
-          _buildHeader(context),
+  Widget build(BuildContext context) => Scaffold(
+    body: Column(
+      children: [
+        // Header with navigation
+        _buildHeader(context),
 
-          // Main content area
-          Expanded(child: child),
+        // Main content area
+        Expanded(child: child),
 
-          // Footer
-          _buildFooter(context),
-        ],
-      ),
-    );
-  }
+        // Footer
+        _buildFooter(context),
+      ],
+    ),
+  );
 
   /// Build the header with navigation
   Widget _buildHeader(BuildContext context) {
@@ -127,9 +126,9 @@ class WebLayout extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(width: 40),
-              
+
               // Navigation bar - moved to the middle
               Expanded(
                 child: SingleChildScrollView(
@@ -158,9 +157,7 @@ class WebLayout extends StatelessWidget {
                     color: theme.colorScheme.onPrimary,
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Search coming soon'),
-                        ),
+                        const SnackBar(content: Text('Search coming soon')),
                       );
                     },
                   ),
@@ -351,17 +348,15 @@ class WebLayout extends StatelessWidget {
     );
   }
 
-
-
   /// Get user initials for avatar
   String _getInitials(String name) {
     if (name.isEmpty) return 'U';
-    
+
     final names = name.trim().split(' ');
     if (names.length == 1) {
       return names[0][0].toUpperCase();
     }
-    
+
     return '${names[0][0]}${names[1][0]}'.toUpperCase();
   }
 

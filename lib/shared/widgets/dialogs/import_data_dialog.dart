@@ -16,32 +16,31 @@ class ImportDataDialog extends ConsumerStatefulWidget {
   ConsumerState<ImportDataDialog> createState() => _ImportDataDialogState();
 
   /// Show the import data dialog
-  static Future<ImportDataResult?> show(BuildContext context) {
-    return showDialog<ImportDataResult>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const ImportDataDialog(),
-    );
-  }
+  static Future<ImportDataResult?> show(BuildContext context) =>
+      showDialog<ImportDataResult>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const ImportDataDialog(),
+      );
 }
 
 class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;  
+  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   ImportDataOption? _selectedOption;
   DocumentType? _selectedDocumentType;
   BrokerType? _selectedBroker;
   int _currentStep = 0;
-  
+
   // File upload states
   List<PlatformFile>? _selectedFiles;
 
   // Step labels for the wizard
   static const List<String> _stepLabels = ['Method', 'Document', 'Broker'];
-  
+
   @override
   void initState() {
     super.initState();
@@ -49,137 +48,126 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
-    
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
 
-
-
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final screenHeight = MediaQuery.of(context).size.height;
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  
-                  // Better responsive sizing
-                  final dialogWidth = screenWidth < 600 
-                      ? screenWidth * 0.95 
-                      : screenWidth < 1200 
-                          ? screenWidth * 0.8 
-                          : 800.0;
-                  
-                  return Container(
-                    width: dialogWidth,
-                    constraints: BoxConstraints(
-                      maxWidth: dialogWidth,
-                      minWidth: 280,
-                      maxHeight: screenHeight * 0.9,
-                      minHeight: 400,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Fixed header section with better padding
-                        Padding(
-                          padding: EdgeInsets.all(screenWidth < 600 ? 16.0 : 24.0),
-                          child: Column(
-                            children: [
-                              DialogHeader(
-                                icon: Icons.upload_file,
-                                title: 'Import Data',
-                                subtitle: _getStepTitle(),
-                                onClose: () => Navigator.pop(context, null),
-                              ),
-                              SizedBox(height: screenWidth < 600 ? 12 : 16),
-                              StepIndicator(
-                                currentStep: _currentStep,
-                                stepLabels: _stepLabels,
-                              ),
-                            ],
-                          ),
-                        ),
-                        
-                        // Scrollable content section
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth < 600 ? 16.0 : 24.0,
-                            ),
-                            child: Column(
-                              children: [
-                                SizedBox(height: 8),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: screenHeight * 0.25,
-                                  ),
-                                  child: _buildStepContent(),
-                                ),
-                                SizedBox(height: 16),
-                              ],
-                            ),
-                          ),
-                        ),
-                        
-                        // Fixed actions section with better padding
-                        Padding(
-                          padding: EdgeInsets.all(screenWidth < 600 ? 16.0 : 24.0),
-                          child: WizardNavigation(
-                            currentStep: _currentStep,
-                            totalSteps: _stepLabels.length,
-                            canProceed: _canProceed(),
-                            onBack: _currentStep > 0 ? () => setState(() => _currentStep--) : null,
-                            onNext: _handleNext,
-                            onCancel: () => Navigator.pop(context, null),
-                            nextButtonText: _currentStep == 2 && _selectedBroker != null ? 'Import' : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _animationController,
+    builder: (context, child) => FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-        );
-      },
-    );
-  }
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final screenHeight = MediaQuery.of(context).size.height;
+              final screenWidth = MediaQuery.of(context).size.width;
 
+              // Better responsive sizing
+              final dialogWidth = screenWidth < 600
+                  ? screenWidth * 0.95
+                  : screenWidth < 1200
+                  ? screenWidth * 0.8
+                  : 800.0;
 
+              return Container(
+                width: dialogWidth,
+                constraints: BoxConstraints(
+                  maxWidth: dialogWidth,
+                  minWidth: 280,
+                  maxHeight: screenHeight * 0.9,
+                  minHeight: 400,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Fixed header section with better padding
+                    Padding(
+                      padding: EdgeInsets.all(screenWidth < 600 ? 16.0 : 24.0),
+                      child: Column(
+                        children: [
+                          DialogHeader(
+                            icon: Icons.upload_file,
+                            title: 'Import Data',
+                            subtitle: _getStepTitle(),
+                            onClose: () => Navigator.pop(context),
+                          ),
+                          SizedBox(height: screenWidth < 600 ? 12 : 16),
+                          StepIndicator(
+                            currentStep: _currentStep,
+                            stepLabels: _stepLabels,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Scrollable content section
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth < 600 ? 16.0 : 24.0,
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 8),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: screenHeight * 0.25,
+                              ),
+                              child: _buildStepContent(),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Fixed actions section with better padding
+                    Padding(
+                      padding: EdgeInsets.all(screenWidth < 600 ? 16.0 : 24.0),
+                      child: WizardNavigation(
+                        currentStep: _currentStep,
+                        totalSteps: _stepLabels.length,
+                        canProceed: _canProceed(),
+                        onBack: _currentStep > 0
+                            ? () => setState(() => _currentStep--)
+                            : null,
+                        onNext: _handleNext,
+                        onCancel: () => Navigator.pop(context),
+                        nextButtonText:
+                            _currentStep == 2 && _selectedBroker != null
+                            ? 'Import'
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
 
   Widget _buildStepContent() {
     switch (_currentStep) {
@@ -194,71 +182,65 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
     }
   }
 
-  Widget _buildMethodSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ImportMethodSelector(
-          selectedOption: _selectedOption,
-          onOptionSelected: (option) {
+  Widget _buildMethodSelection() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      ImportMethodSelector(
+        selectedOption: _selectedOption,
+        onOptionSelected: (option) {
+          setState(() {
+            _selectedOption = option;
+            // Clear selected files when changing methods
+            if (option != ImportDataOption.excel) {
+              _selectedFiles = null;
+            }
+          });
+        },
+      ),
+
+      // Show file upload area if Excel/CSV is selected
+      if (_selectedOption == ImportDataOption.excel) ...[
+        const SizedBox(height: 20),
+        FileUploadWidget(
+          onFilesSelected: (files) {
             setState(() {
-              _selectedOption = option;
-              // Clear selected files when changing methods
-              if (option != ImportDataOption.excel) {
-                _selectedFiles = null;
-              }
+              _selectedFiles = files;
             });
           },
+          onUploadFiles: (files) async {
+            // Just store files for now, actual upload happens when broker is selected
+            setState(() {
+              _selectedFiles = files;
+            });
+            _showSuccessSnackBar(
+              'Files selected successfully! Complete the remaining steps to upload.',
+            );
+          },
+          onShowError: _showErrorSnackBar,
+          onShowSuccess: _showSuccessSnackBar,
         ),
-        
-        // Show file upload area if Excel/CSV is selected
-        if (_selectedOption == ImportDataOption.excel) ...[
-          const SizedBox(height: 20),
-          FileUploadWidget(
-            onFilesSelected: (files) {
-              setState(() {
-                _selectedFiles = files;
-              });
-            },
-            onUploadFiles: (files) async {
-              // Just store files for now, actual upload happens when broker is selected
-              setState(() {
-                _selectedFiles = files;
-              });
-              _showSuccessSnackBar('Files selected successfully! Complete the remaining steps to upload.');
-            },
-            onShowError: _showErrorSnackBar,
-            onShowSuccess: _showSuccessSnackBar,
-          ),
-        ],
       ],
-    );
-  }
+    ],
+  );
 
-  Widget _buildDocumentTypeSelection() {
-    return DocumentTypeSelector(
-      selectedDocumentType: _selectedDocumentType,
-      onDocumentTypeSelected: (docType) {
-        setState(() {
-          _selectedDocumentType = docType;
-        });
-      },
-    );
-  }
+  Widget _buildDocumentTypeSelection() => DocumentTypeSelector(
+    selectedDocumentType: _selectedDocumentType,
+    onDocumentTypeSelected: (docType) {
+      setState(() {
+        _selectedDocumentType = docType;
+      });
+    },
+  );
 
-  Widget _buildBrokerSelection() {
-    return BrokerSelector(
-      selectedBroker: _selectedBroker,
-      onBrokerSelected: (broker) {
-        setState(() {
-          _selectedBroker = broker;
-        });
-      },
-    );
-  }
-
-
+  Widget _buildBrokerSelection() => BrokerSelector(
+    selectedBroker: _selectedBroker,
+    onBrokerSelected: (broker) {
+      setState(() {
+        _selectedBroker = broker;
+      });
+    },
+  );
 
   String _getStepTitle() {
     switch (_currentStep) {
@@ -278,9 +260,9 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
       case 0:
         if (_selectedOption == ImportDataOption.excel) {
           // For Excel/CSV option, files must be selected
-          return _selectedOption != null && 
-                 _selectedFiles != null && 
-                 _selectedFiles!.isNotEmpty;
+          return _selectedOption != null &&
+              _selectedFiles != null &&
+              _selectedFiles!.isNotEmpty;
         }
         return _selectedOption != null;
       case 1:
@@ -291,10 +273,6 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
         return false;
     }
   }
-
-
-
-
 
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -328,7 +306,7 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
     );
   }
 
-  void _handleNext() async {
+  Future<void> _handleNext() async {
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -381,22 +359,25 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
               category: _mapDocumentTypeToCategory(_selectedDocumentType!),
               portfolioId: 'default_portfolio', // TODO: Get from user context
               userId: 'current_user', // TODO: Get from auth context
-              description: 'Import from ${_selectedBroker?.label} - ${_selectedDocumentType?.label}',
+              description:
+                  'Import from ${_selectedBroker?.label} - ${_selectedDocumentType?.label}',
             );
             uploadResults.add(documentUpload);
           } catch (e) {
             debugPrint('Failed to upload file ${file.name}: $e');
-            _showErrorSnackBar('Failed to upload ${file.name}: ${e.toString()}');
+            _showErrorSnackBar(
+              'Failed to upload ${file.name}: ${e.toString()}',
+            );
             return;
           }
         }
       }
 
       // Show success message with details
-      final successMessage = uploadResults.isEmpty 
+      final successMessage = uploadResults.isEmpty
           ? 'Import request created successfully for ${_selectedBroker?.label}!'
           : 'Documents uploaded successfully! ${uploadResults.length} file(s) processed for ${_selectedBroker?.label}.';
-      
+
       _showSuccessSnackBar(successMessage);
 
       // Log the successful import for debugging
@@ -407,7 +388,9 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
       debugPrint('  - Files Uploaded: ${uploadResults.length}');
       if (uploadResults.isNotEmpty) {
         for (final upload in uploadResults) {
-          debugPrint('    - ${upload.identity.fileName} (${upload.identity.processId})');
+          debugPrint(
+            '    - ${upload.identity.fileName} (${upload.identity.processId})',
+          );
         }
       }
 
@@ -450,6 +433,4 @@ class _ImportDataDialogState extends ConsumerState<ImportDataDialog>
       ),
     );
   }
-
-
 }

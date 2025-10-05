@@ -3,48 +3,41 @@ import '../../models/import_data/import_data_models.dart';
 
 /// Widget for selecting import method options
 class ImportMethodSelector extends StatelessWidget {
+  const ImportMethodSelector({
+    required this.selectedOption,
+    required this.onOptionSelected,
+    super.key,
+  });
   final ImportDataOption? selectedOption;
   final ValueChanged<ImportDataOption> onOptionSelected;
 
-  const ImportMethodSelector({
-    super.key,
-    required this.selectedOption,
-    required this.onOptionSelected,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Choose your import method:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...ImportDataOption.values
-            .map((option) => _buildImportOption(option)),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Choose your import method:',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 16),
+      ...ImportDataOption.values.map(_buildImportOption),
+    ],
+  );
 
   Widget _buildImportOption(ImportDataOption option) {
     final isSelected = selectedOption == option;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected 
-              ? const Color(0xFFFF9800) 
+          color: isSelected
+              ? const Color(0xFFFF9800)
               : Colors.grey.withOpacity(0.3),
           width: isSelected ? 2 : 1,
         ),
-        color: isSelected 
+        color: isSelected
             ? const Color(0xFFFF9800).withOpacity(0.05)
             : Colors.transparent,
       ),
@@ -76,8 +69,10 @@ class ImportMethodSelector extends StatelessWidget {
                     option.label,
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected 
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                      color: isSelected
                           ? const Color(0xFFFF9800)
                           : Colors.grey[800],
                     ),
