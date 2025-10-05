@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../models/heatmap/heatmap_tile_data.dart';
 import '../../../models/heatmap/heatmap_ui_data.dart';
+import '../../selectors/sector_selector.dart';
 import 'heatmap_layout_builder.dart';
 
 /// Grid layout builder that arranges heatmap tiles in a responsive grid
@@ -16,16 +17,18 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
     double height, {
     VoidCallback? onTilePressed,
     Widget Function(HeatmapTileData tile)? customTileBuilder,
+    SectorType? selectedSector,
   }) {
-    final tiles = getUiTiles(data);
+    // Get tiles based on selected sector using common base class method
+    final displayTiles = getTilesBasedOnSector(data, selectedSector);
     final crossAxisCount = _calculateOptimalCrossAxisCount(
       context,
-      tiles.length,
+      displayTiles.length,
       width,
     );
 
     AppLogger.debug(
-      'GridLayoutBuilder: building grid with ${tiles.length} tiles, crossAxisCount=$crossAxisCount',
+      'GridLayoutBuilder: building grid with ${displayTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}, crossAxisCount=$crossAxisCount',
       tag: 'Heatmap.Grid',
     );
 
@@ -37,10 +40,10 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
         mainAxisSpacing: _calculateSpacing(width),
         childAspectRatio: _calculateOptimalAspectRatio(data),
       ),
-      itemCount: tiles.length,
+      itemCount: displayTiles.length,
       itemBuilder: (context, index) {
-        final tile = tiles[index];
-        return buildHeatmapTile(
+        final tile = displayTiles[index];
+        return _buildHierarchicalTile(
           context,
           tile,
           data,
@@ -49,6 +52,99 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
         );
       },
     );
+  }
+
+  /// Builds a tile with visual indication of its hierarchy level
+  Widget _buildHierarchicalTile(
+    BuildContext context,
+    HeatmapTileData tile,
+    HeatmapData data, {
+    VoidCallback? onTilePressed,
+    Widget Function(HeatmapTileData tile)? customTileBuilder,
+  }) {
+    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
+
+    return Container(
+      decoration: BoxDecoration(
+        border: hierarchyLevel > 0
+            ? Border.all(color: Colors.grey.shade400)
+            : null,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Stack(
+        children: [
+          buildHeatmapTile(
+            context,
+            tile,
+            data,
+            onTilePressed: onTilePressed,
+            customTileBuilder: customTileBuilder,
+          ),
+          // Add hierarchy indicator
+          if (hierarchyLevel > 0)
+            Positioned(
+              top: 2,
+              left: 2,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'L${hierarchyLevel + 1}',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Calculates the hierarchy level of a tile (0 for root, 1 for first level children, etc.)
+  int _calculateHierarchyLevel(HeatmapTileData targetTile, HeatmapData data) {
+    final rootTiles = getUiTiles(data);
+
+    for (final rootTile in rootTiles) {
+      final level = _findTileLevel(rootTile, targetTile, 0);
+      if (level >= 0) return level;
+    }
+
+    return 0; // Default to root level if not found
+  }
+
+  /// Recursively finds the level of a target tile within a hierarchy
+  int _findTileLevel(
+    HeatmapTileData currentTile,
+    HeatmapTileData targetTile,
+    int currentLevel,
+  ) {
+    if (currentTile.id == targetTile.id) {
+      return currentLevel;
+    }
+
+    if (currentTile.children != null) {
+      for (final child in currentTile.children!) {
+        final childTile = child is HeatmapTileData
+            ? child
+            : HeatmapTileData.fromEntity(child);
+        final foundLevel = _findTileLevel(
+          childTile,
+          targetTile,
+          currentLevel + 1,
+        );
+        if (foundLevel >= 0) {
+          return foundLevel;
+        }
+      }
+    }
+
+    return -1; // Not found in this branch
   }
 
   /// Calculates optimal number of columns based on screen width and tile count
@@ -92,14 +188,18 @@ class GridLayoutBuilder extends HeatmapLayoutBuilder {
   double _calculateOptimalAspectRatio(HeatmapData data) {
     final config = data.configuration;
 
-    // If showing detailed information, make tiles taller
+    // Account for hierarchy indicators - make tiles slightly taller
+    double baseRatio;
     if (config.showSubCards && config.showPerformance && config.showValue) {
-      return 1.0; // Square tiles for detailed view
+      baseRatio =
+          0.9; // Slightly taller square tiles for detailed view with hierarchy
     } else if (config.showSubCards) {
-      return 1.2; // Slightly wider for moderate detail
+      baseRatio = 1.1; // Slightly wider for moderate detail with hierarchy
     } else {
-      return 1.4; // Wider for minimal information
+      baseRatio = 1.3; // Wider for minimal information with hierarchy
     }
+
+    return baseRatio;
   }
 }
 

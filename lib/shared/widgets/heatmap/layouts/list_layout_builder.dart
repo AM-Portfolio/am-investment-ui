@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../models/heatmap/heatmap_tile_data.dart';
 import '../../../models/heatmap/heatmap_ui_data.dart';
+import '../../selectors/sector_selector.dart';
 import 'heatmap_layout_builder.dart';
 
 /// List layout builder that displays heatmap tiles in a vertical list
@@ -16,13 +17,15 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     double height, {
     VoidCallback? onTilePressed,
     Widget Function(HeatmapTileData tile)? customTileBuilder,
+    SectorType? selectedSector,
   }) {
-    final tiles = getUiTiles(data);
-    final sortedTiles = _sortTilesForListView(tiles, data);
+    // Get tiles based on selected sector using common base class method
+    final displayTiles = getTilesBasedOnSector(data, selectedSector);
+    final sortedTiles = _sortTilesForListView(displayTiles, data);
     final tileHeight = _calculateOptimalTileHeight(data, width);
 
     AppLogger.debug(
-      'ListLayoutBuilder: building list with ${sortedTiles.length} tiles, tileHeight=$tileHeight',
+      'ListLayoutBuilder: building list with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}, tileHeight=$tileHeight',
       tag: 'Heatmap.List',
     );
 
@@ -113,7 +116,6 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
 
     final tileColor = getTileColor(tile, data);
     final textColor = getTextColor(tileColor);
-    final config = data.configuration;
 
     return GestureDetector(
       onTap: onTilePressed,
@@ -157,9 +159,25 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
   ) {
     final config = data.configuration;
     final showSubCards = config.showSubCards;
+    final hierarchyLevel = _calculateHierarchyLevel(tile, data);
 
     return Row(
       children: [
+        // Hierarchy indicator
+        if (hierarchyLevel > 0) ...[
+          Container(
+            width:
+                4 +
+                (hierarchyLevel * 8.0), // Increasing indent for deeper levels
+            height: height * 0.6,
+            decoration: BoxDecoration(
+              color: textColor.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+
         // Leading section - Name and primary info
         Expanded(
           flex: 3,
@@ -167,16 +185,42 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Tile name
-              Text(
-                tile.name,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+              // Tile name with level indicator
+              Row(
+                children: [
+                  if (hierarchyLevel > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: textColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'L${hierarchyLevel + 1}',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      tile.name,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
               ),
 
               // Weightage
@@ -271,6 +315,47 @@ class ListLayoutBuilder extends HeatmapLayoutBuilder {
     } else {
       return value.toStringAsFixed(0);
     }
+  }
+
+  /// Calculates the hierarchy level of a tile (0 for root, 1 for first level children, etc.)
+  int _calculateHierarchyLevel(HeatmapTileData targetTile, HeatmapData data) {
+    final rootTiles = getUiTiles(data);
+
+    for (final rootTile in rootTiles) {
+      final level = _findTileLevel(rootTile, targetTile, 0);
+      if (level >= 0) return level;
+    }
+
+    return 0; // Default to root level if not found
+  }
+
+  /// Recursively finds the level of a target tile within a hierarchy
+  int _findTileLevel(
+    HeatmapTileData currentTile,
+    HeatmapTileData targetTile,
+    int currentLevel,
+  ) {
+    if (currentTile.id == targetTile.id) {
+      return currentLevel;
+    }
+
+    if (currentTile.children != null) {
+      for (final child in currentTile.children!) {
+        final childTile = child is HeatmapTileData
+            ? child
+            : HeatmapTileData.fromEntity(child);
+        final foundLevel = _findTileLevel(
+          childTile,
+          targetTile,
+          currentLevel + 1,
+        );
+        if (foundLevel >= 0) {
+          return foundLevel;
+        }
+      }
+    }
+
+    return -1; // Not found in this branch
   }
 }
 

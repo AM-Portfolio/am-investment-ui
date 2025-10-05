@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/heatmap/heatmap_tile_data.dart';
 import '../../../models/heatmap/heatmap_ui_data.dart';
+import '../../selectors/sector_selector.dart';
 
 /// Abstract base class for all heatmap layout builders
 /// Provides a common interface for different layout strategies
@@ -14,6 +15,7 @@ abstract class HeatmapLayoutBuilder {
     double height, {
     VoidCallback? onTilePressed,
     Widget Function(HeatmapTileData tile)? customTileBuilder,
+    SectorType? selectedSector,
   });
 
   /// Gets the display tiles from the heatmap data
@@ -186,6 +188,77 @@ abstract class HeatmapLayoutBuilder {
 
     return baseFontSize;
   }
+
+  /// Gets tiles based on selected sector for display
+  /// Common logic used across all layout builders
+  List<HeatmapTileData> getTilesBasedOnSector(
+    HeatmapData data,
+    SectorType? selectedSector,
+  ) {
+    final rootTiles = getUiTiles(data);
+
+    if (selectedSector == null || selectedSector == SectorType.all) {
+      // Show all parent sector tiles (no children)
+      return rootTiles;
+    }
+
+    if (selectedSector == SectorType.noGroup) {
+      // Show all children from all sectors (flattened)
+      final allChildren = <HeatmapTileData>[];
+      for (final tile in rootTiles) {
+        addTileAndChildren(tile, allChildren, includeParent: false);
+      }
+      return allChildren;
+    }
+
+    // Show specific sector tile and its children
+    final sectorName = selectedSector.displayName;
+    final specificSectorTiles = <HeatmapTileData>[];
+
+    for (final tile in rootTiles) {
+      if (matchesSector(tile, sectorName)) {
+        // Add the sector tile itself
+        specificSectorTiles.add(tile);
+        // Add all its children
+        if (tile.children != null && tile.children!.isNotEmpty) {
+          for (final child in tile.children!) {
+            final childTile = child is HeatmapTileData
+                ? child
+                : HeatmapTileData.fromEntity(child);
+            specificSectorTiles.add(childTile);
+          }
+        }
+        break; // Found the sector, no need to continue
+      }
+    }
+
+    return specificSectorTiles;
+  }
+
+  /// Recursively adds a tile and all its children to the list
+  void addTileAndChildren(
+    HeatmapTileData tile,
+    List<HeatmapTileData> allTiles, {
+    bool includeParent = true,
+  }) {
+    if (includeParent) {
+      allTiles.add(tile);
+    }
+
+    if (tile.children != null && tile.children!.isNotEmpty) {
+      for (final child in tile.children!) {
+        final childTile = child is HeatmapTileData
+            ? child
+            : HeatmapTileData.fromEntity(child);
+        addTileAndChildren(childTile, allTiles);
+      }
+    }
+  }
+
+  /// Checks if a tile matches the selected sector
+  bool matchesSector(HeatmapTileData tile, String sectorName) =>
+      tile.displayName.toLowerCase().contains(sectorName.toLowerCase()) ||
+      tile.name.toLowerCase().contains(sectorName.toLowerCase());
 
   /// Gets the color for a heatmap tile based on configuration
   Color getTileColor(HeatmapTileData tile, HeatmapData data) {

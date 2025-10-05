@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../models/heatmap/heatmap_tile_data.dart';
 import '../../../models/heatmap/heatmap_ui_data.dart';
+import '../../selectors/sector_selector.dart';
 import 'heatmap_layout_builder.dart';
 
 /// Treemap layout builder that implements a space-filling tree visualization
@@ -16,13 +17,15 @@ class TreemapLayoutBuilder extends HeatmapLayoutBuilder {
     double height, {
     VoidCallback? onTilePressed,
     Widget Function(HeatmapTileData tile)? customTileBuilder,
+    SectorType? selectedSector,
   }) {
-    final tiles = getUiTiles(data);
-    final sortedTiles = List<HeatmapTileData>.from(tiles)
+    // Get tiles based on selected sector using common base class method
+    final displayTiles = getTilesBasedOnSector(data, selectedSector);
+    final sortedTiles = List<HeatmapTileData>.from(displayTiles)
       ..sort((a, b) => b.weightage.compareTo(a.weightage));
 
     AppLogger.debug(
-      'TreemapLayoutBuilder: building treemap with ${sortedTiles.length} tiles',
+      'TreemapLayoutBuilder: building treemap with ${sortedTiles.length} tiles for sector=${selectedSector?.displayName ?? 'All'}',
       tag: 'Heatmap.Treemap',
     );
 

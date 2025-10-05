@@ -21,10 +21,12 @@ class UniversalHeatmapTemplateFactory {
     required bool isLoading,
     String? error,
     VoidCallback? onTilePressed,
+    SectorType? selectedSector,
   }) {
     AppLogger.debug(
       'Creating display template with layout=${config.layoutType}, '
-      'tiles=${heatmapData.tiles.length}, isLoading=$isLoading',
+      'tiles=${heatmapData.tiles.length}, isLoading=$isLoading, '
+      'selectedSector=${selectedSector?.displayName ?? 'all'}',
       tag: 'UniversalHeatmapTemplateFactory.Display',
     );
 
@@ -34,6 +36,7 @@ class UniversalHeatmapTemplateFactory {
       error: error,
       onTilePressed: onTilePressed,
       layout: _convertToDisplayLayoutType(config.layoutType),
+      selectedSector: selectedSector,
     );
   }
 

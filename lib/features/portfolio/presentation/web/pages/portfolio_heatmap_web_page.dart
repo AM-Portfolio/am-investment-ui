@@ -267,6 +267,7 @@ class _PortfolioHeatmapWebPageState
       title: 'Portfolio Sector Heatmap',
       showSelectors: true,
       compactMode: false,
+      selectedSector: _selectedSector,
       onTilePressed: () {
         AppLogger.userAction(
           'Heatmap tile pressed',

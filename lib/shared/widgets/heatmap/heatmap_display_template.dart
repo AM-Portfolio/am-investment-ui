@@ -4,6 +4,7 @@ import '../../../core/utils/logger.dart';
 import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
 import '../selectors/heatmap_layout_selector.dart';
+import '../selectors/sector_selector.dart';
 import 'layouts/layouts.dart';
 
 /// Pure heatmap display template - coordinates layout builders for different display styles
@@ -17,6 +18,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
     this.onTilePressed,
     this.customTileBuilder,
     this.layout = HeatmapLayoutType.treemap,
+    this.selectedSector,
   });
 
   final HeatmapData data;
@@ -25,6 +27,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
   final VoidCallback? onTilePressed;
   final Widget Function(HeatmapTileData tile)? customTileBuilder;
   final HeatmapLayoutType layout;
+  final SectorType? selectedSector;
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +140,7 @@ class HeatmapDisplayTemplate extends StatelessWidget {
         height,
         onTilePressed: onTilePressed,
         customTileBuilder: customTileBuilder,
+        selectedSector: selectedSector,
       );
     },
   );

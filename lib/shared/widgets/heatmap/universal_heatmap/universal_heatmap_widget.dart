@@ -25,6 +25,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
     this.isLoading = false,
     this.error,
     this.templateType = UniversalTemplateType.adaptive,
+    this.selectedSector,
   });
 
   /// Investment type (portfolio, index, mutual funds, ETF)
@@ -66,6 +67,9 @@ class UniversalHeatmapWidget extends StatelessWidget {
 
   /// Template composition type
   final UniversalTemplateType templateType;
+
+  /// Currently selected sector for filtering
+  final SectorType? selectedSector;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +143,7 @@ class UniversalHeatmapWidget extends StatelessWidget {
           isLoading: isLoading,
           error: error,
           onTilePressed: onTilePressed,
+          selectedSector: selectedSector,
         );
 
     AppLogger.debug(
