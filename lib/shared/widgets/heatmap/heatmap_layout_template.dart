@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/logger.dart';
-import '../../models/heatmap/heatmap_tile_data.dart';
 import '../../models/heatmap/heatmap_ui_data.dart';
+import 'mobile/heatmap_layout_mobile.dart';
+import 'web/heatmap_layout_web.dart';
 
-/// Pure heatmap layout template - handles header, legend, and overall structure
-/// Extracted for better modularity and composition
-class HeatmapLayoutTemplate extends StatelessWidget {
+class HeatmapLayoutTemplate extends StatefulWidget {
   const HeatmapLayoutTemplate({
+    // Core parameters
     required this.data,
     required this.displayWidget,
     super.key,
     this.selectorWidget,
+    // Layout configuration
     this.title,
     this.subtitle,
     this.icon,
@@ -22,11 +23,20 @@ class HeatmapLayoutTemplate extends StatelessWidget {
     this.customHeader,
     this.padding,
     this.backgroundColor,
+    // Adaptive behavior
+    this.enableAdaptiveLayout = true,
+    this.mobileBreakpoint = 768.0,
+    this.tabletBreakpoint = 1024.0,
+    this.forceLayoutType,
+    this.onLayoutChanged,
   });
 
+  // Core parameters
   final HeatmapData data;
   final Widget displayWidget;
   final Widget? selectorWidget;
+
+  // Layout configuration
   final String? title;
   final String? subtitle;
   final IconData? icon;
@@ -38,145 +48,170 @@ class HeatmapLayoutTemplate extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Color? backgroundColor;
 
+  // Adaptive behavior
+  final bool enableAdaptiveLayout;
+  final double mobileBreakpoint;
+  final double tabletBreakpoint;
+  final LayoutType? forceLayoutType;
+  final ValueChanged<LayoutType>? onLayoutChanged;
+
   @override
-  Widget build(BuildContext context) {
-    AppLogger.debug(
-      'HeatmapLayoutTemplate: rendering layout with header=$showHeader, legend=$showLegend, selectors=$showSelectors',
-      tag: 'Heatmap.Layout',
-    );
-
-    return Container(
-      color: backgroundColor,
-      padding: padding ?? const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          // Selectors section
-          if (showSelectors && selectorWidget != null) ...[
-            selectorWidget!,
-            const SizedBox(height: 12),
-          ],
-
-          // Main heatmap card
-          Expanded(
-            child: Card(
-              elevation: 4,
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Header section
-                    if (showHeader) ...[
-                      customHeader ?? _buildHeader(context),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Legend section
-                    if (showLegend && data.configuration.showPerformance) ...[
-                      _buildColorLegend(context),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Main display content
-                    Expanded(child: displayWidget),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final effectiveTitle = title ?? data.title;
-    final effectiveSubtitle = subtitle ?? data.subtitle;
-
-    return Row(
-      children: [
-        // Icon
-        if (icon != null) ...[
-          Icon(icon, color: Theme.of(context).primaryColor, size: 24),
-          const SizedBox(width: 8),
-        ],
-
-        // Title and subtitle
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                effectiveTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              if (effectiveSubtitle != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  effectiveSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-
-        // Header actions
-        if (headerActions != null && headerActions!.isNotEmpty) ...[
-          const SizedBox(width: 8),
-          Row(children: headerActions!),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildColorLegend(BuildContext context) {
-    if (data.configuration.colorScheme != HeatmapColorSchemeType.performance) {
-      return const SizedBox.shrink();
-    }
-
-    return Row(
-      children: [
-        Text('Performance: ', style: Theme.of(context).textTheme.bodySmall),
-        Expanded(
-          child: Row(
-            children: [
-              _buildLegendItem(context, 'Loss', Colors.red.shade300),
-              const SizedBox(width: 16),
-              _buildLegendItem(context, 'Neutral', Colors.grey.shade300),
-              const SizedBox(width: 16),
-              _buildLegendItem(context, 'Gain', Colors.green.shade300),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(BuildContext context, String label, Color color) =>
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-        ],
-      );
+  State<HeatmapLayoutTemplate> createState() => _HeatmapLayoutTemplateState();
 }
 
-/// Factory constructors for common layout configurations
-extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
+class _HeatmapLayoutTemplateState extends State<HeatmapLayoutTemplate> {
+  @override
+  void initState() {
+    super.initState();
+
+    AppLogger.debug(
+      'HeatmapLayoutTemplate: initialized with adaptive layout=${widget.enableAdaptiveLayout}',
+      tag: 'Heatmap.Layout.Template',
+    );
+  }
+
+  /// Determine the appropriate platform based on screen size
+  LayoutType get _layoutType {
+    if (!widget.enableAdaptiveLayout) {
+      // If adaptive layout is disabled, use web as default
+      return LayoutType.web;
+    }
+
+    if (widget.forceLayoutType != null) {
+      return widget.forceLayoutType!;
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (screenWidth < widget.mobileBreakpoint) {
+      return LayoutType.mobile;
+    } else {
+      return LayoutType.web;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final layoutType = _layoutType;
+
+    // Notify layout changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onLayoutChanged?.call(layoutType);
+    });
+
+    switch (layoutType) {
+      case LayoutType.mobile:
+        return _buildMobileLayout(context);
+      case LayoutType.web:
+        return _buildWebLayout(context);
+    }
+  }
+
+  Widget _buildMobileLayout(BuildContext context) => HeatmapLayoutMobile(
+    data: widget.data,
+    displayWidget: widget.displayWidget,
+    selectorWidget: widget.selectorWidget,
+    title: widget.title,
+    subtitle: widget.subtitle,
+    icon: widget.icon,
+    showHeader: widget.showHeader,
+    showLegend: widget.showLegend,
+    showSelectors: widget.showSelectors,
+    headerActions: widget.headerActions,
+    customHeader: widget.customHeader,
+    padding: widget.padding,
+    backgroundColor: widget.backgroundColor,
+  );
+
+  Widget _buildWebLayout(BuildContext context) => HeatmapLayoutWeb(
+    data: widget.data,
+    displayWidget: widget.displayWidget,
+    selectorWidget: widget.selectorWidget,
+    title: widget.title,
+    subtitle: widget.subtitle,
+    icon: widget.icon,
+    showHeader: widget.showHeader,
+    showLegend: widget.showLegend,
+    showSelectors: widget.showSelectors,
+    headerActions: widget.headerActions,
+    customHeader: widget.customHeader,
+    padding: widget.padding,
+    backgroundColor: widget.backgroundColor,
+  );
+}
+
+/// Enum to represent layout types for heatmap templates
+enum LayoutType { mobile, web }
+
+/// Extension methods for easy template usage
+extension HeatmapLayoutTemplateExtensions on HeatmapLayoutTemplate {
+  /// Create a mobile-optimized layout template
+  static HeatmapLayoutTemplate mobile({
+    required HeatmapData data,
+    required Widget displayWidget,
+    Widget? selectorWidget,
+    String? title,
+    String? subtitle,
+    IconData? icon,
+    List<Widget>? headerActions,
+  }) => HeatmapLayoutTemplate(
+    data: data,
+    displayWidget: displayWidget,
+    selectorWidget: selectorWidget,
+    title: title,
+    subtitle: subtitle,
+    icon: icon,
+    headerActions: headerActions,
+    enableAdaptiveLayout: false,
+    forceLayoutType: LayoutType.mobile,
+  );
+
+  /// Create a web-optimized layout template
+  static HeatmapLayoutTemplate web({
+    required HeatmapData data,
+    required Widget displayWidget,
+    Widget? selectorWidget,
+    String? title,
+    String? subtitle,
+    IconData? icon,
+    List<Widget>? headerActions,
+  }) => HeatmapLayoutTemplate(
+    data: data,
+    displayWidget: displayWidget,
+    selectorWidget: selectorWidget,
+    title: title,
+    subtitle: subtitle,
+    icon: icon,
+    headerActions: headerActions,
+    enableAdaptiveLayout: false,
+    forceLayoutType: LayoutType.web,
+  );
+
+  /// Create a fully adaptive layout template that switches based on screen size
+  static HeatmapLayoutTemplate adaptive({
+    required HeatmapData data,
+    required Widget displayWidget,
+    Widget? selectorWidget,
+    String? title,
+    String? subtitle,
+    IconData? icon,
+    List<Widget>? headerActions,
+    double mobileBreakpoint = 768.0,
+    double tabletBreakpoint = 1024.0,
+    ValueChanged<LayoutType>? onLayoutChanged,
+  }) => HeatmapLayoutTemplate(
+    data: data,
+    displayWidget: displayWidget,
+    selectorWidget: selectorWidget,
+    title: title,
+    subtitle: subtitle,
+    icon: icon,
+    headerActions: headerActions,
+    mobileBreakpoint: mobileBreakpoint,
+    tabletBreakpoint: tabletBreakpoint,
+    onLayoutChanged: onLayoutChanged,
+  );
+
   /// Create a minimal layout (no selectors, simple header)
   static HeatmapLayoutTemplate minimal({
     required HeatmapData data,
@@ -192,7 +227,7 @@ extension HeatmapLayoutTemplateFactory on HeatmapLayoutTemplate {
     showLegend: false,
   );
 
-  /// Create a compact layout (compact selectors, minimal header)
+  /// Create a compact layout (minimal padding, compact design)
   static HeatmapLayoutTemplate compact({
     required HeatmapData data,
     required Widget displayWidget,
