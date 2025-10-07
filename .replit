@@ -23,18 +23,14 @@ args = "Flutter Web App"
 name = "Flutter Web App"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "export PATH=\"$PATH:$HOME/.pub-cache/bin\" && dhttpd --host=0.0.0.0 --port=5000 --path=build/web"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "$HOME/.pub-cache/bin/dhttpd --host=0.0.0.0 --port=5000 --path=build/web"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 39635
-externalPort = 3000
