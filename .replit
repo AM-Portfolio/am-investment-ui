@@ -1,0 +1,45 @@
+modules = ["dart-3.8"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["flutter"]
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Flutter Web App"
+
+[[workflows.workflow]]
+name = "Flutter Web App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export PATH=\"$PATH:$HOME/.pub-cache/bin\" && dhttpd --host=0.0.0.0 --port=5000 --path=build/web"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 39635
+externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "export PATH=\"$PATH:$HOME/.pub-cache/bin\" && dhttpd --host=0.0.0.0 --port=5000 --path=build/web"]
+build = ["flutter", "build", "web", "--release"]
