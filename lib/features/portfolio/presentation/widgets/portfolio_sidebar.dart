@@ -23,9 +23,21 @@ class PortfolioSidebar extends StatelessWidget {
       ),
       _buildNavItem(
         context,
+        icon: Icons.dashboard,
+        title: 'Overview',
+        viewType: PortfolioViewType.overview,
+      ),
+      _buildNavItem(
+        context,
         icon: Icons.account_balance_wallet,
         title: 'Holdings',
         viewType: PortfolioViewType.holdings,
+      ),
+      _buildNavItem(
+        context,
+        icon: Icons.analytics,
+        title: 'Analytics',
+        viewType: PortfolioViewType.analysis,
       ),
       _buildNavItem(
         context,

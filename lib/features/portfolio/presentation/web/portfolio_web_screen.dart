@@ -9,7 +9,9 @@ import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_heatmap_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../widgets/portfolio_sidebar.dart';
+import 'pages/portfolio_overview_web_page.dart';
 import 'pages/portfolio_holdings_web_page.dart';
+import 'pages/portfolio_analysis_web_page.dart';
 import 'pages/portfolio_heatmap_web_page.dart';
 
 /// Web-specific portfolio screen implementation
@@ -33,7 +35,7 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
 }
 
 class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
-  PortfolioViewType _selectedView = PortfolioViewType.holdings;
+  PortfolioViewType _selectedView = PortfolioViewType.overview;
   String? _currentPortfolioId;
 
   @override
@@ -127,19 +129,40 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
   /// Build main content based on selected view
   Widget _buildMainContent(BuildContext context) {
     switch (_selectedView) {
+      case PortfolioViewType.overview:
+        return _buildOverviewContent(context);
       case PortfolioViewType.holdings:
         return _buildHoldingsContent(context);
+      case PortfolioViewType.analysis:
+        return _buildAnalysisContent(context);
       case PortfolioViewType.heatmap:
         return _buildHeatmapContent(context);
       default:
-        // Fallback to holdings if any other view is selected
-        return _buildHoldingsContent(context);
+        // Fallback to overview if any other view is selected
+        return _buildOverviewContent(context);
     }
+  }
+
+  /// Build overview content using dedicated overview page
+  Widget _buildOverviewContent(BuildContext context) {
+    return PortfolioOverviewWebPage(
+      portfolioId: _currentPortfolioId!,
+      portfolioName: widget.selectedPortfolioName,
+    );
   }
 
   /// Build holdings content using dedicated holdings page
   Widget _buildHoldingsContent(BuildContext context) {
     return PortfolioHoldingsWebPage(
+      userId: widget.userId,
+      portfolioId: _currentPortfolioId!,
+      portfolioName: widget.selectedPortfolioName,
+    );
+  }
+
+  /// Build analysis content using dedicated analysis page
+  Widget _buildAnalysisContent(BuildContext context) {
+    return PortfolioAnalysisWebPage(
       userId: widget.userId,
       portfolioId: _currentPortfolioId!,
       portfolioName: widget.selectedPortfolioName,
