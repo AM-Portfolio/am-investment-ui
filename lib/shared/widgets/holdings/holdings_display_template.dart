@@ -32,7 +32,7 @@ class HoldingsDisplayTemplate extends StatelessWidget {
   final HoldingsViewMode viewMode;
   final bool isLoading;
   final String? error;
-  final Function(PortfolioHolding)? onHoldingTap;
+  final ValueChanged<PortfolioHolding>? onHoldingTap;
   final String? sectorFilter;
 
   @override

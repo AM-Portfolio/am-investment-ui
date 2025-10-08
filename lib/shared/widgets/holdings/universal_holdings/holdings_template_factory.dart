@@ -23,7 +23,7 @@ class HoldingsTemplateFactory {
     required HoldingsSelectorCore core,
     required bool isLoading,
     String? error,
-    Function(PortfolioHolding)? onHoldingTap,
+    ValueChanged<PortfolioHolding>? onHoldingTap,
   }) {
     AppLogger.debug(
       'Creating holdings display template with viewMode=${core.selectedViewMode}, '

@@ -15,7 +15,7 @@ class CardLayoutBuilder extends HoldingsLayoutBuilder {
     required bool sortAscending,
     required HoldingsDisplayFormat displayFormat,
     required HoldingsChangeType changeType,
-    Function(PortfolioHolding)? onHoldingTap,
+    ValueChanged<PortfolioHolding>? onHoldingTap,
     double? width,
     double? height,
   }) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
+import '../../../../features/portfolio/internal/domain/entities/portfolio_holding.dart';
 import '../../../../features/portfolio/providers/portfolio_providers.dart';
 import '../configs/holdings_display_config.dart';
 import '../core/holdings_selector_core.dart';
@@ -25,7 +26,7 @@ class UniversalHoldingsWidget extends ConsumerStatefulWidget {
   final HoldingsDisplayConfig? config;
   final HoldingsTemplateType templateType;
   final String? title;
-  final Function(dynamic)? onHoldingTap;
+  final ValueChanged<PortfolioHolding>? onHoldingTap;
 
   @override
   ConsumerState<UniversalHoldingsWidget> createState() =>
