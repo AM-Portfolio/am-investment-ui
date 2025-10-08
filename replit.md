@@ -23,6 +23,15 @@ A comprehensive Flutter web application for investment portfolio management with
 - **Environment**: Development (configurable via properties files)
 
 ## Recent Changes
+- **2025-10-08**: Holdings Template Architecture Implementation
+  - Created sophisticated template-based architecture for portfolio holdings display
+  - Implemented factory pattern with HoldingsTemplateFactory and UniversalHoldingsWidget
+  - Built HoldingsSelectorCore for state management (sorting, filtering, view modes)
+  - Created layout builders (TableLayoutBuilder, CardLayoutBuilder) following strategy pattern
+  - Added HoldingsDisplayConfig with web/mobile/minimal presets
+  - Comprehensive documentation in lib/shared/widgets/holdings/HOLDINGS_TEMPLATE_USAGE.md
+  - Architecture reviewed and approved by architect with zero LSP errors
+  
 - **2025-10-07**: Initial project import and setup
   - Installed Flutter 3.32.0 and Dart 3.8.0
   - Fixed SDK version compatibility (changed from ^3.8.1 to ^3.8.0)
@@ -44,6 +53,15 @@ lib/
 │   ├── portfolio/     # Portfolio management
 │   └── watchlist/     # Watchlist features
 ├── shared/            # Shared widgets and components
+│   └── widgets/
+│       ├── heatmap/   # Heatmap template architecture
+│       └── holdings/  # Holdings template architecture (NEW)
+│           ├── core/            # State management (HoldingsSelectorCore)
+│           ├── configs/         # Display configurations
+│           ├── layouts/         # Layout builders (Table, Card)
+│           ├── universal_holdings/ # Factory and universal widget
+│           ├── holdings_display_template.dart
+│           └── HOLDINGS_TEMPLATE_USAGE.md
 ├── config/            # Configuration files
 ├── di/                # Dependency injection
 ├── app.dart          # Root app widget
@@ -95,7 +113,53 @@ Configured for Replit autoscale deployment:
 - Serves static files via dhttpd on port 5000
 - No backend server included (expects API at localhost:8072)
 
+## Template Architecture Pattern
+
+The app uses a sophisticated template-based architecture for reusable components:
+
+### Holdings Template System
+Located in `lib/shared/widgets/holdings/`, the holdings display system follows a factory-based pattern with:
+
+1. **Core State Management** (`HoldingsSelectorCore`)
+   - Centralized state for sorting, filtering, and display preferences
+   - Observable pattern with callback notifications
+   - Independent of UI implementation
+
+2. **Display Configuration** (`HoldingsDisplayConfig`)
+   - Preset configurations: web, mobile, minimal
+   - Controls feature visibility and defaults
+   - Highly customizable
+
+3. **Layout Builders** (Strategy Pattern)
+   - `TableLayoutBuilder` - Web-optimized table view
+   - `CardLayoutBuilder` - Mobile-optimized card view
+   - Extensible for new layout types
+
+4. **Template Factory** (`HoldingsTemplateFactory`)
+   - Creates display, selector, and layout components
+   - Supports minimal, compact, full, and adaptive templates
+   - Coordinates component assembly
+
+5. **Universal Widget** (`UniversalHoldingsWidget`)
+   - All-in-one component with Riverpod integration
+   - Automatic data fetching via portfolioHoldingsProvider
+   - Adaptive template selection
+
+### Usage Example
+```dart
+UniversalHoldingsWidget(
+  userId: userId,
+  portfolioId: portfolioId,
+  config: HoldingsDisplayConfig.web(),
+  templateType: HoldingsTemplateType.adaptive,
+  onHoldingTap: (holding) => navigateToDetails(holding),
+)
+```
+
+See `lib/shared/widgets/holdings/HOLDINGS_TEMPLATE_USAGE.md` for comprehensive documentation.
+
 ## Notes
 - The app is designed to work with a backend API (not included in this project)
 - Mock data providers available for development/testing
 - Supports both mobile and web layouts with responsive design
+- Template architecture maximizes code reuse between platforms
