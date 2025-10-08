@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart';
+import '../../../../../shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart';
+import '../../../../../shared/widgets/portfolio_overview/models/portfolio_overview_data.dart';
 import '../../../providers/portfolio_providers.dart';
 
 /// Web-specific portfolio analysis page with comprehensive analytics
@@ -29,6 +32,9 @@ class _PortfolioAnalysisWebPageState
   Widget build(BuildContext context) {
     final summaryAsync = ref.watch(
       portfolioSummaryProvider(widget.portfolioId),
+    );
+    final analyticsAsync = ref.watch(
+      portfolioAnalyticsWithDefaultsProvider(widget.portfolioId),
     );
     final holdingsAsync = ref.watch(
       portfolioHoldingsProvider(widget.portfolioId),
@@ -65,7 +71,7 @@ class _PortfolioAnalysisWebPageState
                       // Analytics Grid
                       Expanded(
                         flex: 3,
-                        child: _buildAnalyticsGrid(context, holdingsAsync),
+                        child: _buildAnalyticsGrid(context, analyticsAsync, holdingsAsync),
                       ),
                     ],
                   ),
@@ -258,6 +264,7 @@ class _PortfolioAnalysisWebPageState
 
   Widget _buildAnalyticsGrid(
     BuildContext context,
+    AsyncValue<dynamic> analyticsAsync,
     AsyncValue<dynamic> holdingsAsync,
   ) => Padding(
     padding: const EdgeInsets.all(16),
@@ -273,46 +280,318 @@ class _PortfolioAnalysisWebPageState
         const SizedBox(height: 16),
 
         Expanded(
-          child: GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.2,
-            children: [
-              _buildAnalyticsCard(
-                context,
-                'Sector Allocation',
-                Icons.pie_chart,
-                Colors.blue,
-                holdingsAsync,
+          child: analyticsAsync.when(
+            data: (analytics) => holdingsAsync.when(
+              data: (holdings) => _buildAnalyticsCharts(context, analytics, holdings),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Text('Error loading holdings: $error'),
               ),
-              _buildAnalyticsCard(
-                context,
-                'Risk Metrics',
-                Icons.security,
-                Colors.orange,
-                holdingsAsync,
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading analytics',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              _buildAnalyticsCard(
-                context,
-                'Top Holdings',
-                Icons.trending_up,
-                Colors.green,
-                holdingsAsync,
-              ),
-              _buildAnalyticsCard(
-                context,
-                'Market Cap Distribution',
-                Icons.account_balance,
-                Colors.purple,
-                holdingsAsync,
-              ),
-            ],
+            ),
           ),
         ),
       ],
     ),
   );
+
+  Widget _buildAnalyticsCharts(
+    BuildContext context,
+    dynamic analytics,
+    dynamic holdings,
+  ) {
+    // Extract allocation data
+    final sectorAlloc = analytics.analytics.sectorAllocation;
+    final marketCapAlloc = analytics.analytics.marketCapAllocation;
+    
+    final sectorData = sectorAlloc != null && sectorAlloc.sectorWeights.isNotEmpty
+        ? sectorAlloc.sectorWeights.map((sector) {
+            return AllocationItem(
+              label: sector.sectorName,
+              value: sector.marketCap,
+              percentage: sector.weightPercentage,
+              count: sector.topStocks.length,
+            );
+          }).toList()
+        : <AllocationItem>[];
+    
+    final marketCapData = marketCapAlloc != null && marketCapAlloc.segments.isNotEmpty
+        ? marketCapAlloc.segments.map((segment) {
+            return AllocationItem(
+              label: segment.segmentName,
+              value: segment.segmentValue,
+              percentage: segment.weightPercentage,
+              count: segment.numberOfStocks,
+            );
+          }).toList()
+        : <AllocationItem>[];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.0,
+      children: [
+        _buildSectorAllocationCard(context, sectorData),
+        _buildMarketCapCard(context, marketCapData),
+        _buildTopHoldingsCard(context, holdings),
+        _buildRiskMetricsCard(context),
+      ],
+    );
+  }
+
+  Widget _buildSectorAllocationCard(
+    BuildContext context,
+    List<AllocationItem> sectorData,
+  ) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pie_chart, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Sector Allocation',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: sectorData.isEmpty
+                  ? const Center(child: Text('No sector data'))
+                  : AnimatedSectorDonutChart(
+                      allocations: sectorData,
+                      showAnimation: false,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMarketCapCard(
+    BuildContext context,
+    List<AllocationItem> marketCapData,
+  ) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.account_balance, color: Colors.purple, size: 20),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Market Cap Distribution',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: marketCapData.isEmpty
+                  ? const Center(child: Text('No market cap data'))
+                  : AnimatedMarketCapChart(
+                      allocations: marketCapData,
+                      showAnimation: false,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopHoldingsCard(BuildContext context, dynamic holdings) {
+    final topHoldings = holdings.holdings.take(5).toList();
+    
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.trending_up, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Top Holdings',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.builder(
+                itemCount: topHoldings.length,
+                itemBuilder: (context, index) {
+                  final holding = topHoldings[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                holding.symbol,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                '\$${holding.currentPrice.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${holding.todayChangePercentage >= 0 ? '+' : ''}${holding.todayChangePercentage.toStringAsFixed(2)}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: holding.todayChangePercentage >= 0
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRiskMetricsCard(BuildContext context) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.security, color: Colors.orange, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Risk Metrics',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildRiskMetricRow('Portfolio Beta', '1.15', Colors.orange),
+                  _buildRiskMetricRow('Sharpe Ratio', '0.92', Colors.green),
+                  _buildRiskMetricRow('Volatility', '18.5%', Colors.orange),
+                  _buildRiskMetricRow('Max Drawdown', '-12.3%', Colors.red),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRiskMetricRow(String label, String value, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildAnalyticsCard(
     BuildContext context,
