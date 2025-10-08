@@ -21,25 +21,12 @@ class PortfolioSidebar extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
-      // Temporarily disabled navigation items
-      // _buildNavItem(
-      //   context,
-      //   icon: Icons.dashboard,
-      //   title: 'Overview',
-      //   viewType: PortfolioViewType.overview,
-      // ),
-      // _buildNavItem(
-      //   context,
-      //   icon: Icons.account_balance_wallet,
-      //   title: 'Holdings',
-      //   viewType: PortfolioViewType.holdings,
-      // ),
-      // _buildNavItem(
-      //   context,
-      //   icon: Icons.analytics,
-      //   title: 'Analysis',
-      //   viewType: PortfolioViewType.analysis,
-      // ),
+      _buildNavItem(
+        context,
+        icon: Icons.account_balance_wallet,
+        title: 'Holdings',
+        viewType: PortfolioViewType.holdings,
+      ),
       _buildNavItem(
         context,
         icon: Icons.grid_view,

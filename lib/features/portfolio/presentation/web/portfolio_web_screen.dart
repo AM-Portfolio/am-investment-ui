@@ -9,10 +9,7 @@ import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_heatmap_cubit.dart';
 import '../cubit/portfolio_state.dart';
 import '../widgets/portfolio_sidebar.dart';
-// Temporarily disabled imports
-// import 'pages/portfolio_overview_web_page.dart';
-// import 'pages/portfolio_holdings_web_page.dart';
-// import 'pages/portfolio_analysis_web_page.dart';
+import 'pages/portfolio_holdings_web_page.dart';
 import 'pages/portfolio_heatmap_web_page.dart';
 
 /// Web-specific portfolio screen implementation
@@ -130,48 +127,24 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
   /// Build main content based on selected view
   Widget _buildMainContent(BuildContext context) {
     switch (_selectedView) {
-      // Temporarily disabled views
-      // case PortfolioViewType.overview:
-      //   return _buildOverviewContent(context);
-      // case PortfolioViewType.holdings:
-      //   return _buildHoldingsContent(context);
-      // case PortfolioViewType.analysis:
-      //   return _buildAnalysisContent(context);
+      case PortfolioViewType.holdings:
+        return _buildHoldingsContent(context);
       case PortfolioViewType.heatmap:
         return _buildHeatmapContent(context);
       default:
-        // Fallback to heatmap if any other view is selected
-        return _buildHeatmapContent(context);
+        // Fallback to holdings if any other view is selected
+        return _buildHoldingsContent(context);
     }
   }
 
-  // Temporarily disabled build methods
-  // /// Build overview content using dedicated overview page
-  // Widget _buildOverviewContent(BuildContext context) {
-  //   return PortfolioOverviewWebPage(
-  //     userId: widget.userId,
-  //     portfolioId: _currentPortfolioId!,
-  //     portfolioName: widget.selectedPortfolioName,
-  //   );
-  // }
-
-  // /// Build holdings content using dedicated holdings page
-  // Widget _buildHoldingsContent(BuildContext context) {
-  //   return PortfolioHoldingsWebPage(
-  //     userId: widget.userId,
-  //     portfolioId: _currentPortfolioId!,
-  //     portfolioName: widget.selectedPortfolioName,
-  //   );
-  // }
-
-  // /// Build analysis content using dedicated analysis page
-  // Widget _buildAnalysisContent(BuildContext context) {
-  //   return PortfolioAnalysisWebPage(
-  //     userId: widget.userId,
-  //     portfolioId: _currentPortfolioId!,
-  //     portfolioName: widget.selectedPortfolioName,
-  //   );
-  // }
+  /// Build holdings content using dedicated holdings page
+  Widget _buildHoldingsContent(BuildContext context) {
+    return PortfolioHoldingsWebPage(
+      userId: widget.userId,
+      portfolioId: _currentPortfolioId!,
+      portfolioName: widget.selectedPortfolioName,
+    );
+  }
 
   /// Build heatmap content using dedicated heatmap page
   Widget _buildHeatmapContent(BuildContext context) {
