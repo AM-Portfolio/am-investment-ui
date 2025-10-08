@@ -33,7 +33,7 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
 }
 
 class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
-  PortfolioViewType _selectedView = PortfolioViewType.heatmap;
+  PortfolioViewType _selectedView = PortfolioViewType.holdings;
   String? _currentPortfolioId;
 
   @override
