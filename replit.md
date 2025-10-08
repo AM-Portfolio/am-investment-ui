@@ -23,6 +23,14 @@ A comprehensive Flutter web application for investment portfolio management with
 - **Environment**: Development (configurable via properties files)
 
 ## Recent Changes
+- **2025-10-08**: Mock Data Fallback System Implementation
+  - Created PortfolioMockDataHelper to load mock JSON files when API is unavailable
+  - Added graceful fallback logic to all PortfolioRemoteDataSource methods
+  - Mock data files: portfolio_holdings.json, portfolio_summary.json, portfolio_analytics.json
+  - App now works seamlessly without backend API connection in development mode
+  - Fallback only activates in development environment for safety
+  - Successfully tested with mock data loading confirmed in workflow logs
+
 - **2025-10-08**: Portfolio Overview Dashboard Implementation
   - Built comprehensive Portfolio Overview dashboard with summary cards, top movers, and allocation charts
   - Created data contracts and models (OverviewSummaryData, AllocationItem, OverviewMoversData)
@@ -62,6 +70,11 @@ lib/
 ├── features/          # Feature modules
 │   ├── login/         # Authentication UI
 │   ├── portfolio/     # Portfolio management
+│   │   └── internal/
+│   │       └── data/
+│   │           └── datasources/
+│   │               ├── portfolio_remote_data_source.dart   # API client with fallback
+│   │               └── portfolio_mock_data_helper.dart     # Mock data loader (NEW)
 │   └── watchlist/     # Watchlist features
 ├── shared/            # Shared widgets and components
 │   └── widgets/
@@ -72,11 +85,17 @@ lib/
 │       │   ├── layouts/        # Layout builders (Table, Card)
 │       │   ├── universal_holdings/ # Factory and universal widget
 │       │   └── HOLDINGS_TEMPLATE_USAGE.md
-│       └── portfolio_overview/ # Portfolio Overview dashboard (NEW)
+│       └── portfolio_overview/ # Portfolio Overview dashboard
 │           ├── contracts/      # Data contracts and models
 │           ├── adapters/       # Data transformation adapters
 │           ├── charts/         # Chart components (sector, market cap)
 │           └── portfolio_overview_widget.dart
+├── assets/            # Static assets
+│   ├── mock_data/     # Mock JSON data for development (NEW)
+│   │   ├── portfolio_holdings.json
+│   │   ├── portfolio_summary.json
+│   │   └── portfolio_analytics.json
+│   └── test_users.json
 ├── config/            # Configuration files
 ├── di/                # Dependency injection
 ├── app.dart          # Root app widget
@@ -208,8 +227,46 @@ PortfolioOverviewWidget(
 )
 ```
 
+## Mock Data Fallback System
+
+The app includes a sophisticated fallback mechanism for API unavailability:
+
+### How It Works
+1. **Primary**: App attempts to fetch data from backend API (localhost:8072)
+2. **Fallback**: If API call fails, app automatically loads mock data from JSON files
+3. **Environment-Aware**: Fallback only activates in development mode for safety
+
+### Mock Data Files
+Located in `lib/assets/mock_data/`:
+- `portfolio_holdings.json` - Sample holdings data
+- `portfolio_summary.json` - Portfolio summary with performance metrics
+- `portfolio_analytics.json` - Analytics data with sector/market cap allocations
+
+### Implementation
+**PortfolioMockDataHelper** (`lib/features/portfolio/internal/data/datasources/portfolio_mock_data_helper.dart`):
+- Loads mock JSON files using Flutter's `rootBundle.loadString()`
+- Parses JSON and transforms into DTOs using existing mappers
+- Provides static methods for each data type
+
+**PortfolioRemoteDataSource** - Updated with try-catch fallback:
+```dart
+try {
+  // Attempt API call
+  return await _apiClient.get(...);
+} catch (e) {
+  // Fallback to mock data
+  return await PortfolioMockDataHelper.getMockPortfolioSummary();
+}
+```
+
+### Benefits
+- **Zero Backend Dependency**: App works without running backend server
+- **Seamless Development**: Developers can work on frontend independently
+- **Graceful Degradation**: Users see realistic data instead of errors
+- **Easy Testing**: Mock data provides consistent test scenarios
+
 ## Notes
 - The app is designed to work with a backend API (not included in this project)
-- Mock data providers available for development/testing
+- **NEW**: Graceful fallback to mock data when API is unavailable (development mode only)
 - Supports both mobile and web layouts with responsive design
 - Template architecture maximizes code reuse between platforms
