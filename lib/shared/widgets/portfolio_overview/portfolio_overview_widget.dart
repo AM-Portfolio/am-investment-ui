@@ -4,9 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/portfolio/providers/portfolio_providers.dart';
 import 'adapters/portfolio_overview_data_adapter.dart';
 import 'charts/base/chart_colors.dart';
-import 'charts/sector_allocation/sector_donut_chart.dart';
-import 'charts/sector_allocation/sector_pie_chart.dart';
-import 'charts/sector_allocation/sector_bar_chart.dart';
+import 'charts/sector_allocation/animated_sector_donut_chart.dart';
+import 'charts/market_cap_allocation/animated_market_cap_chart.dart';
 import 'configs/portfolio_overview_config.dart';
 import 'models/portfolio_overview_data.dart';
 
@@ -32,12 +31,14 @@ class _PortfolioOverviewWidgetState
     extends ConsumerState<PortfolioOverviewWidget> {
   late PortfolioOverviewConfig _config;
   ChartType _selectedChartType = ChartType.donut;
+  AllocationType _selectedAllocationType = AllocationType.sector;
 
   @override
   void initState() {
     super.initState();
     _config = widget.config ?? PortfolioOverviewConfig.web();
     _selectedChartType = _config.defaultChartType;
+    _selectedAllocationType = _config.defaultAllocationType;
   }
 
   @override
@@ -361,64 +362,104 @@ class _PortfolioOverviewWidgetState
     BuildContext context,
     PortfolioOverviewData data,
   ) {
+    final currentAllocation = _selectedAllocationType == AllocationType.sector
+        ? data.sectorAllocation
+        : data.marketCapAllocation;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              'Sector Allocation',
+              _selectedAllocationType == AllocationType.sector
+                  ? 'Sector Allocation'
+                  : 'Market Cap Allocation',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${currentAllocation.length} items',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
             const Spacer(),
-            SegmentedButton<ChartType>(
+            // Allocation Type Toggle
+            SegmentedButton<AllocationType>(
               segments: const [
                 ButtonSegment(
-                  value: ChartType.pie,
-                  label: Text('Pie'),
-                  icon: Icon(Icons.pie_chart, size: 16),
+                  value: AllocationType.sector,
+                  label: Text('Sector'),
+                  icon: Icon(Icons.business, size: 16),
                 ),
                 ButtonSegment(
-                  value: ChartType.donut,
-                  label: Text('Donut'),
-                  icon: Icon(Icons.donut_small, size: 16),
-                ),
-                ButtonSegment(
-                  value: ChartType.bar,
-                  label: Text('Bar'),
-                  icon: Icon(Icons.bar_chart, size: 16),
+                  value: AllocationType.marketCap,
+                  label: Text('Market Cap'),
+                  icon: Icon(Icons.account_balance, size: 16),
                 ),
               ],
-              selected: {_selectedChartType},
-              onSelectionChanged: (Set<ChartType> newSelection) {
+              selected: {_selectedAllocationType},
+              onSelectionChanged: (Set<AllocationType> newSelection) {
                 setState(() {
-                  _selectedChartType = newSelection.first;
+                  _selectedAllocationType = newSelection.first;
                 });
               },
+              style: ButtonStyle(
+                visualDensity: VisualDensity.compact,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 300,
-          child: _buildSelectedChart(data.sectorAllocation),
+          height: 350,
+          child: _buildSelectedChart(currentAllocation),
         ),
       ],
     );
   }
 
   Widget _buildSelectedChart(List<AllocationItem> allocations) {
-    switch (_selectedChartType) {
-      case ChartType.pie:
-        return SectorPieChart(allocations: allocations);
-      case ChartType.donut:
-        return SectorDonutChart(allocations: allocations);
-      case ChartType.bar:
-        return SectorBarChart(allocations: allocations);
-      case ChartType.table:
-        return _buildAllocationTable(allocations);
+    if (allocations.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.pie_chart_outline,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No ${_selectedAllocationType == AllocationType.sector ? "sector" : "market cap"} data available',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Use animated charts for better UX
+    if (_selectedAllocationType == AllocationType.sector) {
+      return AnimatedSectorDonutChart(allocations: allocations);
+    } else {
+      return AnimatedMarketCapChart(allocations: allocations);
     }
   }
 

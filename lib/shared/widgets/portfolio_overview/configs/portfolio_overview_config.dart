@@ -6,6 +6,7 @@ class PortfolioOverviewConfig {
     this.showAllocation = true,
     this.showCharts = true,
     this.defaultChartType = ChartType.donut,
+    this.defaultAllocationType = AllocationType.sector,
     this.enableExport = true,
     this.enableRefresh = true,
   });
@@ -15,6 +16,7 @@ class PortfolioOverviewConfig {
   final bool showAllocation;
   final bool showCharts;
   final ChartType defaultChartType;
+  final AllocationType defaultAllocationType;
   final bool enableExport;
   final bool enableRefresh;
 
@@ -55,4 +57,9 @@ enum ChartType {
   donut,
   bar,
   table,
+}
+
+enum AllocationType {
+  sector,
+  marketCap,
 }
