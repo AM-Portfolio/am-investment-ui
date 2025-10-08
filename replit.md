@@ -23,6 +23,17 @@ A comprehensive Flutter web application for investment portfolio management with
 - **Environment**: Development (configurable via properties files)
 
 ## Recent Changes
+- **2025-10-08**: Portfolio Overview Dashboard Implementation
+  - Built comprehensive Portfolio Overview dashboard with summary cards, top movers, and allocation charts
+  - Created data contracts and models (OverviewSummaryData, AllocationItem, OverviewMoversData)
+  - Implemented chart components using fl_chart library (sector pie/donut/bar charts, market cap allocation)
+  - Built PortfolioOverviewWidget with responsive layout adapters for desktop/tablet/mobile
+  - Created PortfolioOverviewDataAdapter to transform domain entities into display models
+  - Fixed property name mismatches in adapter (todayChange, totalGainLoss, companyName, todayChangePercentage)
+  - Integrated Overview into portfolio web screen with sidebar navigation
+  - Added fl_chart dependency (^0.68.0) to pubspec.yaml
+  - Successfully built and deployed with zero LSP errors
+
 - **2025-10-08**: Holdings Template Architecture Implementation
   - Created sophisticated template-based architecture for portfolio holdings display
   - Implemented factory pattern with HoldingsTemplateFactory and UniversalHoldingsWidget
@@ -54,14 +65,18 @@ lib/
 │   └── watchlist/     # Watchlist features
 ├── shared/            # Shared widgets and components
 │   └── widgets/
-│       ├── heatmap/   # Heatmap template architecture
-│       └── holdings/  # Holdings template architecture (NEW)
-│           ├── core/            # State management (HoldingsSelectorCore)
-│           ├── configs/         # Display configurations
-│           ├── layouts/         # Layout builders (Table, Card)
-│           ├── universal_holdings/ # Factory and universal widget
-│           ├── holdings_display_template.dart
-│           └── HOLDINGS_TEMPLATE_USAGE.md
+│       ├── heatmap/            # Heatmap template architecture
+│       ├── holdings/           # Holdings template architecture
+│       │   ├── core/           # State management (HoldingsSelectorCore)
+│       │   ├── configs/        # Display configurations
+│       │   ├── layouts/        # Layout builders (Table, Card)
+│       │   ├── universal_holdings/ # Factory and universal widget
+│       │   └── HOLDINGS_TEMPLATE_USAGE.md
+│       └── portfolio_overview/ # Portfolio Overview dashboard (NEW)
+│           ├── contracts/      # Data contracts and models
+│           ├── adapters/       # Data transformation adapters
+│           ├── charts/         # Chart components (sector, market cap)
+│           └── portfolio_overview_widget.dart
 ├── config/            # Configuration files
 ├── di/                # Dependency injection
 ├── app.dart          # Root app widget
@@ -157,6 +172,41 @@ UniversalHoldingsWidget(
 ```
 
 See `lib/shared/widgets/holdings/HOLDINGS_TEMPLATE_USAGE.md` for comprehensive documentation.
+
+### Portfolio Overview System
+Located in `lib/shared/widgets/portfolio_overview/`, the overview dashboard provides a high-level portfolio summary:
+
+1. **Data Contracts** (`OverviewSummaryData`, `AllocationItem`, `OverviewMoversData`)
+   - Well-defined interfaces for overview data
+   - Type-safe data models for charts and displays
+   - Clear separation between domain and display layers
+
+2. **Data Adapters** (`PortfolioOverviewDataAdapter`)
+   - Transforms domain entities (PortfolioSummary, PortfolioAnalytics, PortfolioHoldings) into display models
+   - Handles property mapping and data aggregation
+   - Extracts top movers, sector allocations, and market cap breakdowns
+
+3. **Chart Components**
+   - Sector allocation charts (pie, donut, bar views)
+   - Market cap allocation visualizations
+   - Built with fl_chart library for rich interactivity
+
+4. **Responsive Layout**
+   - Desktop layout: Multi-column grid with side-by-side charts
+   - Tablet layout: 2-column grid with stacked sections
+   - Mobile layout: Single column with simplified views
+
+### Usage Example
+```dart
+PortfolioOverviewWidget(
+  summaryData: OverviewSummaryData(...),
+  sectorAllocation: [...],
+  marketCapAllocation: [...],
+  topGainers: [...],
+  topLosers: [...],
+  onNavigateToHoldings: () => navigateToHoldings(),
+)
+```
 
 ## Notes
 - The app is designed to work with a backend API (not included in this project)
