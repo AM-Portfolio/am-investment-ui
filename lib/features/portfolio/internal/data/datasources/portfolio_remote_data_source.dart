@@ -8,6 +8,7 @@ import '../dtos/portfolio_list_dto.dart';
 import '../dtos/portfolio_summary_dto.dart';
 import '../mappers/portfolio_analytics_mapper.dart';
 import '../mappers/portfolio_mapper.dart';
+import 'portfolio_mock_data_helper.dart';
 
 /// Abstract data source for portfolio data
 abstract class PortfolioRemoteDataSource {
@@ -101,7 +102,22 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );
-      rethrow;
+      
+      // Fallback to mock data when API is unavailable
+      try {
+        AppLogger.info(
+          'Loading mock portfolio holdings',
+          tag: 'PortfolioRemoteDataSource',
+        );
+        return await PortfolioMockDataHelper.getMockPortfolioHoldings();
+      } catch (mockError) {
+        AppLogger.error(
+          'Failed to load mock data',
+          tag: 'PortfolioRemoteDataSource',
+          error: mockError,
+        );
+        rethrow;
+      }
     }
   }
 
@@ -158,7 +174,22 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );
-      rethrow;
+      
+      // Fallback to mock data when API is unavailable
+      try {
+        AppLogger.info(
+          'Loading mock portfolio holdings',
+          tag: 'PortfolioRemoteDataSource',
+        );
+        return await PortfolioMockDataHelper.getMockPortfolioHoldings();
+      } catch (mockError) {
+        AppLogger.error(
+          'Failed to load mock data',
+          tag: 'PortfolioRemoteDataSource',
+          error: mockError,
+        );
+        rethrow;
+      }
     }
   }
 
@@ -212,7 +243,22 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );
-      rethrow;
+      
+      // Fallback to mock data when API is unavailable
+      try {
+        AppLogger.info(
+          'Loading mock portfolio summary',
+          tag: 'PortfolioRemoteDataSource',
+        );
+        return await PortfolioMockDataHelper.getMockPortfolioSummary();
+      } catch (mockError) {
+        AppLogger.error(
+          'Failed to load mock data',
+          tag: 'PortfolioRemoteDataSource',
+          error: mockError,
+        );
+        rethrow;
+      }
     }
   }
 
@@ -269,7 +315,22 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );
-      rethrow;
+      
+      // Fallback to mock data when API is unavailable
+      try {
+        AppLogger.info(
+          'Loading mock portfolio summary',
+          tag: 'PortfolioRemoteDataSource',
+        );
+        return await PortfolioMockDataHelper.getMockPortfolioSummary();
+      } catch (mockError) {
+        AppLogger.error(
+          'Failed to load mock data',
+          tag: 'PortfolioRemoteDataSource',
+          error: mockError,
+        );
+        rethrow;
+      }
     }
   }
 
@@ -379,7 +440,22 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
         tag: 'PortfolioRemoteDataSource',
         result: 'error',
       );
-      rethrow;
+      
+      // Fallback to mock data when API is unavailable
+      try {
+        AppLogger.info(
+          'Loading mock portfolio analytics',
+          tag: 'PortfolioRemoteDataSource',
+        );
+        return await PortfolioMockDataHelper.getMockPortfolioAnalytics();
+      } catch (mockError) {
+        AppLogger.error(
+          'Failed to load mock data',
+          tag: 'PortfolioRemoteDataSource',
+          error: mockError,
+        );
+        rethrow;
+      }
     }
   }
 
