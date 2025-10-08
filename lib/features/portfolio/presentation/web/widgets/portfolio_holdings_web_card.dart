@@ -35,7 +35,7 @@ class PortfolioHoldingsWebCard extends ConsumerStatefulWidget {
   final int maxHoldings;
 
   /// Callback when a holding is tapped
-  final Function()? onHoldingTap;
+  final Function(PortfolioHolding)? onHoldingTap;
 
   /// Callback when "View All" button is tapped
   final VoidCallback? onViewAll;
@@ -195,7 +195,7 @@ class _PortfolioHoldingsWebCardState
                             columns: _buildColumns(),
                             initialSortColumnIndex:
                                 2, // Sort by current value initially
-                            onItemTap: widget.onHoldingTap,
+                            onItemTap: (holding) => widget.onHoldingTap?.call(holding),
                             rowHeight: rowHeight,
                           ),
                         ),
