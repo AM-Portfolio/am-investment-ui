@@ -23,6 +23,15 @@ A comprehensive Flutter web application for investment portfolio management with
 - **Environment**: Development (configurable via properties files)
 
 ## Recent Changes
+- **2025-10-08**: Enhanced Charts & Analytics UI/UX
+  - Created AnimatedSectorDonutChart with smooth animations and scrollable legend supporting 20+ fields
+  - Created AnimatedMarketCapChart with similar animations and interactivity
+  - Added Sector/Market Cap toggle in Portfolio Overview with segmented button
+  - Fixed Analytics section to display real data instead of placeholders
+  - Analytics now shows live sector allocation, market cap distribution, top holdings, and risk metrics
+  - Charts feature hover effects, touch interactions, and automatic color coding
+  - Improved visual presentation with badges, shadows, and responsive layouts
+
 - **2025-10-08**: Mock Data Fallback System Implementation
   - Created PortfolioMockDataHelper to load mock JSON files when API is unavailable
   - Added graceful fallback logic to all PortfolioRemoteDataSource methods
