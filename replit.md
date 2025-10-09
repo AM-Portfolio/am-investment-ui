@@ -37,3 +37,22 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Google Sign-In SDK**: For Google OAuth authentication.
 - **Google Identity Services (GIS)**: Used for web-based Google Sign-In.
 - **SharedPreferences**: For persistent session storage.
+
+## Deployment
+The application is configured for Replit Autoscale deployment:
+- **Build Command**: `flutter build web --release` - Compiles the app for production
+- **Run Command**: `dhttpd --host=0.0.0.0 --port=5000 --path=build/web` - Serves the built app
+- **Deployment Type**: Autoscale - Automatically scales based on traffic
+- **Access**: The app is accessible at port 5000
+
+### How to Deploy
+1. Click the **"Deploy"** button at the top of the Replit workspace
+2. Select **"Autoscale Deployment"** 
+3. Review the configuration (already set up)
+4. Click **"Deploy"** to publish your application
+5. You'll receive a public URL to access your deployed app
+
+### Demo Credentials
+- **Demo Login**: demo@example.com / password123
+- **Test User**: ssd2658 / password
+- **Google Sign-In**: Available on mobile/native platforms (web requires additional setup)
