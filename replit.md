@@ -39,18 +39,27 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **SharedPreferences**: For persistent session storage.
 
 ## Deployment
-The application is configured for Replit Autoscale deployment:
+The application is configured for Replit Reserved VM deployment:
 - **Build Command**: `flutter build web --release` - Compiles the app for production
 - **Run Command**: `dhttpd --host=0.0.0.0 --port=5000 --path=build/web` - Serves the built app
-- **Deployment Type**: Autoscale - Automatically scales based on traffic
+- **Deployment Type**: Reserved VM - Always-on server with build support
 - **Access**: The app is accessible at port 5000
 
 ### How to Deploy
+
+**Option 1: Reserved VM Deployment (Configured)**
 1. Click the **"Deploy"** button at the top of the Replit workspace
-2. Select **"Autoscale Deployment"** 
-3. Review the configuration (already set up)
-4. Click **"Deploy"** to publish your application
-5. You'll receive a public URL to access your deployed app
+2. The configuration is already set with build and run commands
+3. Click **"Deploy"** to publish your application
+4. You'll receive a public URL to access your deployed app
+
+**Option 2: Static Deployment (Recommended for Lower Cost)**
+For a Flutter web app, Static Deployment is more cost-effective:
+1. Click **"Deploy"** → Select **"Static Deployment"**
+2. Set **Build command**: `flutter build web --release`
+3. Set **Output directory**: `build/web`
+4. Click **"Deploy"**
+5. Benefits: Uses CDN, only pay for data transfer, global distribution
 
 ### Demo Credentials
 - **Demo Login**: demo@example.com / password123
