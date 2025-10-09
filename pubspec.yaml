@@ -2,7 +2,7 @@ name: todo_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -53,6 +53,17 @@ dependencies:
   retrofit: ^4.1.0
   mime: ^1.0.4
 
+  # Authentication dependencies
+  flutter_secure_storage: ^9.2.2
+  google_sign_in: ^6.2.1
+  jwt_decoder: ^2.0.1
+  crypto: ^3.0.3
+  dartz: ^0.10.1
+
+  # Additional UI dependencies
+  glassmorphism: ^3.0.0
+  lottie: ^3.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -80,7 +91,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -96,6 +106,10 @@ flutter:
     - lib/assets/test_users.json
     - lib/assets/images/
     - lib/assets/mock_data/
+    - assets/mock-data/users/
+    - assets/mock-data/tokens/
+    - assets/mock-data/google/
+    - assets/mock-data/api_responses/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

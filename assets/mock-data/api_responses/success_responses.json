@@ -1,0 +1,24 @@
+{
+    "success_responses": {
+        "login_success": {
+            "status": "success",
+            "message": "Login successful",
+            "code": 200
+        },
+        "google_login_success": {
+            "status": "success",
+            "message": "Google login successful",
+            "code": 200
+        },
+        "demo_login_success": {
+            "status": "success",
+            "message": "Demo login successful",
+            "code": 200
+        },
+        "logout_success": {
+            "status": "success",
+            "message": "Logout successful",
+            "code": 200
+        }
+    }
+}

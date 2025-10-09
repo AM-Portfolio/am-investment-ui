@@ -1,0 +1,20 @@
+{
+    "google_profiles": [
+        {
+            "id": "google_user_001",
+            "email": "john.google@gmail.com",
+            "displayName": "John Google",
+            "photoUrl": "https://lh3.googleusercontent.com/a/default-user",
+            "authMethod": "google",
+            "isDemo": false
+        },
+        {
+            "id": "google_user_002",
+            "email": "jane.google@gmail.com",
+            "displayName": "Jane Google",
+            "photoUrl": "https://lh3.googleusercontent.com/a/default-user",
+            "authMethod": "google",
+            "isDemo": false
+        }
+    ]
+}

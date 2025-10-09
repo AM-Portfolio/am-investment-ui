@@ -1,0 +1,29 @@
+{
+    "error_responses": {
+        "invalid_credentials": {
+            "status": "error",
+            "message": "Invalid email or password",
+            "code": 401
+        },
+        "network_error": {
+            "status": "error",
+            "message": "Network error. Please check your connection",
+            "code": 503
+        },
+        "server_error": {
+            "status": "error",
+            "message": "Server error. Please try again later",
+            "code": 500
+        },
+        "google_signin_cancelled": {
+            "status": "error",
+            "message": "Google Sign-In was cancelled",
+            "code": 400
+        },
+        "google_signin_failed": {
+            "status": "error",
+            "message": "Google Sign-In failed",
+            "code": 401
+        }
+    }
+}

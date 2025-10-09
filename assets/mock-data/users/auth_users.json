@@ -1,0 +1,53 @@
+{
+    "auth_users": [
+        {
+            "id": "user_001",
+            "email": "john.doe@aminvestment.com",
+            "password": "Demo123!",
+            "displayName": "John Doe",
+            "photoUrl": null,
+            "authMethod": "email",
+            "isDemo": false
+        },
+        {
+            "id": "user_002",
+            "email": "jane.smith@aminvestment.com",
+            "password": "Test456!",
+            "displayName": "Jane Smith",
+            "photoUrl": null,
+            "authMethod": "email",
+            "isDemo": false
+        },
+        {
+            "id": "user_003",
+            "email": "demo@aminvestment.com",
+            "password": "Demo123!",
+            "displayName": "Demo User",
+            "photoUrl": null,
+            "authMethod": "demo",
+            "isDemo": true
+        }
+    ],
+    "demo_users": [
+        {
+            "id": "demo_001",
+            "email": "demo@aminvestment.com",
+            "password": "Demo123!",
+            "displayName": "Demo User",
+            "photoUrl": null,
+            "authMethod": "demo",
+            "isDemo": true
+        }
+    ],
+    "admin_users": [
+        {
+            "id": "admin_001",
+            "email": "admin@aminvestment.com",
+            "password": "Admin123!",
+            "displayName": "Admin User",
+            "photoUrl": null,
+            "authMethod": "email",
+            "isDemo": false
+        }
+    ]
+}
