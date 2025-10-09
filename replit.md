@@ -154,10 +154,30 @@ Current environment: **Development**
 API URL: `http://localhost:8072`
 
 ## Authentication
-The app includes a login system with:
-- Email/password authentication
-- Demo login option
+
+### Web-Optimized Login Experience
+The app features a modern, web-optimized authentication system with:
+
+**Split-Screen Design (Web)**:
+- Left panel: Purple gradient branding with "AM Investment" logo, tagline, and feature highlights
+- Right panel: Clean, focused login form with professional styling
+- Mobile-responsive with adaptive layouts
+
+**Authentication Methods**:
+- Email/password authentication with validation
+- Demo login for quick testing (credentials: ssd2658/password)
+- Google OAuth button (placeholder for future integration)
+
+**Developer Tools**:
+- Collapsible Developer Controls panel (web only)
+- Feature flags: Real/Mock Google Auth, Real/Mock Backend API, Mock Delays, Debug Logging
+- Quick settings reset functionality
+
+**Technical Architecture**:
+- Riverpod-based state management (authStateNotifierProvider)
+- AuthWrapper handles authentication state and navigation
 - Persistent session using SharedPreferences
+- Automatic navigation to portfolio screen after successful login
 - Test users available in `lib/assets/test_users.json`
 
 ## Deployment
