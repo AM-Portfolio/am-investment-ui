@@ -2,11 +2,15 @@
 import '../core/app_logic/domain/entities/user.dart';
 import '../core/app_logic/domain/entities/auth_state.dart';
 import '../core/app_logic/services/auth_service.dart';
+import '../core/app_logic/services/google_signin_service.dart';
 
 part 'login_providers.g.dart';
 
 @riverpod
 AuthService authService(AuthServiceRef ref) => AuthService();
+
+@riverpod
+GoogleSignInService googleSignInService(GoogleSignInServiceRef ref) => GoogleSignInService();
 
 @riverpod
 class AuthStateNotifier extends _$AuthStateNotifier {
@@ -65,6 +69,36 @@ class AuthStateNotifier extends _$AuthStateNotifier {
       _syncWithAuthService(authService);
     } catch (error) {
       state = state.copyWith(isLoading: false, errorMessage: error.toString());
+    }
+  }
+
+  Future<void> loginWithGoogle({String? webClientId}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final googleService = ref.read(googleSignInServiceProvider);
+
+      await googleService.initialize(webClientId: webClientId);
+
+      final user = await googleService.signIn();
+
+      if (user != null) {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: true,
+          currentUser: user,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Google Sign-In cancelled',
+        );
+      }
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: error.toString(),
+      );
     }
   }
 }

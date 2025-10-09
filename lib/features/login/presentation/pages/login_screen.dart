@@ -110,13 +110,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     AppLogger.userAction('Google Sign-In attempt', tag: 'LoginScreen');
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google Sign-In: Coming soon!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    try {
+      await ref.read(authStateNotifierProvider.notifier).loginWithGoogle();
+
+      AppLogger.info('Google Sign-In successful', tag: 'LoginScreen');
+
+      if (widget.onLogin != null) {
+        final user = ref.read(currentUserProvider);
+        if (user != null) {
+          widget.onLogin!(user.id);
+        }
+      }
+    } catch (error) {
+      AppLogger.error('Google Sign-In failed', tag: 'LoginScreen', error: error);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In failed: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
