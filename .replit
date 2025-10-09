@@ -36,9 +36,14 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 35931
-externalPort = 3001
-
-[[ports]]
 localPort = 38287
 externalPort = 3000
+
+[[ports]]
+localPort = 46813
+externalPort = 3001
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "$HOME/.pub-cache/bin/dhttpd --host=0.0.0.0 --port=5000 --path=build/web"]
+build = ["flutter", "build", "web", "--release"]
