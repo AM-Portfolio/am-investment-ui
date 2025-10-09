@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,12 +28,32 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>todo_app</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Google Sign-In (Google Identity Services) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    // Global callback for Google Sign-In
+    function handleGoogleSignIn(response) {
+      console.log('Google Sign-In response received:', response);
+      // The response contains the JWT credential
+      // We'll pass this to Dart via a custom event
+      window.dispatchEvent(new CustomEvent('google-signin-success', {
+        detail: {
+          credential: response.credential,
+          clientId: response.clientId
+        }
+      }));
+    }
+  </script>
 </head>
+
 <body>
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>
