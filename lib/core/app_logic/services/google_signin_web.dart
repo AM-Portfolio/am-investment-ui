@@ -24,16 +24,58 @@ class GoogleSignInWeb {
 
     // Listen for the custom event from JavaScript
     html.window.addEventListener('google-signin-success', (event) {
-      final customEvent = event as html.CustomEvent;
-      final detail = customEvent.detail as Map<String, dynamic>;
+      try {
+        // Read the response from the global variable
+        final responseObj = js.context['googleSignInResponse'];
 
-      AppLogger.info(
-        'Google Sign-In success event received',
-        tag: 'GoogleSignInWeb',
-      );
+        if (responseObj == null) {
+          AppLogger.error(
+            'Google Sign-In response is null',
+            tag: 'GoogleSignInWeb',
+          );
+          if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+            _signInCompleter!.complete(null);
+          }
+          return;
+        }
 
-      if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
-        _signInCompleter!.complete(detail);
+        // Extract data from JS object
+        final credential = responseObj['credential'] as String?;
+        final clientId = responseObj['clientId'] as String?;
+
+        if (credential == null) {
+          AppLogger.error(
+            'Google Sign-In credential is null',
+            tag: 'GoogleSignInWeb',
+          );
+          if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+            _signInCompleter!.complete(null);
+          }
+          return;
+        }
+
+        final data = {'credential': credential, 'clientId': clientId};
+
+        AppLogger.info(
+          'Google Sign-In success event received',
+          tag: 'GoogleSignInWeb',
+        );
+
+        if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+          _signInCompleter!.complete(data);
+        }
+
+        // Clear the global variable
+        js.context['googleSignInResponse'] = null;
+      } catch (e) {
+        AppLogger.error(
+          'Error handling google-signin-success event',
+          tag: 'GoogleSignInWeb',
+          error: e,
+        );
+        if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+          _signInCompleter!.completeError(e);
+        }
       }
     });
   }

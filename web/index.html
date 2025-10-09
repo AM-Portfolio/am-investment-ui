@@ -34,20 +34,33 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- Google Sign-In (Google Identity Services) -->
+  <meta name="google-signin-client_id"
+    content="145955205909-tqrn1odpfehm9g8kv37tgb1o1urbgnt8.apps.googleusercontent.com">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
+    // Global variable to store Google Sign-In response
+    window.googleSignInResponse = null;
+
     // Global callback for Google Sign-In
     function handleGoogleSignIn(response) {
       console.log('Google Sign-In response received:', response);
-      // The response contains the JWT credential
-      // We'll pass this to Dart via a custom event
-      window.dispatchEvent(new CustomEvent('google-signin-success', {
-        detail: {
+
+      try {
+        // Store the response in a global variable that Dart can access
+        window.googleSignInResponse = {
           credential: response.credential,
-          clientId: response.clientId
-        }
-      }));
+          clientId: response.clientId || response.client_id
+        };
+
+        // Dispatch a simple custom event (no complex detail object)
+        const event = new Event('google-signin-success');
+        window.dispatchEvent(event);
+
+        console.log('Google Sign-In event dispatched successfully');
+      } catch (e) {
+        console.error('Error in handleGoogleSignIn:', e);
+      }
     }
   </script>
 </head>
