@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../domain/entities/user.dart';
 import '../../utils/logger.dart';
@@ -40,14 +41,31 @@ class GoogleSignInService {
 
       GoogleSignInAccount? googleUser;
 
-      if (GoogleSignIn.instance.supportsAuthenticate()) {
-        googleUser = await GoogleSignIn.instance.authenticate();
+      if (kIsWeb) {
+        AppLogger.info('Web platform: Attempting lightweight authentication', tag: 'GoogleSignInService');
+        googleUser = await GoogleSignIn.instance.attemptLightweightAuthentication();
+        
+        if (googleUser == null) {
+          AppLogger.warning(
+            'Web platform: Lightweight authentication returned null. '
+            'Google Sign-In on web requires user interaction with the Google button. '
+            'This is a limitation of Google Identity Services on web.',
+            tag: 'GoogleSignInService',
+          );
+          // For web, we need to rely on the authenticationEvents stream
+          // or use the renderButton() approach from google_sign_in_web
+          throw Exception(
+            'Google Sign-In on web requires the official Google button. '
+            'Please use the "Continue with Google" button to sign in.'
+          );
+        }
       } else {
-        AppLogger.info(
-          'Platform does not support authenticate(). Use web button instead.',
-          tag: 'GoogleSignInService',
-        );
-        return null;
+        if (GoogleSignIn.instance.supportsAuthenticate()) {
+          AppLogger.info('Mobile platform: Using authenticate()', tag: 'GoogleSignInService');
+          googleUser = await GoogleSignIn.instance.authenticate();
+        } else {
+          AppLogger.warning('Platform does not support authenticate()', tag: 'GoogleSignInService');
+        }
       }
 
       if (googleUser == null) {
@@ -56,7 +74,7 @@ class GoogleSignInService {
       }
 
       AppLogger.info(
-        'Google Sign-In successful',
+        'Google Sign-In successful for: ${googleUser.email}',
         tag: 'GoogleSignInService',
       );
 

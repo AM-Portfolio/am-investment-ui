@@ -6,12 +6,12 @@ import '../../../../../shared/widgets/portfolio_overview/portfolio_overview_widg
 /// Web-specific portfolio overview page
 class PortfolioOverviewWebPage extends StatelessWidget {
   const PortfolioOverviewWebPage({
-    required this.portfolioId,
+    required this.userId,
     super.key,
     this.portfolioName,
   });
 
-  final String portfolioId;
+  final String userId;
   final String? portfolioName;
 
   @override
@@ -20,7 +20,7 @@ class PortfolioOverviewWebPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: PortfolioOverviewWidget(
-          portfolioId: portfolioId,
+          userId: userId,
           config: PortfolioOverviewConfig.web(),
           onRefresh: () {
             // Refresh handled by widget

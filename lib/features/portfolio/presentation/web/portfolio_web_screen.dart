@@ -49,9 +49,9 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
       _currentPortfolioId = portfolioId;
     });
 
-    // Invalidate providers to refresh data for new portfolio
-    ref.invalidate(portfolioSummaryProvider(_currentPortfolioId!));
-    ref.invalidate(portfolioHoldingsProvider(_currentPortfolioId!));
+    // Invalidate providers to refresh data - use userId for API calls
+    ref.invalidate(portfolioSummaryProvider(widget.userId));
+    ref.invalidate(portfolioHoldingsProvider(widget.userId));
 
     // Notify parent if callback is provided
     widget.onPortfolioChanged?.call(portfolioId, portfolioName);
@@ -97,8 +97,8 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: () {
-            ref.invalidate(portfolioSummaryProvider(_currentPortfolioId!));
-            ref.invalidate(portfolioHoldingsProvider(_currentPortfolioId!));
+            ref.invalidate(portfolioSummaryProvider(widget.userId));
+            ref.invalidate(portfolioHoldingsProvider(widget.userId));
           },
         ),
       ],
@@ -146,7 +146,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
   /// Build overview content using dedicated overview page
   Widget _buildOverviewContent(BuildContext context) {
     return PortfolioOverviewWebPage(
-      portfolioId: _currentPortfolioId!,
+      userId: widget.userId,
       portfolioName: widget.selectedPortfolioName,
     );
   }

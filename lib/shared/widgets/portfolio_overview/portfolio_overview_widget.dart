@@ -12,13 +12,13 @@ import 'models/portfolio_overview_data.dart';
 /// Universal portfolio overview widget
 class PortfolioOverviewWidget extends ConsumerStatefulWidget {
   const PortfolioOverviewWidget({
-    required this.portfolioId,
+    required this.userId,
     super.key,
     this.config,
     this.onRefresh,
   });
 
-  final String portfolioId;
+  final String userId;
   final PortfolioOverviewConfig? config;
   final VoidCallback? onRefresh;
 
@@ -43,11 +43,11 @@ class _PortfolioOverviewWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final summaryAsync = ref.watch(portfolioSummaryProvider(widget.portfolioId));
+    final summaryAsync = ref.watch(portfolioSummaryProvider(widget.userId));
     final analyticsAsync = ref.watch(
-      portfolioAnalyticsWithDefaultsProvider(widget.portfolioId),
+      portfolioAnalyticsWithDefaultsProvider(widget.userId),
     );
-    final holdingsAsync = ref.watch(portfolioHoldingsProvider(widget.portfolioId));
+    final holdingsAsync = ref.watch(portfolioHoldingsProvider(widget.userId));
 
     return Card(
       child: Padding(
@@ -94,7 +94,7 @@ class _PortfolioOverviewWidgetState
             );
 
             return FutureBuilder<PortfolioOverviewData>(
-              future: adapter.getOverviewData(widget.portfolioId),
+              future: adapter.getOverviewData(widget.userId),
               builder: (context, overviewSnapshot) {
                 if (overviewSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -142,11 +142,11 @@ class _PortfolioOverviewWidgetState
                 IconButton(
                   icon: const Icon(Icons.refresh),
                   onPressed: () {
-                    ref.invalidate(portfolioSummaryProvider(widget.portfolioId));
+                    ref.invalidate(portfolioSummaryProvider(widget.userId));
                     ref.invalidate(
-                      portfolioAnalyticsWithDefaultsProvider(widget.portfolioId),
+                      portfolioAnalyticsWithDefaultsProvider(widget.userId),
                     );
-                    ref.invalidate(portfolioHoldingsProvider(widget.portfolioId));
+                    ref.invalidate(portfolioHoldingsProvider(widget.userId));
                     widget.onRefresh?.call();
                   },
                 ),
