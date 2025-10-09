@@ -39,27 +39,35 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **SharedPreferences**: For persistent session storage.
 
 ## Deployment
-The application is configured for Replit Reserved VM deployment:
-- **Build Command**: `flutter build web --release` - Compiles the app for production
-- **Run Command**: `dhttpd --host=0.0.0.0 --port=5000 --path=build/web` - Serves the built app
-- **Deployment Type**: Reserved VM - Always-on server with build support
-- **Access**: The app is accessible at port 5000
+The application uses **Static Deployment** with pre-built files (Cloud Run environments don't support Flutter SDK).
 
-### How to Deploy
+### Important: Build Locally First
+Since Replit's deployment environments don't have Flutter SDK, you must build the app in the development environment before deploying:
+```bash
+flutter build web --release
+```
+This creates production-ready static files in `build/web/` directory.
 
-**Option 1: Reserved VM Deployment (Configured)**
-1. Click the **"Deploy"** button at the top of the Replit workspace
-2. The configuration is already set with build and run commands
-3. Click **"Deploy"** to publish your application
-4. You'll receive a public URL to access your deployed app
+### How to Deploy (Static Deployment - Recommended)
 
-**Option 2: Static Deployment (Recommended for Lower Cost)**
-For a Flutter web app, Static Deployment is more cost-effective:
-1. Click **"Deploy"** → Select **"Static Deployment"**
-2. Set **Build command**: `flutter build web --release`
-3. Set **Output directory**: `build/web`
+**Step 1: Build the App (Already Done)**
+The app is already built and ready to deploy. The static files are in `build/web/`.
+
+**Step 2: Configure Static Deployment**
+1. Click **"Deploy"** button at the top of your Replit workspace
+2. Select **"Static Deployment"**
+3. Configure settings:
+   - **Build command**: Leave empty (files are pre-built)
+   - **Output directory**: `build/web`
 4. Click **"Deploy"**
-5. Benefits: Uses CDN, only pay for data transfer, global distribution
+
+**Benefits:**
+- ✅ Global CDN distribution (faster loading worldwide)
+- ✅ Cost-effective (only pay for data transfer)
+- ✅ Automatic caching and scaling
+- ✅ Perfect for Flutter web apps
+
+**Note:** If you make code changes, rebuild with `flutter build web --release` before redeploying.
 
 ### Demo Credentials
 - **Demo Login**: demo@example.com / password123
