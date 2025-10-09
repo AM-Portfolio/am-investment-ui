@@ -43,6 +43,9 @@ class AppConstants {
   static const String defaultEnvironmentName = 'development';
   static const bool defaultDebugMode = true;
   static const String defaultLogLevel = 'debug';
+  
+  /// Google Sign-In Configuration
+  static const String defaultGoogleWebClientId = '';
 }
 
 /// Property keys used in configuration files
@@ -72,6 +75,9 @@ class PropertyKeys {
   static const String environmentName = 'environment.name';
   static const String environmentDebugMode = 'environment.debugMode';
   static const String environmentLogLevel = 'environment.logLevel';
+  
+  // Google Sign-In properties
+  static const String googleWebClientId = 'google.web.clientId';
 }
 
 /// Environment variables keys

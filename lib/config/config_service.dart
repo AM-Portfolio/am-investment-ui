@@ -67,6 +67,12 @@ class ConfigService with PropertyInjection {
         PropertyKeys.appDefaultPort,
         defaultValue: AppConstants.defaultPort,
       ),
+      google: GoogleConfig(
+        webClientId: properties.getValue(
+          PropertyKeys.googleWebClientId,
+          defaultValue: AppConstants.defaultGoogleWebClientId,
+        ),
+      ),
       api: ApiConfig(
         baseUrl: properties.getValue(
           PropertyKeys.apiBaseUrl,

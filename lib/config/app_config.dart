@@ -5,6 +5,7 @@ class AppConfig {
   const AppConfig({
     required this.api,
     required this.environment,
+    required this.google,
     this.appName = AppConstants.appName,
     this.version = AppConstants.appVersion,
     this.debugMode = AppConstants.defaultDebugMode,
@@ -16,6 +17,7 @@ class AppConfig {
   final int defaultPort;
   final ApiConfig api;
   final EnvironmentConfig environment;
+  final GoogleConfig google;
 }
 
 /// API configuration
@@ -76,4 +78,15 @@ class EnvironmentConfig {
   final String name;
   final bool debugMode;
   final String logLevel;
+}
+
+/// Google Sign-In configuration
+class GoogleConfig {
+  const GoogleConfig({
+    required this.webClientId,
+  });
+  final String webClientId;
+  
+  /// Check if Google Sign-In is configured
+  bool get isConfigured => webClientId.isNotEmpty;
 }

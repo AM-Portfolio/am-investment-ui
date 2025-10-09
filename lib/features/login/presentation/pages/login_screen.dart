@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../di/login_providers.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../config/config_service.dart';
 import '../widgets/developer_controls_panel.dart';
 import '../widgets/google_signin_button.dart';
 
@@ -111,7 +112,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     AppLogger.userAction('Google Sign-In attempt', tag: 'LoginScreen');
 
     try {
-      await ref.read(authStateNotifierProvider.notifier).loginWithGoogle();
+      final config = ConfigService.config;
+      final webClientId = config.google.webClientId;
+
+      if (!config.google.isConfigured) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Google Sign-In not configured. Please add your Web Client ID to application.properties. See GOOGLE_SIGNIN_SETUP.md for instructions.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'OK',
+                textColor: Colors.white,
+                onPressed: () {},
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      await ref.read(authStateNotifierProvider.notifier).loginWithGoogle(
+        webClientId: webClientId,
+      );
 
       AppLogger.info('Google Sign-In successful', tag: 'LoginScreen');
 
