@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart';
 import '../../../../../shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart';
+import '../../../../../shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart';
 import '../../../../../shared/widgets/portfolio_overview/models/portfolio_overview_data.dart';
+import '../../../internal/domain/entities/portfolio_summary.dart';
 import '../../../providers/portfolio_providers.dart';
 
 /// Web-specific portfolio analysis page with comprehensive analytics
@@ -71,7 +72,11 @@ class _PortfolioAnalysisWebPageState
                       // Analytics Grid
                       Expanded(
                         flex: 3,
-                        child: _buildAnalyticsGrid(context, analyticsAsync, holdingsAsync),
+                        child: _buildAnalyticsGrid(
+                          context,
+                          analyticsAsync,
+                          holdingsAsync,
+                        ),
                       ),
                     ],
                   ),
@@ -226,7 +231,10 @@ class _PortfolioAnalysisWebPageState
     ),
   );
 
-  Widget _buildPerformanceChart(BuildContext context, summary) => Container(
+  Widget _buildPerformanceChart(
+    BuildContext context,
+    PortfolioSummary summary,
+  ) => Container(
     decoration: BoxDecoration(
       color: Colors.grey.shade50,
       borderRadius: BorderRadius.circular(8),
@@ -244,9 +252,9 @@ class _PortfolioAnalysisWebPageState
           ),
           const SizedBox(height: 8),
           Text(
-            'Total Return: \$${summary.totalReturn?.toStringAsFixed(2) ?? '0.00'}',
+            'Total Return: \$${summary.totalGainLoss.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.green,
+              color: summary.totalGainLoss >= 0 ? Colors.green : Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -282,11 +290,11 @@ class _PortfolioAnalysisWebPageState
         Expanded(
           child: analyticsAsync.when(
             data: (analytics) => holdingsAsync.when(
-              data: (holdings) => _buildAnalyticsCharts(context, analytics, holdings),
+              data: (holdings) =>
+                  _buildAnalyticsCharts(context, analytics, holdings),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Error loading holdings: $error'),
-              ),
+              error: (error, stack) =>
+                  Center(child: Text('Error loading holdings: $error')),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(
@@ -314,42 +322,43 @@ class _PortfolioAnalysisWebPageState
     ),
   );
 
-  Widget _buildAnalyticsCharts(
-    BuildContext context,
-    dynamic analytics,
-    dynamic holdings,
-  ) {
+  Widget _buildAnalyticsCharts(BuildContext context, analytics, holdings) {
     // Extract allocation data
     final sectorAlloc = analytics.analytics.sectorAllocation;
     final marketCapAlloc = analytics.analytics.marketCapAllocation;
-    
-    final sectorData = sectorAlloc != null && sectorAlloc.sectorWeights.isNotEmpty
-        ? sectorAlloc.sectorWeights.map((sector) {
-            return AllocationItem(
-              label: sector.sectorName,
-              value: sector.marketCap,
-              percentage: sector.weightPercentage,
-              count: sector.topStocks.length,
-            );
-          }).toList()
+
+    final sectorData =
+        sectorAlloc != null && sectorAlloc.sectorWeights.isNotEmpty
+        ? sectorAlloc.sectorWeights
+              .map(
+                (sector) => AllocationItem(
+                  label: sector.sectorName,
+                  value: sector.marketCap,
+                  percentage: sector.weightPercentage,
+                  count: sector.topStocks.length,
+                ),
+              )
+              .toList()
         : <AllocationItem>[];
-    
-    final marketCapData = marketCapAlloc != null && marketCapAlloc.segments.isNotEmpty
-        ? marketCapAlloc.segments.map((segment) {
-            return AllocationItem(
-              label: segment.segmentName,
-              value: segment.segmentValue,
-              percentage: segment.weightPercentage,
-              count: segment.numberOfStocks,
-            );
-          }).toList()
+
+    final marketCapData =
+        marketCapAlloc != null && marketCapAlloc.segments.isNotEmpty
+        ? marketCapAlloc.segments
+              .map(
+                (segment) => AllocationItem(
+                  label: segment.segmentName,
+                  value: segment.segmentValue,
+                  percentage: segment.weightPercentage,
+                  count: segment.numberOfStocks,
+                ),
+              )
+              .toList()
         : <AllocationItem>[];
 
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
-      childAspectRatio: 1.0,
       children: [
         _buildSectorAllocationCard(context, sectorData),
         _buildMarketCapCard(context, marketCapData),
@@ -362,88 +371,78 @@ class _PortfolioAnalysisWebPageState
   Widget _buildSectorAllocationCard(
     BuildContext context,
     List<AllocationItem> sectorData,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.pie_chart, color: Colors.blue, size: 20),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Sector Allocation',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+  ) => Card(
+    elevation: 2,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.pie_chart, color: Colors.blue, size: 20),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Sector Allocation',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: sectorData.isEmpty
-                  ? const Center(child: Text('No sector data'))
-                  : AnimatedSectorDonutChart(
-                      allocations: sectorData,
-                      showAnimation: false,
-                    ),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: sectorData.isEmpty
+                ? const Center(child: Text('No sector data'))
+                : AnimatedSectorDonutChart(
+                    allocations: sectorData,
+                    showAnimation: false,
+                  ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildMarketCapCard(
     BuildContext context,
     List<AllocationItem> marketCapData,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.account_balance, color: Colors.purple, size: 20),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Market Cap Distribution',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+  ) => Card(
+    elevation: 2,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.account_balance, color: Colors.purple, size: 20),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Market Cap Distribution',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: marketCapData.isEmpty
-                  ? const Center(child: Text('No market cap data'))
-                  : AnimatedMarketCapChart(
-                      allocations: marketCapData,
-                      showAnimation: false,
-                    ),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: marketCapData.isEmpty
+                ? const Center(child: Text('No market cap data'))
+                : AnimatedMarketCapChart(
+                    allocations: marketCapData,
+                    showAnimation: false,
+                  ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildTopHoldingsCard(BuildContext context, dynamic holdings) {
+  Widget _buildTopHoldingsCard(BuildContext context, holdings) {
     final topHoldings = holdings.holdings.take(5).toList();
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -451,16 +450,13 @@ class _PortfolioAnalysisWebPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                const Icon(Icons.trending_up, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                const Text(
+                Icon(Icons.trending_up, color: Colors.green, size: 20),
+                SizedBox(width: 8),
+                Text(
                   'Top Holdings',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ],
             ),
@@ -534,64 +530,54 @@ class _PortfolioAnalysisWebPageState
     );
   }
 
-  Widget _buildRiskMetricsCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+  Widget _buildRiskMetricsCard(BuildContext context) => Card(
+    elevation: 2,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.security, color: Colors.orange, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Risk Metrics',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Icon(Icons.security, color: Colors.orange, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Risk Metrics',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
+                _buildRiskMetricRow('Portfolio Beta', '1.15', Colors.orange),
+                _buildRiskMetricRow('Sharpe Ratio', '0.92', Colors.green),
+                _buildRiskMetricRow('Volatility', '18.5%', Colors.orange),
+                _buildRiskMetricRow('Max Drawdown', '-12.3%', Colors.red),
               ],
             ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildRiskMetricRow('Portfolio Beta', '1.15', Colors.orange),
-                  _buildRiskMetricRow('Sharpe Ratio', '0.92', Colors.green),
-                  _buildRiskMetricRow('Volatility', '18.5%', Colors.orange),
-                  _buildRiskMetricRow('Max Drawdown', '-12.3%', Colors.red),
-                ],
-              ),
-            ),
-          ],
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _buildRiskMetricRow(String label, String value, Color color) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(label, style: const TextStyle(fontSize: 12)),
+      Text(
+        value,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: color,
         ),
       ),
-    );
-  }
-
-  Widget _buildRiskMetricRow(String label, String value, Color color) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
+    ],
+  );
 
   Widget _buildAnalyticsCard(
     BuildContext context,
