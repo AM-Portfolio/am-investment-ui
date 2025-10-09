@@ -23,6 +23,16 @@ A comprehensive Flutter web application for investment portfolio management with
 - **Environment**: Development (configurable via properties files)
 
 ## Recent Changes
+- **2025-10-09**: Web-Optimized Authentication & Developer Experience
+  - Created modern split-screen login design for web (branding left, form right)
+  - Added Google OAuth "Continue with Google" button (placeholder for integration)
+  - Implemented collapsible Developer Controls Panel with feature flag toggles
+  - Enhanced login UI with gradient backgrounds, decorative elements, and professional typography
+  - Fixed architecture conflicts between old and new auth systems
+  - Streamlined DI to use Riverpod providers exclusively
+  - Post-login navigation routes to portfolio screen via AuthWrapper
+  - Mobile-responsive design with adaptive layouts
+
 - **2025-10-08**: Enhanced Charts & Analytics UI/UX
   - Created AnimatedSectorDonutChart with smooth animations and scrollable legend supporting 20+ fields
   - Created AnimatedMarketCapChart with similar animations and interactivity
