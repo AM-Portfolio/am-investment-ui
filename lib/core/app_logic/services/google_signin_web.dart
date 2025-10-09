@@ -15,7 +15,7 @@ class GoogleSignInWeb {
   static final GoogleSignInWeb _instance = GoogleSignInWeb._internal();
 
   String? _clientId;
-  Completer<Map<String, dynamic>>? _signInCompleter;
+  Completer<Map<String, dynamic>?>? _signInCompleter;
 
   /// Initialize Google Identity Services for web
   void initialize(String clientId) {
@@ -38,10 +38,24 @@ class GoogleSignInWeb {
     });
   }
 
+  /// Cancel the current sign-in attempt
+  void cancelSignIn() {
+    if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+      _signInCompleter!.complete(null);
+      AppLogger.info(
+        'Google Sign-In cancelled by user',
+        tag: 'GoogleSignInWeb',
+      );
+    }
+  }
+
   /// Show Google One Tap prompt programmatically
   void _showGoogleOneTap() {
     if (_clientId == null || _clientId!.isEmpty) {
       AppLogger.error('Client ID not set', tag: 'GoogleSignInWeb');
+      if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+        _signInCompleter!.complete(null);
+      }
       return;
     }
 
@@ -54,6 +68,9 @@ class GoogleSignInWeb {
           'Google Identity Services not loaded',
           tag: 'GoogleSignInWeb',
         );
+        if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+          _signInCompleter!.complete(null);
+        }
         return;
       }
 
@@ -71,10 +88,24 @@ class GoogleSignInWeb {
       // Show the One Tap prompt
       id.callMethod('prompt', [
         js.allowInterop((notification) {
+          final notificationStr = notification.toString();
           AppLogger.info(
-            'Google One Tap notification: ${notification.toString()}',
+            'Google One Tap notification: $notificationStr',
             tag: 'GoogleSignInWeb',
           );
+
+          // Handle dismissal/skip cases - complete with null to stop loading
+          if (notificationStr.contains('skipped') ||
+              notificationStr.contains('dismissed') ||
+              notificationStr.contains('opt_out')) {
+            AppLogger.info(
+              'User dismissed or skipped Google One Tap',
+              tag: 'GoogleSignInWeb',
+            );
+            if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+              _signInCompleter!.complete(null);
+            }
+          }
         }),
       ]);
 
@@ -85,6 +116,9 @@ class GoogleSignInWeb {
         tag: 'GoogleSignInWeb',
         error: e,
       );
+      if (_signInCompleter != null && !_signInCompleter!.isCompleted) {
+        _signInCompleter!.complete(null);
+      }
     }
   }
 
@@ -151,20 +185,34 @@ class GoogleSignInWeb {
     );
 
     // Create a new completer for this sign-in attempt
-    _signInCompleter = Completer<Map<String, dynamic>>();
+    _signInCompleter = Completer<Map<String, dynamic>?>();
 
     // Trigger Google One Tap programmatically
     _showGoogleOneTap();
 
     try {
       // Wait for the user to click the button and complete sign-in
+      // Reduced timeout to 10 seconds so user isn't stuck waiting
       final result = await _signInCompleter!.future.timeout(
-        const Duration(seconds: 120),
+        const Duration(seconds: 10),
         onTimeout: () {
-          AppLogger.warning('Google Sign-In timed out', tag: 'GoogleSignInWeb');
-          throw TimeoutException('Google Sign-In timed out');
+          AppLogger.warning(
+            'Google One Tap did not appear or was dismissed',
+            tag: 'GoogleSignInWeb',
+          );
+          // Return null to allow graceful cancellation
+          return null;
         },
       );
+
+      // If timeout returned null, return null (user cancelled or popup didn't appear)
+      if (result == null) {
+        AppLogger.info(
+          'Google Sign-In cancelled or popup did not appear',
+          tag: 'GoogleSignInWeb',
+        );
+        return null;
+      }
 
       // Decode the JWT credential to get user info
       final credential = result['credential'] as String;
