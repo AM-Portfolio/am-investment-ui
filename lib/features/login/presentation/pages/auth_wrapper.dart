@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../portfolio/presentation/pages/portfolio_screen.dart';
-import '../../../../shared/widgets/layouts/web_layout.dart';
-import '../../../../shared/widgets/layouts/mobile_layout.dart';
+
+import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/platform_utils.dart';
 import '../../../../di/login_providers.dart';
+import '../../../../shared/widgets/layouts/mobile_layout.dart';
+import '../../../../shared/widgets/layouts/web_layout.dart';
+import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import 'login_screen.dart';
 
 /// Authentication-aware wrapper that manages authentication state
@@ -23,15 +25,51 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _initializeAuth();
+    // Use addPostFrameCallback to ensure the widget tree is fully built before modifying providers
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeAuth());
   }
 
   Future<void> _initializeAuth() async {
-    // Initialize authentication state and check for existing session
-    await ref.read(authStateNotifierProvider.notifier).validateSession();
-    setState(() {
-      _isInitialized = true;
-    });
+    AppLogger.info(
+      'AuthWrapper: Initializing authentication system...',
+      tag: 'AuthWrapper',
+    );
+
+    try {
+      // Initialize authentication state and check for existing session
+      await ref.read(authStateNotifierProvider.notifier).validateSession();
+
+      final isAuthenticated = ref.read(isAuthenticatedProvider);
+      final user = ref.read(currentUserProvider);
+
+      if (isAuthenticated && user != null) {
+        AppLogger.info(
+          'AuthWrapper: User session restored successfully - ${user.email}',
+          tag: 'AuthWrapper',
+        );
+      } else {
+        AppLogger.info(
+          'AuthWrapper: No existing session found, showing login',
+          tag: 'AuthWrapper',
+        );
+      }
+    } catch (error) {
+      AppLogger.error(
+        'AuthWrapper: Failed to initialize authentication',
+        tag: 'AuthWrapper',
+        error: error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+      AppLogger.debug(
+        'AuthWrapper: Initialization complete',
+        tag: 'AuthWrapper',
+      );
+    }
   }
 
   Future<void> _handleLogin(String userId) async {
@@ -43,7 +81,22 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   }
 
   Future<void> _handleLogout() async {
-    await ref.read(authStateNotifierProvider.notifier).logout();
+    AppLogger.info('AuthWrapper: User initiated logout', tag: 'AuthWrapper');
+
+    try {
+      await ref.read(authStateNotifierProvider.notifier).logout();
+      AppLogger.info(
+        'AuthWrapper: Logout completed successfully',
+        tag: 'AuthWrapper',
+      );
+    } catch (error) {
+      AppLogger.error(
+        'AuthWrapper: Logout failed',
+        tag: 'AuthWrapper',
+        error: error,
+      );
+    }
+
     setState(() {
       _currentPage = 'Portfolio';
     });
