@@ -78,4 +78,33 @@ class Validators {
     
     return null;
   }
+
+  /// Check if email is valid
+  static bool isValidEmail(String email) {
+    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+        .hasMatch(email);
+  }
+
+  /// Check if phone is valid (with country code)
+  static bool isValidPhone(String phone) {
+    // Remove all non-digit characters except +
+    final digitsOnly = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    // Should start with + and have at least 10 digits after country code
+    return RegExp(r'^\+\d{10,15}$').hasMatch(digitsOnly);
+  }
+
+  /// Check if string has uppercase letter
+  static bool hasUpperCase(String value) {
+    return RegExp(r'[A-Z]').hasMatch(value);
+  }
+
+  /// Check if string has lowercase letter
+  static bool hasLowerCase(String value) {
+    return RegExp(r'[a-z]').hasMatch(value);
+  }
+
+  /// Check if string has digit
+  static bool hasDigit(String value) {
+    return RegExp(r'\d').hasMatch(value);
+  }
 }

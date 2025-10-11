@@ -79,6 +79,17 @@ abstract class AuthRepository {
   /// Returns [AuthResult] indicating success or failure
   Future<AuthResult> requestPasswordReset(String email);
 
+  /// Reset password with token
+  ///
+  /// [resetToken] Reset token from email
+  /// [newPassword] New password
+  ///
+  /// Returns [AuthResult] indicating success or failure
+  Future<AuthResult> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  });
+
   /// Dispose resources and close streams
   void dispose();
 }
