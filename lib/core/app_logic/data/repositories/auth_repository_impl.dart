@@ -1,12 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
-import '../../domain/entities/user.dart';
+
+import '../../../../config/config_service.dart';
+import '../../../utils/logger.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/auth_state.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_data_source.dart';
 import '../datasources/auth_storage_data_source.dart';
-import '../../../utils/logger.dart';
 
 /// Implementation of AuthRepository that combines multiple data sources
 ///
@@ -153,12 +156,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
       AuthDataResponse response;
 
-      // In debug mode or for test users, try local data source first
-      if (kDebugMode ||
-          identifier.contains('test') ||
-          identifier.contains('demo')) {
+      // Check configuration to decide whether to use mock data or real API
+      final useMockData = ConfigService.config.api.useMockData;
+
+      if (useMockData &&
+          (kDebugMode ||
+              identifier.contains('test') ||
+              identifier.contains('demo'))) {
         AppLogger.debug(
-          'Using local data source for authentication',
+          'Using local data source for authentication (mock mode enabled)',
           tag: 'AuthRepositoryImpl',
         );
 
@@ -169,8 +175,8 @@ class AuthRepositoryImpl implements AuthRepository {
             tag: 'AuthRepositoryImpl',
           );
         } catch (e) {
-          // If local auth fails in debug mode, don't try remote
-          if (kDebugMode) {
+          // If local auth fails and we're in strict debug mode, don't try remote
+          if (kDebugMode && identifier.contains('test')) {
             AppLogger.warning(
               'Local authentication failed in debug mode',
               tag: 'AuthRepositoryImpl',
@@ -194,9 +200,9 @@ class AuthRepositoryImpl implements AuthRepository {
             return AuthResult.failure(error: e.toString());
           }
 
-          // In release mode, fall back to remote
+          // Fall back to remote API
           AppLogger.debug(
-            'Local authentication failed, trying remote',
+            'Local authentication failed, trying remote API',
             tag: 'AuthRepositoryImpl',
           );
           response = await _remoteDataSource.login(identifier, password);
@@ -206,9 +212,9 @@ class AuthRepositoryImpl implements AuthRepository {
           );
         }
       } else {
-        // Production mode - use remote data source
+        // Use real API - either mock is disabled or production mode
         AppLogger.debug(
-          'Using remote data source for authentication',
+          'Using remote API for authentication',
           tag: 'AuthRepositoryImpl',
         );
         response = await _remoteDataSource.login(identifier, password);
@@ -679,10 +685,7 @@ class AuthRepositoryImpl implements AuthRepository {
         newPassword: newPassword,
       );
 
-      AppLogger.info(
-        'Password reset successful',
-        tag: 'AuthRepositoryImpl',
-      );
+      AppLogger.info('Password reset successful', tag: 'AuthRepositoryImpl');
       AppLogger.methodExit(
         'resetPassword',
         tag: 'AuthRepositoryImpl',

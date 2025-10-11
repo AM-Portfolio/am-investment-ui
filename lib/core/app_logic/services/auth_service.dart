@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
+import '../../../config/config_service.dart';
 import '../../utils/logger.dart';
 import '../data/datasources/auth_local_data_source.dart';
 import '../data/datasources/auth_remote_data_source.dart';
@@ -43,7 +44,7 @@ class AuthService {
     // Initialize data sources
     final localDataSource = AuthLocalDataSource();
     final remoteDataSource = AuthRemoteDataSource(
-      baseUrl: 'https://api.munish.org', // TODO: Get from environment config
+      baseUrl: ConfigService.config.api.baseUrl,
       httpClient: http.Client(),
     );
     final storageDataSource = AuthStorageDataSource();

@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
-import '../../domain/entities/user.dart';
+
 import '../../../utils/logger.dart';
+import '../../domain/entities/user.dart';
 import '../mappers/auth_mapper.dart';
 import 'auth_data_source.dart';
 
@@ -31,24 +33,24 @@ class AuthRemoteDataSource implements AuthDataSource {
           : 'username';
 
       AppLogger.debug(
-        'API request prepared for $identifierType to $baseUrl/auth/login',
+        'API request prepared for $identifierType to $baseUrl/api/v1/auth/login',
         tag: 'AuthRemoteDataSource',
       );
       AppLogger.apiRequest(
         'POST',
-        '$baseUrl/auth/login',
+        '$baseUrl/api/v1/auth/login',
         tag: 'AuthRemoteDataSource',
       );
 
       final response = await httpClient.post(
-        Uri.parse('$baseUrl/auth/login'),
+        Uri.parse('$baseUrl/api/v1/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
 
       AppLogger.apiResponse(
         'POST',
-        '$baseUrl/auth/login',
+        '$baseUrl/api/v1/auth/login',
         response.statusCode,
         tag: 'AuthRemoteDataSource',
       );
