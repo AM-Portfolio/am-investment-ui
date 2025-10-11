@@ -24,10 +24,10 @@ class AuthConstants {
   static const Duration refreshTokenExpiryDuration = Duration(days: 30);
 
   // API endpoints (will be replaced with real ones)
-  static const String loginEndpoint = '/api/auth/login';
-  static const String googleLoginEndpoint = '/api/auth/google';
-  static const String refreshTokenEndpoint = '/api/auth/refresh';
-  static const String logoutEndpoint = '/api/auth/logout';
+  static const String loginEndpoint = '/api/v1/auth/login';
+  static const String googleLoginEndpoint = '/api/v1/auth/google';
+  static const String refreshTokenEndpoint = '/api/v1/auth/refresh';
+  static const String logoutEndpoint = '/api/v1/auth/logout';
 
   // Shared preferences keys
   static const String isLoggedInKey = 'is_logged_in';
