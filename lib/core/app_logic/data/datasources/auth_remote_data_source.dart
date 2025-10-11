@@ -56,7 +56,32 @@ class AuthRemoteDataSource implements AuthDataSource {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        AppLogger.debug(
+          'Response body: ${response.body}',
+          tag: 'AuthRemoteDataSource',
+        );
+
+        if (response.body.isEmpty) {
+          throw Exception('Empty response body from server');
+        }
+
+        final dynamic rawData;
+        try {
+          rawData = jsonDecode(response.body);
+        } catch (e) {
+          AppLogger.error(
+            'Failed to parse JSON response: ${response.body}',
+            tag: 'AuthRemoteDataSource',
+            error: e,
+          );
+          throw Exception('Invalid JSON response from server');
+        }
+
+        if (rawData == null) {
+          throw Exception('Null response from server');
+        }
+
+        final data = rawData as Map<String, dynamic>;
 
         // Use mapper to convert JSON to AuthDataResponse
         final authResponse = AuthMapper.fromJson(data);

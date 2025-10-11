@@ -13,17 +13,35 @@ class AuthMapper {
   }
 
   /// Convert AuthDataResponse from JSON (bypassing DTOs for simpler cases)
-  static AuthDataResponse fromJson(Map<String, dynamic> json) =>
-      AuthDataResponse(
-        user: UserMapper.fromJson(json['user'] as Map<String, dynamic>),
-        token: json['access_token'] as String? ?? json['token'] as String,
-        refreshToken: json['refresh_token'] as String?,
-        expiresAt: json['expires_at'] != null
-            ? DateTime.parse(json['expires_at'] as String)
-            : json['expires_in'] != null
-            ? DateTime.now().add(Duration(seconds: json['expires_in'] as int))
-            : null,
-      );
+  static AuthDataResponse fromJson(Map<String, dynamic> json) {
+    // Handle the actual API response format where user fields are at top level
+    Map<String, dynamic> userJson;
+
+    if (json.containsKey('user') && json['user'] is Map<String, dynamic>) {
+      // Standard format with nested user object
+      userJson = json['user'] as Map<String, dynamic>;
+    } else {
+      // API format with user fields at top level
+      userJson = {
+        'id': json['user_id'] as String,
+        'email': json['email'] as String,
+        'username': json['username'] as String,
+        'status': json['status'] as String?,
+        'scopes': json['scopes'] as List<dynamic>?,
+      };
+    }
+
+    return AuthDataResponse(
+      user: UserMapper.fromJson(userJson),
+      token: json['access_token'] as String? ?? json['token'] as String,
+      refreshToken: json['refresh_token'] as String?,
+      expiresAt: json['expires_at'] != null
+          ? DateTime.parse(json['expires_at'] as String)
+          : json['expires_in'] != null
+          ? DateTime.now().add(Duration(seconds: json['expires_in'] as int))
+          : null,
+    );
+  }
 
   /// Convert login request to JSON
   static Map<String, dynamic> loginRequestToJson(

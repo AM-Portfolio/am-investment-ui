@@ -352,7 +352,9 @@ class WebLayout extends StatelessWidget {
   String _getInitials(String name) {
     if (name.isEmpty) return 'U';
 
-    final names = name.trim().split(' ');
+    final names = name.trim().split(' ').where((n) => n.isNotEmpty).toList();
+    if (names.isEmpty) return 'U';
+
     if (names.length == 1) {
       return names[0][0].toUpperCase();
     }
@@ -363,6 +365,11 @@ class WebLayout extends StatelessWidget {
   /// Get first name from full name
   String _getFirstName(String fullName) {
     if (fullName.isEmpty) return 'User';
-    return fullName.trim().split(' ')[0];
+    final names = fullName
+        .trim()
+        .split(' ')
+        .where((n) => n.isNotEmpty)
+        .toList();
+    return names.isNotEmpty ? names[0] : 'User';
   }
 }

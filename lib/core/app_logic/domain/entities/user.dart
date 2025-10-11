@@ -25,7 +25,12 @@ class User with _$User {
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   /// Get user's full name
-  String get fullName => '$firstName $lastName';
+  String get fullName {
+    final name = '$firstName $lastName'.trim();
+    if (name.isNotEmpty) return name;
+    if (userName.isNotEmpty) return userName;
+    return email.split('@').first; // Use email prefix as fallback
+  }
 
   /// Check if user has a specific role
   bool hasRole(String role) => roles.contains(role);
