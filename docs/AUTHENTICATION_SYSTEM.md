@@ -47,13 +47,25 @@ Standard email and password authentication returning user details, permissions s
 Social login integration with Google OAuth requiring Google ID and email, supporting new user creation and account linking.
 **API Reference:** `lib/assets/google-login.txt`
 
-### Forgot Password (Future)
-Password reset initiation endpoint sending secure reset tokens via email for account recovery workflows.
-**API Reference:** `lib/assets/forgot-password.txt`
+### User Registration (UI Complete, Integration Pending)
+New user signup with email, password, and phone validation. Registration screen is fully implemented with comprehensive form validation.
+**API Reference:** `lib/assets/mock_data/user/register.txt`
+**UI Location:** `lib/features/authentication/presentation/pages/register_page.dart`
+**Status:** UI complete, awaiting use case integration with AuthCubit
 
-### Reset Password (Future)
-Password reset completion endpoint accepting reset tokens and new password for secure account recovery.
-**API Reference:** `lib/assets/reset-password.txt`
+### Forgot Password (UI Complete, Integration Pending)
+Password reset initiation endpoint sending secure reset tokens via email for account recovery workflows. Forgot password screen is fully implemented.
+**API Reference:** `lib/assets/mock_data/user/forgot-password.txt`
+**UI Location:** `lib/features/authentication/presentation/pages/forgot_password_page.dart`
+**Status:** UI complete, awaiting use case integration with AuthCubit
+
+### Reset Password (UI Complete, Integration Pending)
+Password reset completion endpoint accepting reset tokens and new password for secure account recovery. Reset password screen is fully implemented.
+**API Reference:** `lib/assets/mock_data/user/reset-password.txt`
+**UI Location:** `lib/features/authentication/presentation/pages/reset_password_page.dart`
+**Status:** UI complete, awaiting use case integration with AuthCubit
+
+**⚠️ Important Note:** Registration and password reset features have complete UI screens and business logic use cases, but are not yet integrated with the AuthCubit due to dual auth system architecture. See `AUTHENTICATION_IMPLEMENTATION_STATUS.md` for details and next steps.
 
 ---
 
