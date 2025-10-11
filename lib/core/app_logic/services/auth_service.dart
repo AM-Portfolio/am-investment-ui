@@ -1,19 +1,20 @@
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
-import '../domain/entities/auth_result.dart';
-import '../domain/entities/user.dart';
-import '../domain/usecases/login_use_case.dart';
-import '../domain/usecases/register_use_case.dart';
-import '../domain/usecases/logout_use_case.dart';
-import '../domain/usecases/get_auth_state_use_case.dart';
-import '../domain/usecases/get_test_users_use_case.dart';
-import '../data/repositories/auth_repository_impl.dart';
+
+import '../../utils/logger.dart';
 import '../data/datasources/auth_local_data_source.dart';
 import '../data/datasources/auth_remote_data_source.dart';
 import '../data/datasources/auth_storage_data_source.dart';
+import '../data/repositories/auth_repository_impl.dart';
+import '../domain/entities/auth_result.dart';
 import '../domain/entities/auth_state.dart';
-import '../../utils/logger.dart';
+import '../domain/entities/user.dart';
+import '../domain/usecases/get_auth_state_use_case.dart';
+import '../domain/usecases/get_test_users_use_case.dart';
+import '../domain/usecases/login_use_case.dart';
+import '../domain/usecases/logout_use_case.dart';
+import '../domain/usecases/register_use_case.dart';
 
 /// Clean architecture authentication service
 ///
@@ -42,7 +43,7 @@ class AuthService {
     // Initialize data sources
     final localDataSource = AuthLocalDataSource();
     final remoteDataSource = AuthRemoteDataSource(
-      baseUrl: 'https://api.example.com', // TODO: Get from environment config
+      baseUrl: 'https://api.munish.org', // TODO: Get from environment config
       httpClient: http.Client(),
     );
     final storageDataSource = AuthStorageDataSource();

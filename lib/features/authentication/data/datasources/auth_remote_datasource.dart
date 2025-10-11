@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../../config/environment.dart';
 import '../../../../core/constants/auth_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/auth_result_model.dart';
@@ -14,12 +15,17 @@ class AuthRemoteDataSource implements AuthDataSource {
   @override
   Future<AuthResultModel> emailLogin(String email, String password) async {
     try {
+      final fullUrl =
+          '${EnvironmentConfig.apiBaseUrl}${AuthConstants.loginEndpoint}';
       final response = await _dio.post(
-        AuthConstants.loginEndpoint,
+        fullUrl,
         data: {'email': email, 'password': password},
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
+        // Log the response for debugging
+        print('Login API Response: ${response.data}');
         return AuthResultModel.fromJson(response.data);
       } else {
         throw ServerException(
@@ -28,12 +34,22 @@ class AuthRemoteDataSource implements AuthDataSource {
         );
       }
     } on DioException catch (e) {
+      // More detailed error handling
+      print('Login API Error: ${e.response?.data}');
+      print('Status Code: ${e.response?.statusCode}');
+
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
         throw NetworkException(AuthConstants.networkError);
       }
+
+      var errorMessage = AuthConstants.serverError;
+      if (e.response?.data != null && e.response!.data is Map) {
+        errorMessage = e.response!.data['message'] ?? errorMessage;
+      }
+
       throw ServerException(
-        e.message ?? AuthConstants.serverError,
+        errorMessage,
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -42,7 +58,9 @@ class AuthRemoteDataSource implements AuthDataSource {
   @override
   Future<AuthResultModel> googleLogin() async {
     try {
-      final response = await _dio.post(AuthConstants.googleLoginEndpoint);
+      final fullUrl =
+          '${EnvironmentConfig.apiBaseUrl}${AuthConstants.googleLoginEndpoint}';
+      final response = await _dio.post(fullUrl);
 
       if (response.statusCode == 200) {
         return AuthResultModel.fromJson(response.data);
@@ -73,7 +91,9 @@ class AuthRemoteDataSource implements AuthDataSource {
   @override
   Future<void> logout() async {
     try {
-      await _dio.post(AuthConstants.logoutEndpoint);
+      final fullUrl =
+          '${EnvironmentConfig.apiBaseUrl}${AuthConstants.logoutEndpoint}';
+      await _dio.post(fullUrl);
     } on DioException catch (e) {
       // Log but don't throw - logout should always succeed locally
       print('Logout API call failed: ${e.message}');
@@ -83,8 +103,10 @@ class AuthRemoteDataSource implements AuthDataSource {
   @override
   Future<AuthTokensModel> refreshToken(String refreshToken) async {
     try {
+      final fullUrl =
+          '${EnvironmentConfig.apiBaseUrl}${AuthConstants.refreshTokenEndpoint}';
       final response = await _dio.post(
-        AuthConstants.refreshTokenEndpoint,
+        fullUrl,
         data: {'refreshToken': refreshToken},
       );
 

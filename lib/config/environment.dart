@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 
 enum Environment { development, preprod, production }
@@ -45,24 +43,11 @@ class EnvironmentConfig {
   static String get apiBaseUrl {
     switch (environment) {
       case Environment.development:
-        // For development, use platform-specific URLs
-        if (kIsWeb) {
-          return 'http://localhost:8072'; // Web uses localhost directly
-        } else if (Platform.isAndroid) {
-          return 'http://10.0.2.2:8082'; // Android emulator special IP for host machine
-        } else {
-          return 'http://localhost:8082'; // iOS simulator and desktop
-        }
+        return 'https://api.munish.org'; // Your production API
       case Environment.preprod:
-        return 'https://preprod-api.example.com';
+        return 'https://api.munish.org'; // Your production API
       case Environment.production:
-        if (kIsWeb) {
-          return 'http://localhost:8072'; // Web uses localhost directly
-        } else if (Platform.isAndroid) {
-          return 'http://10.0.2.2:8082'; // Android emulator special IP for host machine
-        } else {
-          return 'http://localhost:8082'; // iOS simulator and desktop
-        }
+        return 'https://api.munish.org'; // Your production API
     }
   }
 

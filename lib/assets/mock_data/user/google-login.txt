@@ -1,0 +1,23 @@
+curl --location 'https://api.munish.org/user/api/v1/auth/google' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "google_id": "928",
+  "email": "google.user.1760171378@gmail.com"
+}'
+
+-----------------------------------------
+
+
+{
+    "user_id": "1e1a3b69-419c-4ca4-a5dc-fd2b62135098",
+    "email": "google.user.1760171378@gmail.com",
+    "username": "google.user.1760171378@gmail.com",
+    "status": "active",
+    "scopes": [
+        "read",
+        "write",
+        "profile"
+    ],
+    "is_new_user": true,
+    "email_verified": true
+}

@@ -1,0 +1,23 @@
+curl --location 'https://api.munish.org/user/api/v1/auth/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "email": "newuser.1760156769@example.com",
+  "password": "SecurePassword123!"
+}'
+
+
+
+-----------------------------------------
+
+
+{
+    "user_id": "878e3406-f250-4f71-98c2-14a1fe54291f",
+    "username": "newuser.1760156769@example.com",
+    "email": "newuser.1760156769@example.com",
+    "status": "active",
+    "scopes": [
+        "read",
+        "write"
+    ],
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjAxNzI4NDEsImlhdCI6MTc2MDE3MTA0MSwic3ViIjoiODc4ZTM0MDYtZjI1MC00ZjcxLTk4YzItMTRhMWZlNTQyOTFmIiwidXNlcm5hbWUiOiJuZXd1c2VyLjE3NjAxNTY3NjlAZXhhbXBsZS5jb20iLCJlbWFpbCI6Im5ld3VzZXIuMTc2MDE1Njc2OUBleGFtcGxlLmNvbSIsInNjb3BlcyI6WyJyZWFkIiwid3JpdGUiXX0.h4PfxzDkiy3nh7TSt5yonSw7TK43Gw7_nL_UrJiv3Ps"
+}
