@@ -89,4 +89,53 @@ class AuthCubit extends Cubit<AuthState> {
       }
     });
   }
+
+  /// Register new user
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    required String confirmPassword,
+    String? phone,
+  }) async {
+    emit(const AuthLoading());
+
+    try {
+      // TODO: Implement registration with proper use case integration
+      // Critical: Do not emit false success - show clear error instead
+      emit(const AuthError('Registration feature is not yet fully implemented. Please use existing login credentials.'));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  /// Request password reset
+  Future<void> forgotPassword(String email) async {
+    emit(const AuthLoading());
+
+    try {
+      // TODO: Implement forgot password with proper use case integration
+      // Critical: Do not emit false success without backend verification
+      emit(const AuthError('Password reset feature is not yet fully implemented. Please contact support to reset your password.'));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  /// Reset password with token
+  Future<void> resetPassword({
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    emit(const AuthLoading());
+
+    try {
+      // TODO: Implement reset password with proper use case integration
+      // Critical: Do not emit false success without backend verification
+      emit(const AuthError('Password reset feature is not yet fully implemented. Please contact support to reset your password.'));
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
 }
