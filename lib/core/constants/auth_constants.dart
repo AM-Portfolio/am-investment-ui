@@ -25,7 +25,12 @@ class AuthConstants {
 
   // API endpoints (relative paths - base URL comes from environment config)
   static const String loginEndpoint = '/user/api/v1/auth/login';
+  static const String registerEndpoint = '/user/api/v1/auth/register';
   static const String googleLoginEndpoint = '/user/api/v1/auth/google';
+  static const String forgotPasswordEndpoint =
+      '/user/api/v1/auth/forgot-password';
+  static const String resetPasswordEndpoint =
+      '/user/api/v1/auth/reset-password';
   static const String refreshTokenEndpoint = '/user/api/v1/auth/refresh';
   static const String logoutEndpoint = '/user/api/v1/auth/logout';
 
