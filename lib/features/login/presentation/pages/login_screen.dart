@@ -431,6 +431,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
+
+          const SizedBox(height: 24),
+
+          // Forgot password link
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed('/forgot-password');
+            },
+            child: const Text(
+              'Forgot Password?',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Register link
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Don't have an account?",
+                style: TextStyle(fontSize: 14),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/register');
+                },
+                child: const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
           // Developer controls panel
           if (kIsWeb) const DeveloperControlsPanel(),
         ],

@@ -65,6 +65,17 @@ abstract class AuthDataSource {
   /// Returns true on success, throws exception on failure
   Future<bool> requestPasswordReset(String email);
 
+  /// Reset password with token
+  ///
+  /// [resetToken] Reset token from email
+  /// [newPassword] New password
+  ///
+  /// Returns true on success, throws exception on failure
+  Future<bool> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  });
+
   /// Get list of test users
   ///
   /// Returns list of test users for development/demo purposes

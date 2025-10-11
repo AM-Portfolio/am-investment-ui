@@ -6,9 +6,9 @@ import '../../../../core/utils/validators.dart';
 
 /// Reset password page for completing password reset
 class ResetPasswordPage extends StatelessWidget {
-  const ResetPasswordPage({super.key, required this.resetToken});
+  const ResetPasswordPage({super.key, this.resetToken});
   
-  final String resetToken;
+  final String? resetToken;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -126,9 +126,9 @@ class ResetPasswordPage extends StatelessWidget {
 
 /// Reset password form widget
 class ResetPasswordForm extends StatefulWidget {
-  const ResetPasswordForm({super.key, required this.resetToken});
+  const ResetPasswordForm({super.key, this.resetToken});
   
-  final String resetToken;
+  final String? resetToken;
 
   @override
   State<ResetPasswordForm> createState() => _ResetPasswordFormState();
@@ -136,13 +136,23 @@ class ResetPasswordForm extends StatefulWidget {
 
 class _ResetPasswordFormState extends State<ResetPasswordForm> {
   final _formKey = GlobalKey<FormState>();
+  final _tokenController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.resetToken != null) {
+      _tokenController.text = widget.resetToken!;
+    }
+  }
+
+  @override
   void dispose() {
+    _tokenController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -151,7 +161,7 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthCubit>().resetPassword(
-        resetToken: widget.resetToken,
+        resetToken: _tokenController.text,
         newPassword: _passwordController.text,
         confirmPassword: _confirmPasswordController.text,
       );
@@ -164,6 +174,24 @@ class _ResetPasswordFormState extends State<ResetPasswordForm> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Reset Token
+        TextFormField(
+          controller: _tokenController,
+          decoration: const InputDecoration(
+            labelText: 'Reset Token',
+            prefixIcon: Icon(Icons.vpn_key),
+            border: OutlineInputBorder(),
+            hintText: 'Enter token from email',
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter the reset token from your email';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+
         // New Password
         TextFormField(
           controller: _passwordController,

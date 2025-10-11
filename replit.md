@@ -21,7 +21,11 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Configuration**: Uses environment-specific property files (`application.properties`, `application-dev.properties`, `application-prod.properties`) for managing settings. The `ConfigService` and `AppConfig` classes provide type-safe access to configuration values, including API endpoints, environment settings, and third-party service credentials (like Google Web Client ID).
 
 ### Feature Specifications
-- **User Authentication**: Login, registration, Google OAuth.
+- **User Authentication**: Login, registration (UI only), forgot password (UI only), Google OAuth.
+  - **Registration Screen**: Full signup form with validation (awaits backend integration)
+  - **Forgot Password**: Email input screen with reset instructions (awaits backend integration)
+  - **Reset Password**: Token-based password reset form (awaits backend integration)
+  - **Navigation**: "Forgot Password?" and "Create Account" links on login screen
 - **Portfolio Analytics**: Sector allocation, market cap distribution, top holdings, and risk metrics.
 - **Heatmap Visualizations**: Placeholder, planned for future iterations.
 - **Holdings Management**: Comprehensive display with sorting, filtering, and configurable views (table, card).
@@ -73,3 +77,11 @@ The app is already built and ready to deploy. The static files are in `build/web
 - **Demo Login**: demo@example.com / password123
 - **Test User**: ssd2658 / password
 - **Google Sign-In**: Available on mobile/native platforms (web requires additional setup)
+
+### Authentication Navigation
+The login screen now includes:
+- **"Forgot Password?"** link - navigates to password reset request screen
+- **"Create Account"** link - navigates to user registration screen
+- Routes configured: `/register`, `/forgot-password`, `/reset-password`
+
+**Note**: Registration and password reset UIs are complete but show "not implemented" messages until backend integration is complete. See `AUTHENTICATION_IMPLEMENTATION_STATUS.md` for details.

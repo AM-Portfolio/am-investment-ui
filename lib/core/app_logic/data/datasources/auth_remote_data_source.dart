@@ -493,6 +493,85 @@ class AuthRemoteDataSource implements AuthDataSource {
   }
 
   @override
+  Future<bool> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    AppLogger.methodEntry(
+      'resetPassword',
+      tag: 'AuthRemoteDataSource',
+      params: {'resetToken': resetToken},
+    );
+
+    try {
+      final requestBody = {
+        'resetToken': resetToken,
+        'newPassword': newPassword,
+      };
+
+      AppLogger.apiRequest(
+        'POST',
+        '$baseUrl/auth/password-reset/confirm',
+        tag: 'AuthRemoteDataSource',
+      );
+
+      final response = await httpClient.post(
+        Uri.parse('$baseUrl/auth/password-reset/confirm'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      AppLogger.apiResponse(
+        'POST',
+        '$baseUrl/auth/password-reset/confirm',
+        response.statusCode,
+        tag: 'AuthRemoteDataSource',
+      );
+
+      if (response.statusCode == 200) {
+        AppLogger.info(
+          'Password reset successful',
+          tag: 'AuthRemoteDataSource',
+        );
+        AppLogger.methodExit(
+          'resetPassword',
+          tag: 'AuthRemoteDataSource',
+          result: 'success',
+        );
+        return true;
+      } else {
+        final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+        final error = AuthMapper.parseApiError(errorData);
+        AppLogger.warning(
+          'Password reset failed: $error (Status: ${response.statusCode})',
+          tag: 'AuthRemoteDataSource',
+        );
+        AppLogger.methodExit(
+          'resetPassword',
+          tag: 'AuthRemoteDataSource',
+          result: 'api_error',
+        );
+        throw Exception(error);
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+
+      AppLogger.error(
+        'Network error during password reset',
+        tag: 'AuthRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit(
+        'resetPassword',
+        tag: 'AuthRemoteDataSource',
+        result: 'network_error',
+      );
+      throw Exception('Network error: Unable to connect to server');
+    }
+  }
+
+  @override
   Future<List<User>> getTestUsers() async {
     AppLogger.methodEntry('getTestUsers', tag: 'AuthRemoteDataSource');
 

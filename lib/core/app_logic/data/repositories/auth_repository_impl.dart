@@ -662,6 +662,50 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthResult> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    AppLogger.methodEntry(
+      'resetPassword',
+      tag: 'AuthRepositoryImpl',
+      params: {'resetToken': resetToken},
+    );
+
+    try {
+      final dataSource = kDebugMode ? _localDataSource : _remoteDataSource;
+      await dataSource.resetPassword(
+        resetToken: resetToken,
+        newPassword: newPassword,
+      );
+
+      AppLogger.info(
+        'Password reset successful',
+        tag: 'AuthRepositoryImpl',
+      );
+      AppLogger.methodExit(
+        'resetPassword',
+        tag: 'AuthRepositoryImpl',
+        result: 'success',
+      );
+      return const AuthResult.success();
+    } catch (e) {
+      final errorMessage = e.toString().replaceFirst('Exception: ', '');
+      AppLogger.error(
+        'Password reset failed',
+        tag: 'AuthRepositoryImpl',
+        error: e,
+      );
+      AppLogger.methodExit(
+        'resetPassword',
+        tag: 'AuthRepositoryImpl',
+        result: 'failure',
+      );
+      return AuthResult.failure(error: errorMessage);
+    }
+  }
+
+  @override
   void dispose() {
     AppLogger.info('Disposing AuthRepository', tag: 'AuthRepositoryImpl');
     _authStateController.close();

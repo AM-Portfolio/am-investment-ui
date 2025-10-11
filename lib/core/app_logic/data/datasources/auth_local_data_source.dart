@@ -303,6 +303,31 @@ class AuthLocalDataSource implements AuthDataSource {
   }
 
   @override
+  Future<bool> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    AppLogger.methodEntry(
+      'resetPassword',
+      tag: 'AuthLocalDataSource',
+      params: {'resetToken': resetToken},
+    );
+
+    // For demo mode, always succeed
+    AppLogger.info(
+      'Demo mode: Password reset simulated',
+      tag: 'AuthLocalDataSource',
+    );
+
+    AppLogger.methodExit(
+      'resetPassword',
+      tag: 'AuthLocalDataSource',
+      result: 'success',
+    );
+    return true;
+  }
+
+  @override
   Future<List<User>> getTestUsers() async {
     AppLogger.methodEntry('getTestUsers', tag: 'AuthLocalDataSource');
 
