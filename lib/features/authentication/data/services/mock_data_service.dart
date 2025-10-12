@@ -35,7 +35,7 @@ class MockDataService {
   /// Load test users from default JSON
   Future<List<Map<String, dynamic>>> loadTestUsers() async {
     final response = await rootBundle.loadString(
-      'assets/test_users.json',
+      'lib/assets/test_users.json',
     );
     final Map<String, dynamic> data = json.decode(response);
     final List<dynamic> users = data['users'];

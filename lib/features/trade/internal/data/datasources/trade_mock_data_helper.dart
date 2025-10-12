@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart' show rootBundle;
+
 import '../../../../../core/utils/logger.dart';
-import '../dtos/trade_portfolio_dto.dart';
-import '../dtos/trade_holding_dto.dart';
-import '../dtos/trade_summary_dto.dart';
 import '../dtos/trade_calendar_dto.dart';
+import '../dtos/trade_holding_dto.dart';
+import '../dtos/trade_portfolio_dto.dart';
+import '../dtos/trade_summary_dto.dart';
 
 /// Helper class to load mock trade data from JSON files
 class TradeMockDataHelper {
@@ -41,7 +43,7 @@ class TradeMockDataHelper {
       );
 
       final jsonString = await rootBundle.loadString(
-        'lib/assets/mock_data/trade/trade_holdings.json',
+        'lib/assets/mock_data/trade/holdings/trade_holdings.json',
       );
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
 
@@ -89,7 +91,7 @@ class TradeMockDataHelper {
       );
 
       final jsonString = await rootBundle.loadString(
-        'lib/assets/mock_data/trade/trade_calendar.json',
+        'lib/assets/mock_data/trade/calander/trade_calendar.json',
       );
       final jsonData = json.decode(jsonString) as Map<String, dynamic>;
 
