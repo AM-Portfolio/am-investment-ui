@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/templates/trade_holdings_template.dart';
 import '../../components/templates/trade_summary_template.dart';
 import '../../../providers/trade_internal_providers.dart';
-import '../../../internal/domain/entities/trade_holding.dart';
+import '../../models/trade_holding_view_model.dart';
 
 class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
   final String userId;
@@ -125,32 +125,40 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
     );
   }
 
-  void _showHoldingDetails(BuildContext context, TradeHolding holding) {
+  void _showHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(holding.symbol),
+        title: Text(holding.displaySymbol),
         content: SizedBox(
           width: 600,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Company: ${holding.companyName}'),
-              if (holding.sector != null) Text('Sector: ${holding.sector}'),
-              if (holding.industry != null) Text('Industry: ${holding.industry}'),
+              Text('Company: ${holding.displayCompanyName}'),
+              Text('Sector: ${holding.displaySector}'),
+              Text('Industry: ${holding.displayIndustry}'),
+              Text('Exchange: ${holding.displayExchange}'),
+              Text('Status: ${holding.displayStatus}'),
               const Divider(),
-              Text('Quantity: ${holding.quantity.toStringAsFixed(0)}'),
-              Text('Avg Price: \$${holding.avgPrice.toStringAsFixed(2)}'),
-              Text('Current Price: \$${holding.currentPrice.toStringAsFixed(2)}'),
+              Text('Quantity: ${holding.displayQuantity}'),
+              Text('Entry Price: ${holding.displayEntryPrice}'),
+              if (holding.exitPrice != null) Text('Exit Price: ${holding.displayExitPrice}'),
+              Text('Current Price: ${holding.displayCurrentPrice}'),
               const Divider(),
               Text(
-                'P&L: \$${holding.totalGainLoss.toStringAsFixed(2)} (${holding.totalGainLossPercentage.toStringAsFixed(2)}%)',
+                'P&L: ${holding.displayProfitLoss} (${holding.displayProfitLossPercentage})',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: holding.totalGainLoss >= 0 ? Colors.green : Colors.red,
+                  color: holding.isProfit ? Colors.green : Colors.red,
                 ),
               ),
+              const Divider(),
+              Text('Risk/Reward: ${holding.displayRiskRewardRatio}'),
+              Text('Holding Period: ${holding.displayHoldingPeriod}'),
+              if (holding.broker != null) Text('Broker: ${holding.broker}'),
+              Text('Executions: ${holding.executionCount}'),
             ],
           ),
         ),

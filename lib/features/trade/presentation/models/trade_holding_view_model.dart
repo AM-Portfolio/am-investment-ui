@@ -17,6 +17,8 @@ class TradeHoldingViewModel {
     this.entryPrice,
     this.exitPrice,
     this.currentPrice,
+    this.avgPrice,
+    this.currentValue,
     this.profitLoss,
     this.profitLossPercentage,
     this.riskAmount,
@@ -42,6 +44,8 @@ class TradeHoldingViewModel {
   final double? entryPrice;
   final double? exitPrice;
   final double? currentPrice;
+  final double? avgPrice;
+  final double? currentValue;
   final double? profitLoss;
   final double? profitLossPercentage;
   final double? riskAmount;
@@ -65,6 +69,14 @@ class TradeHoldingViewModel {
   String get displayEntryPrice => entryPrice != null ? '\$${entryPrice!.toStringAsFixed(2)}' : 'N/A';
   String get displayExitPrice => exitPrice != null ? '\$${exitPrice!.toStringAsFixed(2)}' : 'N/A';
   String get displayCurrentPrice => currentPrice != null ? '\$${currentPrice!.toStringAsFixed(2)}' : 'N/A';
+  String get displayAvgPrice => avgPrice != null ? '\$${avgPrice!.toStringAsFixed(2)}' : 'N/A';
+  String get displayCurrentValue => currentValue != null ? '\$${currentValue!.toStringAsFixed(2)}' : 'N/A';
+  
+  // Computed values
+  double get totalGainLoss => profitLoss ?? 0.0;
+  double get totalGainLossPercentage => profitLossPercentage ?? 0.0;
+  double get todayChange => 0.0; // Not available in new structure
+  double get todayChangePercentage => 0.0; // Not available in new structure
   
   String get displayProfitLoss => profitLoss != null ? '\$${profitLoss!.toStringAsFixed(2)}' : '\$0.00';
   String get displayProfitLossPercentage => profitLossPercentage != null ? '${profitLossPercentage!.toStringAsFixed(2)}%' : '0.00%';
@@ -105,6 +117,8 @@ class TradeHoldingViewModel {
       entryPrice: entryInfo?.price,
       exitPrice: exitInfo?.price,
       currentPrice: exitInfo?.price ?? entryInfo?.price,
+      avgPrice: entryInfo?.price,
+      currentValue: (exitInfo?.quantity ?? entryInfo?.quantity ?? 0) * (exitInfo?.price ?? entryInfo?.price ?? 0),
       profitLoss: metrics?.profitLoss,
       profitLossPercentage: metrics?.profitLossPercentage,
       riskAmount: metrics?.riskAmount,

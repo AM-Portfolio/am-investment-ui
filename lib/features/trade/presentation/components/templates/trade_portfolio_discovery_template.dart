@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../internal/domain/entities/trade_portfolio.dart';
+import '../../models/trade_portfolio_view_model.dart';
 
 class TradePortfolioDiscoveryTemplate extends StatelessWidget {
-  final List<TradePortfolio> portfolios;
+  final List<TradePortfolioViewModel> portfolios;
   final bool isLoading;
   final String? errorMessage;
-  final Function(TradePortfolio) onPortfolioSelected;
+  final Function(TradePortfolioViewModel) onPortfolioSelected;
   final VoidCallback? onRefresh;
   final bool isWebView;
 
@@ -82,8 +82,8 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
     );
   }
 
-  Widget _buildPortfolioCard(TradePortfolio portfolio) {
-    final isPositive = portfolio.totalGainLoss >= 0;
+  Widget _buildPortfolioCard(TradePortfolioViewModel portfolio) {
+    final isPositive = portfolio.isProfit;
     
     return Card(
       elevation: 2,
@@ -95,7 +95,7 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                portfolio.name,
+                portfolio.displayName,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -119,14 +119,14 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '\$${portfolio.totalValue.toStringAsFixed(2)}',
+                        portfolio.displayValue,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        '${portfolio.holdingsCount} Holdings',
+                        portfolio.displayHoldingsCount,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -138,7 +138,7 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '${isPositive ? '+' : ''}\$${portfolio.totalGainLoss.toStringAsFixed(2)}',
+                        '${isPositive ? '+' : ''}${portfolio.displayGainLoss}',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -146,7 +146,7 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${isPositive ? '+' : ''}${portfolio.totalGainLossPercentage.toStringAsFixed(2)}%',
+                        '${isPositive ? '+' : ''}${portfolio.displayGainLossPercentage}',
                         style: TextStyle(
                           fontSize: 12,
                           color: isPositive ? Colors.green : Colors.red,

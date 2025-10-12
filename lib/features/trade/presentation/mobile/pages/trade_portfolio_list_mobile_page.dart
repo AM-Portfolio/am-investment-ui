@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../models/trade_portfolio_view_model.dart';
 import '../../../providers/trade_internal_providers.dart';
 
 /// Mobile page for trade portfolio list using Riverpod streams
@@ -50,12 +51,12 @@ class TradePortfolioListMobilePage extends ConsumerWidget {
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
                     child: Text(
-                      portfolio.name.substring(0, 1).toUpperCase(),
+                      portfolio.displayName.substring(0, 1).toUpperCase(),
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
                   title: Text(
-                    portfolio.name,
+                    portfolio.displayName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

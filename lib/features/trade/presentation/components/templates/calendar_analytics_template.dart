@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../internal/domain/entities/trade_calendar.dart';
+import '../../models/trade_calendar_view_model.dart';
 
 class CalendarAnalyticsTemplate extends StatefulWidget {
-  final TradeCalendar calendar;
+  final TradeCalendarViewModel calendar;
   final bool isLoading;
   final String? errorMessage;
-  final Function(TradeCalendarEvent)? onEventSelected;
+  final Function(TradeCalendarEventViewModel)? onEventSelected;
   final VoidCallback? onRefresh;
   final bool isWebView;
 
@@ -26,7 +26,7 @@ class CalendarAnalyticsTemplate extends StatefulWidget {
 
 class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
   DateTime _selectedMonth = DateTime.now();
-  TradeCalendarEvent? _selectedEvent;
+  TradeCalendarEventViewModel? _selectedEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +100,8 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
               const SizedBox(height: 4),
               Text(
                 widget.calendar.startDate != null && widget.calendar.endDate != null
-                    ? '${widget.calendar.totalEvents} events • ${DateFormat('MMM d, y').format(widget.calendar.startDate!)} - ${DateFormat('MMM d, y').format(widget.calendar.endDate!)}'
-                    : '${widget.calendar.totalEvents} events',
+                    ? '${widget.calendar.displayCount} events • ${DateFormat('MMM d, y').format(widget.calendar.startDate!)} - ${DateFormat('MMM d, y').format(widget.calendar.endDate!)}'
+                    : '${widget.calendar.displayCount} events',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
@@ -169,7 +169,7 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
     );
   }
 
-  List<TradeCalendarEvent> _getEventsForDate(DateTime date) {
+  List<TradeCalendarEventViewModel> _getEventsForDate(DateTime date) {
     return widget.calendar.events.where((event) {
       return event.date.year == date.year &&
           event.date.month == date.month &&
@@ -177,10 +177,10 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
     }).toList();
   }
 
-  Widget _buildCalendarDay(DateTime date, List<TradeCalendarEvent> events) {
+  Widget _buildCalendarDay(DateTime date, List<TradeCalendarEventViewModel> events) {
     final hasEvents = events.isNotEmpty;
-    final buyEvents = events.where((e) => e.type == 'BUY').length;
-    final sellEvents = events.where((e) => e.type == 'SELL').length;
+    final buyEvents = events.where((e) => e.type.toUpperCase() == 'BUY').length;
+    final sellEvents = events.where((e) => e.type.toUpperCase() == 'SELL').length;
 
     return Card(
       elevation: hasEvents ? 2 : 1,
@@ -255,7 +255,7 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
       return const Center(child: Text('No events found'));
     }
 
-    final sortedEvents = List<TradeCalendarEvent>.from(widget.calendar.events)
+    final sortedEvents = List<TradeCalendarEventViewModel>.from(widget.calendar.events)
       ..sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.builder(
@@ -268,8 +268,8 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
     );
   }
 
-  Widget _buildEventCard(TradeCalendarEvent event) {
-    final isBuy = event.type == 'BUY';
+  Widget _buildEventCard(TradeCalendarEventViewModel event) {
+    final isBuy = event.type.toUpperCase() == 'BUY';
     
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -302,7 +302,7 @@ class _CalendarAnalyticsTemplateState extends State<CalendarAnalyticsTemplate> {
         ),
         trailing: event.amount != null
             ? Text(
-                '\$${event.amount!.toStringAsFixed(2)}',
+                event.displayAmount,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

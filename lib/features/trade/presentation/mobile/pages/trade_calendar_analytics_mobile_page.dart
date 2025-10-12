@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../models/trade_calendar_view_model.dart';
 import '../../../providers/trade_internal_providers.dart';
 
 /// Mobile page for trade calendar analytics using Riverpod streams
@@ -54,8 +55,8 @@ class _TradeCalendarAnalyticsMobilePageState
           _buildMonthSelector(),
           Expanded(
             child: calendarStream.when(
-              data: (calendarWrapper) {
-                final allEvents = calendarWrapper.events;
+              data: (calendar) {
+                final allEvents = calendar.events;
                 
                 // Filter events by selected month
                 final events = allEvents.where((event) {
@@ -93,7 +94,7 @@ class _TradeCalendarAnalyticsMobilePageState
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
-                      final isBuy = event.type.toLowerCase() == 'buy';
+                      final isBuy = event.type.toUpperCase() == 'BUY';
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -120,7 +121,7 @@ class _TradeCalendarAnalyticsMobilePageState
                               Text(event.title),
                               const SizedBox(height: 4),
                               Text(
-                                '${event.date.toString().split(' ')[0]}',
+                                event.displayDate,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 12,
@@ -130,7 +131,7 @@ class _TradeCalendarAnalyticsMobilePageState
                           ),
                           trailing: event.amount != null
                               ? Text(
-                                  '\$${event.amount!.toStringAsFixed(2)}',
+                                  event.displayAmount,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,

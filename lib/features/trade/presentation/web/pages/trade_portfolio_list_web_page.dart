@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/templates/trade_portfolio_discovery_template.dart';
+import '../../models/trade_portfolio_view_model.dart';
 import '../../../providers/trade_internal_providers.dart';
-import '../../../internal/domain/entities/trade_portfolio.dart';
 
 class TradePortfolioListWebPage extends ConsumerWidget {
   final String userId;
@@ -40,7 +40,7 @@ class TradePortfolioListWebPage extends ConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => TradePortfolioDiscoveryTemplate(
-          portfolios: const [],
+          portfolios: const <TradePortfolioViewModel>[],
           isLoading: false,
           errorMessage: error.toString(),
           onPortfolioSelected: (_) {},
@@ -53,7 +53,7 @@ class TradePortfolioListWebPage extends ConsumerWidget {
     );
   }
 
-  void _navigateToHoldings(BuildContext context, TradePortfolio portfolio) {
+  void _navigateToHoldings(BuildContext context, TradePortfolioViewModel portfolio) {
     Navigator.pushNamed(
       context,
       '/trade/holdings/${portfolio.id}',

@@ -12,6 +12,9 @@ import '../internal/domain/entities/trade_portfolio.dart';
 import '../internal/domain/entities/trade_holding.dart';
 import '../internal/domain/entities/trade_summary.dart';
 import '../internal/domain/entities/trade_calendar.dart';
+import '../presentation/models/trade_portfolio_view_model.dart';
+import '../presentation/models/trade_holding_view_model.dart';
+import '../presentation/models/trade_calendar_view_model.dart';
 
 /// Provider for API client
 final _apiClientProvider = Provider<ApiClient>((ref) {
@@ -94,11 +97,12 @@ final tradeCalendarProvider = FutureProvider.family<TradeCalendar, ({String user
   },
 );
 
-/// Provider for watching trade holdings (stream)
-final tradeHoldingsStreamProvider = StreamProvider.family<TradeHoldings, ({String userId, String portfolioId})>(
+/// Provider for watching trade holdings (stream) - returns view models
+final tradeHoldingsStreamProvider = StreamProvider.family<TradeHoldingsViewModel, ({String userId, String portfolioId})>(
   (ref, params) {
     final useCase = ref.watch(_getTradeHoldingsProvider);
-    return useCase.watch(params.userId, params.portfolioId);
+    return useCase.watch(params.userId, params.portfolioId)
+        .map((holdings) => TradeHoldingsViewModel.fromEntity(holdings));
   },
 );
 
@@ -110,18 +114,20 @@ final tradeSummaryStreamProvider = StreamProvider.family<TradeSummary, ({String 
   },
 );
 
-/// Provider for watching trade portfolios (stream)
-final tradePortfoliosStreamProvider = StreamProvider.family<List<TradePortfolio>, String>(
+/// Provider for watching trade portfolios (stream) - returns view models
+final tradePortfoliosStreamProvider = StreamProvider.family<List<TradePortfolioViewModel>, String>(
   (ref, userId) {
     final useCase = ref.watch(_getTradePortfoliosProvider);
-    return useCase.watch(userId).map((list) => list.portfolios);
+    return useCase.watch(userId).map((list) => 
+        TradePortfolioViewModel.fromEntityList(list.portfolios));
   },
 );
 
-/// Provider for watching trade calendar (stream)
-final tradeCalendarStreamProvider = StreamProvider.family<TradeCalendar, ({String userId, String portfolioId})>(
+/// Provider for watching trade calendar (stream) - returns view models
+final tradeCalendarStreamProvider = StreamProvider.family<TradeCalendarViewModel, ({String userId, String portfolioId})>(
   (ref, params) {
     final useCase = ref.watch(_getTradeCalendarProvider);
-    return useCase.watch(params.userId, params.portfolioId);
+    return useCase.watch(params.userId, params.portfolioId)
+        .map((calendar) => TradeCalendarViewModel.fromEntity(calendar));
   },
 );

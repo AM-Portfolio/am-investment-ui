@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../internal/domain/entities/trade_holding.dart';
+import '../../models/trade_holding_view_model.dart';
 
 class TradeHoldingsTemplate extends StatelessWidget {
-  final List<TradeHolding> holdings;
+  final List<TradeHoldingViewModel> holdings;
   final bool isLoading;
   final String? errorMessage;
-  final Function(TradeHolding)? onHoldingSelected;
+  final Function(TradeHoldingViewModel)? onHoldingSelected;
   final VoidCallback? onRefresh;
   final bool isWebView;
 
@@ -62,32 +62,33 @@ class TradeHoldingsTemplate extends StatelessWidget {
           columns: const [
             DataColumn(label: Text('Symbol')),
             DataColumn(label: Text('Company')),
+            DataColumn(label: Text('Status')),
             DataColumn(label: Text('Quantity')),
-            DataColumn(label: Text('Avg Price')),
+            DataColumn(label: Text('Entry Price')),
             DataColumn(label: Text('Current Price')),
             DataColumn(label: Text('Current Value')),
             DataColumn(label: Text('P&L')),
             DataColumn(label: Text('P&L %')),
-            DataColumn(label: Text('Today')),
+            DataColumn(label: Text('R:R Ratio')),
           ],
           rows: holdings.map((holding) {
-            final isPositive = holding.totalGainLoss >= 0;
-            final isTodayPositive = holding.todayChange >= 0;
+            final isPositive = holding.isProfit;
             
             return DataRow(
               cells: [
                 DataCell(Text(
-                  holding.symbol,
+                  holding.displaySymbol,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 )),
-                DataCell(Text(holding.companyName)),
-                DataCell(Text(holding.quantity.toStringAsFixed(0))),
-                DataCell(Text('\$${holding.avgPrice.toStringAsFixed(2)}')),
-                DataCell(Text('\$${holding.currentPrice.toStringAsFixed(2)}')),
-                DataCell(Text('\$${holding.currentValue.toStringAsFixed(2)}')),
+                DataCell(Text(holding.displayCompanyName)),
+                DataCell(Text(holding.displayStatus)),
+                DataCell(Text(holding.displayQuantity)),
+                DataCell(Text(holding.displayEntryPrice)),
+                DataCell(Text(holding.displayCurrentPrice)),
+                DataCell(Text(holding.displayCurrentValue)),
                 DataCell(
                   Text(
-                    '${isPositive ? '+' : ''}\$${holding.totalGainLoss.toStringAsFixed(2)}',
+                    holding.displayProfitLoss,
                     style: TextStyle(
                       color: isPositive ? Colors.green : Colors.red,
                       fontWeight: FontWeight.bold,
@@ -96,20 +97,13 @@ class TradeHoldingsTemplate extends StatelessWidget {
                 ),
                 DataCell(
                   Text(
-                    '${isPositive ? '+' : ''}${holding.totalGainLossPercentage.toStringAsFixed(2)}%',
+                    holding.displayProfitLossPercentage,
                     style: TextStyle(
                       color: isPositive ? Colors.green : Colors.red,
                     ),
                   ),
                 ),
-                DataCell(
-                  Text(
-                    '${isTodayPositive ? '+' : ''}${holding.todayChangePercentage.toStringAsFixed(2)}%',
-                    style: TextStyle(
-                      color: isTodayPositive ? Colors.green : Colors.red,
-                    ),
-                  ),
-                ),
+                DataCell(Text(holding.displayRiskRewardRatio)),
               ],
               onSelectChanged: onHoldingSelected != null 
                   ? (_) => onHoldingSelected!(holding)
@@ -127,14 +121,14 @@ class TradeHoldingsTemplate extends StatelessWidget {
       itemCount: holdings.length,
       itemBuilder: (context, index) {
         final holding = holdings[index];
-        final isPositive = holding.totalGainLoss >= 0;
+        final isPositive = holding.isProfit;
         
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             title: Text(
-              holding.symbol,
+              holding.displaySymbol,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -144,21 +138,20 @@ class TradeHoldingsTemplate extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text(holding.companyName),
+                Text(holding.displayCompanyName),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text('${holding.quantity.toStringAsFixed(0)} @ \$${holding.currentPrice.toStringAsFixed(2)}'),
+                    Text('${holding.displayQuantity} @ ${holding.displayCurrentPrice}'),
                     const SizedBox(width: 16),
-                    if (holding.sector != null)
-                      Chip(
-                        label: Text(
-                          holding.sector!,
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                        padding: EdgeInsets.zero,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    Chip(
+                      label: Text(
+                        holding.displaySector,
+                        style: const TextStyle(fontSize: 10),
                       ),
+                      padding: EdgeInsets.zero,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ],
                 ),
               ],
@@ -168,7 +161,7 @@ class TradeHoldingsTemplate extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${isPositive ? '+' : ''}\$${holding.totalGainLoss.toStringAsFixed(2)}',
+                  holding.displayProfitLoss,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -176,7 +169,7 @@ class TradeHoldingsTemplate extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${isPositive ? '+' : ''}${holding.totalGainLossPercentage.toStringAsFixed(2)}%',
+                  holding.displayProfitLossPercentage,
                   style: TextStyle(
                     fontSize: 12,
                     color: isPositive ? Colors.green : Colors.red,

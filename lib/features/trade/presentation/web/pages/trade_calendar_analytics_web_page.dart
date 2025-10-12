@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/templates/calendar_analytics_template.dart';
+import '../../models/trade_calendar_view_model.dart';
 import '../../../providers/trade_internal_providers.dart';
-import '../../../internal/domain/entities/trade_calendar.dart';
 
 class TradeCalendarAnalyticsWebPage extends ConsumerWidget {
   final String userId;
@@ -63,7 +63,7 @@ class TradeCalendarAnalyticsWebPage extends ConsumerWidget {
     );
   }
 
-  void _showEventDetails(BuildContext context, TradeCalendarEvent event) {
+  void _showEventDetails(BuildContext context, TradeCalendarEventViewModel event) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -83,24 +83,14 @@ class TradeCalendarAnalyticsWebPage extends ConsumerWidget {
               const Divider(),
               if (event.amount != null) 
                 Text(
-                  'Amount: \$${event.amount!.toStringAsFixed(2)}',
+                  'Amount: ${event.displayAmount}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
               const SizedBox(height: 8),
-              Text('Date: ${event.date.toString()}'),
-              if (event.metadata != null && event.metadata!.isNotEmpty) ...[
-                const Divider(),
-                const Text('Additional Details:'),
-                ...event.metadata!.entries.map((entry) => 
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 4),
-                    child: Text('${entry.key}: ${entry.value}'),
-                  ),
-                ),
-              ],
+              Text('Date: ${event.displayDate}'),
             ],
           ),
         ),

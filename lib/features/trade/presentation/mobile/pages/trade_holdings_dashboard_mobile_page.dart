@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../models/trade_holding_view_model.dart';
 import '../../../providers/trade_internal_providers.dart';
 
 /// Mobile page for trade holdings dashboard using Riverpod streams
@@ -76,7 +77,7 @@ class TradeHoldingsDashboardMobilePage extends ConsumerWidget {
               itemCount: holdings.length,
               itemBuilder: (context, index) {
                 final holding = holdings[index];
-                final isProfit = holding.totalGainLoss >= 0;
+                final isProfit = holding.isProfit;
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -93,24 +94,22 @@ class TradeHoldingsDashboardMobilePage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    holding.symbol,
+                                    holding.displaySymbol,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),
                                   ),
-                                  if (holding.companyName != null) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      holding.companyName!,
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 12,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    holding.displayCompanyName,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
                                     ),
-                                  ],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ],
                               ),
                             ),
@@ -118,7 +117,7 @@ class TradeHoldingsDashboardMobilePage extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  '\$${holding.currentPrice.toStringAsFixed(2)}',
+                                  holding.displayCurrentPrice,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -137,7 +136,7 @@ class TradeHoldingsDashboardMobilePage extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    '${isProfit ? '+' : ''}\$${holding.totalGainLoss.toStringAsFixed(2)}',
+                                    '${isProfit ? '+' : ''}${holding.displayProfitLoss}',
                                     style: TextStyle(
                                       color: isProfit ? Colors.green : Colors.red,
                                       fontWeight: FontWeight.w600,
@@ -155,15 +154,15 @@ class TradeHoldingsDashboardMobilePage extends ConsumerWidget {
                           children: [
                             _buildInfoColumn(
                               'Quantity',
-                              holding.quantity.toString(),
+                              holding.displayQuantity,
                             ),
                             _buildInfoColumn(
                               'Avg Price',
-                              '\$${holding.avgPrice.toStringAsFixed(2)}',
+                              holding.displayAvgPrice,
                             ),
                             _buildInfoColumn(
                               'Current Value',
-                              '\$${holding.currentValue.toStringAsFixed(2)}',
+                              holding.displayCurrentValue,
                             ),
                           ],
                         ),

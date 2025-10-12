@@ -4,20 +4,19 @@ import '../dtos/trade_calendar_dto.dart';
 /// Mapper for trade calendar between DTO and domain entity
 class TradeCalendarMapper {
   /// Convert TradeCalendarEventDto to TradeCalendarEvent domain entity
-  static TradeCalendarEvent fromEventDto(TradeCalendarEventDto dto) {
+  static TradeCalendarEvent fromEventDto(TradeCalendarEventDto dto, String portfolioId) {
     return TradeCalendarEvent(
-      id: dto.id,
-      type: dto.type,
-      title: dto.title,
-      date: DateTime.parse(dto.date),
-      description: dto.description,
+      tradeId: dto.id,
+      portfolioId: portfolioId,
+      tradeDate: DateTime.parse(dto.date),
       symbol: dto.symbol,
-      amount: dto.amount,
-      metadata: dto.metadata,
+      status: dto.type,
+      profitLoss: dto.amount,
+      metadata: dto.metadata ?? {},
     );
   }
 
-  /// Convert TradeCalendarDto to TradeCalendar domain entity
+  /// Convert TradeCalendar Dto to TradeCalendar domain entity
   static TradeCalendar fromDto(
     TradeCalendarDto dto,
     String userId,
@@ -26,7 +25,7 @@ class TradeCalendarMapper {
     return TradeCalendar(
       userId: userId,
       portfolioId: portfolioId,
-      events: dto.events.map((e) => fromEventDto(e)).toList(),
+      events: dto.events.map((e) => fromEventDto(e, portfolioId)).toList(),
       totalEvents: dto.totalEvents ?? dto.events.length,
       startDate:
           dto.startDate != null ? DateTime.tryParse(dto.startDate!) : null,
@@ -40,13 +39,13 @@ class TradeCalendarMapper {
       events: entity.events
           .map(
             (e) => TradeCalendarEventDto(
-              id: e.id,
-              type: e.type,
-              title: e.title,
-              date: e.date.toIso8601String(),
-              description: e.description,
+              id: e.tradeId,
+              type: e.status ?? 'UNKNOWN',
+              title: e.symbol ?? 'Trade Event',
+              date: e.tradeDate.toIso8601String(),
+              description: null,
               symbol: e.symbol,
-              amount: e.amount,
+              amount: e.profitLoss,
               metadata: e.metadata,
             ),
           )
