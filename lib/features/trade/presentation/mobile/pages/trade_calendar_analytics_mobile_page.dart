@@ -1,45 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/logger.dart';
-import '../../cubit/unified_trade_cubit.dart';
+import '../../../providers/trade_internal_providers.dart';
 
-class TradeCalendarAnalyticsMobilePage extends StatefulWidget {
+/// Mobile page for trade calendar analytics using Riverpod streams
+class TradeCalendarAnalyticsMobilePage extends ConsumerStatefulWidget {
   const TradeCalendarAnalyticsMobilePage({
+    required this.userId,
     required this.portfolioId,
     this.portfolioName,
     super.key,
   });
 
+  final String userId;
   final String portfolioId;
   final String? portfolioName;
 
   @override
-  State<TradeCalendarAnalyticsMobilePage> createState() =>
+  ConsumerState<TradeCalendarAnalyticsMobilePage> createState() =>
       _TradeCalendarAnalyticsMobilePageState();
 }
 
 class _TradeCalendarAnalyticsMobilePageState
-    extends State<TradeCalendarAnalyticsMobilePage> {
+    extends ConsumerState<TradeCalendarAnalyticsMobilePage> {
   DateTime _selectedDate = DateTime.now();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadCalendar();
-    });
-  }
-
-  void _loadCalendar() {
-    context.read<UnifiedTradeCubit>().loadMonthlyCalendar(
-          widget.portfolioId,
-          _selectedDate.year,
-          _selectedDate.month,
-        );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final calendarStream = ref.watch(
+      tradeCalendarStreamProvider((
+        userId: widget.userId,
+        portfolioId: widget.portfolioId,
+      )),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.portfolioName ?? 'Trade Calendar'),
@@ -50,7 +44,6 @@ class _TradeCalendarAnalyticsMobilePageState
               setState(() {
                 _selectedDate = DateTime.now();
               });
-              _loadCalendar();
             },
             tooltip: 'Today',
           ),
@@ -60,22 +53,129 @@ class _TradeCalendarAnalyticsMobilePageState
         children: [
           _buildMonthSelector(),
           Expanded(
-            child: BlocBuilder<UnifiedTradeCubit, UnifiedTradeState>(
-              builder: (context, state) {
-                return state.when(
-                  initial: () => const Center(
-                    child: Text('Select a month to view calendar'),
+            child: calendarStream.when(
+              data: (calendarWrapper) {
+                final allEvents = calendarWrapper.events;
+                
+                // Filter events by selected month
+                final events = allEvents.where((event) {
+                  return event.date.year == _selectedDate.year &&
+                         event.date.month == _selectedDate.month;
+                }).toList();
+                
+                if (events.isEmpty) {
+                  return const Center(
+                    child: Text('No events for this month'),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    AppLogger.userAction(
+                      'Pull to Refresh Trade Calendar',
+                      tag: 'TradeCalendarMobile',
+                      context: {
+                        'portfolioId': widget.portfolioId,
+                        'year': _selectedDate.year,
+                        'month': _selectedDate.month,
+                      },
+                    );
+                    ref.invalidate(
+                      tradeCalendarStreamProvider((
+                        userId: widget.userId,
+                        portfolioId: widget.portfolioId,
+                      )),
+                    );
+                  },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: events.length,
+                    itemBuilder: (context, index) {
+                      final event = events[index];
+                      final isBuy = event.type.toLowerCase() == 'buy';
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            backgroundColor: isBuy ? Colors.green : Colors.red,
+                            child: Icon(
+                              isBuy ? Icons.arrow_upward : Icons.arrow_downward,
+                              color: Colors.white,
+                            ),
+                          ),
+                          title: Text(
+                            event.symbol ?? event.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(event.title),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${event.date.toString().split(' ')[0]}',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: event.amount != null
+                              ? Text(
+                                  '\$${event.amount!.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: isBuy ? Colors.green : Colors.red,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      );
+                    },
                   ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (message) => _buildErrorWidget(message),
-                  portfoliosLoaded: (_) => const SizedBox(),
-                  portfolioSummaryLoaded: (_) => const SizedBox(),
-                  holdingsLoaded: (_) => const SizedBox(),
-                  tradeDetailsLoaded: (_) => const SizedBox(),
-                  calendarLoaded: (calendar) => _buildCalendarView(calendar),
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Error', style: Theme.of(context).textTheme.headlineSmall),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        error.toString(),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.invalidate(
+                          tradeCalendarStreamProvider((
+                            userId: widget.userId,
+                            portfolioId: widget.portfolioId,
+                          )),
+                        );
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -104,7 +204,6 @@ class _TradeCalendarAnalyticsMobilePageState
                   _selectedDate.month - 1,
                 );
               });
-              _loadCalendar();
             },
           ),
           Text(
@@ -123,119 +222,9 @@ class _TradeCalendarAnalyticsMobilePageState
                   _selectedDate.month + 1,
                 );
               });
-              _loadCalendar();
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text('Error', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadCalendar,
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarView(dynamic calendar) {
-    final trades = calendar.trades ?? [];
-
-    if (trades.isEmpty) {
-      return const Center(
-        child: Text('No trades for this month'),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        AppLogger.userAction(
-          'Pull to Refresh Trade Calendar',
-          tag: 'TradeCalendarMobile',
-          context: {
-            'portfolioId': widget.portfolioId,
-            'year': _selectedDate.year,
-            'month': _selectedDate.month,
-          },
-        );
-        _loadCalendar();
-      },
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        itemCount: trades.length,
-        itemBuilder: (context, index) {
-          final trade = trades[index];
-          final isBuy = trade.tradeType?.toLowerCase() == 'buy';
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              leading: CircleAvatar(
-                backgroundColor: isBuy ? Colors.green : Colors.red,
-                child: Icon(
-                  isBuy ? Icons.arrow_upward : Icons.arrow_downward,
-                  color: Colors.white,
-                ),
-              ),
-              title: Text(
-                trade.symbol ?? 'N/A',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(
-                    '${trade.tradeType?.toUpperCase() ?? 'N/A'} ${trade.quantity ?? 0} @ \$${trade.price?.toStringAsFixed(2) ?? '0.00'}',
-                  ),
-                  if (trade.tradeDate != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      trade.tradeDate!,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              trailing: Text(
-                '\$${(trade.totalAmount ?? 0).toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: isBuy ? Colors.green : Colors.red,
-                ),
-              ),
-            ),
-          );
-        },
       ),
     );
   }
