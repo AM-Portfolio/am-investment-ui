@@ -406,3 +406,5 @@ This trade system leverages the proven template design pattern from investment p
 - Investment Portfolio Heatmap Integration (reference pattern for template design)
 
 This comprehensive trade system follows the proven template design pattern while providing platform-optimized experiences through dedicated web and mobile pages that share common business logic and templates.
+
+<!-- This file should be deleted - consolidated into main trade guide -->
