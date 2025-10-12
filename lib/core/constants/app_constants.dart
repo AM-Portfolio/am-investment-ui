@@ -32,6 +32,22 @@ class AppConstants {
   static const String defaultSummaryResource = '/api/v1/portfolios/summary';
   static const String defaultTransactionsResource = '/api/v1/portfolios/transactions';
   
+  /// Trade API Defaults
+  static const String defaultTradeBaseUrl = 'https://api.munish.org';
+  static const String defaultTradePortfolioListResource = '/api/v1/portfolio-summary/by-owner';
+  static const String defaultTradePortfolioSummaryResource = '/api/v1/portfolio-summary';
+  static const String defaultTradeHoldingsResource = '/api/v1/trades/portfolio-details';
+  static const String defaultTradeDetailsResource = '/api/v1/trades/details/by-ids';
+  static const String defaultTradeCalendarMonthResource = '/api/v1/trades/calendar/{portfolioId}/month';
+  static const String defaultTradeCalendarDayResource = '/api/v1/trades/calendar/{portfolioId}/day';
+  static const String defaultTradeCalendarQuarterResource = '/api/v1/trades/calendar/{portfolioId}/quarter';
+  static const String defaultTradeCalendarFinancialYearResource = '/api/v1/trades/calendar/{portfolioId}/financial-year';
+  static const String defaultTradeSearchResource = '/api/v1/trades/search';
+  static const int defaultTradeConnectTimeout = 30;
+  static const int defaultTradeReceiveTimeout = 60;
+  static const int defaultTradeSendTimeout = 60;
+  static const bool defaultTradeEnabled = true;
+  
   /// Document API Defaults
   static const String defaultDocumentBaseUrl = 'http://localhost:8070';
   static const int defaultConnectTimeout = 30;
@@ -63,6 +79,22 @@ class PropertyKeys {
   static const String apiPortfolioHoldingsResource = 'api.portfolio.holdingsResource';
   static const String apiPortfolioSummaryResource = 'api.portfolio.summaryResource';
   static const String apiPortfolioTransactionsResource = 'api.portfolio.transactionsResource';
+  
+  // Trade API properties
+  static const String apiTradeBaseUrl = 'api.trade.baseUrl';
+  static const String apiTradePortfolioListResource = 'api.trade.portfolioListResource';
+  static const String apiTradePortfolioSummaryResource = 'api.trade.portfolioSummaryResource';
+  static const String apiTradeHoldingsResource = 'api.trade.holdingsResource';
+  static const String apiTradeDetailsResource = 'api.trade.tradeDetailsResource';
+  static const String apiTradeCalendarMonthResource = 'api.trade.calendarMonthResource';
+  static const String apiTradeCalendarDayResource = 'api.trade.calendarDayResource';
+  static const String apiTradeCalendarQuarterResource = 'api.trade.calendarQuarterResource';
+  static const String apiTradeCalendarFinancialYearResource = 'api.trade.calendarFinancialYearResource';
+  static const String apiTradeSearchResource = 'api.trade.searchResource';
+  static const String apiTradeConnectTimeout = 'api.trade.connectTimeout';
+  static const String apiTradeReceiveTimeout = 'api.trade.receiveTimeout';
+  static const String apiTradeSendTimeout = 'api.trade.sendTimeout';
+  static const String apiTradeEnabled = 'api.trade.enabled';
   
   // Document API properties
   static const String apiDocumentBaseUrl = 'api.document.baseUrl';

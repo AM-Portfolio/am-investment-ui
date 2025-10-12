@@ -104,6 +104,64 @@ class ConfigService with PropertyInjection {
             defaultValue: AppConstants.defaultTransactionsResource,
           ),
         ),
+        trade: TradeApiConfig(
+          baseUrl: properties.getValue(
+            PropertyKeys.apiTradeBaseUrl,
+            defaultValue: AppConstants.defaultTradeBaseUrl,
+          ),
+          portfolioListResource: properties.getValue(
+            PropertyKeys.apiTradePortfolioListResource,
+            defaultValue: AppConstants.defaultTradePortfolioListResource,
+          ),
+          portfolioSummaryResource: properties.getValue(
+            PropertyKeys.apiTradePortfolioSummaryResource,
+            defaultValue: AppConstants.defaultTradePortfolioSummaryResource,
+          ),
+          holdingsResource: properties.getValue(
+            PropertyKeys.apiTradeHoldingsResource,
+            defaultValue: AppConstants.defaultTradeHoldingsResource,
+          ),
+          tradeDetailsResource: properties.getValue(
+            PropertyKeys.apiTradeDetailsResource,
+            defaultValue: AppConstants.defaultTradeDetailsResource,
+          ),
+          calendarMonthResource: properties.getValue(
+            PropertyKeys.apiTradeCalendarMonthResource,
+            defaultValue: AppConstants.defaultTradeCalendarMonthResource,
+          ),
+          calendarDayResource: properties.getValue(
+            PropertyKeys.apiTradeCalendarDayResource,
+            defaultValue: AppConstants.defaultTradeCalendarDayResource,
+          ),
+          calendarQuarterResource: properties.getValue(
+            PropertyKeys.apiTradeCalendarQuarterResource,
+            defaultValue: AppConstants.defaultTradeCalendarQuarterResource,
+          ),
+          calendarFinancialYearResource: properties.getValue(
+            PropertyKeys.apiTradeCalendarFinancialYearResource,
+            defaultValue: AppConstants.defaultTradeCalendarFinancialYearResource,
+          ),
+          searchResource: properties.getValue(
+            PropertyKeys.apiTradeSearchResource,
+            defaultValue: AppConstants.defaultTradeSearchResource,
+          ),
+          connectTimeout: properties.getIntValue(
+            PropertyKeys.apiTradeConnectTimeout,
+            defaultValue: AppConstants.defaultTradeConnectTimeout,
+          ),
+          receiveTimeout: properties.getIntValue(
+            PropertyKeys.apiTradeReceiveTimeout,
+            defaultValue: AppConstants.defaultTradeReceiveTimeout,
+          ),
+          sendTimeout: properties.getIntValue(
+            PropertyKeys.apiTradeSendTimeout,
+            defaultValue: AppConstants.defaultTradeSendTimeout,
+          ),
+          enabled: properties.getBoolValue(
+            PropertyKeys.apiTradeEnabled,
+            defaultValue: AppConstants.defaultTradeEnabled,
+          ),
+        ),
         document: DocumentApiConfig(
           baseUrl: properties.getValue(
             PropertyKeys.apiDocumentBaseUrl,
