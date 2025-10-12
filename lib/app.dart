@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'di/auth_providers.dart';
-import 'features/login/presentation/pages/auth_wrapper.dart';
+import 'features/authentication/presentation/pages/auth_wrapper.dart';
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/forgot_password_page.dart';
