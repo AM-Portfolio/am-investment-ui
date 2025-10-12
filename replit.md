@@ -23,7 +23,8 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
   - **Template Components**: Reusable `TradePortfolioDiscoveryTemplate`, `TradeHoldingsTemplate`, and `CalendarAnalyticsTemplate` for consistent UI across web and mobile
   - **Sequential API Flow**: Portfolio discovery → Portfolio analysis → Trade details → Calendar analytics, following the trade API specification
   - **Mock Data Integration**: Complete mock data set in `lib/assets/mock_data/trade/` for development and testing
-  - **Navigation**: Three web pages (portfolio list, holdings dashboard, calendar analytics) with dynamic routing and Riverpod provider integration
+  - **Web Implementation**: Three web pages (portfolio list, holdings dashboard, calendar analytics) with sidebar navigation and dynamic routing
+  - **Mobile Implementation**: Three mobile pages with card-based layouts, pull-to-refresh, touch-friendly UI, and tab navigation. Accessible via 5th tab in mobile portfolio screen. Routes use dynamic path segments for navigation (/trade/holdings/:id, /trade/calendar/:id)
 - **Configuration**: Uses environment-specific property files (`application.properties`, `application-dev.properties`, `application-prod.properties`) for managing settings. The `ConfigService` and `AppConfig` classes provide type-safe access to configuration values, including API endpoints, environment settings, and third-party service credentials (like Google Web Client ID).
 
 ### Feature Specifications
@@ -35,7 +36,9 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Portfolio Analytics**: Sector allocation, market cap distribution, top holdings, and risk metrics.
 - **Heatmap Visualizations**: Placeholder, planned for future iterations.
 - **Holdings Management**: Comprehensive display with sorting, filtering, and configurable views (table, card).
-- **Trade System Integration**: Complete trade management system with portfolio discovery, holdings analysis, and calendar views. Features automatic API fallback to mock data, template-based components for reusability, and sequential API flow following trade specifications. Accessible via "Trade Analysis" link in portfolio sidebar.
+- **Trade System Integration**: Complete trade management system with portfolio discovery, holdings analysis, and calendar views. Features automatic API fallback to mock data, template-based components for reusability, and sequential API flow following trade specifications.
+  - **Web Access**: "Trade Analysis" link in portfolio sidebar
+  - **Mobile Access**: "Trade" tab in mobile portfolio bottom navigation (5th tab)
 - **Developer Controls**: A collapsible panel with feature flags for toggling mock data, authentication methods, and debug logging.
 
 ## External Dependencies
