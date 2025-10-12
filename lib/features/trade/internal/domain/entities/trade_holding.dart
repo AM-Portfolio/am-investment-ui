@@ -47,7 +47,7 @@ class TradeHoldings with _$TradeHoldings {
 
 
   /// Create empty holdings
-  factory TradeHoldings.emptyHoldings(String userId, String portfolioId) =>
+  factory TradeHoldings.empty(String userId, String portfolioId) =>
       TradeHoldings(
         userId: userId,
         portfolioId: portfolioId,
