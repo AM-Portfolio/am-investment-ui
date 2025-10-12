@@ -1,54 +1,62 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'instrument_info.dart';
+import 'trade_entry_exit_info.dart';
+import 'trade_metrics.dart';
+import 'trade_execution.dart';
 
 part 'trade_holding.freezed.dart';
 part 'trade_holding.g.dart';
 
-/// Domain entity for trade holding
+/// Domain entity for individual trade holding with complete lifecycle
 @freezed
 class TradeHolding with _$TradeHolding {
   const factory TradeHolding({
-    required String symbol,
-    required String companyName,
-    required double quantity,
-    required double currentPrice,
-    required double avgPrice,
-    required double currentValue,
-    required double investedAmount,
-    required double totalGainLoss,
-    required double totalGainLossPercentage,
-    required double todayChange,
-    required double todayChangePercentage,
-    @Default(0.0) double weight,
-    String? sector,
-    String? industry,
-    String? exchange,
+    required String tradeId,
+    required String portfolioId,
+    InstrumentInfo? instrumentInfo,
+    String? status,
+    String? tradePositionType,
+    TradeEntryExitInfo? entryInfo,
+    TradeEntryExitInfo? exitInfo,
+    TradeMetrics? metrics,
+    @Default([]) List<TradeExecution> tradeExecutions,
+    @Default({}) Map<String, dynamic> psychologyData,
+    @Default({}) Map<String, dynamic> entryReasoning,
+    @Default({}) Map<String, dynamic> exitReasoning,
+    DateTime? tradeEndDate,
+    DateTime? tradeDate,
   }) = _TradeHolding;
 
   factory TradeHolding.fromJson(Map<String, dynamic> json) =>
       _$TradeHoldingFromJson(json);
 }
 
-/// Domain entity for trade holdings collection
+/// Domain entity for paginated trade holdings collection
 @freezed
 class TradeHoldings with _$TradeHoldings {
   const factory TradeHoldings({
     required String userId,
     required String portfolioId,
-    required List<TradeHolding> holdings,
-    @Default(0) int totalCount,
-    double? totalValue,
-    double? totalGainLoss,
+    @Default([]) List<TradeHolding> content,
+    @Default(0) int totalPages,
+    @Default(true) bool last,
+    @Default(0) int totalElements,
+    @Default(true) bool first,
+    @Default(50) int size,
+    @Default(0) int number,
+    @Default(0) int numberOfElements,
+    @Default(false) bool empty,
   }) = _TradeHoldings;
 
   factory TradeHoldings.fromJson(Map<String, dynamic> json) =>
       _$TradeHoldingsFromJson(json);
 
   /// Create empty holdings
-  factory TradeHoldings.empty(String userId, String portfolioId) =>
+  factory TradeHoldings.emptyHoldings(String userId, String portfolioId) =>
       TradeHoldings(
         userId: userId,
         portfolioId: portfolioId,
-        holdings: [],
-        totalCount: 0,
+        content: [],
+        totalElements: 0,
       );
 }

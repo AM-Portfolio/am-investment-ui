@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'portfolio_metrics.dart';
 
 part 'trade_portfolio.freezed.dart';
 part 'trade_portfolio.g.dart';
@@ -9,10 +10,10 @@ class TradePortfolio with _$TradePortfolio {
   const factory TradePortfolio({
     required String id,
     required String name,
-    required String ownerId,
-    required double totalValue,
-    required double totalGainLoss,
-    required double totalGainLossPercentage,
+    String? ownerId,
+    double? totalValue,
+    double? totalGainLoss,
+    double? totalGainLossPercentage,
     @Default(0) int holdingsCount,
     String? description,
     DateTime? lastUpdated,
@@ -20,6 +21,31 @@ class TradePortfolio with _$TradePortfolio {
 
   factory TradePortfolio.fromJson(Map<String, dynamic> json) =>
       _$TradePortfolioFromJson(json);
+}
+
+/// Domain entity for comprehensive portfolio summary with advanced metrics
+@freezed
+class TradePortfolioSummary with _$TradePortfolioSummary {
+  const factory TradePortfolioSummary({
+    required String portfolioId,
+    required String name,
+    String? description,
+    String? ownerId,
+    @Default(true) bool active,
+    String? currency,
+    double? initialCapital,
+    double? currentCapital,
+    DateTime? createdDate,
+    DateTime? lastUpdatedDate,
+    PortfolioMetrics? metrics,
+    @Default([]) List<String> tradeIds,
+    List<String>? winningTradeIds,
+    List<String>? losingTradeIds,
+    Map<String, dynamic>? assetAllocations,
+  }) = _TradePortfolioSummary;
+
+  factory TradePortfolioSummary.fromJson(Map<String, dynamic> json) =>
+      _$TradePortfolioSummaryFromJson(json);
 }
 
 /// Domain entity for trade portfolio list

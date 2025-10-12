@@ -1,27 +1,38 @@
 import '../../domain/entities/trade_holding.dart';
 import '../dtos/trade_holding_dto.dart';
+import 'instrument_info_mapper.dart';
+import 'trade_entry_exit_info_mapper.dart';
+import 'trade_metrics_mapper.dart';
+import 'trade_execution_mapper.dart';
 
-/// Mapper for trade holding between DTO and domain entity
+/// Comprehensive mapper for trade holding with nested structures
 class TradeHoldingMapper {
   /// Convert TradeHoldingDto to TradeHolding domain entity
   static TradeHolding fromDto(TradeHoldingDto dto) {
     return TradeHolding(
-      symbol: dto.symbol,
-      companyName: dto.companyName,
-      quantity: dto.quantity,
-      currentPrice: dto.currentPrice,
-      avgPrice: dto.avgPrice,
-      currentValue: dto.currentValue,
-      investedAmount: dto.investedAmount,
-      totalGainLoss: dto.totalGainLoss,
-      totalGainLossPercentage: dto.totalGainLossPercentage,
-      todayChange: dto.todayChange,
-      todayChangePercentage: dto.todayChangePercentage,
-      weight: dto.weight ?? 0.0,
-      sector: dto.sector,
-      industry: dto.industry,
-      exchange: dto.exchange,
+      tradeId: dto.tradeId,
+      portfolioId: dto.portfolioId,
+      instrumentInfo: InstrumentInfoMapper.fromDto(dto.instrumentInfo),
+      status: dto.status,
+      tradePositionType: dto.tradePositionType,
+      entryInfo: TradeEntryExitInfoMapper.fromDto(dto.entryInfo),
+      exitInfo: TradeEntryExitInfoMapper.fromDto(dto.exitInfo),
+      metrics: TradeMetricsMapper.fromDto(dto.metrics),
+      tradeExecutions: TradeExecutionMapper.fromDtoList(dto.tradeExecutions),
+      psychologyData: dto.psychologyData,
+      entryReasoning: dto.entryReasoning,
+      exitReasoning: dto.exitReasoning,
+      tradeEndDate: dto.tradeEndDate != null
+          ? DateTime.tryParse(dto.tradeEndDate!)
+          : null,
+      tradeDate:
+          dto.tradeDate != null ? DateTime.tryParse(dto.tradeDate!) : null,
     );
+  }
+
+  /// Convert list of TradeHoldingDtos to list of TradeHolding entities
+  static List<TradeHolding> fromDtoList(List<TradeHoldingDto> dtos) {
+    return dtos.map((dto) => fromDto(dto)).toList();
   }
 
   /// Convert TradeHoldingsDto to TradeHoldings domain entity
@@ -33,31 +44,15 @@ class TradeHoldingMapper {
     return TradeHoldings(
       userId: userId,
       portfolioId: portfolioId,
-      holdings: dto.holdings.map((h) => fromDto(h)).toList(),
-      totalCount: dto.totalCount ?? dto.holdings.length,
-      totalValue: dto.totalValue,
-      totalGainLoss: dto.totalGainLoss,
-    );
-  }
-
-  /// Convert TradeHolding domain entity to TradeHoldingDto
-  static TradeHoldingDto toDto(TradeHolding entity) {
-    return TradeHoldingDto(
-      symbol: entity.symbol,
-      companyName: entity.companyName,
-      quantity: entity.quantity,
-      currentPrice: entity.currentPrice,
-      avgPrice: entity.avgPrice,
-      currentValue: entity.currentValue,
-      investedAmount: entity.investedAmount,
-      totalGainLoss: entity.totalGainLoss,
-      totalGainLossPercentage: entity.totalGainLossPercentage,
-      todayChange: entity.todayChange,
-      todayChangePercentage: entity.todayChangePercentage,
-      weight: entity.weight,
-      sector: entity.sector,
-      industry: entity.industry,
-      exchange: entity.exchange,
+      content: fromDtoList(dto.content),
+      totalPages: dto.totalPages,
+      last: dto.last,
+      totalElements: dto.totalElements,
+      first: dto.first,
+      size: dto.size,
+      number: dto.number,
+      numberOfElements: dto.numberOfElements,
+      empty: dto.empty,
     );
   }
 }
