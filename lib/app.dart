@@ -11,10 +11,10 @@ import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.
 import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
 import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
 import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
-import 'features/trade/providers/trade_providers.dart';
 import 'features/trade/data/models/trade_portfolio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/trade/presentation/cubit/unified_trade_cubit.dart';
+import 'features/trade/providers/trade_service_providers.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -54,32 +54,59 @@ class App extends ConsumerWidget {
         case '/trade/portfolios':
           return MaterialPageRoute(
             builder: (context) => Consumer(
-              builder: (context, ref, _) => BlocProvider(
-                create: (_) => ref.read(unifiedTradeCubitProvider),
-                child: const TradePortfolioListWebPage(
-                  ownerId: '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec',
-                ),
-              ),
+              builder: (context, ref, _) {
+                final apiService = ref.read(tradeApiServiceProvider);
+                final mockService = ref.read(tradeMockServiceProvider);
+                
+                return BlocProvider<UnifiedTradeCubit>(
+                  create: (_) => UnifiedTradeCubit(
+                    apiService: apiService,
+                    mockService: mockService,
+                    useMockData: false,
+                  ),
+                  child: const TradePortfolioListWebPage(
+                    ownerId: '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec',
+                  ),
+                );
+              },
             ),
           );
         case '/trade/holdings':
           final portfolio = settings.arguments as TradePortfolio;
           return MaterialPageRoute(
             builder: (context) => Consumer(
-              builder: (context, ref, _) => BlocProvider(
-                create: (_) => ref.read(unifiedTradeCubitProvider),
-                child: TradeHoldingsDashboardWebPage(portfolio: portfolio),
-              ),
+              builder: (context, ref, _) {
+                final apiService = ref.read(tradeApiServiceProvider);
+                final mockService = ref.read(tradeMockServiceProvider);
+                
+                return BlocProvider<UnifiedTradeCubit>(
+                  create: (_) => UnifiedTradeCubit(
+                    apiService: apiService,
+                    mockService: mockService,
+                    useMockData: false,
+                  ),
+                  child: TradeHoldingsDashboardWebPage(portfolio: portfolio),
+                );
+              },
             ),
           );
         case '/trade/calendar':
           final portfolio = settings.arguments as TradePortfolio;
           return MaterialPageRoute(
             builder: (context) => Consumer(
-              builder: (context, ref, _) => BlocProvider(
-                create: (_) => ref.read(unifiedTradeCubitProvider),
-                child: TradeCalendarAnalyticsWebPage(portfolio: portfolio),
-              ),
+              builder: (context, ref, _) {
+                final apiService = ref.read(tradeApiServiceProvider);
+                final mockService = ref.read(tradeMockServiceProvider);
+                
+                return BlocProvider<UnifiedTradeCubit>(
+                  create: (_) => UnifiedTradeCubit(
+                    apiService: apiService,
+                    mockService: mockService,
+                    useMockData: false,
+                  ),
+                  child: TradeCalendarAnalyticsWebPage(portfolio: portfolio),
+                );
+              },
             ),
           );
         default:

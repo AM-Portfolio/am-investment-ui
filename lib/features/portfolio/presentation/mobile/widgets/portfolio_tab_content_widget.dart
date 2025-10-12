@@ -12,7 +12,7 @@ import '../portfolio_analysis_widget.dart';
 import 'portfolio_holdings_widget.dart';
 import '../../../../trade/presentation/cubit/unified_trade_cubit.dart';
 import '../../../../trade/presentation/mobile/pages/trade_portfolio_list_mobile_page.dart';
-import '../../../../trade/providers/trade_providers.dart';
+import '../../../../trade/providers/trade_service_providers.dart';
 
 /// Widget that handles portfolio tab content based on state
 class PortfolioTabContentWidget extends ConsumerWidget {
