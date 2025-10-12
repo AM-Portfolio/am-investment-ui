@@ -42,8 +42,9 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     );
 
     try {
+      // Trade API Spec: GET /api/v1/portfolio-summary/by-owner/{ownerId}
       final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolios/list?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolio-summary/by-owner/$userId';
 
       final response = await _apiClient.get<TradePortfolioListDto>(
         fullUri,
@@ -101,8 +102,9 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     );
 
     try {
+      // Trade API Spec: GET /api/v1/trades/portfolio-details/{portfolioId}?page=0&size=50&sort=tradeDate,desc
       final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/holdings?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/trades/portfolio-details/$portfolioId?page=0&size=50&sort=tradeDate%2Cdesc';
 
       final response = await _apiClient.get<TradeHoldingsDto>(
         fullUri,
@@ -160,8 +162,9 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     );
 
     try {
+      // Trade API Spec: GET /api/v1/portfolio-summary/{portfolioId}
       final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/summary?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolio-summary/$portfolioId';
 
       final response = await _apiClient.get<TradeSummaryDto>(
         fullUri,
@@ -219,8 +222,11 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
     );
 
     try {
+      // Trade API Spec: GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}
+      // Default to current month for initial calendar view
+      final now = DateTime.now();
       final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/calendar?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/trades/calendar/month?portfolioId=$portfolioId&year=${now.year}&month=${now.month}';
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
