@@ -30,10 +30,20 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
   - Google Sign-In configuration is managed through the `ConfigService` with `GoogleConfig` class, which loads the Web Client ID from environment-specific properties files
 - **Holdings Management**: Utilizes a sophisticated template-based architecture for displaying holdings. This includes a `HoldingsSelectorCore` for state management (sorting, filtering, view modes), `HoldingsDisplayConfig` for display presets (web, mobile, minimal), and layout builders (`TableLayoutBuilder`, `CardLayoutBuilder`) following a strategy pattern. A `HoldingsTemplateFactory` creates display components, coordinated by a `UniversalHoldingsWidget` for adaptive template selection and Riverpod integration.
 - **Data Handling**: Implements a mock data fallback system where `PortfolioMockDataHelper` loads JSON mock files from `lib/assets/mock_data/` if API calls fail. This system is active only in the development environment, ensuring seamless frontend development without a live backend connection.
-- **Trade System Architecture**: Pure Clean Architecture implementation with Riverpod state management:
+- **Trade System Architecture**: Pure Clean Architecture implementation with Riverpod state management and corrected Trade API endpoints:
+  - **API Endpoints (Corrected per Trade API Spec)**:
+    - **Portfolio Discovery**: `GET /api/v1/portfolio-summary/by-owner/{ownerId}` - Returns array of portfolios for authenticated user
+    - **Holdings Analysis**: `GET /api/v1/trades/portfolio-details/{portfolioId}?page=0&size=50&sort=tradeDate,desc` - Paginated trade holdings with comprehensive metrics
+    - **Portfolio Summary**: `GET /api/v1/portfolio-summary/{portfolioId}` - Detailed portfolio metrics, win/loss rates, trade statistics
+    - **Calendar Analytics**: `GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}` - Time-based trade data for visualization
+  - **Rich Data Capabilities**:
+    - **Portfolio Metrics**: Initial/current capital, net P&L, win rate, loss rate, profit factor, expectancy, drawdown, Sharpe ratio, Sortino ratio
+    - **Trade Details**: Symbol, ISIN, exchange, segment, entry/exit timestamps, prices, quantities, fees, P&L metrics, risk-reward ratios
+    - **Performance Analytics**: Monthly/weekly returns, winning/losing/break-even trades, trade execution history
+    - **Calendar Features**: Day/month/quarter/financial-year views, trade event aggregation, time-based filtering
   - **Internal Layer (lib/features/trade/internal/)**:
     - **Domain Layer**: Freezed entities (TradePortfolio, TradeHolding, TradeSummary, TradeCalendar, TradeCalendarEvent), repository interfaces with stream support, and validated use cases (GetTradePortfolios, GetTradeHoldings, GetTradeSummary, GetTradeCalendar)
-    - **Data Layer**: DTOs for API mapping, remote data sources with API-first approach, mappers for DTO-to-entity conversion, and repository implementations with broadcast stream controllers and caching
+    - **Data Layer**: DTOs matching Trade API response structures (portfolioId field, optional metrics), remote data sources with corrected endpoints, mappers for DTO-to-entity conversion, and repository implementations with broadcast stream controllers and caching
     - **Mock Data Fallback**: Automatic fallback to mock JSON files in `lib/assets/mock_data/trade/` when API endpoints fail (dev environment only)
   - **Presentation Layer (Fully Riverpod-Based)**:
     - **Stream Providers**: Complete Riverpod stream provider implementation (`tradePortfoliosStreamProvider`, `tradeHoldingsStreamProvider`, `tradeSummaryStreamProvider`, `tradeCalendarStreamProvider`) using family providers with record parameters
