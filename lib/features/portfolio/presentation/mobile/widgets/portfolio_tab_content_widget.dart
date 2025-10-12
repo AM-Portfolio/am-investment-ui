@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/logger.dart';
 import '../../cubit/portfolio_cubit.dart';
@@ -9,9 +10,12 @@ import '../../widgets/portfolio_summary_widget.dart';
 import '../pages/portfolio_heatmap_mobile_page.dart';
 import '../portfolio_analysis_widget.dart';
 import 'portfolio_holdings_widget.dart';
+import '../../../../trade/presentation/cubit/unified_trade_cubit.dart';
+import '../../../../trade/presentation/mobile/pages/trade_portfolio_list_mobile_page.dart';
+import '../../../../trade/providers/trade_providers.dart';
 
 /// Widget that handles portfolio tab content based on state
-class PortfolioTabContentWidget extends StatelessWidget {
+class PortfolioTabContentWidget extends ConsumerWidget {
   const PortfolioTabContentWidget({
     required this.tabController,
     required this.currentPortfolioId,
@@ -23,19 +27,19 @@ class PortfolioTabContentWidget extends StatelessWidget {
   final String userId;
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => BlocBuilder<PortfolioCubit, PortfolioState>(
-    builder: (context, state) => TabBarView(
-      controller: tabController,
-      children: [
-        _OverviewTab(currentPortfolioId: currentPortfolioId, userId: userId),
-        _HoldingsTab(currentPortfolioId: currentPortfolioId, userId: userId),
-        _AnalysisTab(currentPortfolioId: currentPortfolioId, userId: userId),
-        _HeatmapTab(currentPortfolioId: currentPortfolioId, userId: userId),
-      ],
-    ),
-  );
+  Widget build(BuildContext context, WidgetRef ref) =>
+      BlocBuilder<PortfolioCubit, PortfolioState>(
+        builder: (context, state) => TabBarView(
+          controller: tabController,
+          children: [
+            _OverviewTab(currentPortfolioId: currentPortfolioId, userId: userId),
+            _HoldingsTab(currentPortfolioId: currentPortfolioId, userId: userId),
+            _AnalysisTab(currentPortfolioId: currentPortfolioId, userId: userId),
+            _HeatmapTab(currentPortfolioId: currentPortfolioId, userId: userId),
+            _TradeTab(userId: userId, ref: ref),
+          ],
+        ),
+      );
 }
 
 /// Overview tab widget
@@ -265,6 +269,32 @@ class _HeatmapTab extends StatelessWidget {
 
   /// Get portfolio name from the current portfolio state
   String? _getPortfolioName(BuildContext context) => 'Heatmap';
+}
+
+/// Trade tab widget using the trade mobile page
+class _TradeTab extends StatelessWidget {
+  const _TradeTab({required this.userId, required this.ref});
+  final String userId;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    try {
+      final tradeApiService = ref.read(tradeApiServiceProvider);
+      final tradeMockService = ref.read(tradeMockServiceProvider);
+
+      return BlocProvider<UnifiedTradeCubit>(
+        create: (context) => UnifiedTradeCubit(
+          apiService: tradeApiService,
+          mockService: tradeMockService,
+          useMockData: false,
+        ),
+        child: TradePortfolioListMobilePage(userId: userId),
+      );
+    } catch (error) {
+      return Center(child: Text('Error loading trade: $error'));
+    }
+  }
 }
 
 /// Reusable error widget for portfolio tabs

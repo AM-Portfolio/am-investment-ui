@@ -164,7 +164,7 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _currentPortfolioId = widget.selectedPortfolioId ?? widget.userId;
 
     // Load portfolio data

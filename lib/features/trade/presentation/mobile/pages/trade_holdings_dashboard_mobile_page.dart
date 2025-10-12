@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../cubit/unified_trade_cubit.dart';
-import '../../cubit/unified_trade_state.dart';
 
 class TradeHoldingsDashboardMobilePage extends StatefulWidget {
   const TradeHoldingsDashboardMobilePage({

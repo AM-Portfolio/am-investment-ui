@@ -9,9 +9,12 @@ import 'features/authentication/presentation/pages/reset_password_page.dart';
 import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
 import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.dart';
 import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
+import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
+import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
 import 'features/trade/providers/trade_providers.dart';
 import 'features/trade/data/models/trade_portfolio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'features/trade/presentation/cubit/unified_trade_cubit.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -80,6 +83,60 @@ class App extends ConsumerWidget {
             ),
           );
         default:
+          // Handle dynamic routes for mobile trade pages
+          if (settings.name?.startsWith('/trade/holdings/') == true) {
+            final portfolioId =
+                settings.name!.substring('/trade/holdings/'.length);
+            final args = settings.arguments as Map<String, dynamic>?;
+            final portfolioName = args?['portfolioName'] as String?;
+
+            return MaterialPageRoute(
+              builder: (context) => Consumer(
+                builder: (context, ref, _) {
+                  final apiService = ref.read(tradeApiServiceProvider);
+                  final mockService = ref.read(tradeMockServiceProvider);
+
+                  return BlocProvider<UnifiedTradeCubit>(
+                    create: (_) => UnifiedTradeCubit(
+                      apiService: apiService,
+                      mockService: mockService,
+                      useMockData: false,
+                    ),
+                    child: TradeHoldingsDashboardMobilePage(
+                      portfolioId: portfolioId,
+                      portfolioName: portfolioName,
+                    ),
+                  );
+                },
+              ),
+            );
+          } else if (settings.name?.startsWith('/trade/calendar/') == true) {
+            final portfolioId =
+                settings.name!.substring('/trade/calendar/'.length);
+            final args = settings.arguments as Map<String, dynamic>?;
+            final portfolioName = args?['portfolioName'] as String?;
+
+            return MaterialPageRoute(
+              builder: (context) => Consumer(
+                builder: (context, ref, _) {
+                  final apiService = ref.read(tradeApiServiceProvider);
+                  final mockService = ref.read(tradeMockServiceProvider);
+
+                  return BlocProvider<UnifiedTradeCubit>(
+                    create: (_) => UnifiedTradeCubit(
+                      apiService: apiService,
+                      mockService: mockService,
+                      useMockData: false,
+                    ),
+                    child: TradeCalendarAnalyticsMobilePage(
+                      portfolioId: portfolioId,
+                      portfolioName: portfolioName,
+                    ),
+                  );
+                },
+              ),
+            );
+          }
           return null;
       }
     },

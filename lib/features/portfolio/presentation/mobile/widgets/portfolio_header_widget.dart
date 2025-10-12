@@ -111,6 +111,7 @@ class PortfolioHeaderWidget extends StatelessWidget {
               text: 'Analysis',
             ),
             Tab(icon: Icon(Icons.grid_view, size: 20), text: 'Heatmap'),
+            Tab(icon: Icon(Icons.show_chart, size: 20), text: 'Trade'),
           ],
         ),
       ),
