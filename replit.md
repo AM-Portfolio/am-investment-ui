@@ -18,6 +18,12 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Authentication**: Supports email/password, demo login, and Google OAuth Sign-In (using Google Sign-In SDK v7.1.0 and Google Identity Services). Authentication state and navigation are managed via Riverpod and an `AuthWrapper`. Sessions are persistent using SharedPreferences. Google Sign-In configuration is managed through the `ConfigService` with `GoogleConfig` class, which loads the Web Client ID from environment-specific properties files. The login screen validates configuration and provides user-friendly error messages with setup guidance when Client ID is missing.
 - **Holdings Management**: Utilizes a sophisticated template-based architecture for displaying holdings. This includes a `HoldingsSelectorCore` for state management (sorting, filtering, view modes), `HoldingsDisplayConfig` for display presets (web, mobile, minimal), and layout builders (`TableLayoutBuilder`, `CardLayoutBuilder`) following a strategy pattern. A `HoldingsTemplateFactory` creates display components, coordinated by a `UniversalHoldingsWidget` for adaptive template selection and Riverpod integration.
 - **Data Handling**: Implements a mock data fallback system where `PortfolioMockDataHelper` loads JSON mock files from `lib/assets/mock_data/` if API calls fail. This system is active only in the development environment, ensuring seamless frontend development without a live backend connection.
+- **Trade System Architecture**: Follows the proven template design pattern with:
+  - **Unified Cubit Approach**: `UnifiedTradeCubit` manages all trade operations with automatic fallback from API to mock data when endpoints fail
+  - **Template Components**: Reusable `TradePortfolioDiscoveryTemplate`, `TradeHoldingsTemplate`, and `CalendarAnalyticsTemplate` for consistent UI across web and mobile
+  - **Sequential API Flow**: Portfolio discovery → Portfolio analysis → Trade details → Calendar analytics, following the trade API specification
+  - **Mock Data Integration**: Complete mock data set in `lib/assets/mock_data/trade/` for development and testing
+  - **Navigation**: Three web pages (portfolio list, holdings dashboard, calendar analytics) with dynamic routing and Riverpod provider integration
 - **Configuration**: Uses environment-specific property files (`application.properties`, `application-dev.properties`, `application-prod.properties`) for managing settings. The `ConfigService` and `AppConfig` classes provide type-safe access to configuration values, including API endpoints, environment settings, and third-party service credentials (like Google Web Client ID).
 
 ### Feature Specifications
@@ -29,6 +35,7 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Portfolio Analytics**: Sector allocation, market cap distribution, top holdings, and risk metrics.
 - **Heatmap Visualizations**: Placeholder, planned for future iterations.
 - **Holdings Management**: Comprehensive display with sorting, filtering, and configurable views (table, card).
+- **Trade System Integration**: Complete trade management system with portfolio discovery, holdings analysis, and calendar views. Features automatic API fallback to mock data, template-based components for reusability, and sequential API flow following trade specifications. Accessible via "Trade Analysis" link in portfolio sidebar.
 - **Developer Controls**: A collapsible panel with feature flags for toggling mock data, authentication methods, and debug logging.
 
 ## External Dependencies
