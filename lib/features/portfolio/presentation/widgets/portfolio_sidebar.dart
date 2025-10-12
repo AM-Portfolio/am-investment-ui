@@ -45,6 +45,12 @@ class PortfolioSidebar extends StatelessWidget {
         title: 'Heatmap',
         viewType: PortfolioViewType.heatmap,
       ),
+      const Divider(),
+      ListTile(
+        leading: const Icon(Icons.show_chart),
+        title: const Text('Trade Analysis'),
+        onTap: () => Navigator.pushNamed(context, '/trade/portfolios'),
+      ),
     ],
   );
 

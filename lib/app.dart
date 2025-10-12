@@ -6,6 +6,12 @@ import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/forgot_password_page.dart';
 import 'features/authentication/presentation/pages/reset_password_page.dart';
+import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
+import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.dart';
+import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
+import 'features/trade/providers/trade_providers.dart';
+import 'features/trade/data/models/trade_portfolio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -24,11 +30,58 @@ class App extends ConsumerWidget {
     darkTheme: ThemeData.dark(useMaterial3: true),
     home: const AuthWrapper(),
     // Add routes
-    routes: {
-      '/portfolio': (context) => const PortfolioScreen(userId: ''),
-      '/register': (context) => const RegisterPage(),
-      '/forgot-password': (context) => const ForgotPasswordPage(),
-      '/reset-password': (context) => const ResetPasswordPage(),
+    onGenerateRoute: (settings) {
+      switch (settings.name) {
+        case '/portfolio':
+          return MaterialPageRoute(
+            builder: (context) => const PortfolioScreen(userId: ''),
+          );
+        case '/register':
+          return MaterialPageRoute(
+            builder: (context) => const RegisterPage(),
+          );
+        case '/forgot-password':
+          return MaterialPageRoute(
+            builder: (context) => const ForgotPasswordPage(),
+          );
+        case '/reset-password':
+          return MaterialPageRoute(
+            builder: (context) => const ResetPasswordPage(),
+          );
+        case '/trade/portfolios':
+          return MaterialPageRoute(
+            builder: (context) => Consumer(
+              builder: (context, ref, _) => BlocProvider(
+                create: (_) => ref.read(unifiedTradeCubitProvider),
+                child: const TradePortfolioListWebPage(
+                  ownerId: '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec',
+                ),
+              ),
+            ),
+          );
+        case '/trade/holdings':
+          final portfolio = settings.arguments as TradePortfolio;
+          return MaterialPageRoute(
+            builder: (context) => Consumer(
+              builder: (context, ref, _) => BlocProvider(
+                create: (_) => ref.read(unifiedTradeCubitProvider),
+                child: TradeHoldingsDashboardWebPage(portfolio: portfolio),
+              ),
+            ),
+          );
+        case '/trade/calendar':
+          final portfolio = settings.arguments as TradePortfolio;
+          return MaterialPageRoute(
+            builder: (context) => Consumer(
+              builder: (context, ref, _) => BlocProvider(
+                create: (_) => ref.read(unifiedTradeCubitProvider),
+                child: TradeCalendarAnalyticsWebPage(portfolio: portfolio),
+              ),
+            ),
+          );
+        default:
+          return null;
+      }
     },
     // Add error handling
     builder: (context, child) =>

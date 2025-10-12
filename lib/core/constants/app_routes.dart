@@ -18,6 +18,9 @@ class AppRoutes {
   static const String tradeHistory = '/trades/history';
   static const String tradeOrders = '/trades/orders';
   static const String positions = '/trades/positions';
+  static const String tradePortfolios = '/trade/portfolios';
+  static const String tradeHoldings = '/trade/holdings';
+  static const String tradeCalendar = '/trade/calendar';
   
   // Analysis sub-routes
   static const String performanceAnalysis = '/analysis/performance';
