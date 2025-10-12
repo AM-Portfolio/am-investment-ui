@@ -6,6 +6,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_tokens_entity.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_data_source.dart';
 import '../datasources/auth_remote_datasource.dart';
@@ -177,9 +178,25 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Right(null);
       }
 
-      // Create entities from stored data
-      // Note: This is a simplified version. In production, you'd fetch full user data
-      return const Right(null); // Implement fully when needed
+      // Reconstruct user and auth result from stored data
+      final userEntity = UserEntity(
+        id: userId,
+        email: email,
+        authMethod: 'stored', // Could be tracked separately if needed
+      );
+
+      final tokensEntity = AuthTokensEntity(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresAt: expiry,
+      );
+
+      final authResult = AuthResultEntity(
+        user: userEntity,
+        tokens: tokensEntity,
+      );
+
+      return Right(authResult);
     } catch (e) {
       return Left(UnknownFailure(e.toString()));
     }

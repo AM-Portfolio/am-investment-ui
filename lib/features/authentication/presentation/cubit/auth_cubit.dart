@@ -4,6 +4,7 @@ import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/demo_login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/check_auth_status_usecase.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
 import 'auth_state.dart';
 
 /// Authentication Cubit
@@ -14,17 +15,20 @@ class AuthCubit extends Cubit<AuthState> {
     required DemoLoginUseCase demoLoginUseCase,
     required LogoutUseCase logoutUseCase,
     required CheckAuthStatusUseCase checkAuthStatusUseCase,
+    required GetCurrentUserUseCase getCurrentUserUseCase,
   }) : _emailLoginUseCase = emailLoginUseCase,
        _googleLoginUseCase = googleLoginUseCase,
        _demoLoginUseCase = demoLoginUseCase,
        _logoutUseCase = logoutUseCase,
        _checkAuthStatusUseCase = checkAuthStatusUseCase,
+       _getCurrentUserUseCase = getCurrentUserUseCase,
        super(const AuthInitial());
   final EmailLoginUseCase _emailLoginUseCase;
   final GoogleLoginUseCase _googleLoginUseCase;
   final DemoLoginUseCase _demoLoginUseCase;
   final LogoutUseCase _logoutUseCase;
   final CheckAuthStatusUseCase _checkAuthStatusUseCase;
+  final GetCurrentUserUseCase _getCurrentUserUseCase;
 
   /// Login with email and password
   Future<void> loginWithEmail(String email, String password) async {
@@ -74,20 +78,33 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  /// Check authentication status
+  /// Check authentication status and restore session if valid
   Future<void> checkAuthStatus() async {
     emit(const AuthLoading());
 
-    final result = await _checkAuthStatusUseCase();
+    final statusResult = await _checkAuthStatusUseCase();
 
-    result.fold((failure) => emit(const Unauthenticated()), (isAuthenticated) {
-      if (isAuthenticated) {
-        // In production, fetch user details
-        emit(const Unauthenticated()); // Simplified for now
-      } else {
-        emit(const Unauthenticated());
-      }
-    });
+    await statusResult.fold(
+      (failure) async => emit(const Unauthenticated()),
+      (isAuthenticated) async {
+        if (isAuthenticated) {
+          // Fetch and restore user from storage
+          final userResult = await _getCurrentUserUseCase();
+          userResult.fold(
+            (failure) => emit(const Unauthenticated()),
+            (authResult) {
+              if (authResult != null) {
+                emit(Authenticated(authResult.user));
+              } else {
+                emit(const Unauthenticated());
+              }
+            },
+          );
+        } else {
+          emit(const Unauthenticated());
+        }
+      },
+    );
   }
 
   /// Register new user

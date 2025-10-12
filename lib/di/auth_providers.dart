@@ -10,6 +10,7 @@ import '../features/authentication/domain/repositories/auth_repository.dart';
 import '../features/authentication/domain/usecases/check_auth_status_usecase.dart';
 import '../features/authentication/domain/usecases/demo_login_usecase.dart';
 import '../features/authentication/domain/usecases/email_login_usecase.dart';
+import '../features/authentication/domain/usecases/get_current_user_usecase.dart';
 import '../features/authentication/domain/usecases/google_login_usecase.dart';
 import '../features/authentication/domain/usecases/logout_usecase.dart';
 import '../features/authentication/presentation/cubit/auth_cubit.dart';
@@ -75,12 +76,16 @@ class AuthProviders {
   static CheckAuthStatusUseCase get checkAuthStatusUseCase =>
       CheckAuthStatusUseCase(authRepository);
 
+  static GetCurrentUserUseCase get getCurrentUserUseCase =>
+      GetCurrentUserUseCase(authRepository);
+
   static AuthCubit createAuthCubit() => AuthCubit(
         emailLoginUseCase: emailLoginUseCase,
         googleLoginUseCase: googleLoginUseCase,
         demoLoginUseCase: demoLoginUseCase,
         logoutUseCase: logoutUseCase,
         checkAuthStatusUseCase: checkAuthStatusUseCase,
+        getCurrentUserUseCase: getCurrentUserUseCase,
       );
 
   static List<BlocProvider> get providers => [
