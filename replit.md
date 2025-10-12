@@ -15,14 +15,18 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Portfolio Overview Dashboard**: A comprehensive dashboard featuring summary cards, top movers, and allocation charts, designed with responsive layout adapters for desktop, tablet, and mobile.
 
 ### Technical Implementations
-- **Authentication**: Full Clean Architecture implementation with BLoC/Cubit state management in `lib/features/authentication/`. Supports email/password, demo login, and Google OAuth Sign-In. Architecture includes:
-  - **Domain Layer**: Entities (UserEntity, AuthResultEntity, AuthTokensEntity), repository interfaces, and use cases (EmailLoginUseCase, GoogleLoginUseCase, DemoLoginUseCase, LogoutUseCase, CheckAuthStatusUseCase)
+- **Authentication**: Unified Clean Architecture implementation with BLoC/Cubit state management in `lib/features/authentication/`. This consolidated module contains all authentication-related functionality. Supports email/password, demo login, and Google OAuth Sign-In. Architecture includes:
+  - **Domain Layer**: Entities (UserEntity, AuthResultEntity, AuthTokensEntity), repository interfaces, and use cases (EmailLoginUseCase, GoogleLoginUseCase, DemoLoginUseCase, LogoutUseCase, CheckAuthStatusUseCase, GetCurrentUserUseCase)
   - **Data Layer**: DTOs, data sources (MockAuthDataSource for development, AuthRemoteDataSource for production), and repository implementations with automatic fallback to mock data
-  - **Presentation Layer**: AuthCubit for state management, login/registration/password reset pages, and reusable widgets
-  - **Security**: Sessions are persistent using FlutterSecureStorage with encrypted shared preferences on Android
+  - **Presentation Layer**: 
+    - **State Management**: AuthCubit and FeatureFlagCubit for managing authentication state and feature toggles
+    - **Pages**: AuthWrapper (main entry), LoginScreen (with responsive web/mobile layouts), RegisterPage, ForgotPasswordPage, ResetPasswordPage
+    - **Widgets**: GoogleSignInButton, DeveloperControlsPanel, EmailLoginForm, and other reusable UI components
+    - **Responsive Design**: Modern split-screen layout for web, card-based layout for mobile
+  - **Security**: Sessions are persistent using FlutterSecureStorage with encrypted shared preferences on Android. GetCurrentUserUseCase restores authenticated sessions on app restart
   - **Feature Flags**: Toggle between mock and real API backends via FeatureFlags
-  - **DI**: Dependency injection configured in `lib/di/auth_providers.dart` using singleton pattern
-  - **Navigation**: `AuthWrapper` manages authentication state and routing using BlocBuilder
+  - **DI**: Dependency injection configured in `lib/di/auth_providers.dart` using singleton pattern with BLoC providers
+  - **Navigation**: `AuthWrapper` manages authentication state and routing using BlocBuilder, serving as the main app entry point
   - Google Sign-In configuration is managed through the `ConfigService` with `GoogleConfig` class, which loads the Web Client ID from environment-specific properties files
 - **Holdings Management**: Utilizes a sophisticated template-based architecture for displaying holdings. This includes a `HoldingsSelectorCore` for state management (sorting, filtering, view modes), `HoldingsDisplayConfig` for display presets (web, mobile, minimal), and layout builders (`TableLayoutBuilder`, `CardLayoutBuilder`) following a strategy pattern. A `HoldingsTemplateFactory` creates display components, coordinated by a `UniversalHoldingsWidget` for adaptive template selection and Riverpod integration.
 - **Data Handling**: Implements a mock data fallback system where `PortfolioMockDataHelper` loads JSON mock files from `lib/assets/mock_data/` if API calls fail. This system is active only in the development environment, ensuring seamless frontend development without a live backend connection.
