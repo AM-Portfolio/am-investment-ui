@@ -1,0 +1,147 @@
+{
+  "events": [
+    {
+      "id": "event-001",
+      "type": "BUY",
+      "title": "Bought TATAMTRDVR",
+      "date": "2020-09-07T09:33:57",
+      "description": "Long position opened",
+      "symbol": "TATAMTRDVR",
+      "amount": 722400.00,
+      "metadata": {
+        "quantity": 12000,
+        "price": 60.20,
+        "tradeType": "LONG"
+      }
+    },
+    {
+      "id": "event-002",
+      "type": "SELL",
+      "title": "Sold TATAMTRDVR",
+      "date": "2020-09-07T09:53:56",
+      "description": "Break-even exit",
+      "symbol": "TATAMTRDVR",
+      "amount": 722400.00,
+      "metadata": {
+        "quantity": 12000,
+        "price": 60.20,
+        "profitLoss": 0.00
+      }
+    },
+    {
+      "id": "event-003",
+      "type": "BUY",
+      "title": "Bought COALINDIA",
+      "date": "2020-07-30T13:24:11",
+      "description": "Long position opened",
+      "symbol": "COALINDIA",
+      "amount": 90720.00,
+      "metadata": {
+        "quantity": 700,
+        "price": 129.60,
+        "tradeType": "LONG"
+      }
+    },
+    {
+      "id": "event-004",
+      "type": "SELL",
+      "title": "Sold COALINDIA",
+      "date": "2020-08-10T09:37:16",
+      "description": "Profitable exit",
+      "symbol": "COALINDIA",
+      "amount": 91350.00,
+      "metadata": {
+        "quantity": 700,
+        "price": 130.50,
+        "profitLoss": 630.00
+      }
+    },
+    {
+      "id": "event-005",
+      "type": "BUY",
+      "title": "Bought PNB",
+      "date": "2020-07-30T10:01:26",
+      "description": "Long position opened",
+      "symbol": "PNB",
+      "amount": 588900.00,
+      "metadata": {
+        "quantity": 18000,
+        "price": 32.72,
+        "tradeType": "LONG"
+      }
+    },
+    {
+      "id": "event-006",
+      "type": "SELL",
+      "title": "Sold PNB",
+      "date": "2020-08-10T09:24:28",
+      "description": "Loss exit",
+      "symbol": "PNB",
+      "amount": 584250.00,
+      "metadata": {
+        "quantity": 18000,
+        "price": 32.46,
+        "profitLoss": -4651.20
+      }
+    },
+    {
+      "id": "event-007",
+      "type": "BUY",
+      "title": "Bought ITC",
+      "date": "2020-08-27T15:27:30",
+      "description": "Long position opened",
+      "symbol": "ITC",
+      "amount": 194200.00,
+      "metadata": {
+        "quantity": 1000,
+        "price": 194.20,
+        "tradeType": "LONG"
+      }
+    },
+    {
+      "id": "event-008",
+      "type": "SELL",
+      "title": "Sold ITC",
+      "date": "2020-08-28T09:51:26",
+      "description": "Profitable exit",
+      "symbol": "ITC",
+      "amount": 195100.00,
+      "metadata": {
+        "quantity": 1000,
+        "price": 195.10,
+        "profitLoss": 900.00
+      }
+    },
+    {
+      "id": "event-009",
+      "type": "BUY",
+      "title": "Bought SUNPHARMA",
+      "date": "2020-09-18T14:53:01",
+      "description": "Long position opened",
+      "symbol": "SUNPHARMA",
+      "amount": 1042000.00,
+      "metadata": {
+        "quantity": 2000,
+        "price": 521.00,
+        "tradeType": "LONG"
+      }
+    },
+    {
+      "id": "event-010",
+      "type": "SELL",
+      "title": "Sold SUNPHARMA",
+      "date": "2020-09-18T14:56:05",
+      "description": "Profitable exit",
+      "symbol": "SUNPHARMA",
+      "amount": 1044000.00,
+      "metadata": {
+        "quantity": 2000,
+        "price": 522.00,
+        "profitLoss": 2000.00
+      }
+    }
+  ],
+  "totalEvents": 10,
+  "startDate": "2020-07-30T10:01:26",
+  "endDate": "2020-09-23T09:28:12"
+}

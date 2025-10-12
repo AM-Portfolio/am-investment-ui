@@ -1,0 +1,73 @@
+{
+  "totalValue": 2637100.00,
+  "totalInvested": 2638221.20,
+  "totalGainLoss": -1121.20,
+  "totalGainLossPercentage": -0.04,
+  "todayChange": 1490.00,
+  "todayChangePercentage": 0.06,
+  "sectorAllocation": [
+    {
+      "sector": "Healthcare",
+      "value": 1044000.00,
+      "percentage": 39.6,
+      "holdingsCount": 1
+    },
+    {
+      "sector": "Automotive",
+      "value": 722400.00,
+      "percentage": 27.4,
+      "holdingsCount": 1
+    },
+    {
+      "sector": "Financial Services",
+      "value": 584250.00,
+      "percentage": 22.2,
+      "holdingsCount": 1
+    },
+    {
+      "sector": "FMCG",
+      "value": 195100.00,
+      "percentage": 7.4,
+      "holdingsCount": 1
+    },
+    {
+      "sector": "Energy",
+      "value": 91350.00,
+      "percentage": 3.4,
+      "holdingsCount": 1
+    }
+  ],
+  "topGainers": [
+    {
+      "symbol": "SUNPHARMA",
+      "name": "Sun Pharmaceutical Industries",
+      "change": 2000.00,
+      "changePercentage": 0.19,
+      "currentPrice": 522.00
+    },
+    {
+      "symbol": "ITC",
+      "name": "ITC Limited",
+      "change": 900.00,
+      "changePercentage": 0.46,
+      "currentPrice": 195.10
+    },
+    {
+      "symbol": "COALINDIA",
+      "name": "Coal India Ltd",
+      "change": 630.00,
+      "changePercentage": 0.69,
+      "currentPrice": 130.50
+    }
+  ],
+  "topLosers": [
+    {
+      "symbol": "PNB",
+      "name": "Punjab National Bank",
+      "change": -4651.20,
+      "changePercentage": -0.79,
+      "currentPrice": 32.46
+    }
+  ],
+  "holdingsCount": 5
+}
