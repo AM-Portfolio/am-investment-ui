@@ -1,21 +1,22 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../di/login_providers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../config/config_service.dart';
+import '../../../authentication/presentation/cubit/auth_cubit.dart';
+import '../../../authentication/presentation/cubit/auth_state.dart';
 import '../widgets/developer_controls_panel.dart';
 import '../widgets/google_signin_button.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.onLogin});
   final Function(String userId)? onLogin;
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -44,17 +45,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       AppLogger.info('Starting login process', tag: 'LoginScreen');
-      // Use Riverpod authentication provider
-      await ref
-          .read(authStateNotifierProvider.notifier)
-          .login(_emailController.text, _passwordController.text);
+      await context.read<AuthCubit>().loginWithEmail(
+            _emailController.text,
+            _passwordController.text,
+          );
 
       AppLogger.info(
         'Login successful for user: ${_emailController.text}',
         tag: 'LoginScreen',
       );
 
-      // Call the optional callback for compatibility
       if (widget.onLogin != null) {
         widget.onLogin!(_emailController.text);
       }
@@ -66,7 +66,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         stackTrace: StackTrace.current,
       );
 
-      // Error handling is managed by the provider, but show a snackbar for user feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -83,16 +82,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       AppLogger.info('Starting demo login process', tag: 'LoginScreen');
-      // Demo login with predefined credentials
-      await ref
-          .read(authStateNotifierProvider.notifier)
-          .login('ssd2658', 'password');
+      await context.read<AuthCubit>().loginWithDemo();
 
       AppLogger.info('Demo login successful', tag: 'LoginScreen');
 
-      // Call the optional callback for compatibility
       if (widget.onLogin != null) {
-        widget.onLogin!('ssd2658');
+        widget.onLogin!('demo');
       }
     } catch (error) {
       AppLogger.error('Demo login failed', tag: 'LoginScreen', error: error);
@@ -113,7 +108,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final config = ConfigService.config;
-      final webClientId = config.google.webClientId;
 
       if (!config.google.isConfigured) {
         if (mounted) {
@@ -135,16 +129,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         return;
       }
 
-      await ref.read(authStateNotifierProvider.notifier).loginWithGoogle(
-        webClientId: webClientId,
-      );
+      await context.read<AuthCubit>().loginWithGoogle();
 
       AppLogger.info('Google Sign-In successful', tag: 'LoginScreen');
 
       if (widget.onLogin != null) {
-        final user = ref.read(currentUserProvider);
-        if (user != null) {
-          widget.onLogin!(user.id);
+        final state = context.read<AuthCubit>().state;
+        if (state is Authenticated) {
+          widget.onLogin!(state.user.id);
         }
       }
     } catch (error) {
@@ -162,14 +154,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final authState = ref.watch(authStateNotifierProvider);
-    final isLoading = authState.isLoading;
+  Widget build(BuildContext context) =>
+      BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is AuthLoading;
 
-    return Scaffold(
-      body: kIsWeb ? _buildWebLayout(isLoading) : _buildMobileLayout(isLoading),
-    );
-  }
+          return Scaffold(
+            body: kIsWeb
+                ? _buildWebLayout(isLoading)
+                : _buildMobileLayout(isLoading),
+          );
+        },
+      );
 
   Widget _buildWebLayout(bool isLoading) {
     return Row(
@@ -228,7 +234,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: Colors.white.withOpacity(0.9),
                         ),
                         const SizedBox(height: 32),
-                        Text(
+                        const Text(
                           'AM Investment',
                           style: TextStyle(
                             color: Colors.white,
@@ -247,9 +253,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 48),
                         _buildFeatureItem('📊 Real-time portfolio analytics'),
                         const SizedBox(height: 16),
-                        _buildFeatureItem('📈 Advanced market insights'),
+                        _buildFeatureItem('📈 Smart investment tracking'),
                         const SizedBox(height: 16),
-                        _buildFeatureItem('🔒 Secure and reliable'),
+                        _buildFeatureItem('🔍 Market insights & analysis'),
+                        const SizedBox(height: 16),
+                        _buildFeatureItem('💼 Professional portfolio tools'),
                       ],
                     ),
                   ),
@@ -261,16 +269,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // Right side - Login form
         Expanded(
           flex: 4,
-          child: Container(
-            color: Colors.grey.shade50,
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(48),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 450),
-                  child: _buildLoginForm(isLoading),
-                ),
-              ),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(48),
+              child: _buildLoginForm(isLoading),
             ),
           ),
         ),
@@ -279,204 +281,215 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildMobileLayout(bool isLoading) {
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: _buildLoginForm(isLoading),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).primaryColor.withOpacity(0.1),
+            Colors.white,
+          ],
+        ),
+      ),
+      child: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 80,
+                  color: Theme.of(context).primaryColor,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'AM Investment',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Portfolio Management',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                ),
+                const SizedBox(height: 48),
+                _buildLoginForm(isLoading),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLoginForm(bool isLoading) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (kIsWeb) ...[
-            Icon(
-              Icons.account_balance_wallet_rounded,
-              size: 64,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 24),
-          ],
-          Text(
-            'Welcome Back',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Sign in to your AM Investment account',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.email),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: true,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _handleLogin(),
-            decoration: const InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.lock),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 48,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : _handleLogin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: Card(
+        elevation: kIsWeb ? 8 : 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Welcome Back',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    )
-                  : const Text(
-                      'Sign In',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sign in to continue',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email / User ID',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email or user ID';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => !isLoading ? _handleLogin() : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: Divider(color: Colors.grey.shade300)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'OR',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
-              ),
-              Expanded(child: Divider(color: Colors.grey.shade300)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GoogleSignInButton(
-            onPressed: isLoading ? null : _handleGoogleSignIn,
-            isLoading: isLoading,
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 48,
-            child: OutlinedButton(
-              onPressed: isLoading ? null : _handleDemoLogin,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: Theme.of(context).primaryColor,
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'Demo Login',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Forgot password link
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed('/forgot-password');
-            },
-            child: const Text(
-              'Forgot Password?',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Register link
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Don't have an account?",
-                style: TextStyle(fontSize: 14),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/register');
-                },
-                child: const Text(
-                  'Create Account',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: isLoading ? null : _handleDemoLogin,
+                    icon: const Icon(Icons.account_circle),
+                    label: const Text('Demo Login'),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                GoogleSignInButton(
+                  onPressed: isLoading ? null : _handleGoogleSignIn,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/forgot-password');
+                      },
+                      child: const Text('Forgot Password?'),
+                    ),
+                    const Text(' | '),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/register');
+                      },
+                      child: const Text('Create Account'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const DeveloperControlsPanel(),
+              ],
+            ),
           ),
-
-          // Developer controls panel
-          if (kIsWeb) const DeveloperControlsPanel(),
-        ],
+        ),
       ),
     );
   }
@@ -484,15 +497,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildFeatureItem(String text) {
     return Row(
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 16),
         Text(
           text,
           style: TextStyle(
