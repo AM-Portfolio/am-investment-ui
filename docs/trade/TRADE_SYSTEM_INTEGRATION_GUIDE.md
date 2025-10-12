@@ -1,7 +1,44 @@
 # Trade System Integration Guide
 
 ## Overview
-This guide explains how to integrate a comprehensive trade management system in your Flutter app, leveraging the rich trade-specific data structures discovered in the mock data analysis. The system provides specialized components for professional-grade trade portfolio management, advanced analytics, and calendar-based trade tracking with 30+ features across 4 main pages plus a unified dashboard.
+This guide explains how to integrate a comprehensive trade management system in your Flutter app, leveraging the rich trade-specific data structures discovered in the mock data analysis and the existing shared template architecture. The system provides specialized components for professional-grade trade portfolio management, advanced analytics, and calendar-based trade tracking with 30+ features across 4 main pages plus a unified dashboard.
+
+---
+
+## 🏗️ **Shared Template Integration**
+
+### **Leveraging Existing Template Architecture**
+
+The trade system integrates with the proven `lib/shared/widgets` template pattern:
+
+**Base Template Pattern**
+```dart
+// Following existing PlatformWidget pattern
+abstract class TradePlatformWidget extends PlatformWidget {
+  // Inherits platform detection and adaptive rendering
+  // Integrates with MobileLayout and WebLayout
+}
+```
+
+**Universal Template System**
+```dart
+// Following UniversalHeatmapWidget pattern
+class UniversalTradeTemplate extends StatelessWidget {
+  final UniversalTemplateType templateType;
+  final TradeData data;
+  // Supports: adaptive, mobile, web rendering
+}
+```
+
+### **Professional Trading Template Advantages**
+
+- **Shared Template System**: Leverages existing `lib/shared/widgets` template architecture for consistency
+- **Universal Adaptive Pattern**: Uses proven responsive design with `UniversalTemplateType.adaptive`  
+- **Platform Abstraction**: Builds on `PlatformWidget` for automatic mobile/web/iOS optimization
+- **Layout Templates**: Integrates with existing `MobileLayout` and `WebLayout` for consistent navigation
+- **Trading-Focused Extensions**: Specialized components for trade lifecycle, risk analysis, performance tracking
+- **Rich Data Utilization**: Leverages complete trade data structures (execution details, risk metrics, timing analysis)
+- **Cross-Page Consistency**: Shared filtering, common data models, unified state management
 
 ---
 
@@ -17,55 +54,114 @@ Based on comprehensive mock data analysis revealing rich trade-specific data str
 - **Rich Data Utilization**: Leverages 8+ trade-specific data files with detailed instrument info, execution details, and performance metrics
 - **Sequential Trading Flow**: Portfolio Discovery → Summary Analysis → Holdings Management → Calendar Tracking
 
-### **Trade-Specific Components Structure**
+## 📁 **Enhanced File Structure (Leveraging Shared Templates)**
 
-Based on rich mock data analysis revealing professional trading features:
+### **Complete Trade System Architecture**
 
+Integrating with existing `lib/shared` template system for responsive mobile/web implementation:
+
+```plaintext
+lib/
+├── features/
+│   └── trade/
+│       └── internal/                          # ✅ Complete Clean Architecture
+│           ├── data/                          # ✅ Data layer (infrastructure)
+│           │   ├── datasources/
+│           │   │   ├── trade_remote_data_source.dart  # API integration
+│           │   │   └── trade_mock_data_helper.dart    # Mock data utilities
+│           │   ├── dtos/                      # Data Transfer Objects (freezed + json)
+│           │   │   ├── trade_portfolio_dto.dart       # Portfolio overview
+│           │   │   ├── trade_summary_dto.dart         # Analytics data
+│           │   │   ├── trade_holding_dto.dart         # Holdings data
+│           │   │   └── trade_calendar_dto.dart        # Calendar events
+│           │   ├── mappers/                   # DTO ↔ Entity transformation
+│           │   │   ├── trade_portfolio_mapper.dart    # Portfolio mapping
+│           │   │   ├── trade_summary_mapper.dart      # Summary mapping
+│           │   │   ├── trade_holding_mapper.dart      # Holdings mapping
+│           │   │   └── trade_calendar_mapper.dart     # Calendar mapping
+│           │   └── repositories/
+│           │       └── trade_repository_impl.dart     # Repository implementation
+│           ├── domain/                        # ✅ Business logic layer
+│           │   ├── entities/                  # Business models (freezed)
+│           │   │   ├── trade_portfolio.dart           # Portfolio domain model
+│           │   │   ├── trade_summary.dart             # Summary domain model
+│           │   │   ├── trade_holding.dart             # Holdings domain model
+│           │   │   └── trade_calendar.dart            # Calendar domain model
+│           │   ├── repositories/
+│           │   │   └── trade_repository.dart          # Repository interface
+│           │   └── usecases/                  # Business use cases
+│           │       ├── get_trade_portfolios.dart      # Portfolio retrieval
+│           │       ├── get_trade_summary.dart         # Summary analytics
+│           │       ├── get_trade_holdings.dart        # Holdings management
+│           │       └── get_trade_calendar.dart        # Calendar events
+│           └── presentation/                  # 🔄 To Implement with Templates
+│               ├── pages/                     # Main trade pages
+│               │   ├── trade_dashboard_page.dart      # Dashboard (extends PlatformWidget)
+│               │   ├── trade_summary_page.dart        # Summary analytics
+│               │   ├── trade_holdings_page.dart       # Holdings management
+│               │   └── trade_calendar_page.dart       # Calendar view
+│               ├── templates/                 # Trade-specific templates
+│               │   ├── trade_universal_template.dart  # Universal adaptive template
+│               │   ├── trade_mobile_template.dart     # Mobile layout template
+│               │   ├── trade_web_template.dart        # Web layout template
+│               │   └── trade_template_factory.dart    # Template selection logic
+│               ├── widgets/                   # Reusable trade components
+│               │   ├── common/               # Shared trade widgets
+│               │   │   ├── trade_filter_panel.dart   # Common filter system
+│               │   │   ├── metric_dashboard.dart     # KPI display widgets
+│               │   │   └── responsive_data_table.dart # Adaptive table widget
+│               │   ├── dashboard/            # Dashboard-specific widgets
+│               │   ├── holdings/             # Holdings-specific widgets
+│               │   ├── summary/              # Summary-specific widgets
+│               │   └── calendar/             # Calendar-specific widgets
+│               └── providers/                 # ✅ Riverpod state providers
+│                   ├── trade_calendar_provider.dart
+│                   ├── trade_holdings_provider.dart
+│                   ├── trade_portfolios_provider.dart
+│                   └── trade_summary_provider.dart
+└── shared/                                   # ✅ Existing Template Infrastructure
+    └── widgets/                              # Template foundation to leverage
+        ├── platform_widget.dart              # Base adaptive class (to extend)
+        ├── layouts/                          # Layout templates (to integrate)
+        │   ├── mobile_layout.dart           # Mobile navigation structure
+        │   └── web_layout.dart              # Web navigation structure  
+        ├── heatmap/                         # Template pattern reference
+        │   └── universal_heatmap_widget.dart # Example: adaptive template
+        ├── components/                      # Shared UI components (to use)
+        │   ├── adaptive_card.dart           # Responsive card widget
+        │   └── responsive_grid.dart         # Grid layout helper
+        └── templates/                       # Template utilities (to extend)
+            ├── template_types.dart          # UniversalTemplateType enum
+            └── template_factory.dart        # Template creation logic
 ```
-lib/features/trade/
-├── data/
-│   ├── models/
-│   │   ├── trade_portfolio_dto.dart           # Portfolio overview (totalValue: $2.6M)
-│   │   ├── trade_summary_dto.dart             # Analytics (5 sectors, top gainers/losers)
-│   │   ├── trade_holdings_dto.dart            # Detailed holdings (15 trades, execution data)
-│   │   ├── trade_calendar_dto.dart            # Calendar events (BUY/SELL timeline)
-│   │   ├── trade_execution_dto.dart           # Order execution (broker, timestamps, fees)
-│   │   ├── instrument_info_dto.dart           # Stock details (ISIN, exchange, segment)
-│   │   ├── performance_metrics_dto.dart       # Risk-reward, P&L, holding periods
-│   │   └── sector_allocation_dto.dart         # Healthcare 39.6%, Automotive 27.4%, etc.
-│   └── services/
-│       ├── trade_api_service.dart             # Complete API integration
-│       └── trade_analytics_service.dart       # Performance calculations
-├── domain/
-│   ├── entities/                              # Business models
-│   └── repositories/
-├── presentation/
-│   ├── cubit/
-│   │   ├── trade_dashboard_cubit.dart         # Unified dashboard (KPIs + overview)
-│   │   ├── trade_summary_cubit.dart           # Advanced analytics page
-│   │   ├── trade_holdings_cubit.dart          # Holdings management page  
-│   │   ├── trade_calendar_cubit.dart          # Calendar & timeline page
-│   │   └── common_filter_cubit.dart           # Shared filtering system
-│   ├── components/templates/
-│   │   ├── trade_dashboard_template.dart      # Main dashboard (KPIs, top performers)
-│   │   ├── trade_summary_template.dart        # Analytics (sectors, metrics, charts)
-│   │   ├── trade_holdings_template.dart       # Holdings table (positions, P&L)
-│   │   ├── trade_calendar_template.dart       # Calendar view (events, timeline)
-│   │   ├── common_filter_template.dart        # Shared filter panel
-│   │   ├── trade_card_template.dart           # Individual trade cards
-│   │   ├── performance_chart_template.dart    # Charts (pie, line, bar)
-│   │   └── risk_metrics_template.dart         # Risk analysis components
-│   ├── pages/
-│   │   ├── trade_dashboard_page.dart          # Main: Overview + KPIs
-│   │   ├── trade_summary_page.dart            # Page 1: Analytics + Sectors  
-│   │   ├── trade_holdings_page.dart           # Page 2: Holdings + Positions
-│   │   ├── trade_calendar_page.dart           # Page 3: Calendar + Timeline
-│   │   └── trade_details_page.dart            # Drill-down: Individual trades
-│   └── mobile/pages/
-│       ├── trade_portfolio_list_mobile_page.dart    # Page 1: Portfolio discovery
-│       ├── trade_holdings_dashboard_mobile_page.dart # Page 2: Holdings & analysis
-│       └── trade_calendar_analytics_mobile_page.dart # Page 3: Calendar & analytics
-```
+
+---
+
+## 🎯 **Implementation Roadmap**
+
+### **Phase 1: Template Foundation** ⚡ **Priority**
+1. **Create Base Templates**: Extend `PlatformWidget` for `BaseTradePage`
+2. **Implement Universal Template**: Follow `UniversalHeatmapWidget` pattern
+3. **Setup Template Factory**: Create template selection logic
+4. **Integrate Shared Layouts**: Use existing `MobileLayout` and `WebLayout`
+
+### **Phase 2: Core Pages** 📱 **Next**
+1. **Dashboard Page**: Implement with metric cards using `AdaptiveCard`
+2. **Holdings Page**: Create with responsive data table
+3. **Summary Page**: Build analytics with sector charts
+4. **Calendar Page**: Implement calendar grid with trade events
+
+### **Phase 3: Common Components** 🔧 **Enhancement**
+1. **Filter Panel**: Universal filter system for all pages
+2. **Metric Cards**: Leverage `ResponsiveGrid` for adaptive layout
+3. **Data Tables**: Responsive table component with sorting/filtering
+4. **Navigation**: Trade-specific navigation integrating with shared layouts
+
+### **Phase 4: Polish & Optimization** ✨ **Future**
+1. **Loading States**: Skeleton screens matching template layouts
+2. **Error Handling**: Consistent error widgets across pages
+3. **Performance**: Optimize with proper memoization and caching
+4. **Testing**: Unit/widget tests for all template components
 
 ---
 
@@ -128,37 +224,83 @@ Based on comprehensive analysis of 8+ mock data files revealing institutional-qu
 
 ## 🔌 **Trade-Specific API Integration Flow**
 
-### **Professional Trading Data Flow**
+### **Professional Trading Data Flow (Current Implementation)**
 
 **Step 1: Portfolio Discovery & Dashboard**
-- **Endpoint**: `GET /api/v1/portfolio-summary/by-owner/{ownerId}`
-- **Returns**: Array of portfolios with basic metrics (total value, P&L, holdings count)
-- **Mock Data**: `trade_portfolios.json` - Portfolio overview with $850K value, -0.56% P&L
+- **Use Case**: `GetTradePortfolios` → `TradeRemoteDataSource.getTradePortfolios(userId)`
+- **API Endpoint**: `GET /api/v1/portfolio-summary/by-owner/{ownerId}`
+- **Data Flow**: API → TradePortfolioDto → TradePortfolioMapper → TradePortfolio (Entity)
+- **Mock Fallback**: `trade_portfolios.json` - Portfolio overview with $850K value, -0.56% P&L
 - **Features**: Dashboard KPIs, portfolio selection, quick metrics
 
 **Step 2: Advanced Portfolio Analytics** 
-- **Endpoint**: `GET /api/v1/portfolio-summary/{portfolioId}`
-- **Returns**: Comprehensive analytics with sector allocation, top performers
-- **Mock Data**: `trade_summary.json` - $2.6M portfolio, 5 sectors, top gainers/losers
+- **Use Case**: `GetTradeSummary` → `TradeRemoteDataSource.getTradeSummary(userId, portfolioId)`
+- **API Endpoint**: `GET /api/v1/portfolio-summary/{portfolioId}`
+- **Data Flow**: API → TradeSummaryDto → TradeSummaryMapper → TradeSummary (Entity)
+- **Mock Fallback**: `trade_summary.json` - $2.6M portfolio, 5 sectors, top gainers/losers
 - **Features**: Sector pie charts, performance analysis, advanced metrics
 
 **Step 3: Holdings & Position Management**
-- **Endpoint**: `GET /api/v1/trades/portfolio-details/{portfolioId}?page=0&size=50&sort=tradeDate,desc`
-- **Returns**: Paginated trade details with complete lifecycle data
-- **Mock Data**: `trade_holdings.json` - 15 trades with entry/exit, risk metrics, execution data
+- **Use Case**: `GetTradeHoldings` → `TradeRemoteDataSource.getTradeHoldings(userId, portfolioId)`
+- **API Endpoint**: `GET /api/v1/trades/portfolio-details/{portfolioId}?page=0&size=50&sort=tradeDate,desc`
+- **Data Flow**: API → TradeHoldingsDto → TradeHoldingMapper → TradeHoldings (Entity)
+- **Mock Fallback**: `trade_holdings.json` - 15 trades with entry/exit, risk metrics, execution data
 - **Features**: Holdings table, position analysis, P&L tracking, execution details
 
 **Step 4: Calendar & Timeline Analysis**
-- **Endpoint**: `GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}`
-- **Returns**: Calendar events with trade activities and timeline data
-- **Mock Data**: `trade_calendar.json` - BUY/SELL events with dates, amounts, outcomes
+- **Use Case**: `GetTradeCalendar` → `TradeRemoteDataSource.getTradeCalendar(userId, portfolioId)`
+- **API Endpoint**: `GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}`
+- **Data Flow**: API → TradeCalendarDto → TradeCalendarMapper → TradeCalendar (Entity)
+- **Mock Fallback**: `trade_calendar.json` - BUY/SELL events with dates, amounts, outcomes
 - **Features**: Calendar view, timeline analysis, event tracking
 
-**Step 5: Individual Trade Deep-Dive**
-- **Endpoint**: `POST /api/v1/trades/details/by-ids` (Batch trade details)
-- **Returns**: Complete trade execution breakdown with order details
-- **Mock Data**: `trade_details_by_id.json` - Full execution timeline, broker info, risk metrics
-- **Features**: Trade detail modal, execution analysis, performance breakdown
+### **Implementation Architecture**
+
+**Repository Pattern Implementation:**
+```dart
+// TradeRepository (Interface)
+abstract class TradeRepository {
+  Future<TradePortfolioList> getTradePortfolios(String userId);
+  Future<TradeSummary> getTradeSummary(String userId, String portfolioId);
+  Future<TradeHoldings> getTradeHoldings(String userId, String portfolioId);
+  Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId);
+}
+
+// TradeRepositoryImpl (Implementation)
+class TradeRepositoryImpl implements TradeRepository {
+  final TradeRemoteDataSource _remoteDataSource;
+  
+  // Uses mappers to convert DTOs to domain entities
+  Future<TradePortfolioList> getTradePortfolios(String userId) async {
+    final dto = await _remoteDataSource.getTradePortfolios(userId);
+    return TradePortfolioMapper.fromListDto(dto, userId);
+  }
+}
+```
+
+**Use Case Pattern Implementation:**
+```dart
+class GetTradePortfolios {
+  final TradeRepository _repository;
+  
+  Future<TradePortfolioList> call(String userId) async {
+    // Validation and logging
+    return await _repository.getTradePortfolios(userId);
+  }
+}
+```
+
+**Dependency Injection (Riverpod):**
+```dart
+// Providers for dependency injection
+final tradeRepositoryProvider = Provider<TradeRepository>((ref) {
+  return TradeRepositoryImpl(ref.watch(tradeRemoteDataSourceProvider));
+});
+
+final getTradePortfoliosProvider = Provider<GetTradePortfolios>((ref) {
+  return GetTradePortfolios(ref.watch(tradeRepositoryProvider));
+});
+```
 
 ### **Advanced Data Integration**
 
@@ -445,108 +587,31 @@ All pages are built with responsive design using shared templates that adapt to 
 
 ---
 
-## 📁 **Professional Trading System File Structure**
+### **Current Architecture Highlights:**
 
-```
-lib/features/trade/
-├── data/
-│   ├── models/                                      # Rich trading data models
-│   │   ├── trade_portfolio_dto.dart                 # Portfolio overview ($2.6M value, P&L)
-│   │   ├── trade_summary_dto.dart                   # Advanced analytics (5 sectors, top performers)
-│   │   ├── trade_holdings_dto.dart                  # Holdings with execution details  
-│   │   ├── trade_calendar_dto.dart                  # Calendar events and timeline
-│   │   ├── trade_execution_dto.dart                 # Order execution (broker, timestamps)
-│   │   ├── instrument_info_dto.dart                 # Stock details (ISIN, exchange)
-│   │   ├── performance_metrics_dto.dart             # Risk-reward, P&L calculations
-│   │   ├── sector_allocation_dto.dart               # Sector breakdown and performance
-│   │   ├── common_filter_dto.dart                   # Shared filter parameters
-│   │   └── paginated_trade_response.dart            # API pagination handling
-│   ├── services/
-│   │   ├── trade_api_service.dart                   # Complete API integration
-│   │   ├── trade_analytics_service.dart             # Performance calculations
-│   │   ├── trade_filter_service.dart                # Common filtering logic
-│   │   └── trade_cache_service.dart                 # Caching strategy
-│   └── repositories/
-│       └── trade_repository_impl.dart               # Data layer implementation
-├── domain/
-│   ├── entities/                                    # Business models
-│   ├── repositories/
-│   │   └── trade_repository.dart                    # Repository interface
-│   └── usecases/
-│       ├── get_portfolio_summary_usecase.dart       # Dashboard data
-│       ├── get_trade_analytics_usecase.dart         # Summary page analytics
-│       ├── get_holdings_data_usecase.dart           # Holdings management
-│       ├── get_calendar_events_usecase.dart         # Calendar data
-│       └── apply_common_filter_usecase.dart         # Cross-page filtering
-├── presentation/
-│   ├── cubit/
-│   │   ├── trade_dashboard_cubit.dart               # Main dashboard state
-│   │   ├── trade_summary_cubit.dart                 # Advanced analytics state
-│   │   ├── trade_holdings_cubit.dart                # Holdings management state
-│   │   ├── trade_calendar_cubit.dart                # Calendar view state
-│   │   ├── common_filter_cubit.dart                 # Shared filter state
-│   │   └── trade_details_cubit.dart                 # Individual trade state
-│   ├── components/templates/                        # Reusable templates
-│   │   ├── trade_dashboard_template.dart            # Dashboard KPIs and overview
-│   │   ├── trade_summary_template.dart              # Analytics and charts
-│   │   ├── trade_holdings_template.dart             # Holdings table and positions
-│   │   ├── trade_calendar_template.dart             # Calendar and timeline
-│   │   ├── common_filter_template.dart              # Shared filter panel
-│   │   ├── trade_details_template.dart              # Individual trade analysis
-│   │   ├── performance_chart_template.dart          # Charts (pie, line, bar)
-│   │   ├── risk_metrics_template.dart               # Risk analysis widgets
-│   │   ├── kpi_card_template.dart                   # Dashboard KPI cards
-│   │   └── sector_allocation_template.dart          # Sector breakdown widgets
-│   ├── pages/                                       # Main application pages
-│   │   ├── trade_dashboard_page.dart                # Main: Overview + KPIs
-│   │   ├── trade_summary_page.dart                  # Page 1: Analytics + Sectors
-│   │   ├── trade_holdings_page.dart                 # Page 2: Holdings + Positions  
-│   │   ├── trade_calendar_page.dart                 # Page 3: Calendar + Timeline
-│   │   └── trade_details_page.dart                  # Drill-down: Individual trades
-│   ├── widgets/                                     # Specialized trading widgets
-│   │   ├── trade_card_widget.dart                   # Individual trade cards
-│   │   ├── portfolio_metrics_widget.dart            # Portfolio overview metrics
-│   │   ├── sector_pie_chart_widget.dart             # Interactive sector charts
-│   │   ├── holdings_table_widget.dart               # Advanced holdings table
-│   │   ├── calendar_event_widget.dart               # Calendar event display
-│   │   ├── performance_gauge_widget.dart            # Performance indicators
-│   │   └── filter_chip_widget.dart                  # Filter state display
-│   └── shared/
-│       ├── trade_responsive_layout.dart             # Responsive design helper
-│       ├── trade_navigation_service.dart            # Page navigation logic
-│       ├── trade_theme_data.dart                    # Trading-specific themes
-│       └── trade_constants.dart                     # Constants and enums
-├── utils/                                          # Trading utilities
-│   ├── trade_formatters.dart                       # Currency, percentage formatters
-│   ├── trade_calculations.dart                     # P&L, risk-reward calculations  
-│   ├── trade_date_utils.dart                       # Date/time handling
-│   ├── trade_export_utils.dart                     # Export functionality
-│   ├── mock_trade_data.dart                        # Mock data utilities
-│   └── trade_validation_utils.dart                 # Data validation helpers
-└── tests/                                          # Comprehensive testing
-    ├── pages/
-    │   ├── dashboard_page_test.dart
-    │   ├── summary_page_test.dart
-    │   ├── holdings_page_test.dart
-    │   └── calendar_page_test.dart
-    ├── templates/
-    │   ├── dashboard_template_test.dart
-    │   ├── holdings_template_test.dart
-    │   └── filter_template_test.dart
-    ├── cubit/
-    │   ├── dashboard_cubit_test.dart
-    │   ├── holdings_cubit_test.dart
-    │   └── filter_cubit_test.dart
-    ├── services/
-    │   ├── api_service_test.dart
-    │   └── analytics_service_test.dart
-    ├── integration/
-    │   ├── trade_flow_test.dart
-    │   └── filter_integration_test.dart
-    └── utils/
-        ├── calculations_test.dart
-        └── formatters_test.dart
-```
+#### **✅ Already Implemented:**
+- **Clean Architecture**: Internal folder structure with clear separation of concerns
+- **Data Layer**: Complete DTO structure with JSON serialization (freezed + json_annotation)
+- **Domain Layer**: Business entities with use cases for each major operation
+- **Mappers**: DTO ↔ Entity conversion for clean data transformation
+- **Remote Data Source**: API integration with mock data fallbacks
+- **Repository Pattern**: Interface and implementation for data access
+- **Dependency Injection**: Riverpod providers for service instantiation
+- **Code Generation**: Freezed, JSON serialization, and provider generation
+
+#### **📋 Ready for Extension:**
+- **Use Cases**: 4 core use cases implemented (portfolios, holdings, summary, calendar)
+- **API Integration**: Remote data source with proper error handling and mock fallbacks
+- **State Management**: Cubit structure ready for presentation layer
+- **Data Transformation**: Complete mapper system for DTO/Entity conversion
+- **Provider System**: Dependency injection setup for scalable architecture
+
+#### **🚀 Next Implementation Steps:**
+1. **Presentation Layer**: Implement pages, templates, and widgets
+2. **State Management**: Complete cubit implementations for each page
+3. **Common Filtering**: Cross-page filter system with shared state
+4. **Advanced Analytics**: Performance calculations and risk metrics
+5. **UI Components**: Charts, tables, calendars, and interactive elements
 
 ### **Key Architecture Benefits:**
 
