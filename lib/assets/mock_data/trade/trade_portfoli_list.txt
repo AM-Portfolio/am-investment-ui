@@ -1,0 +1,10 @@
+curl --location 'https://api.munish.org/api/v1/portfolio-summary/by-owner/64d5f6c9-9516-4eca-ac45-c73cfff7a8ec' \
+--header 'Accept: application/json'
+
+
+[
+    {
+        "portfolioId": "8a57024c-05c2-475b-a2c4-0545865efa4a",
+        "name": "8a57024c-05c2-475b-a2c4-0545865efa4a"
+    }
+]

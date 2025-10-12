@@ -1,0 +1,28 @@
+.git
+.gitignore
+.DS_Store
+*.md
+README.md
+LICENSE
+
+# Build outputs (excluding build/web which we need)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.code-workspace
+
+# Test
+test/
+coverage/
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Misc
