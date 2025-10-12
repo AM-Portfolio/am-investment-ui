@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/app_logic/services/auth_service.dart';
 import '../components.dart';
 
 /// A layout component specifically designed for web interfaces
@@ -10,8 +9,10 @@ class WebLayout extends StatelessWidget {
   const WebLayout({
     required this.child,
     super.key,
-    this.title = 'AM Investment', // Title parameter kept for compatibility
+    this.title = 'AM Investment',
     this.activeNavItem = 'Dashboard',
+    this.userName = 'User',
+    this.userEmail,
     this.onLogout,
     this.onNavigate,
   });
@@ -24,6 +25,12 @@ class WebLayout extends StatelessWidget {
 
   /// The currently active navigation item
   final String activeNavItem;
+
+  /// User display name
+  final String userName;
+
+  /// User email
+  final String? userEmail;
 
   /// Callback when logout is requested
   final VoidCallback? onLogout;
@@ -50,7 +57,6 @@ class WebLayout extends StatelessWidget {
   /// Build the header with navigation
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final user = AuthService().currentState.currentUser;
 
     return Container(
       color: theme.colorScheme.primary,
@@ -182,8 +188,8 @@ class WebLayout extends StatelessWidget {
 
                   // User profile with dropdown
                   UserDropdownMenu(
-                    userName: user?.fullName ?? 'User',
-                    userEmail: user?.email,
+                    userName: userName,
+                    userEmail: userEmail,
                     onLogout: onLogout,
                     onProfile: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -205,8 +211,8 @@ class WebLayout extends StatelessWidget {
                             radius: 16,
                             backgroundColor: theme.colorScheme.onPrimary,
                             child: Text(
-                              user?.fullName.isNotEmpty == true
-                                  ? _getInitials(user!.fullName)
+                              userName.isNotEmpty
+                                  ? _getInitials(userName)
                                   : 'U',
                               style: TextStyle(
                                 color: theme.colorScheme.primary,
@@ -216,7 +222,7 @@ class WebLayout extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _getFirstName(user?.fullName ?? 'User'),
+                            _getFirstName(userName),
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.w500,

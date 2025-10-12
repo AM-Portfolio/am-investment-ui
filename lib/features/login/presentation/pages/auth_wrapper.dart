@@ -133,6 +133,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
               ? WebLayout(
                   title: _currentPage,
                   activeNavItem: _currentPage,
+                  userName: state.user.displayName ?? state.user.email,
+                  userEmail: state.user.email,
                   onLogout: _handleLogout,
                   onNavigate: _handleNavigation,
                   child: _getCurrentScreen(userId),
