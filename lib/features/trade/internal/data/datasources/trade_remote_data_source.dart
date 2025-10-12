@@ -43,14 +43,29 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/portfolio-summary/by-owner/{ownerId}
+      // Returns a plain array of portfolios
       final fullUri =
           '${_apiConfig.baseUrl}/api/v1/portfolio-summary/by-owner/$userId';
 
       final response = await _apiClient.get<TradePortfolioListDto>(
         fullUri,
-        parser: (data) => TradePortfolioListDto.fromJson(
-          data! as Map<String, dynamic>,
-        ),
+        parser: (data) {
+          // API returns array, wrap it in expected structure
+          if (data is List) {
+            return TradePortfolioListDto(
+              portfolios: (data as List<dynamic>)
+                  .map((item) => TradePortfolioDto.fromJson(
+                        item as Map<String, dynamic>,
+                      ))
+                  .toList(),
+              totalCount: data.length,
+            );
+          }
+          // Fallback if already wrapped
+          return TradePortfolioListDto.fromJson(
+            data! as Map<String, dynamic>,
+          );
+        },
       );
 
       AppLogger.info(

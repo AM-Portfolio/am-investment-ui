@@ -3,15 +3,16 @@ import 'package:json_annotation/json_annotation.dart';
 part 'trade_portfolio_dto.g.dart';
 
 /// DTO for trade portfolio from API
+/// API Response: { "portfolioId": "...", "name": "..." }
 @JsonSerializable()
 class TradePortfolioDto {
   const TradePortfolioDto({
-    required this.id,
+    required this.portfolioId,
     required this.name,
-    required this.ownerId,
-    required this.totalValue,
-    required this.totalGainLoss,
-    required this.totalGainLossPercentage,
+    this.ownerId,
+    this.totalValue,
+    this.totalGainLoss,
+    this.totalGainLossPercentage,
     this.holdingsCount,
     this.description,
     this.lastUpdated,
@@ -20,12 +21,12 @@ class TradePortfolioDto {
   factory TradePortfolioDto.fromJson(Map<String, dynamic> json) =>
       _$TradePortfolioDtoFromJson(json);
 
-  final String id;
+  final String portfolioId;
   final String name;
-  final String ownerId;
-  final double totalValue;
-  final double totalGainLoss;
-  final double totalGainLossPercentage;
+  final String? ownerId;
+  final double? totalValue;
+  final double? totalGainLoss;
+  final double? totalGainLossPercentage;
   final int? holdingsCount;
   final String? description;
   final String? lastUpdated;

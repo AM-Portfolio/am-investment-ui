@@ -6,12 +6,12 @@ class TradePortfolioMapper {
   /// Convert TradePortfolioDto to TradePortfolio domain entity
   static TradePortfolio fromDto(TradePortfolioDto dto) {
     return TradePortfolio(
-      id: dto.id,
+      id: dto.portfolioId,
       name: dto.name,
-      ownerId: dto.ownerId,
-      totalValue: dto.totalValue,
-      totalGainLoss: dto.totalGainLoss,
-      totalGainLossPercentage: dto.totalGainLossPercentage,
+      ownerId: dto.ownerId ?? '',
+      totalValue: dto.totalValue ?? 0.0,
+      totalGainLoss: dto.totalGainLoss ?? 0.0,
+      totalGainLossPercentage: dto.totalGainLossPercentage ?? 0.0,
       holdingsCount: dto.holdingsCount ?? 0,
       description: dto.description,
       lastUpdated: dto.lastUpdated != null
@@ -35,7 +35,7 @@ class TradePortfolioMapper {
   /// Convert TradePortfolio domain entity to TradePortfolioDto
   static TradePortfolioDto toDto(TradePortfolio entity) {
     return TradePortfolioDto(
-      id: entity.id,
+      portfolioId: entity.id,
       name: entity.name,
       ownerId: entity.ownerId,
       totalValue: entity.totalValue,
