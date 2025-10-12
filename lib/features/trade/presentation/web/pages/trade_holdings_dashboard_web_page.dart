@@ -1,105 +1,154 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../cubit/unified_trade_cubit.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/templates/trade_holdings_template.dart';
-import '../../../data/models/trade_portfolio.dart';
-import '../../../data/models/trade_holding.dart';
+import '../../components/templates/trade_summary_template.dart';
+import '../../../providers/trade_internal_providers.dart';
+import '../../../internal/domain/entities/trade_holding.dart';
 
-class TradeHoldingsDashboardWebPage extends StatefulWidget {
-  final TradePortfolio portfolio;
+class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
+  final String userId;
+  final String portfolioId;
 
   const TradeHoldingsDashboardWebPage({
     super.key,
-    required this.portfolio,
+    required this.userId,
+    required this.portfolioId,
   });
 
   @override
-  State<TradeHoldingsDashboardWebPage> createState() => _TradeHoldingsDashboardWebPageState();
+  ConsumerState<TradeHoldingsDashboardWebPage> createState() => _TradeHoldingsDashboardWebPageState();
 }
 
-class _TradeHoldingsDashboardWebPageState extends State<TradeHoldingsDashboardWebPage> {
-  int currentPage = 0;
+class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDashboardWebPage> 
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _loadHoldings();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
-  void _loadHoldings() {
-    context.read<UnifiedTradeCubit>().loadPortfolioHoldings(
-      widget.portfolio.portfolioId,
-      page: currentPage,
-      size: 50,
-    );
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Holdings - ${widget.portfolio.name}'),
+        title: const Text('Trade Analysis'),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),
             onPressed: () => _navigateToCalendar(context),
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Holdings'),
+            Tab(text: 'Summary'),
+          ],
+        ),
       ),
-      body: BlocBuilder<UnifiedTradeCubit, UnifiedTradeState>(
-        builder: (context, state) {
-          return state.when(
-            initial: () => const Center(child: Text('Ready to load holdings')),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            portfoliosLoaded: (_) => const Center(child: Text('Portfolios loaded')),
-            portfolioSummaryLoaded: (_) => const Center(child: Text('Portfolio summary loaded')),
-            holdingsLoaded: (holdings) => TradeHoldingsTemplate(
-              holdings: holdings,
-              isLoading: false,
-              onTradeSelected: (trade) => _showTradeDetails(context, trade),
-              onPageChanged: (page) {
-                setState(() => currentPage = page);
-                _loadHoldings();
-              },
-              isWebView: true,
-            ),
-            tradeDetailsLoaded: (_) => const Center(child: Text('Trade details loaded')),
-            calendarLoaded: (_) => const Center(child: Text('Calendar loaded')),
-            error: (message) => TradeHoldingsTemplate(
-              holdings: null,
-              isLoading: false,
-              errorMessage: message,
-              onTradeSelected: (_) {},
-              isWebView: true,
-            ),
-          );
-        },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildHoldingsTab(),
+          _buildSummaryTab(),
+        ],
       ),
     );
   }
 
-  void _showTradeDetails(BuildContext context, TradeHolding trade) {
+  Widget _buildHoldingsTab() {
+    final params = (userId: widget.userId, portfolioId: widget.portfolioId);
+    final holdingsAsync = ref.watch(tradeHoldingsStreamProvider(params));
+
+    return holdingsAsync.when(
+      data: (tradeHoldings) => TradeHoldingsTemplate(
+        holdings: tradeHoldings.holdings,
+        isLoading: false,
+        onHoldingSelected: (holding) => _showHoldingDetails(context, holding),
+        onRefresh: () {
+          ref.invalidate(tradeHoldingsStreamProvider(params));
+        },
+        isWebView: true,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => TradeHoldingsTemplate(
+        holdings: const [],
+        isLoading: false,
+        errorMessage: error.toString(),
+        onRefresh: () {
+          ref.invalidate(tradeHoldingsStreamProvider(params));
+        },
+        isWebView: true,
+      ),
+    );
+  }
+
+  Widget _buildSummaryTab() {
+    final params = (userId: widget.userId, portfolioId: widget.portfolioId);
+    final summaryAsync = ref.watch(tradeSummaryStreamProvider(params));
+
+    return summaryAsync.when(
+      data: (summary) => TradeSummaryTemplate(
+        summary: summary,
+        isLoading: false,
+        onRefresh: () {
+          ref.invalidate(tradeSummaryStreamProvider(params));
+        },
+        isWebView: true,
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(error.toString(), style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                ref.invalidate(tradeSummaryStreamProvider(params));
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showHoldingDetails(BuildContext context, TradeHolding holding) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(trade.instrumentInfo.symbol),
+        title: Text(holding.symbol),
         content: SizedBox(
           width: 600,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Status: ${trade.status}'),
-              Text('Position: ${trade.tradePositionType}'),
+              Text('Company: ${holding.companyName}'),
+              if (holding.sector != null) Text('Sector: ${holding.sector}'),
+              if (holding.industry != null) Text('Industry: ${holding.industry}'),
               const Divider(),
-              Text('Entry: ${trade.entryInfo.price} @ ${trade.entryInfo.quantity}'),
-              Text('Exit: ${trade.exitInfo.price} @ ${trade.exitInfo.quantity}'),
+              Text('Quantity: ${holding.quantity.toStringAsFixed(0)}'),
+              Text('Avg Price: \$${holding.avgPrice.toStringAsFixed(2)}'),
+              Text('Current Price: \$${holding.currentPrice.toStringAsFixed(2)}'),
               const Divider(),
               Text(
-                'P&L: ${trade.metrics.profitLoss.toStringAsFixed(2)} (${trade.metrics.profitLossPercentage.toStringAsFixed(2)}%)',
+                'P&L: \$${holding.totalGainLoss.toStringAsFixed(2)} (${holding.totalGainLossPercentage.toStringAsFixed(2)}%)',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: trade.metrics.profitLoss >= 0 ? Colors.green : Colors.red,
+                  color: holding.totalGainLoss >= 0 ? Colors.green : Colors.red,
                 ),
               ),
             ],
@@ -118,8 +167,8 @@ class _TradeHoldingsDashboardWebPageState extends State<TradeHoldingsDashboardWe
   void _navigateToCalendar(BuildContext context) {
     Navigator.pushNamed(
       context,
-      '/trade/calendar',
-      arguments: widget.portfolio,
+      '/trade/calendar/${widget.portfolioId}',
+      arguments: {'userId': widget.userId, 'portfolioId': widget.portfolioId},
     );
   }
 }

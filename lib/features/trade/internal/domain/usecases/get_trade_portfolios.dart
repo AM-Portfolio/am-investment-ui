@@ -57,4 +57,27 @@ class GetTradePortfolios {
       rethrow;
     }
   }
+
+  /// Execute with stream for real-time updates
+  Stream<TradePortfolioList> watch(String userId) {
+    AppLogger.methodEntry(
+      'GetTradePortfolios.watch',
+      tag: 'GetTradePortfolios',
+      params: {'userId': userId},
+    );
+
+    if (userId.isEmpty) {
+      AppLogger.error(
+        'Validation failed for stream',
+        tag: 'GetTradePortfolios',
+      );
+      throw ArgumentError('User ID cannot be empty');
+    }
+
+    AppLogger.info(
+      'Starting trade portfolios stream',
+      tag: 'GetTradePortfolios',
+    );
+    return _repository.watchTradePortfolios(userId);
+  }
 }

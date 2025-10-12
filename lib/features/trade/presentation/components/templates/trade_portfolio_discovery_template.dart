@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/trade_portfolio.dart';
+import '../../../internal/domain/entities/trade_portfolio.dart';
 
 class TradePortfolioDiscoveryTemplate extends StatelessWidget {
   final List<TradePortfolio> portfolios;
@@ -83,6 +83,8 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
   }
 
   Widget _buildPortfolioCard(TradePortfolio portfolio) {
+    final isPositive = portfolio.totalGainLoss >= 0;
+    
     return Card(
       elevation: 2,
       child: InkWell(
@@ -105,19 +107,55 @@ class TradePortfolioDiscoveryTemplate extends StatelessWidget {
                   portfolio.description!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey[600]),
                 ),
               ],
               const Spacer(),
-              if (portfolio.metrics != null) ...[
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total Trades: ${portfolio.metrics!.totalTrades}'),
-                    Text('Win Rate: ${portfolio.metrics!.winRate.toStringAsFixed(1)}%'),
-                  ],
-                ),
-              ],
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '\$${portfolio.totalValue.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${portfolio.holdingsCount} Holdings',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${isPositive ? '+' : ''}\$${portfolio.totalGainLoss.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isPositive ? Colors.green : Colors.red,
+                        ),
+                      ),
+                      Text(
+                        '${isPositive ? '+' : ''}${portfolio.totalGainLossPercentage.toStringAsFixed(2)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isPositive ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ),

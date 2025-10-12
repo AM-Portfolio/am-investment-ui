@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/trade_holding.dart';
-import '../../../data/models/paginated_response.dart';
+import '../../../internal/domain/entities/trade_holding.dart';
 
 class TradeHoldingsTemplate extends StatelessWidget {
-  final PaginatedResponse<TradeHolding>? holdings;
+  final List<TradeHolding> holdings;
   final bool isLoading;
   final String? errorMessage;
-  final Function(TradeHolding) onTradeSelected;
-  final Function(int page)? onPageChanged;
+  final Function(TradeHolding)? onHoldingSelected;
+  final VoidCallback? onRefresh;
   final bool isWebView;
 
   const TradeHoldingsTemplate({
@@ -15,8 +14,8 @@ class TradeHoldingsTemplate extends StatelessWidget {
     required this.holdings,
     required this.isLoading,
     this.errorMessage,
-    required this.onTradeSelected,
-    this.onPageChanged,
+    this.onHoldingSelected,
+    this.onRefresh,
     this.isWebView = true,
   });
 
@@ -34,72 +33,90 @@ class TradeHoldingsTemplate extends StatelessWidget {
             const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 16),
             Text(errorMessage!, style: const TextStyle(color: Colors.red)),
+            if (onRefresh != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: onRefresh,
+                child: const Text('Retry'),
+              ),
+            ],
           ],
         ),
       );
     }
 
-    if (holdings == null || holdings!.content.isEmpty) {
+    if (holdings.isEmpty) {
       return const Center(child: Text('No holdings found'));
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: isWebView
-              ? _buildTableView()
-              : _buildCardView(),
-        ),
-        if (onPageChanged != null) _buildPagination(),
-      ],
-    );
+    return isWebView
+        ? _buildTableView()
+        : _buildCardView();
   }
 
   Widget _buildTableView() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Symbol')),
-          DataColumn(label: Text('Status')),
-          DataColumn(label: Text('Entry Price')),
-          DataColumn(label: Text('Exit Price')),
-          DataColumn(label: Text('Quantity')),
-          DataColumn(label: Text('P&L')),
-          DataColumn(label: Text('P&L %')),
-        ],
-        rows: holdings!.content.map((holding) {
-          return DataRow(
-            cells: [
-              DataCell(Text(holding.instrumentInfo.symbol)),
-              DataCell(_buildStatusChip(holding.status)),
-              DataCell(Text(holding.entryInfo.price.toStringAsFixed(2))),
-              DataCell(Text(holding.exitInfo.price.toStringAsFixed(2))),
-              DataCell(Text(holding.entryInfo.quantity.toString())),
-              DataCell(
-                Text(
-                  holding.metrics.profitLoss.toStringAsFixed(2),
-                  style: TextStyle(
-                    color: holding.metrics.profitLoss >= 0
-                        ? Colors.green
-                        : Colors.red,
+      child: SingleChildScrollView(
+        child: DataTable(
+          columns: const [
+            DataColumn(label: Text('Symbol')),
+            DataColumn(label: Text('Company')),
+            DataColumn(label: Text('Quantity')),
+            DataColumn(label: Text('Avg Price')),
+            DataColumn(label: Text('Current Price')),
+            DataColumn(label: Text('Current Value')),
+            DataColumn(label: Text('P&L')),
+            DataColumn(label: Text('P&L %')),
+            DataColumn(label: Text('Today')),
+          ],
+          rows: holdings.map((holding) {
+            final isPositive = holding.totalGainLoss >= 0;
+            final isTodayPositive = holding.todayChange >= 0;
+            
+            return DataRow(
+              cells: [
+                DataCell(Text(
+                  holding.symbol,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                )),
+                DataCell(Text(holding.companyName)),
+                DataCell(Text(holding.quantity.toStringAsFixed(0))),
+                DataCell(Text('\$${holding.avgPrice.toStringAsFixed(2)}')),
+                DataCell(Text('\$${holding.currentPrice.toStringAsFixed(2)}')),
+                DataCell(Text('\$${holding.currentValue.toStringAsFixed(2)}')),
+                DataCell(
+                  Text(
+                    '${isPositive ? '+' : ''}\$${holding.totalGainLoss.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: isPositive ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              DataCell(
-                Text(
-                  '${holding.metrics.profitLossPercentage.toStringAsFixed(2)}%',
-                  style: TextStyle(
-                    color: holding.metrics.profitLossPercentage >= 0
-                        ? Colors.green
-                        : Colors.red,
+                DataCell(
+                  Text(
+                    '${isPositive ? '+' : ''}${holding.totalGainLossPercentage.toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      color: isPositive ? Colors.green : Colors.red,
+                    ),
                   ),
                 ),
-              ),
-            ],
-            onSelectChanged: (_) => onTradeSelected(holding),
-          );
-        }).toList(),
+                DataCell(
+                  Text(
+                    '${isTodayPositive ? '+' : ''}${holding.todayChangePercentage.toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      color: isTodayPositive ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+              onSelectChanged: onHoldingSelected != null 
+                  ? (_) => onHoldingSelected!(holding)
+                  : null,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -107,92 +124,72 @@ class TradeHoldingsTemplate extends StatelessWidget {
   Widget _buildCardView() {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: holdings!.content.length,
+      itemCount: holdings.length,
       itemBuilder: (context, index) {
-        final holding = holdings!.content[index];
+        final holding = holdings[index];
+        final isPositive = holding.totalGainLoss >= 0;
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            title: Text(holding.instrumentInfo.symbol),
-            subtitle: Text('${holding.status} • ${holding.tradePositionType}'),
+            contentPadding: const EdgeInsets.all(16),
+            title: Text(
+              holding.symbol,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(holding.companyName),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text('${holding.quantity.toStringAsFixed(0)} @ \$${holding.currentPrice.toStringAsFixed(2)}'),
+                    const SizedBox(width: 16),
+                    if (holding.sector != null)
+                      Chip(
+                        label: Text(
+                          holding.sector!,
+                          style: const TextStyle(fontSize: 10),
+                        ),
+                        padding: EdgeInsets.zero,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                  ],
+                ),
+              ],
+            ),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  holding.metrics.profitLoss.toStringAsFixed(2),
+                  '${isPositive ? '+' : ''}\$${holding.totalGainLoss.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: holding.metrics.profitLoss >= 0
-                        ? Colors.green
-                        : Colors.red,
+                    fontSize: 16,
+                    color: isPositive ? Colors.green : Colors.red,
                   ),
                 ),
                 Text(
-                  '${holding.metrics.profitLossPercentage.toStringAsFixed(2)}%',
+                  '${isPositive ? '+' : ''}${holding.totalGainLossPercentage.toStringAsFixed(2)}%',
                   style: TextStyle(
-                    color: holding.metrics.profitLossPercentage >= 0
-                        ? Colors.green
-                        : Colors.red,
+                    fontSize: 12,
+                    color: isPositive ? Colors.green : Colors.red,
                   ),
                 ),
               ],
             ),
-            onTap: () => onTradeSelected(holding),
+            onTap: onHoldingSelected != null 
+                ? () => onHoldingSelected!(holding)
+                : null,
           ),
         );
       },
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color color;
-    switch (status.toUpperCase()) {
-      case 'WIN':
-      case 'WINNING':
-        color = Colors.green;
-        break;
-      case 'LOSS':
-      case 'LOSING':
-        color = Colors.red;
-        break;
-      case 'BREAK_EVEN':
-        color = Colors.orange;
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Chip(
-      label: Text(
-        status,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
-      ),
-      backgroundColor: color,
-      padding: EdgeInsets.zero,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    );
-  }
-
-  Widget _buildPagination() {
-    if (holdings == null) return const SizedBox.shrink();
-    
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: holdings!.first ? null : () => onPageChanged!(holdings!.page - 1),
-          ),
-          Text('Page ${holdings!.page + 1} of ${holdings!.totalPages}'),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: holdings!.last ? null : () => onPageChanged!(holdings!.page + 1),
-          ),
-        ],
-      ),
     );
   }
 }

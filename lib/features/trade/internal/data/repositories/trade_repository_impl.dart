@@ -21,10 +21,14 @@ class TradeRepositoryImpl implements TradeRepository {
   final TradeRemoteDataSource _remoteDataSource;
 
   // Stream controllers for real-time updates
+  final StreamController<TradePortfolioList> _portfoliosController =
+      StreamController<TradePortfolioList>.broadcast();
   final StreamController<TradeHoldings> _holdingsController =
       StreamController<TradeHoldings>.broadcast();
   final StreamController<TradeSummary> _summaryController =
       StreamController<TradeSummary>.broadcast();
+  final StreamController<TradeCalendar> _calendarController =
+      StreamController<TradeCalendar>.broadcast();
 
   // Cache for the latest data
   TradePortfolioList? _cachedPortfolioList;
@@ -45,6 +49,7 @@ class TradeRepositoryImpl implements TradeRepository {
       final portfolioList = TradePortfolioMapper.fromListDto(dto, userId);
 
       _cachedPortfolioList = portfolioList;
+      _portfoliosController.add(portfolioList);
 
       AppLogger.info(
         'Trade portfolios fetched successfully',
@@ -212,6 +217,7 @@ class TradeRepositoryImpl implements TradeRepository {
       final calendar = TradeCalendarMapper.fromDto(dto, userId, portfolioId);
 
       _cachedCalendar = calendar;
+      _calendarController.add(calendar);
 
       AppLogger.info(
         'Trade calendar fetched successfully',
@@ -277,6 +283,30 @@ class TradeRepositoryImpl implements TradeRepository {
   }
 
   @override
+  Stream<TradePortfolioList> watchTradePortfolios(String userId) {
+    AppLogger.methodEntry(
+      'watchTradePortfolios',
+      tag: 'TradeRepository',
+      params: {'userId': userId},
+    );
+
+    if (_cachedPortfolioList != null) {
+      Future.microtask(() => _portfoliosController.add(_cachedPortfolioList!));
+    } else {
+      getTradePortfolios(userId).catchError((error) {
+        AppLogger.error(
+          'Failed to fetch initial portfolios for stream',
+          tag: 'TradeRepository',
+          error: error,
+        );
+        return TradePortfolioList.empty(userId);
+      });
+    }
+
+    return _portfoliosController.stream;
+  }
+
+  @override
   Stream<TradeSummary> watchTradeSummary(String userId, String portfolioId) {
     AppLogger.methodEntry(
       'watchTradeSummary',
@@ -300,12 +330,38 @@ class TradeRepositoryImpl implements TradeRepository {
     return _summaryController.stream;
   }
 
+  @override
+  Stream<TradeCalendar> watchTradeCalendar(String userId, String portfolioId) {
+    AppLogger.methodEntry(
+      'watchTradeCalendar',
+      tag: 'TradeRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    if (_cachedCalendar != null) {
+      Future.microtask(() => _calendarController.add(_cachedCalendar!));
+    } else {
+      getTradeCalendar(userId, portfolioId).catchError((error) {
+        AppLogger.error(
+          'Failed to fetch initial calendar for stream',
+          tag: 'TradeRepository',
+          error: error,
+        );
+        return TradeCalendar.empty(userId, portfolioId);
+      });
+    }
+
+    return _calendarController.stream;
+  }
+
   /// Dispose method to clean up resources
   void dispose() {
     AppLogger.methodEntry('dispose', tag: 'TradeRepository');
 
+    _portfoliosController.close();
     _holdingsController.close();
     _summaryController.close();
+    _calendarController.close();
     _cachedPortfolioList = null;
     _cachedHoldings = null;
     _cachedSummary = null;

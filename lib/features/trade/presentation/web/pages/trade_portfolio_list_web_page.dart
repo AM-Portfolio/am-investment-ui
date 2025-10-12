@@ -1,30 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../cubit/unified_trade_cubit.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/templates/trade_portfolio_discovery_template.dart';
-import '../../../data/models/trade_portfolio.dart';
+import '../../../providers/trade_internal_providers.dart';
+import '../../../internal/domain/entities/trade_portfolio.dart';
 
-class TradePortfolioListWebPage extends StatefulWidget {
-  final String ownerId;
+class TradePortfolioListWebPage extends ConsumerWidget {
+  final String userId;
 
   const TradePortfolioListWebPage({
     super.key,
-    required this.ownerId,
+    required this.userId,
   });
 
   @override
-  State<TradePortfolioListWebPage> createState() => _TradePortfolioListWebPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(userId));
 
-class _TradePortfolioListWebPageState extends State<TradePortfolioListWebPage> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<UnifiedTradeCubit>().loadPortfoliosByOwner(widget.ownerId);
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trade Portfolios'),
@@ -32,41 +23,32 @@ class _TradePortfolioListWebPageState extends State<TradePortfolioListWebPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<UnifiedTradeCubit>().loadPortfoliosByOwner(widget.ownerId);
+              ref.invalidate(tradePortfoliosStreamProvider(userId));
             },
           ),
         ],
       ),
-      body: BlocBuilder<UnifiedTradeCubit, UnifiedTradeState>(
-        builder: (context, state) {
-          return state.when(
-            initial: () => const Center(child: Text('Ready to load portfolios')),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            portfoliosLoaded: (portfolios) => TradePortfolioDiscoveryTemplate(
-              portfolios: portfolios,
-              isLoading: false,
-              onPortfolioSelected: (portfolio) => _navigateToHoldings(context, portfolio),
-              onRefresh: () {
-                context.read<UnifiedTradeCubit>().loadPortfoliosByOwner(widget.ownerId);
-              },
-              isWebView: true,
-            ),
-            portfolioSummaryLoaded: (_) => const Center(child: Text('Portfolio summary loaded')),
-            holdingsLoaded: (_) => const Center(child: Text('Holdings loaded')),
-            tradeDetailsLoaded: (_) => const Center(child: Text('Trade details loaded')),
-            calendarLoaded: (_) => const Center(child: Text('Calendar loaded')),
-            error: (message) => TradePortfolioDiscoveryTemplate(
-              portfolios: const [],
-              isLoading: false,
-              errorMessage: message,
-              onPortfolioSelected: (_) {},
-              onRefresh: () {
-                context.read<UnifiedTradeCubit>().loadPortfoliosByOwner(widget.ownerId);
-              },
-              isWebView: true,
-            ),
-          );
-        },
+      body: portfoliosAsync.when(
+        data: (portfolios) => TradePortfolioDiscoveryTemplate(
+          portfolios: portfolios,
+          isLoading: false,
+          onPortfolioSelected: (portfolio) => _navigateToHoldings(context, portfolio),
+          onRefresh: () {
+            ref.invalidate(tradePortfoliosStreamProvider(userId));
+          },
+          isWebView: true,
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => TradePortfolioDiscoveryTemplate(
+          portfolios: const [],
+          isLoading: false,
+          errorMessage: error.toString(),
+          onPortfolioSelected: (_) {},
+          onRefresh: () {
+            ref.invalidate(tradePortfoliosStreamProvider(userId));
+          },
+          isWebView: true,
+        ),
       ),
     );
   }
@@ -74,8 +56,8 @@ class _TradePortfolioListWebPageState extends State<TradePortfolioListWebPage> {
   void _navigateToHoldings(BuildContext context, TradePortfolio portfolio) {
     Navigator.pushNamed(
       context,
-      '/trade/holdings',
-      arguments: portfolio,
+      '/trade/holdings/${portfolio.id}',
+      arguments: {'userId': userId, 'portfolioId': portfolio.id},
     );
   }
 }

@@ -109,3 +109,19 @@ final tradeSummaryStreamProvider = StreamProvider.family<TradeSummary, ({String 
     return useCase.watch(params.userId, params.portfolioId);
   },
 );
+
+/// Provider for watching trade portfolios (stream)
+final tradePortfoliosStreamProvider = StreamProvider.family<List<TradePortfolio>, String>(
+  (ref, userId) {
+    final useCase = ref.watch(_getTradePortfoliosProvider);
+    return useCase.watch(userId).map((list) => list.portfolios);
+  },
+);
+
+/// Provider for watching trade calendar (stream)
+final tradeCalendarStreamProvider = StreamProvider.family<TradeCalendar, ({String userId, String portfolioId})>(
+  (ref, params) {
+    final useCase = ref.watch(_getTradeCalendarProvider);
+    return useCase.watch(params.userId, params.portfolioId);
+  },
+);

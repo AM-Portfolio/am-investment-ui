@@ -17,9 +17,15 @@ abstract class TradeRepository {
   /// Get calendar analytics for a specific trade portfolio
   Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId);
 
+  /// Get portfolios stream for real-time updates
+  Stream<TradePortfolioList> watchTradePortfolios(String userId);
+
   /// Get holdings stream for real-time updates
   Stream<TradeHoldings> watchTradeHoldings(String userId, String portfolioId);
 
   /// Get summary stream for real-time updates
   Stream<TradeSummary> watchTradeSummary(String userId, String portfolioId);
+
+  /// Get calendar stream for real-time updates
+  Stream<TradeCalendar> watchTradeCalendar(String userId, String portfolioId);
 }

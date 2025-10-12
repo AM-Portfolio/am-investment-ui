@@ -57,4 +57,27 @@ class GetTradeCalendar {
       rethrow;
     }
   }
+
+  /// Execute with stream for real-time updates
+  Stream<TradeCalendar> watch(String userId, String portfolioId) {
+    AppLogger.methodEntry(
+      'GetTradeCalendar.watch',
+      tag: 'GetTradeCalendar',
+      params: {'userId': userId, 'portfolioId': portfolioId},
+    );
+
+    if (userId.isEmpty || portfolioId.isEmpty) {
+      AppLogger.error(
+        'Validation failed for stream',
+        tag: 'GetTradeCalendar',
+      );
+      throw ArgumentError('User ID and Portfolio ID cannot be empty');
+    }
+
+    AppLogger.info(
+      'Starting trade calendar stream',
+      tag: 'GetTradeCalendar',
+    );
+    return _repository.watchTradeCalendar(userId, portfolioId);
+  }
 }
