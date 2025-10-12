@@ -10,9 +10,7 @@ import '../../widgets/portfolio_summary_widget.dart';
 import '../pages/portfolio_heatmap_mobile_page.dart';
 import '../portfolio_analysis_widget.dart';
 import 'portfolio_holdings_widget.dart';
-import '../../../../trade/presentation/cubit/unified_trade_cubit.dart';
 import '../../../../trade/presentation/mobile/pages/trade_portfolio_list_mobile_page.dart';
-import '../../../../trade/providers/trade_service_providers.dart';
 
 /// Widget that handles portfolio tab content based on state
 class PortfolioTabContentWidget extends ConsumerWidget {
@@ -271,7 +269,7 @@ class _HeatmapTab extends StatelessWidget {
   String? _getPortfolioName(BuildContext context) => 'Heatmap';
 }
 
-/// Trade tab widget using the trade mobile page
+/// Trade tab widget using the trade mobile page with Riverpod
 class _TradeTab extends StatelessWidget {
   const _TradeTab({required this.userId, required this.ref});
   final String userId;
@@ -279,21 +277,7 @@ class _TradeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      final tradeApiService = ref.read(tradeApiServiceProvider);
-      final tradeMockService = ref.read(tradeMockServiceProvider);
-
-      return BlocProvider<UnifiedTradeCubit>(
-        create: (context) => UnifiedTradeCubit(
-          apiService: tradeApiService,
-          mockService: tradeMockService,
-          useMockData: false,
-        ),
-        child: TradePortfolioListMobilePage(userId: userId),
-      );
-    } catch (error) {
-      return Center(child: Text('Error loading trade: $error'));
-    }
+    return TradePortfolioListMobilePage(userId: userId);
   }
 }
 
