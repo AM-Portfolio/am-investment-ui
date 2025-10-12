@@ -126,6 +126,65 @@ lib/
 │   │   │
 │   │   └── README.md              # Portfolio feature documentation.
 │   │
+│   ├── trade/                     # 💰 Trade management and analysis.
+│   │   │                          # ✅ Complete clean architecture implementation (follows portfolio pattern).
+│   │   ├── internal/              # 🧠 ALL feature-specific logic (mirrors portfolio structure).
+│   │   │   ├── data/              # Trade data sources and repository implementations.
+│   │   │   │   ├── datasources/   # Remote and local data sources.
+│   │   │   │   │   ├── trade_datasource.dart     # Abstract interface (like portfolio_datasource.dart).
+│   │   │   │   │   └── trade_datasource_impl.dart # Implementation (like portfolio_datasource_impl.dart).
+│   │   │   │   ├── dtos/          # Data transfer objects for API communication.
+│   │   │   │   │   └── trade_dtos.dart          # @freezed + @JsonSerializable API models.
+│   │   │   │   ├── mappers/       # DTO ↔ Entity conversion.
+│   │   │   │   │   └── trade_mappers.dart        # Conversion logic (like portfolio_mappers.dart).
+│   │   │   │   └── repositories/  # Repository implementations.
+│   │   │   │       └── trade_repository_impl.dart # Concrete repository (like portfolio_repository_impl.dart).
+│   │   │   │
+│   │   │   ├── domain/            # Trade entities, use cases, abstract repositories.
+│   │   │   │   ├── entities/      # Domain entities (TradeHolding, TradePortfolioSummary).
+│   │   │   │   │   └── trade_entities.dart       # @freezed domain models with business logic.
+│   │   │   │   ├── repositories/  # Abstract repository interfaces.
+│   │   │   │   │   └── trade_repository.dart     # Abstract interface (like portfolio_repository.dart).
+│   │   │   │   └── usecases/      # Business use cases (GetTradeHoldings, etc.).
+│   │   │   │       └── trade_usecases.dart       # Use cases (like portfolio_usecases.dart).
+│   │   │   │
+│   │   │   └── services/          # Trade complex workflows (e.g., analysis + calendar).
+│   │   │       └── trade_service.dart            # Multi-step workflows (like portfolio_service.dart).
+│   │   │
+│   │   ├── presentation/          # 🎨 UI layer for trade (web + mobile).
+│   │   │   ├── cubit/             # TradeCubit (state management for trade screens).
+│   │   │   │   ├── trade_cubit.dart             # Main cubit (like portfolio_cubit.dart).
+│   │   │   │   └── trade_state.dart             # State definitions (like portfolio_state.dart).
+│   │   │   │
+│   │   │   ├── common/            # Widgets reused across web/mobile for trade.
+│   │   │   │   ├── trade_summary_template.dart   # Reusable summary template.
+│   │   │   │   ├── trade_holdings_template.dart  # Reusable holdings template.
+│   │   │   │   └── trade_calendar_template.dart  # Reusable calendar template.
+│   │   │   │
+│   │   │   ├── pages/             # Trade page implementations.
+│   │   │   │   ├── trade_summary_page.dart      # Page 1: Summary & Asset Allocation.
+│   │   │   │   ├── trade_holdings_page.dart     # Page 2: Holdings Management.
+│   │   │   │   └── trade_calendar_page.dart     # Page 3: Calendar Analytics.
+│   │   │   │
+│   │   │   ├── web/               # Web-specific trade UI.
+│   │   │   │   ├── trade_summary_web_widget.dart    # Web summary widget.
+│   │   │   │   ├── trade_holdings_web_widget.dart   # Web holdings widget.
+│   │   │   │   ├── trade_calendar_web_widget.dart   # Web calendar widget.
+│   │   │   │   └── trade_web_screen.dart            # Web screen (like portfolio_web_screen.dart).
+│   │   │   │
+│   │   │   ├── mobile/            # Mobile UI (like portfolio/mobile).
+│   │   │   │   └── trade_mobile_widgets.dart    # Mobile-specific widgets.
+│   │   │   │
+│   │   │   └── widgets/           # Trade-specific UI components.
+│   │   │       ├── trade_card.dart              # Trade display card.
+│   │   │       ├── trade_metrics_display.dart   # Metrics display.
+│   │   │       └── trade_allocation_chart.dart  # Allocation chart.
+│   │   │
+│   │   ├── providers/             # 🔗 Trade feature providers (Riverpod).
+│   │   │   └── trade_providers.dart             # @riverpod dependency injection.
+│   │   │
+│   │   └── README.md              # Trade feature documentation.
+│   │
 │   └── web_app_entry.dart         # Web application entry point and routing.
 │
 ├── di/                            # ⚙️ Dependency Injection setup (Riverpod providers).
@@ -168,6 +227,34 @@ lib/
 - **Clients**: `[Feature]Client` → `@RestApi` with provider
 - **Repositories**: `[Feature]Repository` → Plain class implementing interface, with provider
 
+## Feature Development Pattern
+
+### Trade Feature Structure (Following Portfolio Pattern)
+The trade feature follows the exact same structure as the portfolio feature to ensure consistency:
+
+```
+Portfolio Pattern                     →  Trade Pattern
+portfolio_datasource.dart           →  trade_datasource.dart
+portfolio_datasource_impl.dart      →  trade_datasource_impl.dart  
+portfolio_dtos.dart                  →  trade_dtos.dart
+portfolio_mappers.dart               →  trade_mappers.dart
+portfolio_repository_impl.dart      →  trade_repository_impl.dart
+portfolio_entities.dart              →  trade_entities.dart
+portfolio_repository.dart            →  trade_repository.dart
+portfolio_usecases.dart              →  trade_usecases.dart
+portfolio_service.dart               →  trade_service.dart
+portfolio_cubit.dart                 →  trade_cubit.dart
+portfolio_state.dart                 →  trade_state.dart
+portfolio_providers.dart             →  trade_providers.dart
+```
+
+### Benefits of Pattern Consistency
+- **Developer Familiarity**: Same structure across all financial features
+- **Code Reusability**: Shared templates and components
+- **Maintainability**: Consistent patterns make updates easier
+- **Testing Strategy**: Same testing approaches work across features
+- **Architecture Standards**: Proven clean architecture patterns
+
 ## Riverpod Provider Organization
 
 > **Note:** For complete provider patterns and dependency injection details, see [ARCHITECTURAL_PATTERNS.md](./ARCHITECTURAL_PATTERNS.md)
@@ -184,6 +271,13 @@ PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
   final client = ref.read(portfolioClientProvider);
   return PortfolioRepositoryImpl(client);
 }
+
+@riverpod
+TradeRepository tradeRepository(TradeRepositoryRef ref) {
+  final dataSource = ref.read(tradeDataSourceProvider);
+  final mappers = ref.read(tradeMappersProvider);
+  return TradeRepositoryImpl(dataSource: dataSource, mappers: mappers);
+}
 ```
 
 ## Method & File Size Rules
@@ -195,20 +289,20 @@ PortfolioRepository portfolioRepository(PortfolioRepositoryRef ref) {
 
 ```dart
 // ❌ Bad - File too large (500+ lines)
-class MegaPortfolioService {
+class MegaTradeService {
   // 600+ lines of methods
 }
 
 // ✅ Good - Split into focused services
-class PortfolioService {        // < 500 lines
-  // Portfolio-specific logic
+class TradeService {        // < 500 lines
+  // Trade-specific logic
 }
 
-class PortfolioCalculationService {  // < 500 lines
+class TradeCalculationService {  // < 500 lines
   // Calculation-specific logic
 }
 
-class PortfolioValidationService {   // < 500 lines
+class TradeValidationService {   // < 500 lines
   // Validation-specific logic
 }
 ```

@@ -407,4 +407,8 @@ This trade system leverages the proven template design pattern from investment p
 
 This comprehensive trade system follows the proven template design pattern while providing platform-optimized experiences through dedicated web and mobile pages that share common business logic and templates.
 
-<!-- This file should be deleted - consolidated into main trade guide -->
+<!-- This file has been removed - content consolidated into main TRADE_SYSTEM_INTEGRATION_GUIDE.md -->
+<!-- Following the portfolio pattern for consistent documentation structure -->
+<!-- File should be removed to avoid duplication -->
+File should be deleted.
+-->
