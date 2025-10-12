@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'di/auth_providers.dart';
 import 'features/login/presentation/pages/auth_wrapper.dart';
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/authentication/presentation/pages/register_page.dart';
@@ -14,11 +15,21 @@ import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
-class App extends ConsumerWidget {
+class App extends StatelessWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: AuthProviders.providers,
+    child: const _MaterialApp(),
+  );
+}
+
+class _MaterialApp extends StatelessWidget {
+  const _MaterialApp();
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
     title: 'AM Investment',
     theme: ThemeData(
       primarySwatch: Colors.blue,
