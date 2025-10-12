@@ -18,18 +18,19 @@ The application is built using Flutter 3.32.0 and Dart 3.8.0, adhering to Clean 
 - **Authentication**: Supports email/password, demo login, and Google OAuth Sign-In (using Google Sign-In SDK v7.1.0 and Google Identity Services). Authentication state and navigation are managed via Riverpod and an `AuthWrapper`. Sessions are persistent using SharedPreferences. Google Sign-In configuration is managed through the `ConfigService` with `GoogleConfig` class, which loads the Web Client ID from environment-specific properties files. The login screen validates configuration and provides user-friendly error messages with setup guidance when Client ID is missing.
 - **Holdings Management**: Utilizes a sophisticated template-based architecture for displaying holdings. This includes a `HoldingsSelectorCore` for state management (sorting, filtering, view modes), `HoldingsDisplayConfig` for display presets (web, mobile, minimal), and layout builders (`TableLayoutBuilder`, `CardLayoutBuilder`) following a strategy pattern. A `HoldingsTemplateFactory` creates display components, coordinated by a `UniversalHoldingsWidget` for adaptive template selection and Riverpod integration.
 - **Data Handling**: Implements a mock data fallback system where `PortfolioMockDataHelper` loads JSON mock files from `lib/assets/mock_data/` if API calls fail. This system is active only in the development environment, ensuring seamless frontend development without a live backend connection.
-- **Trade System Architecture**: Implements complete Clean Architecture pattern mirroring portfolio structure:
+- **Trade System Architecture**: Complete Clean Architecture implementation with full Riverpod migration (migrated from BLoC/Cubit):
   - **Internal Layer (lib/features/trade/internal/)**:
-    - **Domain Layer**: Entities (TradePortfolio, TradeHolding, TradeSummary, TradeCalendar), repository interfaces, and use cases (GetTradePortfolios, GetTradeHoldings, GetTradeSummary, GetTradeCalendar)
-    - **Data Layer**: DTOs for API mapping, remote data sources with API-first approach, mappers for DTO-to-entity conversion, and repository implementations with caching
-    - **Mock Data Fallback**: Automatic fallback to mock JSON files in `lib/assets/mock_data/trade/` when API endpoints fail
-  - **Presentation Layer**:
-    - **Riverpod Providers**: Comprehensive dependency injection through `trade_internal_providers.dart` wiring use cases, repositories, and data sources
-    - **Template Components**: Reusable templates for holdings, summary, and calendar views following portfolio template pattern
-    - **Web Implementation**: Separate web pages with sidebar navigation and dynamic routing
-    - **Mobile Implementation**: Separate mobile pages with card-based layouts, pull-to-refresh, and tab navigation (5th tab in portfolio screen)
+    - **Domain Layer**: Freezed entities (TradePortfolio, TradeHolding, TradeSummary, TradeCalendar, TradeCalendarEvent), repository interfaces with stream support, and validated use cases (GetTradePortfolios, GetTradeHoldings, GetTradeSummary, GetTradeCalendar)
+    - **Data Layer**: DTOs for API mapping, remote data sources with API-first approach, mappers for DTO-to-entity conversion, and repository implementations with broadcast stream controllers and caching
+    - **Mock Data Fallback**: Automatic fallback to mock JSON files in `lib/assets/mock_data/trade/` when API endpoints fail (dev environment only)
+  - **Presentation Layer (Fully Riverpod-Based)**:
+    - **Stream Providers**: Complete Riverpod stream provider implementation (`tradePortfoliosStreamProvider`, `tradeHoldingsStreamProvider`, `tradeSummaryStreamProvider`, `tradeCalendarStreamProvider`) using family providers with record parameters
+    - **Template Components**: Reusable presentation templates (TradePortfolioDiscoveryTemplate, TradeHoldingsTemplate, TradeSummaryTemplate, CalendarAnalyticsTemplate) consuming domain entities with shared callbacks for web/mobile
+    - **Web Implementation**: ConsumerWidget-based pages with stream watching, sidebar navigation, and Map<String, String> routing arguments (userId, portfolioId)
+    - **Mobile Implementation**: ConsumerWidget/ConsumerStatefulWidget pages with pull-to-refresh, client-side filtering (calendar by month), card-based layouts, and userId forwarding in navigation
+  - **Architecture Migration**: Complete removal of BLoC/Cubit dependencies, migrated to pure Riverpod with stream providers and domain entities throughout
   - **Sequential API Flow**: Portfolio discovery → Holdings analysis → Summary/analytics → Calendar events
-  - **Generated Code**: Freezed entities and JSON serialization for type-safe data handling
+  - **Generated Code**: Freezed entities with @Default annotations and JSON serialization for type-safe data handling
 - **Configuration**: Uses environment-specific property files (`application.properties`, `application-dev.properties`, `application-prod.properties`) for managing settings. The `ConfigService` and `AppConfig` classes provide type-safe access to configuration values, including API endpoints (e.g., `api.baseUrl=https://api.munish.org/api/v1` for development), environment settings, and third-party service credentials (like Google Web Client ID).
 
 ### Feature Specifications
