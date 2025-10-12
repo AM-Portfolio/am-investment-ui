@@ -5,7 +5,6 @@ import 'trade_metrics.dart';
 import 'trade_execution.dart';
 
 part 'trade_holding.freezed.dart';
-part 'trade_holding.g.dart';
 
 /// Domain entity for individual trade holding with complete lifecycle
 @freezed
@@ -27,8 +26,6 @@ class TradeHolding with _$TradeHolding {
     DateTime? tradeDate,
   }) = _TradeHolding;
 
-  factory TradeHolding.fromJson(Map<String, dynamic> json) =>
-      _$TradeHoldingFromJson(json);
 }
 
 /// Domain entity for paginated trade holdings collection
@@ -48,8 +45,6 @@ class TradeHoldings with _$TradeHoldings {
     @Default(false) bool empty,
   }) = _TradeHoldings;
 
-  factory TradeHoldings.fromJson(Map<String, dynamic> json) =>
-      _$TradeHoldingsFromJson(json);
 
   /// Create empty holdings
   factory TradeHoldings.emptyHoldings(String userId, String portfolioId) =>

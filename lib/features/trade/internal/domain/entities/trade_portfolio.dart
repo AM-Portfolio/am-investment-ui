@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'portfolio_metrics.dart';
 
 part 'trade_portfolio.freezed.dart';
-part 'trade_portfolio.g.dart';
 
 /// Domain entity for trade portfolio discovery
 @freezed
@@ -19,8 +18,6 @@ class TradePortfolio with _$TradePortfolio {
     DateTime? lastUpdated,
   }) = _TradePortfolio;
 
-  factory TradePortfolio.fromJson(Map<String, dynamic> json) =>
-      _$TradePortfolioFromJson(json);
 }
 
 /// Domain entity for comprehensive portfolio summary with advanced metrics
@@ -43,9 +40,6 @@ class TradePortfolioSummary with _$TradePortfolioSummary {
     List<String>? losingTradeIds,
     Map<String, dynamic>? assetAllocations,
   }) = _TradePortfolioSummary;
-
-  factory TradePortfolioSummary.fromJson(Map<String, dynamic> json) =>
-      _$TradePortfolioSummaryFromJson(json);
 }
 
 /// Domain entity for trade portfolio list
@@ -56,9 +50,6 @@ class TradePortfolioList with _$TradePortfolioList {
     required List<TradePortfolio> portfolios,
     @Default(0) int totalCount,
   }) = _TradePortfolioList;
-
-  factory TradePortfolioList.fromJson(Map<String, dynamic> json) =>
-      _$TradePortfolioListFromJson(json);
 
   /// Create empty portfolio list
   factory TradePortfolioList.empty(String userId) => TradePortfolioList(

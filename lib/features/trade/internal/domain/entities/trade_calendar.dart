@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'trade_holding.dart';
 
 part 'trade_calendar.freezed.dart';
-part 'trade_calendar.g.dart';
 
 /// Domain entity for trade calendar event (complete trade data for calendar view)
 @freezed
@@ -24,8 +23,6 @@ class TradeCalendarEvent with _$TradeCalendarEvent {
     @Default({}) Map<String, dynamic> metadata,
   }) = _TradeCalendarEvent;
 
-  factory TradeCalendarEvent.fromJson(Map<String, dynamic> json) =>
-      _$TradeCalendarEventFromJson(json);
 }
 
 /// Domain entity for trade calendar with portfolio-indexed trades
@@ -40,9 +37,6 @@ class TradeCalendar with _$TradeCalendar {
     DateTime? startDate,
     DateTime? endDate,
   }) = _TradeCalendar;
-
-  factory TradeCalendar.fromJson(Map<String, dynamic> json) =>
-      _$TradeCalendarFromJson(json);
 
   /// Create empty calendar
   factory TradeCalendar.empty(String userId, String portfolioId) =>
