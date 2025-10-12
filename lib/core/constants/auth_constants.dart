@@ -16,8 +16,8 @@ class AuthConstants {
   static const String demoLoginSuccess = 'Welcome to demo mode!';
 
   // Demo user credentials
-  static const String demoEmail = 'demo@aminvestment.com';
-  static const String demoPassword = 'Demo123!';
+  static const String demoEmail = 'ssd2658@gmail.com';
+  static const String demoPassword = '@M1unish';
 
   // Token settings
   static const Duration tokenExpiryDuration = Duration(hours: 24);

@@ -43,7 +43,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       final fullUri =
-          '${_apiConfig.baseUrl}/portfolios/list?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolios/list?userId=$userId';
 
       final response = await _apiClient.get<TradePortfolioListDto>(
         fullUri,
@@ -102,7 +102,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       final fullUri =
-          '${_apiConfig.baseUrl}/portfolios/$portfolioId/holdings?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/holdings?userId=$userId';
 
       final response = await _apiClient.get<TradeHoldingsDto>(
         fullUri,
@@ -161,7 +161,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       final fullUri =
-          '${_apiConfig.baseUrl}/portfolios/$portfolioId/summary?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/summary?userId=$userId';
 
       final response = await _apiClient.get<TradeSummaryDto>(
         fullUri,
@@ -220,7 +220,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       final fullUri =
-          '${_apiConfig.baseUrl}/portfolios/$portfolioId/calendar?userId=$userId';
+          '${_apiConfig.baseUrl}/api/v1/portfolios/$portfolioId/calendar?userId=$userId';
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
