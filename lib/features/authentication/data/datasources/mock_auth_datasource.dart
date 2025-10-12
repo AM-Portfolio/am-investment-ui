@@ -48,6 +48,7 @@ class MockAuthDataSource implements AuthDataSource {
   }
 
   @override
+
   Future<void> logout() async {
     // Mock logout - just delay
     await Future.delayed(const Duration(milliseconds: 500));

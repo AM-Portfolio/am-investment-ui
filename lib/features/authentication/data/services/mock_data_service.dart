@@ -32,6 +32,16 @@ class MockDataService {
     return googleProfiles.map((json) => UserModel.fromJson(json)).toList();
   }
 
+  /// Load test users from default JSON
+  Future<List<Map<String, dynamic>>> loadTestUsers() async {
+    final response = await rootBundle.loadString(
+      'assets/test_users.json',
+    );
+    final Map<String, dynamic> data = json.decode(response);
+    final List<dynamic> users = data['users'];
+    return users.cast<Map<String, dynamic>>();
+  }
+
   /// Authenticate user with email and password (mock)
   Future<AuthResultModel?> authenticateEmailPassword(
     String email,
@@ -50,6 +60,27 @@ class MockDataService {
       return null;
     }
 
+    // First try test_users.json (default JSON)
+    final testUsers = await loadTestUsers();
+    final testUserJson = testUsers.cast<Map<String, dynamic>?>().firstWhere(
+      (u) => u!['email'] == email && u['password'] == password,
+      orElse: () => null,
+    );
+
+    if (testUserJson != null) {
+      // Map from test_users.json format to UserModel format
+      final user = UserModel(
+        id: testUserJson['id'] as String,
+        email: testUserJson['email'] as String,
+        displayName: testUserJson['name'] as String? ?? 'User',
+        authMethod: AuthConstants.authMethodEmail,
+        isDemo: false,
+      );
+      final tokens = _generateMockTokens();
+      return AuthResultModel(user: user, tokens: tokens);
+    }
+
+    // Fallback to mock users if not found in test users
     final users = await loadMockUsers();
     final user = users.cast<UserModel?>().firstWhere(
       (u) => u!.email == email,
@@ -91,13 +122,36 @@ class MockDataService {
       );
     }
 
-    final user = UserModel(
-      id: 'demo_001',
-      email: AuthConstants.demoEmail,
-      displayName: 'Demo User',
-      authMethod: AuthConstants.authMethodDemo,
-      isDemo: true,
+    // Load users from test_users.json (default JSON)
+    final testUsers = await loadTestUsers();
+    
+    // Find demo user or fallback to first user
+    UserModel user;
+    final demoUserJson = testUsers.cast<Map<String, dynamic>?>().firstWhere(
+      (u) => u!['email'] == 'ssd2658@gmail.com' || u['username'] == '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec',
+      orElse: () => null,
     );
+    
+    if (demoUserJson != null) {
+      // Map from test_users.json format to UserModel format
+      user = UserModel(
+        id: demoUserJson['id'] as String,
+        email: demoUserJson['email'] as String,
+        displayName: demoUserJson['name'] as String? ?? 'Demo User',
+        authMethod: AuthConstants.authMethodDemo,
+        isDemo: true,
+      );
+    } else {
+      // Fallback to first user if demo user not found
+      final fallbackUserJson = testUsers.first;
+      user = UserModel(
+        id: fallbackUserJson['id'] as String,
+        email: fallbackUserJson['email'] as String,
+        displayName: fallbackUserJson['name'] as String? ?? 'Demo User',
+        authMethod: AuthConstants.authMethodDemo,
+        isDemo: true,
+      );
+    }
 
     final tokens = _generateMockTokens();
 
