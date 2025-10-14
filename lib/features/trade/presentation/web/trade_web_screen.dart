@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
+import '../../providers/trade_internal_providers.dart';
+import '../components/templates/trade_portfolio_discovery_template.dart';
+import '../models/trade_portfolio_view_model.dart';
 import '../widgets/trade_sidebar.dart';
-import 'pages/trade_holdings_web_page.dart';
-import 'pages/trade_portfolios_web_page.dart';
+import 'pages/trade_calendar_analytics_web_page.dart';
+import 'pages/trade_holdings_dashboard_web_page.dart';
 
 /// Trade view types for navigation
 enum TradeViewType { portfolios, holdings, calendar }
@@ -104,17 +107,17 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
     switch (_selectedView) {
       case TradeViewType.portfolios:
-        title = 'Trade Portfolios';
+        title = 'Portfolio Discovery';
         break;
       case TradeViewType.holdings:
         title = _currentPortfolioName != null
-            ? 'Holdings - $_currentPortfolioName'
-            : 'Trade Holdings';
+            ? 'Holdings Dashboard - $_currentPortfolioName'
+            : 'Trade Holdings Dashboard';
         break;
       case TradeViewType.calendar:
         title = _currentPortfolioName != null
-            ? 'Calendar - $_currentPortfolioName'
-            : 'Trade Calendar';
+            ? 'Calendar Analytics - $_currentPortfolioName'
+            : 'Trade Calendar Analytics';
         break;
     }
 
@@ -146,24 +149,50 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           ),
 
         // Refresh button
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          tooltip: 'Refresh Data',
-          onPressed: () {
-            // Invalidate relevant providers based on current view
-            AppLogger.info(
-              'Refreshing trade data for view: $_selectedView',
-              tag: 'TradeWebScreen',
-            );
+        Consumer(
+          builder: (context, ref, child) => IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Data',
+            onPressed: () {
+              AppLogger.info(
+                'Refreshing trade data for view: $_selectedView',
+                tag: 'TradeWebScreen',
+              );
 
-            // Add refresh logic here based on selected view
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Refreshing trade data...'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
+              // Invalidate relevant providers based on current view
+              switch (_selectedView) {
+                case TradeViewType.portfolios:
+                  ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+                  break;
+                case TradeViewType.holdings:
+                  if (_currentPortfolioId != null) {
+                    final params = (
+                      userId: widget.userId,
+                      portfolioId: _currentPortfolioId!,
+                    );
+                    ref.invalidate(tradeHoldingsStreamProvider(params));
+                    ref.invalidate(tradeSummaryStreamProvider(params));
+                  }
+                  break;
+                case TradeViewType.calendar:
+                  if (_currentPortfolioId != null) {
+                    final params = (
+                      userId: widget.userId,
+                      portfolioId: _currentPortfolioId!,
+                    );
+                    ref.invalidate(tradeCalendarStreamProvider(params));
+                  }
+                  break;
+              }
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Refreshing ${_selectedView.name} data...'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
         ),
 
         const SizedBox(width: 8),
@@ -175,35 +204,59 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
   Widget _buildMainContent(BuildContext context) {
     switch (_selectedView) {
       case TradeViewType.portfolios:
-        return TradePortfoliosWebPage(
-          userId: widget.userId,
-          onPortfolioSelected: _onPortfolioSelected,
-        );
+        return _buildPortfoliosView();
 
       case TradeViewType.holdings:
         if (_currentPortfolioId == null) {
           return _buildSelectPortfolioPrompt();
         }
-        return TradeHoldingsWebPage(
+        return TradeHoldingsDashboardWebPage(
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
-          portfolioName: _currentPortfolioName ?? 'Portfolio',
         );
 
       case TradeViewType.calendar:
         if (_currentPortfolioId == null) {
           return _buildSelectPortfolioPrompt();
         }
-        return TradeCalendarWebPage(
+        return TradeCalendarAnalyticsWebPage(
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
-          portfolioName: _currentPortfolioName ?? 'Portfolio',
         );
-
-      default:
-        return _buildSelectPortfolioPrompt();
     }
   }
+
+  /// Build portfolios view with integrated navigation
+  Widget _buildPortfoliosView() => Consumer(
+    builder: (context, ref, child) {
+      final portfoliosAsync = ref.watch(
+        tradePortfoliosStreamProvider(widget.userId),
+      );
+
+      return portfoliosAsync.when(
+        data: (portfolios) => TradePortfolioDiscoveryTemplate(
+          portfolios: portfolios,
+          isLoading: false,
+          onPortfolioSelected: (portfolio) {
+            _onPortfolioSelected(portfolio.id, portfolio.name);
+          },
+          onRefresh: () {
+            ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => TradePortfolioDiscoveryTemplate(
+          portfolios: const <TradePortfolioViewModel>[],
+          isLoading: false,
+          errorMessage: error.toString(),
+          onPortfolioSelected: (_) {},
+          onRefresh: () {
+            ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+          },
+        ),
+      );
+    },
+  );
 
   /// Build prompt to select a portfolio
   Widget _buildSelectPortfolioPrompt() => Center(
@@ -211,7 +264,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          Icons.account_balance_wallet_outlined,
+          _selectedView == TradeViewType.holdings
+              ? Icons.dashboard_outlined
+              : Icons.calendar_today_outlined,
           size: 64,
           color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
@@ -224,7 +279,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Choose a portfolio from the list to view ${_selectedView == TradeViewType.holdings ? 'holdings' : 'calendar'}',
+          _selectedView == TradeViewType.holdings
+              ? 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views'
+              : 'Choose a portfolio to explore the interactive calendar analytics with trade event insights',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
           ),
@@ -232,8 +289,8 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         ),
         const SizedBox(height: 24),
         ElevatedButton.icon(
-          icon: const Icon(Icons.list),
-          label: const Text('View Portfolios'),
+          icon: const Icon(Icons.account_balance_wallet),
+          label: const Text('Browse Portfolios'),
           onPressed: () {
             setState(() {
               _selectedView = TradeViewType.portfolios;
