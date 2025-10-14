@@ -1,22 +1,21 @@
 import 'dart:async';
 
-import '../../domain/entities/trade_portfolio.dart';
-import '../../domain/entities/trade_holding.dart';
-import '../../domain/entities/trade_summary.dart';
+import '../../../../../core/utils/logger.dart';
 import '../../domain/entities/trade_calendar.dart';
+import '../../domain/entities/trade_holding.dart';
+import '../../domain/entities/trade_portfolio.dart';
+import '../../domain/entities/trade_summary.dart';
 import '../../domain/repositories/trade_repository.dart';
 import '../datasources/trade_remote_data_source.dart';
-import '../mappers/trade_portfolio_mapper.dart';
-import '../mappers/trade_holding_mapper.dart';
-import '../mappers/trade_summary_mapper.dart';
 import '../mappers/trade_calendar_mapper.dart';
-import '../../../../../core/utils/logger.dart';
+import '../mappers/trade_holding_mapper.dart';
+import '../mappers/trade_portfolio_mapper.dart';
+import '../mappers/trade_summary_mapper.dart';
 
 /// Repository implementation for trade data operations
 class TradeRepositoryImpl implements TradeRepository {
-  TradeRepositoryImpl({
-    required TradeRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+  TradeRepositoryImpl({required TradeRemoteDataSource remoteDataSource})
+    : _remoteDataSource = remoteDataSource;
 
   final TradeRemoteDataSource _remoteDataSource;
 
@@ -99,10 +98,7 @@ class TradeRepositoryImpl implements TradeRepository {
     );
 
     try {
-      final dto = await _remoteDataSource.getTradeHoldings(
-        userId,
-        portfolioId,
-      );
+      final dto = await _remoteDataSource.getTradeHoldings(userId, portfolioId);
       final holdings = TradeHoldingMapper.fromListDto(dto, userId, portfolioId);
 
       _cachedHoldings = holdings;
@@ -210,11 +206,8 @@ class TradeRepositoryImpl implements TradeRepository {
     );
 
     try {
-      final dto = await _remoteDataSource.getTradeCalendar(
-        userId,
-        portfolioId,
-      );
-      final calendar = TradeCalendarMapper.fromDto(dto, userId, portfolioId);
+      final dto = await _remoteDataSource.getTradeCalendar(userId, portfolioId);
+      final calendar = TradeCalendarMapper.fromDto(dto);
 
       _cachedCalendar = calendar;
       _calendarController.add(calendar);
@@ -256,10 +249,7 @@ class TradeRepositoryImpl implements TradeRepository {
   }
 
   @override
-  Stream<TradeHoldings> watchTradeHoldings(
-    String userId,
-    String portfolioId,
-  ) {
+  Stream<TradeHoldings> watchTradeHoldings(String userId, String portfolioId) {
     AppLogger.methodEntry(
       'watchTradeHoldings',
       tag: 'TradeRepository',

@@ -16,48 +16,32 @@ class TradeCalendarEventViewModel {
     this.profitLossPercentage,
   });
 
-  final String id;
-  final String title;
-  final DateTime date;
-  final String type;
-  final String? description;
-  final String? symbol;
-  final double? amount;
-  final String? status;
-  final double? profitLoss;
-  final double? profitLossPercentage;
-
-  /// Computed properties
-  String get displayDate => '${date.month}/${date.day}/${date.year}';
-  String get displayAmount => amount != null ? '\$${amount!.toStringAsFixed(2)}' : 'N/A';
-  String get displayProfitLoss => profitLoss != null ? '\$${profitLoss!.toStringAsFixed(2)}' : 'N/A';
-  bool get isProfit => (profitLoss ?? 0) >= 0;
-
   /// Factory from domain entity
   factory TradeCalendarEventViewModel.fromEntity(TradeCalendarEvent entity) {
     // Generate title from available data
-    String title = entity.symbol ?? 'Trade Event';
+    var title = entity.symbol ?? 'Trade Event';
     if (entity.status != null) {
       title = '$title - ${entity.status}';
     }
 
     // Generate type from status or default
-    String type = entity.status ?? 'TRADE';
+    final type = entity.status ?? 'TRADE';
 
     // Generate description
     String? description;
     if (entity.profitLoss != null && entity.profitLossPercentage != null) {
-      description = 'P&L: \$${entity.profitLoss!.toStringAsFixed(2)} (${entity.profitLossPercentage!.toStringAsFixed(2)}%)';
+      description =
+          'P&L: \$${entity.profitLoss!.toStringAsFixed(2)} (${entity.profitLossPercentage!.toStringAsFixed(2)}%)';
     }
 
     return TradeCalendarEventViewModel(
-      id: entity.tradeId,
+      id: entity.id,
       title: title,
-      date: entity.tradeDate,
+      date: entity.date,
       type: type,
       description: description,
       symbol: entity.symbol,
-      amount: entity.profitLoss,
+      amount: entity.amount,
       status: entity.status,
       profitLoss: entity.profitLoss,
       profitLossPercentage: entity.profitLossPercentage,
@@ -68,15 +52,16 @@ class TradeCalendarEventViewModel {
   factory TradeCalendarEventViewModel.fromTradeHolding(TradeHolding holding) {
     final instrument = holding.instrumentInfo;
     final metrics = holding.metrics;
-    
-    String title = instrument?.symbol ?? 'Trade';
+
+    var title = instrument?.symbol ?? 'Trade';
     if (holding.status != null) {
       title = '$title - ${holding.status}';
     }
 
     String? description;
     if (metrics?.profitLoss != null && metrics?.profitLossPercentage != null) {
-      description = 'P&L: \$${metrics!.profitLoss!.toStringAsFixed(2)} (${metrics.profitLossPercentage!.toStringAsFixed(2)}%)';
+      description =
+          'P&L: \$${metrics!.profitLoss!.toStringAsFixed(2)} (${metrics.profitLossPercentage!.toStringAsFixed(2)}%)';
     }
 
     return TradeCalendarEventViewModel(
@@ -93,15 +78,32 @@ class TradeCalendarEventViewModel {
     );
   }
 
+  final String id;
+  final String title;
+  final DateTime date;
+  final String type;
+  final String? description;
+  final String? symbol;
+  final double? amount;
+  final String? status;
+  final double? profitLoss;
+  final double? profitLossPercentage;
+
+  /// Computed properties
+  String get displayDate => '${date.month}/${date.day}/${date.year}';
+  String get displayAmount =>
+      amount != null ? '\$${amount!.toStringAsFixed(2)}' : 'N/A';
+  String get displayProfitLoss =>
+      profitLoss != null ? '\$${profitLoss!.toStringAsFixed(2)}' : 'N/A';
+  bool get isProfit => (profitLoss ?? 0) >= 0;
+
   static List<TradeCalendarEventViewModel> fromEntityList(
-      List<TradeCalendarEvent> entities) {
-    return entities.map((e) => TradeCalendarEventViewModel.fromEntity(e)).toList();
-  }
+    List<TradeCalendarEvent> entities,
+  ) => entities.map(TradeCalendarEventViewModel.fromEntity).toList();
 
   static List<TradeCalendarEventViewModel> fromTradeHoldingList(
-      List<TradeHolding> holdings) {
-    return holdings.map((h) => TradeCalendarEventViewModel.fromTradeHolding(h)).toList();
-  }
+    List<TradeHolding> holdings,
+  ) => holdings.map(TradeCalendarEventViewModel.fromTradeHolding).toList();
 }
 
 /// View model for trade calendar
@@ -114,6 +116,61 @@ class TradeCalendarViewModel {
     this.startDate,
     this.endDate,
   });
+
+  /// Factory from domain entity
+  factory TradeCalendarViewModel.fromEntity(
+    TradeCalendar entity, {
+    String? userId,
+    String? portfolioId,
+  }) {
+    final allEvents = <TradeCalendarEventViewModel>[];
+
+    // Convert all trades to calendar events
+    for (final portfolioTradeList in entity.portfolioTrades.values) {
+      for (final trade in portfolioTradeList) {
+        // Create event from trade detail
+        final event = TradeCalendarEvent.fromTradeDetail(trade);
+        allEvents.add(TradeCalendarEventViewModel.fromEntity(event));
+
+        // Create events from individual executions
+        for (final execution in trade.tradeExecutions) {
+          final executionEvent = TradeCalendarEvent.fromTradeExecution(
+            execution,
+            trade.portfolioId,
+          );
+          allEvents.add(TradeCalendarEventViewModel.fromEntity(executionEvent));
+        }
+      }
+    }
+
+    // Sort events by date
+    allEvents.sort((a, b) => a.date.compareTo(b.date));
+
+    // Calculate date range from events
+    DateTime? startDate;
+    DateTime? endDate;
+    if (allEvents.isNotEmpty) {
+      startDate = allEvents.first.date;
+      endDate = allEvents.last.date;
+    }
+
+    return TradeCalendarViewModel(
+      userId: userId ?? 'unknown',
+      portfolioId: portfolioId ?? 'unknown',
+      events: allEvents,
+      totalEvents: allEvents.length,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  /// Empty state
+  factory TradeCalendarViewModel.empty(String userId, String portfolioId) =>
+      TradeCalendarViewModel(
+        userId: userId,
+        portfolioId: portfolioId,
+        events: [],
+      );
 
   final String userId;
   final String portfolioId;
@@ -129,39 +186,5 @@ class TradeCalendarViewModel {
       return '${startDate!.month}/${startDate!.day} - ${endDate!.month}/${endDate!.day}';
     }
     return 'All Time';
-  }
-
-  /// Factory from domain entity
-  factory TradeCalendarViewModel.fromEntity(TradeCalendar entity) {
-    // Combine events from both sources
-    final allEvents = <TradeCalendarEventViewModel>[];
-    
-    // Add events from events list
-    allEvents.addAll(TradeCalendarEventViewModel.fromEntityList(entity.events));
-    
-    // Add events from tradesByPortfolio map
-    entity.tradesByPortfolio.forEach((portfolioId, holdings) {
-      allEvents.addAll(
-        TradeCalendarEventViewModel.fromTradeHoldingList(holdings),
-      );
-    });
-
-    return TradeCalendarViewModel(
-      userId: entity.userId,
-      portfolioId: entity.portfolioId,
-      events: allEvents,
-      totalEvents: allEvents.length,
-      startDate: entity.startDate,
-      endDate: entity.endDate,
-    );
-  }
-
-  /// Empty state
-  factory TradeCalendarViewModel.empty(String userId, String portfolioId) {
-    return TradeCalendarViewModel(
-      userId: userId,
-      portfolioId: portfolioId,
-      events: [],
-    );
   }
 }

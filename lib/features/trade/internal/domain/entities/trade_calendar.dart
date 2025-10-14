@@ -198,6 +198,10 @@ class TradeCalendar with _$TradeCalendar {
     required Map<String, List<TradeDetail>> portfolioTrades,
   }) = _TradeCalendar;
 
+  /// Factory for creating empty trade calendar
+  factory TradeCalendar.empty(String userId, String portfolioId) =>
+      const TradeCalendar(portfolioTrades: {});
+
   const TradeCalendar._();
 
   /// Get all trades from all portfolios as a flat list
@@ -269,4 +273,63 @@ class TradeCalendar with _$TradeCalendar {
 
   /// Get unique portfolios
   Set<String> get portfolioIds => portfolioTrades.keys.toSet();
+}
+
+/// Trade calendar event entity for individual trade events
+@freezed
+class TradeCalendarEvent with _$TradeCalendarEvent {
+  const factory TradeCalendarEvent({
+    required String id,
+    required DateTime date,
+    required String type,
+    String? symbol,
+    String? status,
+    double? amount,
+    double? profitLoss,
+    double? profitLossPercentage,
+    String? description,
+    Map<String, dynamic>? metadata,
+  }) = _TradeCalendarEvent;
+
+  const TradeCalendarEvent._();
+
+  /// Create event from TradeDetail
+  factory TradeCalendarEvent.fromTradeDetail(TradeDetail trade) =>
+      TradeCalendarEvent(
+        id: trade.tradeId,
+        date: trade.tradeDate,
+        type: trade.status.name.toUpperCase(),
+        symbol: trade.instrumentInfo.symbol,
+        status: trade.status.name,
+        amount: trade.entryInfo.totalValue,
+        profitLoss: trade.metrics.profitLoss,
+        profitLossPercentage: trade.metrics.profitLossPercentage,
+        description: trade.instrumentInfo.formattedDescription,
+        metadata: {
+          'portfolioId': trade.portfolioId,
+          'tradePositionType': trade.tradePositionType.name,
+          'brokerType': trade.primaryExecution?.basicInfo.brokerType,
+        },
+      );
+
+  /// Create event from TradeExecution
+  factory TradeCalendarEvent.fromTradeExecution(
+    TradeExecution execution,
+    String portfolioId,
+  ) => TradeCalendarEvent(
+    id: execution.basicInfo.tradeId,
+    date: execution.basicInfo.tradeDate,
+    type: execution.executionInfo.tradeType.toUpperCase(),
+    symbol: execution.instrumentInfo.symbol,
+    status: execution.basicInfo.tradeType,
+    amount: execution.executionInfo.quantity * execution.executionInfo.price,
+    description: execution.instrumentInfo.formattedDescription,
+    metadata: {
+      'portfolioId': portfolioId,
+      'orderId': execution.basicInfo.orderId,
+      'brokerType': execution.basicInfo.brokerType,
+      'quantity': execution.executionInfo.quantity,
+      'price': execution.executionInfo.price,
+    },
+  );
 }
