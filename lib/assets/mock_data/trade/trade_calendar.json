@@ -1,147 +1,325 @@
 {
-  "events": [
+  "8a57024c-05c2-475b-a2c4-0545865efa4a": [
     {
-      "id": "event-001",
-      "type": "BUY",
-      "title": "Bought TATAMTRDVR",
-      "date": "2020-09-07T09:33:57",
-      "description": "Long position opened",
-      "symbol": "TATAMTRDVR",
-      "amount": 722400.00,
-      "metadata": {
-        "quantity": 12000,
-        "price": 60.20,
-        "tradeType": "LONG"
-      }
-    },
-    {
-      "id": "event-002",
-      "type": "SELL",
-      "title": "Sold TATAMTRDVR",
-      "date": "2020-09-07T09:53:56",
-      "description": "Break-even exit",
-      "symbol": "TATAMTRDVR",
-      "amount": 722400.00,
-      "metadata": {
-        "quantity": 12000,
-        "price": 60.20,
-        "profitLoss": 0.00
-      }
-    },
-    {
-      "id": "event-003",
-      "type": "BUY",
-      "title": "Bought COALINDIA",
-      "date": "2020-07-30T13:24:11",
-      "description": "Long position opened",
-      "symbol": "COALINDIA",
-      "amount": 90720.00,
-      "metadata": {
-        "quantity": 700,
-        "price": 129.60,
-        "tradeType": "LONG"
-      }
-    },
-    {
-      "id": "event-004",
-      "type": "SELL",
-      "title": "Sold COALINDIA",
-      "date": "2020-08-10T09:37:16",
-      "description": "Profitable exit",
-      "symbol": "COALINDIA",
-      "amount": 91350.00,
-      "metadata": {
-        "quantity": 700,
-        "price": 130.50,
-        "profitLoss": 630.00
-      }
-    },
-    {
-      "id": "event-005",
-      "type": "BUY",
-      "title": "Bought PNB",
-      "date": "2020-07-30T10:01:26",
-      "description": "Long position opened",
-      "symbol": "PNB",
-      "amount": 588900.00,
-      "metadata": {
-        "quantity": 18000,
-        "price": 32.72,
-        "tradeType": "LONG"
-      }
-    },
-    {
-      "id": "event-006",
-      "type": "SELL",
-      "title": "Sold PNB",
-      "date": "2020-08-10T09:24:28",
-      "description": "Loss exit",
-      "symbol": "PNB",
-      "amount": 584250.00,
-      "metadata": {
-        "quantity": 18000,
-        "price": 32.46,
-        "profitLoss": -4651.20
-      }
-    },
-    {
-      "id": "event-007",
-      "type": "BUY",
-      "title": "Bought ITC",
-      "date": "2020-08-27T15:27:30",
-      "description": "Long position opened",
-      "symbol": "ITC",
-      "amount": 194200.00,
-      "metadata": {
-        "quantity": 1000,
-        "price": 194.20,
-        "tradeType": "LONG"
-      }
-    },
-    {
-      "id": "event-008",
-      "type": "SELL",
-      "title": "Sold ITC",
-      "date": "2020-08-28T09:51:26",
-      "description": "Profitable exit",
-      "symbol": "ITC",
-      "amount": 195100.00,
-      "metadata": {
-        "quantity": 1000,
-        "price": 195.10,
-        "profitLoss": 900.00
-      }
-    },
-    {
-      "id": "event-009",
-      "type": "BUY",
-      "title": "Bought SUNPHARMA",
-      "date": "2020-09-18T14:53:01",
-      "description": "Long position opened",
-      "symbol": "SUNPHARMA",
-      "amount": 1042000.00,
-      "metadata": {
+      "tradeId": "630eb463-655c-4b8a-9b21-53b8c3f0d912",
+      "portfolioId": "8a57024c-05c2-475b-a2c4-0545865efa4a",
+      "instrumentInfo": {
+        "symbol": "COALINDIA",
+        "isin": "INE522F01014",
+        "rawSymbol": "COALINDIA",
+        "exchange": "NSE",
+        "segment": "EQUITY",
+        "series": "EQ",
+        "description": "COALINDIA",
+        "baseSymbol": "COALINDIA",
+        "formattedDescription": "COALINDIA",
+        "derivative": false,
+        "index": false
+      },
+      "status": "BREAK_EVEN",
+      "tradePositionType": "SHORT",
+      "entryInfo": {
+        "timestamp": "2020-09-23T09:44:53",
+        "price": 120.0900,
         "quantity": 2000,
-        "price": 521.00,
-        "tradeType": "LONG"
-      }
+        "totalValue": 240180.00,
+        "fees": 0
+      },
+      "exitInfo": {
+        "timestamp": "2020-09-23T09:44:53",
+        "price": 120.0900,
+        "quantity": 2000,
+        "totalValue": 240180.00,
+        "fees": 0
+      },
+      "metrics": {
+        "profitLoss": 0.0000,
+        "profitLossPercentage": 0.0000,
+        "returnOnEquity": 0.0000,
+        "riskAmount": 4803.6000,
+        "rewardAmount": 9607.2000,
+        "riskRewardRatio": 2.0000,
+        "holdingTimeDays": 0,
+        "holdingTimeHours": 0,
+        "holdingTimeMinutes": 0,
+        "maxAdverseExcursion": null,
+        "maxFavorableExcursion": null
+      },
+      "tradeExecutions": [
+        {
+          "basicInfo": {
+            "tradeId": "481679",
+            "orderId": "1000000002008683",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T09:34:51",
+            "brokerType": "ZERODHA",
+            "tradeType": "SELL"
+          },
+          "instrumentInfo": {
+            "symbol": "COALINDIA",
+            "isin": "INE522F01014",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "COALINDIA",
+            "formattedDescription": "COALINDIA",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "SELL",
+            "auction": "FALSE",
+            "quantity": 2000,
+            "price": 119.95
+          }
+        },
+        {
+          "basicInfo": {
+            "tradeId": "613915",
+            "orderId": "1000000002538490",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T09:44:53",
+            "brokerType": "ZERODHA",
+            "tradeType": "BUY"
+          },
+          "instrumentInfo": {
+            "symbol": "COALINDIA",
+            "isin": "INE522F01014",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "COALINDIA",
+            "formattedDescription": "COALINDIA",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "BUY",
+            "auction": "FALSE",
+            "quantity": 2000,
+            "price": 120.09
+          }
+        }
+      ],
+      "psychologyData": {},
+      "entryReasoning": {},
+      "exitReasoning": {},
+      "tradeDate": "2020-09-23",
+      "tradeEndDate": "2020-09-23"
     },
     {
-      "id": "event-010",
-      "type": "SELL",
-      "title": "Sold SUNPHARMA",
-      "date": "2020-09-18T14:56:05",
-      "description": "Profitable exit",
-      "symbol": "SUNPHARMA",
-      "amount": 1044000.00,
-      "metadata": {
-        "quantity": 2000,
-        "price": 522.00,
-        "profitLoss": 2000.00
-      }
+      "tradeId": "f08a3141-5779-4c34-b17d-a626cf34b3d1",
+      "portfolioId": "8a57024c-05c2-475b-a2c4-0545865efa4a",
+      "instrumentInfo": {
+        "symbol": "ITC",
+        "isin": "INE154A01025",
+        "rawSymbol": "ITC",
+        "exchange": "NSE",
+        "segment": "EQUITY",
+        "series": "EQ",
+        "description": "ITC",
+        "baseSymbol": "ITC",
+        "formattedDescription": "ITC",
+        "derivative": false,
+        "index": false
+      },
+      "status": "LOSS",
+      "tradePositionType": "LONG",
+      "entryInfo": {
+        "timestamp": "2020-09-23T11:27:41",
+        "price": 175.0500,
+        "quantity": 1000,
+        "totalValue": 175050.00,
+        "fees": 0
+      },
+      "exitInfo": {
+        "timestamp": "2020-09-23T12:41:28",
+        "price": 173.7500,
+        "quantity": 1000,
+        "totalValue": 173750.00,
+        "fees": 0
+      },
+      "metrics": {
+        "profitLoss": -1300.0000,
+        "profitLossPercentage": -0.7400,
+        "returnOnEquity": -0.7400,
+        "riskAmount": 3501.0000,
+        "rewardAmount": 7002.0000,
+        "riskRewardRatio": 2.0000,
+        "holdingTimeDays": 0,
+        "holdingTimeHours": 1,
+        "holdingTimeMinutes": 13,
+        "maxAdverseExcursion": null,
+        "maxFavorableExcursion": null
+      },
+      "tradeExecutions": [
+        {
+          "basicInfo": {
+            "tradeId": "26626887",
+            "orderId": "1100000005273924",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T11:27:41",
+            "brokerType": "ZERODHA",
+            "tradeType": "BUY"
+          },
+          "instrumentInfo": {
+            "symbol": "ITC",
+            "isin": "INE154A01025",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "ITC",
+            "formattedDescription": "ITC",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "BUY",
+            "auction": "FALSE",
+            "quantity": 1000,
+            "price": 175.05
+          }
+        },
+        {
+          "basicInfo": {
+            "tradeId": "27419553",
+            "orderId": "1100000007844572",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T12:41:28",
+            "brokerType": "ZERODHA",
+            "tradeType": "SELL"
+          },
+          "instrumentInfo": {
+            "symbol": "ITC",
+            "isin": "INE154A01025",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "ITC",
+            "formattedDescription": "ITC",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "SELL",
+            "auction": "FALSE",
+            "quantity": 1000,
+            "price": 173.75
+          }
+        }
+      ],
+      "psychologyData": {},
+      "entryReasoning": {},
+      "exitReasoning": {},
+      "tradeDate": "2020-09-23",
+      "tradeEndDate": "2020-09-23"
+    },
+    {
+      "tradeId": "32b24bdf-5071-480d-a540-d668e9c27dca",
+      "portfolioId": "8a57024c-05c2-475b-a2c4-0545865efa4a",
+      "instrumentInfo": {
+        "symbol": "SUNPHARMA",
+        "isin": "INE044A01036",
+        "rawSymbol": "SUNPHARMA",
+        "exchange": "NSE",
+        "segment": "EQUITY",
+        "series": "EQ",
+        "description": "SUNPHARMA",
+        "baseSymbol": "SUNPHARMA",
+        "formattedDescription": "SUNPHARMA",
+        "derivative": false,
+        "index": false
+      },
+      "status": "WIN",
+      "tradePositionType": "LONG",
+      "entryInfo": {
+        "timestamp": "2020-09-23T09:26:42",
+        "price": 514.5000,
+        "quantity": 1000,
+        "totalValue": 514500.0,
+        "fees": 0
+      },
+      "exitInfo": {
+        "timestamp": "2020-09-23T09:28:12",
+        "price": 516.5000,
+        "quantity": 1000,
+        "totalValue": 516500.0,
+        "fees": 0
+      },
+      "metrics": {
+        "profitLoss": 2000.0000,
+        "profitLossPercentage": 0.3900,
+        "returnOnEquity": 0.3900,
+        "riskAmount": 10290.000,
+        "rewardAmount": 2000.0000,
+        "riskRewardRatio": 0.1944,
+        "holdingTimeDays": 0,
+        "holdingTimeHours": 0,
+        "holdingTimeMinutes": 1,
+        "maxAdverseExcursion": null,
+        "maxFavorableExcursion": null
+      },
+      "tradeExecutions": [
+        {
+          "basicInfo": {
+            "tradeId": "75415043",
+            "orderId": "1300000001464563",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T09:26:42",
+            "brokerType": "ZERODHA",
+            "tradeType": "BUY"
+          },
+          "instrumentInfo": {
+            "symbol": "SUNPHARMA",
+            "isin": "INE044A01036",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "SUNPHARMA",
+            "formattedDescription": "SUNPHARMA",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "BUY",
+            "auction": "FALSE",
+            "quantity": 1000,
+            "price": 514.5
+          }
+        },
+        {
+          "basicInfo": {
+            "tradeId": "75451055",
+            "orderId": "1300000001568234",
+            "tradeDate": "2020-09-23",
+            "orderExecutionTime": "2020-09-23T09:28:12",
+            "brokerType": "ZERODHA",
+            "tradeType": "SELL"
+          },
+          "instrumentInfo": {
+            "symbol": "SUNPHARMA",
+            "isin": "INE044A01036",
+            "exchange": "NSE",
+            "segment": "UNKNOWN",
+            "series": "EQ",
+            "baseSymbol": "SUNPHARMA",
+            "formattedDescription": "SUNPHARMA",
+            "derivative": false,
+            "index": false
+          },
+          "executionInfo": {
+            "tradeType": "SELL",
+            "auction": "FALSE",
+            "quantity": 1000,
+            "price": 516.5
+          }
+        }
+      ],
+      "psychologyData": {},
+      "entryReasoning": {},
+      "exitReasoning": {},
+      "tradeDate": "2020-09-23",
+      "tradeEndDate": "2020-09-23"
     }
-  ],
-  "totalEvents": 10,
-  "startDate": "2020-07-30T10:01:26",
-  "endDate": "2020-09-23T09:28:12"
+  ]
 }

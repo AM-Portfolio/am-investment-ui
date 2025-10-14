@@ -1,10 +1,10 @@
 import '../../../../../config/app_config.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/utils/logger.dart';
-import '../dtos/trade_portfolio_dto.dart';
-import '../dtos/trade_holding_dto.dart';
-import '../dtos/trade_summary_dto.dart';
 import '../dtos/trade_calendar_dto.dart';
+import '../dtos/trade_holding_dto.dart';
+import '../dtos/trade_portfolio_dto.dart';
+import '../dtos/trade_summary_dto.dart';
 import 'trade_mock_data_helper.dart';
 
 /// Abstract data source for trade data
@@ -27,8 +27,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
   const TradeRemoteDataSourceImpl({
     required ApiClient apiClient,
     required ApiConfig apiConfig,
-  })  : _apiClient = apiClient,
-        _apiConfig = apiConfig;
+  }) : _apiClient = apiClient,
+       _apiConfig = apiConfig;
 
   final ApiClient _apiClient;
   final ApiConfig _apiConfig;
@@ -53,18 +53,18 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
           // API returns array, wrap it in expected structure
           if (data is List) {
             return TradePortfolioListDto(
-              portfolios: (data as List<dynamic>)
-                  .map((item) => TradePortfolioDto.fromJson(
-                        item as Map<String, dynamic>,
-                      ))
+              portfolios: data
+                  .map(
+                    (item) => TradePortfolioDto.fromJson(
+                      item as Map<String, dynamic>,
+                    ),
+                  )
                   .toList(),
               totalCount: data.length,
             );
           }
           // Fallback if already wrapped
-          return TradePortfolioListDto.fromJson(
-            data! as Map<String, dynamic>,
-          );
+          return TradePortfolioListDto.fromJson(data! as Map<String, dynamic>);
         },
       );
 
@@ -123,9 +123,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       final response = await _apiClient.get<TradeHoldingsDto>(
         fullUri,
-        parser: (data) => TradeHoldingsDto.fromJson(
-          data! as Map<String, dynamic>,
-        ),
+        parser: (data) =>
+            TradeHoldingsDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -183,9 +182,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       final response = await _apiClient.get<TradeSummaryDto>(
         fullUri,
-        parser: (data) => TradeSummaryDto.fromJson(
-          data! as Map<String, dynamic>,
-        ),
+        parser: (data) =>
+            TradeSummaryDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -245,9 +243,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
-        parser: (data) => TradeCalendarDto.fromJson(
-          data! as Map<String, dynamic>,
-        ),
+        parser: (data) {
+          final json = data! as Map<String, dynamic>;
+          // Handle empty response by creating empty portfolio trades map
+          if (json.isEmpty) {
+            return const TradeCalendarDto(portfolioTrades: {});
+          }
+          return TradeCalendarDto.fromJson(json);
+        },
       );
 
       AppLogger.info(

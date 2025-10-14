@@ -1,13 +1,13 @@
+import '../../../../../core/utils/logger.dart';
 import '../entities/trade_calendar.dart';
 import '../repositories/trade_repository.dart';
-import '../../../../../core/utils/logger.dart';
 
 /// Use case for getting trade calendar
 class GetTradeCalendar {
   const GetTradeCalendar(this._repository);
   final TradeRepository _repository;
 
-  /// Execute the use case
+  /// Execute the use case to get trade calendar for a specific portfolio
   Future<TradeCalendar> call(String userId, String portfolioId) async {
     AppLogger.methodEntry(
       'GetTradeCalendar.call',
@@ -67,17 +67,11 @@ class GetTradeCalendar {
     );
 
     if (userId.isEmpty || portfolioId.isEmpty) {
-      AppLogger.error(
-        'Validation failed for stream',
-        tag: 'GetTradeCalendar',
-      );
+      AppLogger.error('Validation failed for stream', tag: 'GetTradeCalendar');
       throw ArgumentError('User ID and Portfolio ID cannot be empty');
     }
 
-    AppLogger.info(
-      'Starting trade calendar stream',
-      tag: 'GetTradeCalendar',
-    );
+    AppLogger.info('Starting trade calendar stream', tag: 'GetTradeCalendar');
     return _repository.watchTradeCalendar(userId, portfolioId);
   }
 }
