@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../widgets/trade_sidebar.dart';
-import 'pages/trade_calendar_web_page.dart';
 import 'pages/trade_holdings_web_page.dart';
 import 'pages/trade_portfolios_web_page.dart';
 

@@ -8,6 +8,7 @@ import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
+import '../../../trade/presentation/web/trade_web_screen.dart';
 import 'login_screen.dart';
 
 /// Authentication-aware wrapper that manages authentication state
@@ -63,7 +64,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       case 'Dashboard':
         return _buildPlaceholderScreen('Dashboard');
       case 'Trade':
-        return _buildPlaceholderScreen('Trade');
+        return TradeWebScreen(userId: userId);
       case 'Market':
         return _buildPlaceholderScreen('Market');
       case 'News':
