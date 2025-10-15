@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'presentation/converters/trade_calendar_converter.dart';
 import 'presentation/cubit/trade_calendar_cubit.dart';
 import 'presentation/cubit/trade_calendar_state.dart';
-import 'presentation/mappers/trade_calendar_universal_mapper.dart';
 import 'providers/trade_internal_providers.dart';
 
 /// Provider for TradeCalendarUniversalMapper
