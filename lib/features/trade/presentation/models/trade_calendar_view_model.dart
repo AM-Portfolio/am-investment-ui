@@ -1,5 +1,7 @@
 import '../../../../../shared/widgets/calendar/universal_calendar/card_types.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/types.dart';
+import '../../internal/domain/entities/trade_calendar.dart';
+import '../converters/trade_calendar_converter.dart';
 
 /// View model for trade calendar data optimized for UI consumption
 class TradeCalendarViewModel {
@@ -95,6 +97,25 @@ class TradeCalendarViewModel {
     }
 
     return totalTrades > 0 ? totalWins / totalTrades : 0.0;
+  }
+
+  /// Factory method to create TradeCalendarViewModel from TradeCalendar entity
+  factory TradeCalendarViewModel.fromEntity(TradeCalendar entity) {
+    // Get the portfolio ID from the first available portfolio
+    final portfolioId = entity.portfolioTrades.keys.isNotEmpty
+        ? entity.portfolioTrades.keys.first
+        : '';
+
+    // Convert entity to calendar data using the converter
+    final calendarData = TradeCalendarConverter.convertEntityToCalendarData(
+      entity: entity,
+    );
+
+    return TradeCalendarViewModel(
+      portfolioId: portfolioId,
+      calendarData: calendarData,
+      lastUpdated: DateTime.now(),
+    );
   }
 
   /// Copy with new parameters

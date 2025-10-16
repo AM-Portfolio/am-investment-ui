@@ -3,15 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'di/auth_providers.dart';
 import 'features/authentication/presentation/pages/auth_wrapper.dart';
-import 'features/portfolio/presentation/pages/portfolio_screen.dart';
-import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/forgot_password_page.dart';
+import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/reset_password_page.dart';
-import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
-import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.dart';
-import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
+import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
-import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
+import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
+import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.dart';
+import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
+// import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -47,9 +47,7 @@ class _MaterialApp extends StatelessWidget {
             builder: (context) => const PortfolioScreen(userId: ''),
           );
         case '/register':
-          return MaterialPageRoute(
-            builder: (context) => const RegisterPage(),
-          );
+          return MaterialPageRoute(builder: (context) => const RegisterPage());
         case '/forgot-password':
           return MaterialPageRoute(
             builder: (context) => const ForgotPasswordPage(),
@@ -65,7 +63,7 @@ class _MaterialApp extends StatelessWidget {
             ),
           );
         case '/trade/holdings':
-          final args = settings.arguments as Map<String, String>;
+          final args = settings.arguments! as Map<String, String>;
           return MaterialPageRoute(
             builder: (context) => TradeHoldingsDashboardWebPage(
               userId: args['userId']!,
@@ -73,7 +71,7 @@ class _MaterialApp extends StatelessWidget {
             ),
           );
         case '/trade/calendar':
-          final args = settings.arguments as Map<String, String>;
+          final args = settings.arguments! as Map<String, String>;
           return MaterialPageRoute(
             builder: (context) => TradeCalendarAnalyticsWebPage(
               userId: args['userId']!,
@@ -83,11 +81,14 @@ class _MaterialApp extends StatelessWidget {
         default:
           // Handle dynamic routes for mobile trade pages
           if (settings.name?.startsWith('/trade/holdings/') == true) {
-            final portfolioId =
-                settings.name!.substring('/trade/holdings/'.length);
+            final portfolioId = settings.name!.substring(
+              '/trade/holdings/'.length,
+            );
             final args = settings.arguments as Map<String, dynamic>?;
             final portfolioName = args?['portfolioName'] as String?;
-            final userId = args?['userId'] as String? ?? '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec';
+            final userId =
+                args?['userId'] as String? ??
+                '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec';
 
             return MaterialPageRoute(
               builder: (context) => TradeHoldingsDashboardMobilePage(
@@ -97,17 +98,18 @@ class _MaterialApp extends StatelessWidget {
               ),
             );
           } else if (settings.name?.startsWith('/trade/calendar/') == true) {
-            final portfolioId =
-                settings.name!.substring('/trade/calendar/'.length);
+            final portfolioId = settings.name!.substring(
+              '/trade/calendar/'.length,
+            );
             final args = settings.arguments as Map<String, dynamic>?;
             final portfolioName = args?['portfolioName'] as String?;
-            final userId = args?['userId'] as String? ?? '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec';
+            final userId =
+                args?['userId'] as String? ??
+                '64d5f6c9-9516-4eca-ac45-c73cfff7a8ec';
 
             return MaterialPageRoute(
-              builder: (context) => TradeCalendarAnalyticsMobilePage(
-                userId: userId,
-                portfolioId: portfolioId,
-                portfolioName: portfolioName,
+              builder: (context) => const Scaffold(
+                body: Center(child: Text('Mobile page placeholder')),
               ),
             );
           }

@@ -147,3 +147,60 @@ class TradeCardData extends CardData {
       lossCount > 0 ? winCount / lossCount : winCount.toDouble();
   double get calculatedWinRate => tradeCount > 0 ? winCount / tradeCount : 0.0;
 }
+
+/// Portfolio card data
+class PortfolioCardData extends CardData {
+  const PortfolioCardData({
+    required super.dateKey,
+    required this.totalValue,
+    required this.dailyChange,
+    required this.dailyChangePercent,
+    this.assetAllocation,
+    this.topPerformers,
+    this.worstPerformers,
+    super.metadata,
+  });
+
+  final double totalValue;
+  final double dailyChange;
+  final double dailyChangePercent;
+  final Map<String, double>? assetAllocation;
+  final List<Map<String, dynamic>>? topPerformers;
+  final List<Map<String, dynamic>>? worstPerformers;
+
+  bool get isPositive => dailyChange >= 0;
+}
+
+/// Custom card data for user-defined content
+class CustomCardData extends CardData {
+  const CustomCardData({
+    required super.dateKey,
+    required this.title,
+    required this.value,
+    this.subtitle,
+    this.description,
+    this.icon,
+    this.color,
+    this.customFields,
+    super.metadata,
+  });
+
+  final String title;
+  final String value;
+  final String? subtitle;
+  final String? description;
+  final String? icon;
+  final Color? color;
+  final Map<String, dynamic>? customFields;
+}
+
+/// Calendar card theme enumeration for backward compatibility
+enum CalendarCardTheme {
+  primary,
+  secondary,
+  success,
+  warning,
+  error,
+  info,
+  neutral,
+}

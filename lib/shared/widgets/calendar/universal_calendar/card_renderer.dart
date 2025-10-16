@@ -99,7 +99,8 @@ class CalendarCardFactory {
       default:
         return calendar_types.CustomCardData(
           dateKey: dateKey,
-          content: {'empty': true},
+          title: 'Empty',
+          value: '--',
         );
     }
   }

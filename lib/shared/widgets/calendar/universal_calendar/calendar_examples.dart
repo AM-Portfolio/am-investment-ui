@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'card_types.dart';
+import 'card_types.dart' as card_types;
 import 'data_provider.dart';
 import 'types.dart';
 import 'universal_calendar_widget.dart';
@@ -185,25 +185,24 @@ class _CalendarExampleScreenState extends State<CalendarExampleScreen> {
 /// Predefined card configurations for different contexts
 class CalendarPresets {
   /// Trading focused card configurations
-  static List<CalendarCardConfig> get tradingCards => [
-    const CalendarCardConfig(
-      type: CalendarCardType.pnlSummary,
+  static List<card_types.CalendarCardConfig> get tradingCards => [
+    const card_types.CalendarCardConfig(
+      type: card_types.CalendarCardType.pnlSummary,
       title: 'Daily P&L',
-      theme: CalendarCardTheme.neutral,
     ),
-    const CalendarCardConfig(
-      type: CalendarCardType.tradeMetrics,
+    const card_types.CalendarCardConfig(
+      type: card_types.CalendarCardType.tradeMetrics,
       title: 'Trade Count & Win Rate',
-      size: CardSizeType.large,
-      layout: CardLayoutStyle.grid,
-      theme: CalendarCardTheme.info,
+      size: card_types.CardSizeType.large,
+      layout: card_types.CardLayoutStyle.grid,
+      theme: card_types.CardTheme.info,
     ),
-    const CalendarCardConfig(
-      type: CalendarCardType.winLossRatio,
+    const card_types.CalendarCardConfig(
+      type: card_types.CalendarCardType.winLossRatio,
       title: 'Win/Loss',
-      size: CardSizeType.small,
-      layout: CardLayoutStyle.chart,
-      theme: CalendarCardTheme.success,
+      size: card_types.CardSizeType.small,
+      layout: card_types.CardLayoutStyle.chart,
+      theme: card_types.CardTheme.success,
     ),
     const CalendarCardConfig(
       type: CalendarCardType.riskReward,
