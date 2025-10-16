@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../cubit/portfolio_state.dart';
 
 /// Portfolio sidebar widget with view selection
@@ -44,12 +45,6 @@ class PortfolioSidebar extends StatelessWidget {
         icon: Icons.grid_view,
         title: 'Heatmap',
         viewType: PortfolioViewType.heatmap,
-      ),
-      const Divider(),
-      ListTile(
-        leading: const Icon(Icons.show_chart),
-        title: const Text('Trade Analysis'),
-        onTap: () => Navigator.pushNamed(context, '/trade/portfolios'),
       ),
     ],
   );

@@ -4,7 +4,7 @@ import '../../../../../core/utils/logger.dart';
 import '../dtos/trade_calendar_dto.dart';
 import '../dtos/trade_holding_dto.dart';
 import '../dtos/trade_portfolio_dto.dart';
-import '../dtos/trade_summary_dto.dart';
+import '../dtos/trade_portfolio_summary_dto.dart';
 import 'trade_mock_data_helper.dart';
 
 /// Abstract data source for trade data
@@ -16,7 +16,10 @@ abstract class TradeRemoteDataSource {
   Future<TradeHoldingsDto> getTradeHoldings(String userId, String portfolioId);
 
   /// Get trade summary from remote API
-  Future<TradeSummaryDto> getTradeSummary(String userId, String portfolioId);
+  Future<TradePortfolioSummaryDto> getTradeSummary(
+    String userId,
+    String portfolioId,
+  );
 
   /// Get trade calendar from remote API
   Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId);
@@ -165,7 +168,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
   }
 
   @override
-  Future<TradeSummaryDto> getTradeSummary(
+  Future<TradePortfolioSummaryDto> getTradeSummary(
     String userId,
     String portfolioId,
   ) async {
@@ -180,10 +183,10 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
       final fullUri =
           '${_apiConfig.baseUrl}/api/v1/portfolio-summary/$portfolioId';
 
-      final response = await _apiClient.get<TradeSummaryDto>(
+      final response = await _apiClient.get<TradePortfolioSummaryDto>(
         fullUri,
         parser: (data) =>
-            TradeSummaryDto.fromJson(data! as Map<String, dynamic>),
+            TradePortfolioSummaryDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(

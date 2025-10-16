@@ -153,7 +153,7 @@ class TradeRepositoryImpl implements TradeRepository {
 
     try {
       final dto = await _remoteDataSource.getTradeSummary(userId, portfolioId);
-      final summary = TradeSummaryMapper.fromDto(dto, userId, portfolioId);
+      final summary = TradeSummaryMapper.fromPortfolioSummaryDto(dto, userId);
 
       _cachedSummary = summary;
       _summaryController.add(summary);

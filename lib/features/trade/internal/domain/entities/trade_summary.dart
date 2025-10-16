@@ -23,33 +23,49 @@ class TradeSummary with _$TradeSummary {
   const factory TradeSummary({
     required String userId,
     required String portfolioId,
-    required double totalValue,
-    required double totalInvested,
-    required double totalGainLoss,
-    required double totalGainLossPercentage,
-    required double todayChange,
-    required double todayChangePercentage,
+    required String portfolioName,
+    @Default(0.0) double totalValue,
+    @Default(0.0) double totalInvested,
+    @Default(0.0) double totalGainLoss,
+    @Default(0.0) double totalGainLossPercentage,
+    @Default(0.0) double todayChange,
+    @Default(0.0) double todayChangePercentage,
+    @Default(0) int totalTrades,
+    @Default(0) int winningTrades,
+    @Default(0) int losingTrades,
+    @Default(0) int breakEvenTrades,
+    @Default(0) int openPositions,
+    double? winRate,
+    double? lossRate,
+    double? profitFactor,
+    double? expectancy,
+    double? totalProfit,
+    double? totalLoss,
+    double? netProfitLoss,
+    double? netProfitLossPercentage,
+    double? maxDrawdown,
+    double? maxDrawdownPercentage,
+    double? sharpeRatio,
+    double? sortinoRatio,
     @Default([]) List<TradeSectorAllocation> sectorAllocation,
     @Default([]) List<TradeTopMover> topGainers,
     @Default([]) List<TradeTopMover> topLosers,
-    int? holdingsCount,
+    @Default([]) List<String> tradeIds,
   }) = _TradeSummary;
 
   factory TradeSummary.fromJson(Map<String, dynamic> json) =>
       _$TradeSummaryFromJson(json);
 
   /// Create empty summary
-  factory TradeSummary.empty(String userId, String portfolioId) =>
-      TradeSummary(
-        userId: userId,
-        portfolioId: portfolioId,
-        totalValue: 0,
-        totalInvested: 0,
-        totalGainLoss: 0,
-        totalGainLossPercentage: 0,
-        todayChange: 0,
-        todayChangePercentage: 0,
-      );
+  factory TradeSummary.empty(
+    String userId,
+    String portfolioId, [
+    String? portfolioName,
+  ]) => TradeSummary(
+    userId: userId,
+    portfolioId: portfolioId,
+    portfolioName: portfolioName ?? portfolioId,
+  );
 }
 
 /// Domain entity for top movers in trade
