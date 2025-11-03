@@ -36,10 +36,12 @@ class TradeSummaryMapper {
   static TradeSummary fromDto(
     TradeSummaryDto dto,
     String userId,
-    String portfolioId,
-  ) => TradeSummary(
+    String portfolioId, [
+    String? portfolioName,
+  ]) => TradeSummary(
     userId: userId,
     portfolioId: portfolioId,
+    portfolioName: portfolioName ?? portfolioId,
     totalValue: dto.totalValue,
     totalInvested: dto.totalInvested,
     totalGainLoss: dto.totalGainLoss,
@@ -49,7 +51,7 @@ class TradeSummaryMapper {
     sectorAllocation: dto.sectorAllocation?.map(fromSectorDto).toList() ?? [],
     topGainers: dto.topGainers?.map(fromTopMoverDto).toList() ?? [],
     topLosers: dto.topLosers?.map(fromTopMoverDto).toList() ?? [],
-    holdingsCount: dto.holdingsCount,
+    holdingsCount: dto.holdingsCount ?? 0,
   );
 
   /// Convert TradeSummary domain entity to TradeSummaryDto

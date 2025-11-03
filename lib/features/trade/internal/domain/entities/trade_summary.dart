@@ -13,8 +13,7 @@ class TradeSectorAllocation with _$TradeSectorAllocation {
     @Default(0) int holdingsCount,
   }) = _TradeSectorAllocation;
 
-  factory TradeSectorAllocation.fromJson(Map<String, dynamic> json) =>
-      _$TradeSectorAllocationFromJson(json);
+  factory TradeSectorAllocation.fromJson(Map<String, dynamic> json) => _$TradeSectorAllocationFromJson(json);
 }
 
 /// Domain entity for trade summary/analysis
@@ -35,6 +34,7 @@ class TradeSummary with _$TradeSummary {
     @Default(0) int losingTrades,
     @Default(0) int breakEvenTrades,
     @Default(0) int openPositions,
+    @Default(0) int holdingsCount,
     double? winRate,
     double? lossRate,
     double? profitFactor,
@@ -53,19 +53,11 @@ class TradeSummary with _$TradeSummary {
     @Default([]) List<String> tradeIds,
   }) = _TradeSummary;
 
-  factory TradeSummary.fromJson(Map<String, dynamic> json) =>
-      _$TradeSummaryFromJson(json);
+  factory TradeSummary.fromJson(Map<String, dynamic> json) => _$TradeSummaryFromJson(json);
 
   /// Create empty summary
-  factory TradeSummary.empty(
-    String userId,
-    String portfolioId, [
-    String? portfolioName,
-  ]) => TradeSummary(
-    userId: userId,
-    portfolioId: portfolioId,
-    portfolioName: portfolioName ?? portfolioId,
-  );
+  factory TradeSummary.empty(String userId, String portfolioId, [String? portfolioName]) =>
+      TradeSummary(userId: userId, portfolioId: portfolioId, portfolioName: portfolioName ?? portfolioId);
 }
 
 /// Domain entity for top movers in trade
@@ -79,6 +71,5 @@ class TradeTopMover with _$TradeTopMover {
     required double currentPrice,
   }) = _TradeTopMover;
 
-  factory TradeTopMover.fromJson(Map<String, dynamic> json) =>
-      _$TradeTopMoverFromJson(json);
+  factory TradeTopMover.fromJson(Map<String, dynamic> json) => _$TradeTopMoverFromJson(json);
 }
