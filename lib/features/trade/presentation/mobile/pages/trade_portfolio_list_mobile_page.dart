@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../providers/trade_internal_providers.dart';
 import '../../components/templates/trade_portfolio_discovery_template.dart';
 import '../../models/trade_portfolio_view_model.dart';
-import '../../../providers/trade_internal_providers.dart';
 
 class TradePortfolioListMobilePage extends ConsumerWidget {
+  const TradePortfolioListMobilePage({required this.userId, super.key});
   final String userId;
-
-  const TradePortfolioListMobilePage({
-    super.key,
-    required this.userId,
-  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,10 +59,7 @@ class TradePortfolioListMobilePage extends ConsumerWidget {
     Navigator.pushNamed(
       context,
       '/trade/holdings/${portfolio.id}',
-      arguments: {
-        'userId': userId,
-        'portfolioName': portfolio.name,
-      },
+      arguments: {'userId': userId, 'portfolioName': portfolio.name},
     );
   }
 }

@@ -16,10 +16,7 @@ abstract class TradeRemoteDataSource {
   Future<TradeHoldingsDto> getTradeHoldings(String userId, String portfolioId);
 
   /// Get trade summary from remote API
-  Future<TradePortfolioSummaryDto> getTradeSummary(
-    String userId,
-    String portfolioId,
-  );
+  Future<TradePortfolioSummaryDto> getTradeSummary(String userId, String portfolioId);
 
   /// Get trade calendar from remote API
   Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId);
@@ -27,28 +24,21 @@ abstract class TradeRemoteDataSource {
 
 /// Concrete implementation of trade remote data source
 class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
-  const TradeRemoteDataSourceImpl({
-    required ApiClient apiClient,
-    required ApiConfig apiConfig,
-  }) : _apiClient = apiClient,
-       _apiConfig = apiConfig;
+  const TradeRemoteDataSourceImpl({required ApiClient apiClient, required ApiConfig apiConfig})
+    : _apiClient = apiClient,
+      _apiConfig = apiConfig;
 
   final ApiClient _apiClient;
   final ApiConfig _apiConfig;
 
   @override
   Future<TradePortfolioListDto> getTradePortfolios(String userId) async {
-    AppLogger.methodEntry(
-      'getTradePortfolios',
-      tag: 'TradeRemoteDataSource',
-      params: {'userId': userId},
-    );
+    AppLogger.methodEntry('getTradePortfolios', tag: 'TradeRemoteDataSource', params: {'userId': userId});
 
     try {
       // Trade API Spec: GET /api/v1/portfolio-summary/by-owner/{ownerId}
       // Returns a plain array of portfolios
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolio-summary/by-owner/$userId';
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/portfolio-summary/by-owner/$userId';
 
       final response = await _apiClient.get<TradePortfolioListDto>(
         fullUri,
@@ -56,13 +46,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
           // API returns array, wrap it in expected structure
           if (data is List) {
             return TradePortfolioListDto(
-              portfolios: data
-                  .map(
-                    (item) => TradePortfolioDto.fromJson(
-                      item as Map<String, dynamic>,
-                    ),
-                  )
-                  .toList(),
+              portfolios: data.map((item) => TradePortfolioDto.fromJson(item as Map<String, dynamic>)).toList(),
               totalCount: data.length,
             );
           }
@@ -71,15 +55,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         },
       );
 
-      AppLogger.info(
-        'Trade portfolios fetched successfully from API',
-        tag: 'TradeRemoteDataSource',
-      );
-      AppLogger.methodExit(
-        'getTradePortfolios',
-        tag: 'TradeRemoteDataSource',
-        result: 'success',
-      );
+      AppLogger.info('Trade portfolios fetched successfully from API', tag: 'TradeRemoteDataSource');
+      AppLogger.methodExit('getTradePortfolios', tag: 'TradeRemoteDataSource', result: 'success');
 
       return response;
     } catch (e) {
@@ -92,27 +69,17 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       // Fallback to mock data
       try {
-        AppLogger.info(
-          'Loading mock trade portfolios',
-          tag: 'TradeRemoteDataSource',
-        );
+        AppLogger.info('Loading mock trade portfolios', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradePortfolios();
       } catch (mockError) {
-        AppLogger.error(
-          'Failed to load mock data',
-          tag: 'TradeRemoteDataSource',
-          error: mockError,
-        );
+        AppLogger.error('Failed to load mock data', tag: 'TradeRemoteDataSource', error: mockError);
         rethrow;
       }
     }
   }
 
   @override
-  Future<TradeHoldingsDto> getTradeHoldings(
-    String userId,
-    String portfolioId,
-  ) async {
+  Future<TradeHoldingsDto> getTradeHoldings(String userId, String portfolioId) async {
     AppLogger.methodEntry(
       'getTradeHoldings',
       tag: 'TradeRemoteDataSource',
@@ -126,19 +93,11 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       final response = await _apiClient.get<TradeHoldingsDto>(
         fullUri,
-        parser: (data) =>
-            TradeHoldingsDto.fromJson(data! as Map<String, dynamic>),
+        parser: (data) => TradeHoldingsDto.fromJson(data! as Map<String, dynamic>),
       );
 
-      AppLogger.info(
-        'Trade holdings fetched successfully from API',
-        tag: 'TradeRemoteDataSource',
-      );
-      AppLogger.methodExit(
-        'getTradeHoldings',
-        tag: 'TradeRemoteDataSource',
-        result: 'success',
-      );
+      AppLogger.info('Trade holdings fetched successfully from API', tag: 'TradeRemoteDataSource');
+      AppLogger.methodExit('getTradeHoldings', tag: 'TradeRemoteDataSource', result: 'success');
 
       return response;
     } catch (e) {
@@ -151,27 +110,17 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       // Fallback to mock data
       try {
-        AppLogger.info(
-          'Loading mock trade holdings',
-          tag: 'TradeRemoteDataSource',
-        );
+        AppLogger.info('Loading mock trade holdings', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeHoldings();
       } catch (mockError) {
-        AppLogger.error(
-          'Failed to load mock data',
-          tag: 'TradeRemoteDataSource',
-          error: mockError,
-        );
+        AppLogger.error('Failed to load mock data', tag: 'TradeRemoteDataSource', error: mockError);
         rethrow;
       }
     }
   }
 
   @override
-  Future<TradePortfolioSummaryDto> getTradeSummary(
-    String userId,
-    String portfolioId,
-  ) async {
+  Future<TradePortfolioSummaryDto> getTradeSummary(String userId, String portfolioId) async {
     AppLogger.methodEntry(
       'getTradeSummary',
       tag: 'TradeRemoteDataSource',
@@ -180,24 +129,15 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/portfolio-summary/{portfolioId}
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/portfolio-summary/$portfolioId';
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/portfolio-summary/$portfolioId';
 
       final response = await _apiClient.get<TradePortfolioSummaryDto>(
         fullUri,
-        parser: (data) =>
-            TradePortfolioSummaryDto.fromJson(data! as Map<String, dynamic>),
+        parser: (data) => TradePortfolioSummaryDto.fromJson(data! as Map<String, dynamic>),
       );
 
-      AppLogger.info(
-        'Trade summary fetched successfully from API',
-        tag: 'TradeRemoteDataSource',
-      );
-      AppLogger.methodExit(
-        'getTradeSummary',
-        tag: 'TradeRemoteDataSource',
-        result: 'success',
-      );
+      AppLogger.info('Trade summary fetched successfully from API', tag: 'TradeRemoteDataSource');
+      AppLogger.methodExit('getTradeSummary', tag: 'TradeRemoteDataSource', result: 'success');
 
       return response;
     } catch (e) {
@@ -210,27 +150,17 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       // Fallback to mock data
       try {
-        AppLogger.info(
-          'Loading mock trade summary',
-          tag: 'TradeRemoteDataSource',
-        );
+        AppLogger.info('Loading mock trade summary', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeSummary();
       } catch (mockError) {
-        AppLogger.error(
-          'Failed to load mock data',
-          tag: 'TradeRemoteDataSource',
-          error: mockError,
-        );
+        AppLogger.error('Failed to load mock data', tag: 'TradeRemoteDataSource', error: mockError);
         rethrow;
       }
     }
   }
 
   @override
-  Future<TradeCalendarDto> getTradeCalendar(
-    String userId,
-    String portfolioId,
-  ) async {
+  Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId) async {
     AppLogger.methodEntry(
       'getTradeCalendar',
       tag: 'TradeRemoteDataSource',
@@ -256,15 +186,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         },
       );
 
-      AppLogger.info(
-        'Trade calendar fetched successfully from API',
-        tag: 'TradeRemoteDataSource',
-      );
-      AppLogger.methodExit(
-        'getTradeCalendar',
-        tag: 'TradeRemoteDataSource',
-        result: 'success',
-      );
+      AppLogger.info('Trade calendar fetched successfully from API', tag: 'TradeRemoteDataSource');
+      AppLogger.methodExit('getTradeCalendar', tag: 'TradeRemoteDataSource', result: 'success');
 
       return response;
     } catch (e) {
@@ -277,17 +200,10 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
       // Fallback to mock data
       try {
-        AppLogger.info(
-          'Loading mock trade calendar',
-          tag: 'TradeRemoteDataSource',
-        );
+        AppLogger.info('Loading mock trade calendar', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendar();
       } catch (mockError) {
-        AppLogger.error(
-          'Failed to load mock data',
-          tag: 'TradeRemoteDataSource',
-          error: mockError,
-        );
+        AppLogger.error('Failed to load mock data', tag: 'TradeRemoteDataSource', error: mockError);
         rethrow;
       }
     }

@@ -5,13 +5,12 @@ import '../dtos/trade_summary_dto.dart';
 /// Mapper for trade summary between DTO and domain entity
 class TradeSummaryMapper {
   /// Convert TradeSectorAllocationDto to TradeSectorAllocation domain entity
-  static TradeSectorAllocation fromSectorDto(TradeSectorAllocationDto dto) =>
-      TradeSectorAllocation(
-        sector: dto.sector,
-        value: dto.value,
-        percentage: dto.percentage,
-        holdingsCount: dto.holdingsCount ?? 0,
-      );
+  static TradeSectorAllocation fromSectorDto(TradeSectorAllocationDto dto) => TradeSectorAllocation(
+    sector: dto.sector,
+    value: dto.value,
+    percentage: dto.percentage,
+    holdingsCount: dto.holdingsCount ?? 0,
+  );
 
   /// Convert TradeTopMoverDto to TradeTopMover domain entity
   static TradeTopMover fromTopMoverDto(TradeTopMoverDto dto) => TradeTopMover(
@@ -23,36 +22,29 @@ class TradeSummaryMapper {
   );
 
   /// Convert TradePortfolioSummaryDto to TradeSummary domain entity
-  static TradeSummary fromPortfolioSummaryDto(
-    TradePortfolioSummaryDto dto,
-    String userId,
-  ) {
+  static TradeSummary fromPortfolioSummaryDto(TradePortfolioSummaryDto dto, String userId) {
     // For now, create an empty summary since the API structure doesn't match
     // the expected TradeSummary structure. This needs proper mapping logic.
     return TradeSummary.empty(userId, dto.portfolioId);
   }
 
   /// Convert TradeSummaryDto to TradeSummary domain entity
-  static TradeSummary fromDto(
-    TradeSummaryDto dto,
-    String userId,
-    String portfolioId, [
-    String? portfolioName,
-  ]) => TradeSummary(
-    userId: userId,
-    portfolioId: portfolioId,
-    portfolioName: portfolioName ?? portfolioId,
-    totalValue: dto.totalValue,
-    totalInvested: dto.totalInvested,
-    totalGainLoss: dto.totalGainLoss,
-    totalGainLossPercentage: dto.totalGainLossPercentage,
-    todayChange: dto.todayChange,
-    todayChangePercentage: dto.todayChangePercentage,
-    sectorAllocation: dto.sectorAllocation?.map(fromSectorDto).toList() ?? [],
-    topGainers: dto.topGainers?.map(fromTopMoverDto).toList() ?? [],
-    topLosers: dto.topLosers?.map(fromTopMoverDto).toList() ?? [],
-    holdingsCount: dto.holdingsCount ?? 0,
-  );
+  static TradeSummary fromDto(TradeSummaryDto dto, String userId, String portfolioId, [String? portfolioName]) =>
+      TradeSummary(
+        userId: userId,
+        portfolioId: portfolioId,
+        portfolioName: portfolioName ?? portfolioId,
+        totalValue: dto.totalValue,
+        totalInvested: dto.totalInvested,
+        totalGainLoss: dto.totalGainLoss,
+        totalGainLossPercentage: dto.totalGainLossPercentage,
+        todayChange: dto.todayChange,
+        todayChangePercentage: dto.todayChangePercentage,
+        sectorAllocation: dto.sectorAllocation?.map(fromSectorDto).toList() ?? [],
+        topGainers: dto.topGainers?.map(fromTopMoverDto).toList() ?? [],
+        topLosers: dto.topLosers?.map(fromTopMoverDto).toList() ?? [],
+        holdingsCount: dto.holdingsCount ?? 0,
+      );
 
   /// Convert TradeSummary domain entity to TradeSummaryDto
   static TradeSummaryDto toDto(TradeSummary entity) => TradeSummaryDto(

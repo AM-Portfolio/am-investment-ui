@@ -27,9 +27,7 @@ class TradeSidebar extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Theme.of(context).dividerColor),
-            ),
+            border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
           ),
           child: Row(
             children: [
@@ -39,11 +37,7 @@ class TradeSidebar extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.swap_horiz,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 24,
-                ),
+                child: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Column(
@@ -51,17 +45,13 @@ class TradeSidebar extends StatelessWidget {
                 children: [
                   Text(
                     'Trade Analysis',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Portfolio Management',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
                   ),
                 ],
               ),
@@ -77,20 +67,14 @@ class TradeSidebar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-              ),
+              border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.account_balance_wallet,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    Icon(Icons.account_balance_wallet, size: 16, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 6),
                     Text(
                       'Current Portfolio',
@@ -101,19 +85,19 @@ class TradeSidebar extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   currentPortfolioName ?? 'Unknown Portfolio',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  currentPortfolioId!,
+                  'ID: ${currentPortfolioId!.substring(0, 8)}...',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    fontSize: 10,
                     fontFamily: 'monospace',
                   ),
                 ),
@@ -151,10 +135,7 @@ class TradeSidebar extends StatelessWidget {
                 isEnabled: currentPortfolioId != null,
               ),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Divider(),
-              ),
+              const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
 
               // Quick Actions
               _buildQuickActionItem(
@@ -163,11 +144,9 @@ class TradeSidebar extends StatelessWidget {
                 title: 'Analytics Dashboard',
                 subtitle: 'Performance overview',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Analytics dashboard coming soon'),
-                    ),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Analytics dashboard coming soon')));
                 },
               ),
               _buildQuickActionItem(
@@ -176,11 +155,9 @@ class TradeSidebar extends StatelessWidget {
                 title: 'Export Data',
                 subtitle: 'Download trade reports',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Export functionality coming soon'),
-                    ),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Export functionality coming soon')));
                 },
               ),
             ],
@@ -191,9 +168,7 @@ class TradeSidebar extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: Theme.of(context).dividerColor),
-            ),
+            border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,20 +176,16 @@ class TradeSidebar extends StatelessWidget {
               Text(
                 'Trade System v1.0',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Professional trading analysis',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.4),
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
               ),
             ],
           ),
@@ -246,14 +217,8 @@ class TradeSidebar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: isSelected
-                  ? theme.colorScheme.primaryContainer
-                  : Colors.transparent,
-              border: isSelected
-                  ? Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.3),
-                    )
-                  : null,
+              color: isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
+              border: isSelected ? Border.all(color: theme.colorScheme.primary.withOpacity(0.3)) : null,
             ),
             child: Row(
               children: [
@@ -261,9 +226,7 @@ class TradeSidebar extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isEnabled
-                        ? (isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.primary.withOpacity(0.1))
+                        ? (isSelected ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.1))
                         : theme.colorScheme.onSurface.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -271,9 +234,7 @@ class TradeSidebar extends StatelessWidget {
                     icon,
                     size: 18,
                     color: isEnabled
-                        ? (isSelected
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.primary)
+                        ? (isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.primary)
                         : theme.colorScheme.onSurface.withOpacity(0.4),
                   ),
                 ),
@@ -286,13 +247,9 @@ class TradeSidebar extends StatelessWidget {
                         title,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: isEnabled
-                              ? (isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurface)
+                              ? (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface)
                               : theme.colorScheme.onSurface.withOpacity(0.4),
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -307,12 +264,7 @@ class TradeSidebar extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (!isEnabled)
-                  Icon(
-                    Icons.lock_outline,
-                    size: 16,
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
-                  ),
+                if (!isEnabled) Icon(Icons.lock_outline, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.3)),
               ],
             ),
           ),
@@ -348,38 +300,23 @@ class TradeSidebar extends StatelessWidget {
                     color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  child: Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 12,
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
-                ),
+                Icon(Icons.arrow_forward_ios, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.4)),
               ],
             ),
           ),
