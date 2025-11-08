@@ -5,14 +5,9 @@ part 'trade_calendar_dto.g.dart';
 /// DTO for trade execution details from API
 @JsonSerializable()
 class TradeExecutionDto {
-  const TradeExecutionDto({
-    required this.basicInfo,
-    required this.instrumentInfo,
-    required this.executionInfo,
-  });
+  const TradeExecutionDto({required this.basicInfo, required this.instrumentInfo, required this.executionInfo});
 
-  factory TradeExecutionDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeExecutionDtoFromJson(json);
+  factory TradeExecutionDto.fromJson(Map<String, dynamic> json) => _$TradeExecutionDtoFromJson(json);
 
   final TradeBasicInfoDto basicInfo;
   final TradeInstrumentInfoDto instrumentInfo;
@@ -33,8 +28,7 @@ class TradeBasicInfoDto {
     required this.tradeType,
   });
 
-  factory TradeBasicInfoDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeBasicInfoDtoFromJson(json);
+  factory TradeBasicInfoDto.fromJson(Map<String, dynamic> json) => _$TradeBasicInfoDtoFromJson(json);
 
   final String tradeId;
   final String orderId;
@@ -56,8 +50,7 @@ class TradeExecutionInfoDto {
     required this.price,
   });
 
-  factory TradeExecutionInfoDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeExecutionInfoDtoFromJson(json);
+  factory TradeExecutionInfoDto.fromJson(Map<String, dynamic> json) => _$TradeExecutionInfoDtoFromJson(json);
 
   final String tradeType;
   final String auction;
@@ -84,8 +77,7 @@ class TradeInstrumentInfoDto {
     this.description,
   });
 
-  factory TradeInstrumentInfoDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeInstrumentInfoDtoFromJson(json);
+  factory TradeInstrumentInfoDto.fromJson(Map<String, dynamic> json) => _$TradeInstrumentInfoDtoFromJson(json);
 
   final String symbol;
   final String isin;
@@ -113,8 +105,7 @@ class TradePositionInfoDto {
     required this.fees,
   });
 
-  factory TradePositionInfoDto.fromJson(Map<String, dynamic> json) =>
-      _$TradePositionInfoDtoFromJson(json);
+  factory TradePositionInfoDto.fromJson(Map<String, dynamic> json) => _$TradePositionInfoDtoFromJson(json);
 
   final String timestamp;
   final double price;
@@ -142,8 +133,7 @@ class TradeMetricsDto {
     this.maxFavorableExcursion,
   });
 
-  factory TradeMetricsDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeMetricsDtoFromJson(json);
+  factory TradeMetricsDto.fromJson(Map<String, dynamic> json) => _$TradeMetricsDtoFromJson(json);
 
   final double profitLoss;
   final double profitLossPercentage;
@@ -180,8 +170,7 @@ class TradeDetailDto {
     required this.exitReasoning,
   });
 
-  factory TradeDetailDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeDetailDtoFromJson(json);
+  factory TradeDetailDto.fromJson(Map<String, dynamic> json) => _$TradeDetailDtoFromJson(json);
 
   final String tradeId;
   final String portfolioId;
@@ -215,10 +204,7 @@ class TradeCalendarDto {
       final tradesJson = entry.value as List<dynamic>;
 
       portfolioTrades[portfolioId] = tradesJson
-          .map(
-            (tradeJson) =>
-                TradeDetailDto.fromJson(tradeJson as Map<String, dynamic>),
-          )
+          .map((tradeJson) => TradeDetailDto.fromJson(tradeJson as Map<String, dynamic>))
           .toList();
     }
 
@@ -237,3 +223,23 @@ class TradeCalendarDto {
     return json;
   }
 }
+
+/// DTO for trade calendar by month response
+/// Uses the same structure as TradeCalendarDto
+typedef TradeCalendarMonthDto = TradeCalendarDto;
+
+/// DTO for trade calendar by day response
+/// API returns: { "portfolioId": [TradeDetailDto, ...] }
+typedef TradeCalendarDayDto = TradeCalendarDto;
+
+/// DTO for trade calendar by date range response
+/// API returns: { "portfolioId": [TradeDetailDto, ...] }
+typedef TradeCalendarDateRangeDto = TradeCalendarDto;
+
+/// DTO for trade calendar by quarter response
+/// API returns: { "portfolioId": [TradeDetailDto, ...] }
+typedef TradeCalendarQuarterDto = TradeCalendarDto;
+
+/// DTO for trade calendar by financial year response
+/// API returns: { "portfolioId": [TradeDetailDto, ...] }
+typedef TradeCalendarFinancialYearDto = TradeCalendarDto;

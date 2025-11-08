@@ -9,7 +9,9 @@ import '../../../../../shared/widgets/calendar/universal_calendar/universal_cale
 import '../../../trade_calendar_providers.dart';
 import '../../cubit/trade_calendar_cubit.dart';
 import '../../cubit/trade_calendar_state.dart';
+import '../../models/calendar_view_models.dart' as view_models;
 import '../../models/trade_calendar_view_model.dart';
+import '../../widgets/calendar_views.dart';
 
 /// Simple trade event model for display purposes
 class SimpleTradeEvent {
@@ -89,12 +91,8 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
     final cubit = ref.read(tradeCalendarCubitProvider(params));
 
-    cubit.initialize(
-      userId: widget.userId,
-      portfolioId: widget.portfolioId,
-      year: _selectedYear,
-      month: _selectedMonth,
-    );
+    // Start in yearly view
+    cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
   }
 
   /// Load calendar data for selected year and month
@@ -224,15 +222,156 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
   );
 
   /// Build main content with universal calendar integration
-  Widget _buildMainContent(BuildContext context, TradeCalendarViewModel viewModel, TradeCalendarCubit cubit) =>
-      SingleChildScrollView(
-        child: Column(
-          children: [
-            if (_isCalendarExpanded) ...[_buildUniversalCalendarSection(context, cubit), const Divider(height: 1)],
-            _buildTabContent(context, viewModel),
-          ],
-        ),
-      );
+  Widget _buildMainContent(BuildContext context, TradeCalendarViewModel viewModel, TradeCalendarCubit cubit) {
+    // Get navigation state from cubit
+    final navigationState = cubit.navigationState;
+
+    return Column(
+      children: [
+        // Breadcrumb navigation
+        _buildBreadcrumbs(context, navigationState, cubit),
+        const Divider(height: 1),
+
+        // Hierarchical calendar view
+        Expanded(child: _buildHierarchicalCalendarView(context, navigationState, cubit)),
+      ],
+    );
+  }
+
+  /// Build breadcrumb navigation
+  Widget _buildBreadcrumbs(
+    BuildContext context,
+    view_models.CalendarNavigationState navigationState,
+    TradeCalendarCubit cubit,
+  ) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      child: Row(
+        children: [
+          // Home icon for yearly view
+          InkWell(
+            onTap: () {
+              cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Icon(
+                Icons.home,
+                size: 20,
+                color: navigationState.viewType == view_models.CalendarViewType.yearly
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+
+          // Breadcrumb trail
+          ...navigationState.breadcrumbs.map((breadcrumb) {
+            final isLast = breadcrumb == navigationState.breadcrumbs.last;
+            return Row(
+              children: [
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right, size: 16),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: isLast
+                      ? null
+                      : () {
+                          cubit.navigateToBreadcrumb(
+                            userId: widget.userId,
+                            portfolioId: widget.portfolioId,
+                            breadcrumb: breadcrumb,
+                          );
+                        },
+                  child: Text(
+                    breadcrumb.label,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: isLast ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: isLast ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// Build hierarchical calendar view based on navigation state
+  Widget _buildHierarchicalCalendarView(
+    BuildContext context,
+    view_models.CalendarNavigationState navigationState,
+    TradeCalendarCubit cubit,
+  ) => Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: switch (navigationState.viewType) {
+      view_models.CalendarViewType.yearly => _buildYearlyView(context, cubit),
+      view_models.CalendarViewType.monthly => _buildMonthlyView(context, cubit),
+      view_models.CalendarViewType.daily => _buildDailyView(context, cubit),
+    },
+  );
+
+  /// Build yearly calendar view
+  Widget _buildYearlyView(BuildContext context, TradeCalendarCubit cubit) {
+    final yearlyData = cubit.getYearlyCalendarData();
+
+    if (yearlyData == null) {
+      return const Center(child: Text('Loading yearly data...'));
+    }
+
+    return YearlyCalendarView(
+      yearData: yearlyData,
+      onMonthTap: (month) {
+        cubit.navigateToMonthly(userId: widget.userId, portfolioId: widget.portfolioId, month: month);
+      },
+      onPreviousYear: () {
+        cubit.navigateToPreviousYear(userId: widget.userId, portfolioId: widget.portfolioId);
+      },
+      onNextYear: () {
+        cubit.navigateToNextYear(userId: widget.userId, portfolioId: widget.portfolioId);
+      },
+    );
+  }
+
+  /// Build monthly calendar view
+  Widget _buildMonthlyView(BuildContext context, TradeCalendarCubit cubit) {
+    final monthlyData = cubit.getMonthlyCalendarData();
+
+    if (monthlyData == null) {
+      return const Center(child: Text('Loading monthly data...'));
+    }
+
+    return MonthlyCalendarView(
+      monthData: monthlyData,
+      onDayTap: (day) {
+        cubit.navigateToDaily(userId: widget.userId, portfolioId: widget.portfolioId, day: day);
+      },
+      onBack: () {
+        cubit.navigateBack(userId: widget.userId, portfolioId: widget.portfolioId);
+      },
+    );
+  }
+
+  /// Build daily calendar view
+  Widget _buildDailyView(BuildContext context, TradeCalendarCubit cubit) {
+    final dailyData = cubit.getDailyCalendarData();
+
+    if (dailyData == null) {
+      return const Center(child: Text('Loading daily data...'));
+    }
+
+    return DailyCalendarView(
+      dayData: dailyData,
+      onBack: () {
+        cubit.navigateBack(userId: widget.userId, portfolioId: widget.portfolioId);
+      },
+    );
+  }
 
   /// Build universal calendar section with enhanced templates
   Widget _buildUniversalCalendarSection(BuildContext context, TradeCalendarCubit cubit) => Container(

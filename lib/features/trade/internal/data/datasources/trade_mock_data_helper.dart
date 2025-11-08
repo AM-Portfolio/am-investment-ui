@@ -69,4 +69,38 @@ class TradeMockDataHelper {
       rethrow;
     }
   }
+
+  /// Get mock trade calendar by day from JSON file
+  static Future<TradeCalendarDto> getMockTradeCalendarByDay() async {
+    try {
+      AppLogger.info('Loading mock trade calendar by day from assets', tag: 'TradeMockDataHelper');
+
+      final jsonString = await rootBundle.loadString(
+        'lib/assets/mock_data/trade/calander/calender-by-day-response.json',
+      );
+      final jsonData = json.decode(jsonString) as Map<String, dynamic>;
+
+      return TradeCalendarDto.fromJson(jsonData);
+    } catch (e) {
+      AppLogger.error('Failed to load mock trade calendar by day', tag: 'TradeMockDataHelper', error: e);
+      rethrow;
+    }
+  }
+
+  /// Get mock trade calendar by date range from JSON file
+  static Future<TradeCalendarDto> getMockTradeCalendarByDateRange() async {
+    try {
+      AppLogger.info('Loading mock trade calendar by date range from assets', tag: 'TradeMockDataHelper');
+
+      final jsonString = await rootBundle.loadString(
+        'lib/assets/mock_data/trade/calander/calender-by-date-range-response.json',
+      );
+      final jsonData = json.decode(jsonString) as Map<String, dynamic>;
+
+      return TradeCalendarDto.fromJson(jsonData);
+    } catch (e) {
+      AppLogger.error('Failed to load mock trade calendar by date range', tag: 'TradeMockDataHelper', error: e);
+      rethrow;
+    }
+  }
 }

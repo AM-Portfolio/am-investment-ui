@@ -1,0 +1,14 @@
+Calender by Month -- curl --location 'https://api.munish.org/api/v1/trades/calendar/month?portfolioId=8a57024c-05c2-475b-a2c4-0545865efa4a&year=2020&month=9' \
+--header 'Accept: application/json'
+
+Calender bY Day - curl --location 'https://api.munish.org/api/v1/trades/calendar/day?date=2020-12-15&portfolioId=8a57024c-05c2-475b-a2c4-0545865efa4a' \
+--header 'Accept: application/json'
+
+Calender by Financial year - curl --location 'https://api.munish.org/api/v1/trades/calendar/financial-year?portfolioId=8a57024c-05c2-475b-a2c4-0545865efa4a&financialYear=2021' \
+--header 'Accept: application/json'
+
+Calender bY quater - curl --location 'https://api.munish.org/api/v1/trades/calendar/quarter?portfolioId=8a57024c-05c2-475b-a2c4-0545865efa4a&year=2020&quarter=4' \
+--header 'Accept: application/json'
+
+Calender by Custom date range - curl --location 'https://api.munish.org/api/v1/trades/calendar/financial-year?portfolioId=8a57024c-05c2-475b-a2c4-0545865efa4a&financialYear=2021' \
+--header 'Accept: application/json'

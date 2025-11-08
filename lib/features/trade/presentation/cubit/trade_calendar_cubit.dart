@@ -3,30 +3,52 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../shared/widgets/calendar/universal_calendar/card_types.dart' as calendar_types;
 import '../../../../shared/widgets/calendar/universal_calendar/types.dart';
-import '../../internal/domain/entities/trade_calendar.dart';
+import '../../internal/domain/entities/trade_calendar.dart' as entities;
 import '../../internal/domain/usecases/get_trade_calendar.dart';
+import '../../internal/domain/usecases/get_trade_calendar_by_date_range.dart';
+import '../../internal/domain/usecases/get_trade_calendar_by_day.dart';
+import '../../internal/domain/usecases/get_trade_calendar_by_month.dart';
 import '../converters/trade_calendar_converter.dart';
+import '../models/calendar_view_models.dart' as view_models;
 import '../models/trade_calendar_view_model.dart';
+import '../services/calendar_aggregation_service.dart';
+import '../services/calendar_navigation_service.dart';
 import 'trade_calendar_state.dart';
 
 /// Enhanced Cubit for managing trade calendar state with Universal Calendar integration
 /// Provides optimized state management, caching, and seamless universal template integration
+/// Now supports hierarchical calendar views (yearly → monthly → daily)
 class TradeCalendarCubit extends Cubit<TradeCalendarState> {
-  TradeCalendarCubit(this._getTradeCalendar) : super(TradeCalendarInitial());
+  TradeCalendarCubit(
+    this._getTradeCalendar,
+    this._getTradeCalendarByMonth,
+    this._getTradeCalendarByDay,
+    this._getTradeCalendarByDateRange,
+  ) : super(TradeCalendarInitial());
 
   final GetTradeCalendar _getTradeCalendar;
+  final GetTradeCalendarByMonth _getTradeCalendarByMonth;
+  final GetTradeCalendarByDay _getTradeCalendarByDay;
+  final GetTradeCalendarByDateRange _getTradeCalendarByDateRange;
+
+  // Services
+  final CalendarNavigationService _navigationService = CalendarNavigationService();
+  final CalendarAggregationService _aggregationService = CalendarAggregationService();
 
   // Cache for performance optimization
-  TradeCalendar? _cachedEntityData;
+  entities.TradeCalendar? _cachedEntityData;
   String? _currentPortfolioId;
   String? _currentUserId;
+
+  // Navigation state
+  view_models.CalendarNavigationState _navigationState = view_models.CalendarNavigationState.initial();
 
   /// Get current cached parameters for comparison
   bool _isSameParameters(String userId, String portfolioId) =>
       _currentUserId == userId && _currentPortfolioId == portfolioId;
 
   /// Update cache with new data
-  void _updateCache(String userId, String portfolioId, TradeCalendar data) {
+  void _updateCache(String userId, String portfolioId, entities.TradeCalendar data) {
     _currentUserId = userId;
     _currentPortfolioId = portfolioId;
     _cachedEntityData = data;
@@ -105,7 +127,7 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
 
   /// Process trade calendar data and emit loaded state
   Future<void> _processTradeCalendarData(
-    TradeCalendar tradeCalendar,
+    entities.TradeCalendar tradeCalendar,
     String userId,
     String portfolioId,
     DateSelection? dateFilter, {
@@ -309,13 +331,7 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
 
   /// Get Universal Calendar card configurations for trading context
   List<calendar_types.CalendarCardConfig> getUniversalCardConfigs() => [
-    const calendar_types.CalendarCardConfig(
-      type: calendar_types.CalendarCardType.pnlSummary,
-      title: 'Daily P&L',
-      size: calendar_types.CardSizeType.medium,
-      layout: calendar_types.CardLayoutStyle.metric,
-      theme: calendar_types.CardTheme.neutral,
-    ),
+    const calendar_types.CalendarCardConfig(type: calendar_types.CalendarCardType.pnlSummary, title: 'Daily P&L'),
     const calendar_types.CalendarCardConfig(
       type: calendar_types.CalendarCardType.tradeMetrics,
       title: 'Trade Statistics',
@@ -333,7 +349,6 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
     const calendar_types.CalendarCardConfig(
       type: calendar_types.CalendarCardType.riskReward,
       title: 'Risk/Reward',
-      size: calendar_types.CardSizeType.medium,
       layout: calendar_types.CardLayoutStyle.comparison,
       theme: calendar_types.CardTheme.info,
     ),
@@ -402,11 +417,261 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
   }
 
   /// Get current entity data if loaded
-  TradeCalendar? get currentEntityData {
+  entities.TradeCalendar? get currentEntityData {
     final currentState = state;
     if (currentState is TradeCalendarLoaded) {
       return currentState.entityData;
     }
     return null;
+  }
+
+  // ========== Hierarchical Calendar Navigation Methods ==========
+
+  /// Get current navigation state
+  view_models.CalendarNavigationState get navigationState => _navigationState;
+
+  /// Navigate to yearly view
+  Future<void> navigateToYearly({required String userId, required String portfolioId, int? year}) async {
+    AppLogger.methodEntry('navigateToYearly', tag: 'TradeCalendarCubit');
+
+    _navigationState = _navigationService.navigateToYearly(currentState: _navigationState, year: year);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate to monthly view
+  Future<void> navigateToMonthly({required String userId, required String portfolioId, required int month}) async {
+    AppLogger.methodEntry('navigateToMonthly', tag: 'TradeCalendarCubit', params: {'month': month});
+
+    _navigationState = _navigationService.navigateToMonthly(currentState: _navigationState, month: month);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate to daily view
+  Future<void> navigateToDaily({required String userId, required String portfolioId, required int day}) async {
+    AppLogger.methodEntry('navigateToDaily', tag: 'TradeCalendarCubit', params: {'day': day});
+
+    _navigationState = _navigationService.navigateToDaily(currentState: _navigationState, day: day);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate back one level
+  Future<void> navigateBack({required String userId, required String portfolioId}) async {
+    AppLogger.methodEntry('navigateBack', tag: 'TradeCalendarCubit');
+
+    _navigationState = _navigationService.navigateBack(currentState: _navigationState);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate to specific breadcrumb
+  Future<void> navigateToBreadcrumb({
+    required String userId,
+    required String portfolioId,
+    required view_models.CalendarBreadcrumb breadcrumb,
+  }) async {
+    AppLogger.methodEntry('navigateToBreadcrumb', tag: 'TradeCalendarCubit');
+
+    _navigationState = _navigationService.navigateToBreadcrumb(currentState: _navigationState, breadcrumb: breadcrumb);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Change year in yearly view
+  Future<void> changeYear({required String userId, required String portfolioId, required int year}) async {
+    AppLogger.methodEntry('changeYear', tag: 'TradeCalendarCubit', params: {'year': year});
+
+    _navigationState = _navigationState.changeYear(year);
+
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate to previous year
+  Future<void> navigateToPreviousYear({required String userId, required String portfolioId}) async {
+    _navigationState = _navigationService.navigateToPreviousYear(currentState: _navigationState);
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Navigate to next year
+  Future<void> navigateToNextYear({required String userId, required String portfolioId}) async {
+    _navigationState = _navigationService.navigateToNextYear(currentState: _navigationState);
+    await _loadDataForCurrentView(userId, portfolioId);
+  }
+
+  /// Load data appropriate for current view type
+  Future<void> _loadDataForCurrentView(String userId, String portfolioId) async {
+    emit(const TradeCalendarLoading());
+
+    try {
+      final dateRange = _navigationService.getDateRangeForView(_navigationState);
+
+      entities.TradeCalendar calendarData;
+
+      switch (_navigationState.viewType) {
+        case view_models.CalendarViewType.yearly:
+          // Load entire year data using date range
+          calendarData = await _getTradeCalendarByDateRange(
+            userId,
+            portfolioId,
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate,
+          );
+          break;
+
+        case view_models.CalendarViewType.monthly:
+          // Load specific month
+          calendarData = await _getTradeCalendarByMonth(
+            userId,
+            portfolioId,
+            year: _navigationState.year,
+            month: _navigationState.month!,
+          );
+          break;
+
+        case view_models.CalendarViewType.daily:
+          // Load specific day
+          calendarData = await _getTradeCalendarByDay(
+            userId,
+            portfolioId,
+            date: DateTime(_navigationState.year, _navigationState.month!, _navigationState.day!),
+          );
+          break;
+      }
+
+      // Update cache
+      _updateCache(userId, portfolioId, calendarData);
+
+      // Convert to view models and emit state
+      await _emitHierarchicalCalendarState(calendarData, userId, portfolioId);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Failed to load calendar data for current view',
+        tag: 'TradeCalendarCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      emit(TradeCalendarError(message: _getErrorMessage(error), stackTrace: stackTrace));
+    }
+  }
+
+  /// Emit hierarchical calendar state based on view type
+  Future<void> _emitHierarchicalCalendarState(
+    entities.TradeCalendar calendarData,
+    String userId,
+    String portfolioId,
+  ) async {
+    // Convert entity to calendar data map
+    final calendarDataMap = TradeCalendarConverter.convertEntityToCalendarData(entity: calendarData);
+
+    // Create traditional view model for backward compatibility
+    final viewModel = TradeCalendarViewModel(
+      portfolioId: portfolioId,
+      calendarData: calendarDataMap,
+      lastUpdated: DateTime.now(),
+    );
+
+    emit(TradeCalendarLoaded(viewModel: viewModel, entityData: calendarData, lastUpdated: DateTime.now()));
+  }
+
+  /// Get aggregated yearly calendar data
+  view_models.YearlyCalendarData? getYearlyCalendarData() {
+    final currentState = state;
+    if (currentState is! TradeCalendarLoaded) return null;
+
+    final calendarData = currentState.viewModel.calendarData;
+
+    // Convert CardData map to TradeDetail map
+    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
+    for (final entry in calendarData.entries) {
+      final dateKey = entry.key;
+      final cardDataList = entry.value;
+
+      // Extract trade details from card data
+      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
+    }
+
+    return _aggregationService.aggregateYearlyData(calendarData: tradeDetailsMap, year: _navigationState.year);
+  }
+
+  /// Get aggregated monthly calendar data
+  view_models.MonthlyCalendarData? getMonthlyCalendarData() {
+    final currentState = state;
+    if (currentState is! TradeCalendarLoaded || _navigationState.month == null) return null;
+
+    final calendarData = currentState.viewModel.calendarData;
+
+    // Convert CardData map to TradeDetail map
+    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
+    for (final entry in calendarData.entries) {
+      final dateKey = entry.key;
+      final cardDataList = entry.value;
+
+      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
+    }
+
+    return _aggregationService.aggregateMonthlyData(
+      calendarData: tradeDetailsMap,
+      year: _navigationState.year,
+      month: _navigationState.month!,
+    );
+  }
+
+  /// Get aggregated daily calendar data
+  view_models.DailyCalendarData? getDailyCalendarData() {
+    final currentState = state;
+    if (currentState is! TradeCalendarLoaded || _navigationState.month == null || _navigationState.day == null)
+      return null;
+
+    final calendarData = currentState.viewModel.calendarData;
+
+    // Convert CardData map to TradeDetail map
+    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
+    for (final entry in calendarData.entries) {
+      final dateKey = entry.key;
+      final cardDataList = entry.value;
+
+      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
+    }
+
+    return _aggregationService.aggregateDailyData(
+      calendarData: tradeDetailsMap,
+      date: DateTime(_navigationState.year, _navigationState.month!, _navigationState.day!),
+    );
+  }
+
+  /// Extract trade details from card data
+  List<view_models.TradeDetail> _extractTradeDetailsFromCardData(List<calendar_types.CardData> cardDataList) {
+    final tradeDetails = <view_models.TradeDetail>[];
+
+    for (final cardData in cardDataList) {
+      // Extract trade information from card data
+      final metadata = cardData.metadata;
+      if (metadata != null) {
+        try {
+          final trade = view_models.TradeDetail(
+            tradeId: metadata['tradeId']?.toString() ?? '',
+            symbol: metadata['symbol']?.toString() ?? '',
+            status: metadata['status']?.toString() ?? '',
+            tradeType: metadata['tradeType']?.toString() ?? '',
+            entryPrice: (metadata['entryPrice'] ?? 0.0).toDouble(),
+            exitPrice: (metadata['exitPrice'] ?? 0.0).toDouble(),
+            quantity: (metadata['quantity'] ?? 0).toInt(),
+            profitLoss: (metadata['profitLoss'] ?? 0.0).toDouble(),
+            profitLossPercentage: (metadata['profitLossPercentage'] ?? 0.0).toDouble(),
+            entryTime: DateTime.parse(metadata['entryTime']?.toString() ?? DateTime.now().toIso8601String()),
+            exitTime: DateTime.parse(metadata['exitTime']?.toString() ?? DateTime.now().toIso8601String()),
+            holdingTime: Duration(minutes: (metadata['holdingTimeMinutes'] ?? 0).toInt()),
+          );
+          tradeDetails.add(trade);
+        } catch (e) {
+          AppLogger.warning('Failed to extract trade detail from card data', tag: 'TradeCalendarCubit', error: e);
+        }
+      }
+    }
+
+    return tradeDetails;
   }
 }

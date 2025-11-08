@@ -138,32 +138,37 @@ class TradeRepositoryImpl implements TradeRepository {
   }
 
   @override
-  Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId, {int? year, int? month}) async {
+  Future<TradeCalendar> getTradeCalendarByMonth(
+    String userId,
+    String portfolioId, {
+    required int year,
+    required int month,
+  }) async {
     AppLogger.methodEntry(
-      'getTradeCalendar',
+      'getTradeCalendarByMonth',
       tag: 'TradeRepository',
       params: {'userId': userId, 'portfolioId': portfolioId, 'year': year, 'month': month},
     );
 
     try {
-      final dto = await _remoteDataSource.getTradeCalendar(userId, portfolioId, year: year, month: month);
+      final dto = await _remoteDataSource.getTradeCalendarByMonth(userId, portfolioId, year: year, month: month);
       final calendar = TradeCalendarMapper.fromDto(dto);
 
       _cachedCalendar = calendar;
       _calendarController.add(calendar);
 
-      AppLogger.info('Trade calendar fetched successfully', tag: 'TradeRepository');
-      AppLogger.methodExit('getTradeCalendar', tag: 'TradeRepository', result: 'success');
+      AppLogger.info('Trade calendar by month fetched successfully', tag: 'TradeRepository');
+      AppLogger.methodExit('getTradeCalendarByMonth', tag: 'TradeRepository', result: 'success');
 
       return calendar;
     } catch (e) {
       AppLogger.error(
-        'Failed to fetch trade calendar',
+        'Failed to fetch trade calendar by month',
         tag: 'TradeRepository',
         error: e,
         stackTrace: StackTrace.current,
       );
-      AppLogger.methodExit('getTradeCalendar', tag: 'TradeRepository', result: 'error');
+      AppLogger.methodExit('getTradeCalendarByMonth', tag: 'TradeRepository', result: 'error');
 
       if (_cachedCalendar != null) {
         AppLogger.info('Returning cached trade calendar', tag: 'TradeRepository');
@@ -172,6 +177,176 @@ class TradeRepositoryImpl implements TradeRepository {
 
       rethrow;
     }
+  }
+
+  @override
+  Future<TradeCalendar> getTradeCalendarByDay(String userId, String portfolioId, {required DateTime date}) async {
+    AppLogger.methodEntry(
+      'getTradeCalendarByDay',
+      tag: 'TradeRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId, 'date': date.toIso8601String()},
+    );
+
+    try {
+      final dto = await _remoteDataSource.getTradeCalendarByDay(userId, portfolioId, date: date);
+      final calendar = TradeCalendarMapper.fromDto(dto);
+
+      AppLogger.info('Trade calendar by day fetched successfully', tag: 'TradeRepository');
+      AppLogger.methodExit('getTradeCalendarByDay', tag: 'TradeRepository', result: 'success');
+
+      return calendar;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch trade calendar by day',
+        tag: 'TradeRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit('getTradeCalendarByDay', tag: 'TradeRepository', result: 'error');
+
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TradeCalendar> getTradeCalendarByDateRange(
+    String userId,
+    String portfolioId, {
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    AppLogger.methodEntry(
+      'getTradeCalendarByDateRange',
+      tag: 'TradeRepository',
+      params: {
+        'userId': userId,
+        'portfolioId': portfolioId,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+      },
+    );
+
+    try {
+      final dto = await _remoteDataSource.getTradeCalendarByDateRange(
+        userId,
+        portfolioId,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      final calendar = TradeCalendarMapper.fromDto(dto);
+
+      AppLogger.info('Trade calendar by date range fetched successfully', tag: 'TradeRepository');
+      AppLogger.methodExit('getTradeCalendarByDateRange', tag: 'TradeRepository', result: 'success');
+
+      return calendar;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch trade calendar by date range',
+        tag: 'TradeRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit('getTradeCalendarByDateRange', tag: 'TradeRepository', result: 'error');
+
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TradeCalendar> getTradeCalendarByQuarter(
+    String userId,
+    String portfolioId, {
+    required int year,
+    required int quarter,
+  }) async {
+    AppLogger.methodEntry(
+      'getTradeCalendarByQuarter',
+      tag: 'TradeRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId, 'year': year, 'quarter': quarter},
+    );
+
+    try {
+      final dto = await _remoteDataSource.getTradeCalendarByQuarter(userId, portfolioId, year: year, quarter: quarter);
+      final calendar = TradeCalendarMapper.fromDto(dto);
+
+      _cachedCalendar = calendar;
+      _calendarController.add(calendar);
+
+      AppLogger.info('Trade calendar by quarter fetched successfully', tag: 'TradeRepository');
+      AppLogger.methodExit('getTradeCalendarByQuarter', tag: 'TradeRepository', result: 'success');
+
+      return calendar;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch trade calendar by quarter',
+        tag: 'TradeRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit('getTradeCalendarByQuarter', tag: 'TradeRepository', result: 'error');
+
+      if (_cachedCalendar != null) {
+        AppLogger.info('Returning cached trade calendar', tag: 'TradeRepository');
+        return _cachedCalendar!;
+      }
+
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TradeCalendar> getTradeCalendarByFinancialYear(
+    String userId,
+    String portfolioId, {
+    required int financialYear,
+  }) async {
+    AppLogger.methodEntry(
+      'getTradeCalendarByFinancialYear',
+      tag: 'TradeRepository',
+      params: {'userId': userId, 'portfolioId': portfolioId, 'financialYear': financialYear},
+    );
+
+    try {
+      final dto = await _remoteDataSource.getTradeCalendarByFinancialYear(
+        userId,
+        portfolioId,
+        financialYear: financialYear,
+      );
+      final calendar = TradeCalendarMapper.fromDto(dto);
+
+      _cachedCalendar = calendar;
+      _calendarController.add(calendar);
+
+      AppLogger.info('Trade calendar by financial year fetched successfully', tag: 'TradeRepository');
+      AppLogger.methodExit('getTradeCalendarByFinancialYear', tag: 'TradeRepository', result: 'success');
+
+      return calendar;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch trade calendar by financial year',
+        tag: 'TradeRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      AppLogger.methodExit('getTradeCalendarByFinancialYear', tag: 'TradeRepository', result: 'error');
+
+      if (_cachedCalendar != null) {
+        AppLogger.info('Returning cached trade calendar', tag: 'TradeRepository');
+        return _cachedCalendar!;
+      }
+
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId, {int? year, int? month}) async {
+    // Legacy method - delegates to getTradeCalendarByMonth
+    final now = DateTime.now();
+    final targetYear = year ?? now.year;
+    final targetMonth = month ?? now.month;
+
+    return getTradeCalendarByMonth(userId, portfolioId, year: targetYear, month: targetMonth);
   }
 
   @override

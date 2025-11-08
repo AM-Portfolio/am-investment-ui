@@ -14,7 +14,42 @@ abstract class TradeRepository {
   /// Get summary/analysis for a specific trade portfolio
   Future<TradeSummary> getTradeSummary(String userId, String portfolioId);
 
-  /// Get calendar analytics for a specific trade portfolio
+  /// Get calendar analytics by month for a specific trade portfolio
+  Future<TradeCalendar> getTradeCalendarByMonth(
+    String userId,
+    String portfolioId, {
+    required int year,
+    required int month,
+  });
+
+  /// Get calendar analytics by day for a specific trade portfolio
+  Future<TradeCalendar> getTradeCalendarByDay(String userId, String portfolioId, {required DateTime date});
+
+  /// Get calendar analytics by date range for a specific trade portfolio
+  Future<TradeCalendar> getTradeCalendarByDateRange(
+    String userId,
+    String portfolioId, {
+    required DateTime startDate,
+    required DateTime endDate,
+  });
+
+  /// Get calendar analytics by quarter for a specific trade portfolio
+  Future<TradeCalendar> getTradeCalendarByQuarter(
+    String userId,
+    String portfolioId, {
+    required int year,
+    required int quarter,
+  });
+
+  /// Get calendar analytics by financial year for a specific trade portfolio
+  Future<TradeCalendar> getTradeCalendarByFinancialYear(
+    String userId,
+    String portfolioId, {
+    required int financialYear,
+  });
+
+  /// Get calendar analytics for a specific trade portfolio (legacy - delegates to getTradeCalendarByMonth)
+  @Deprecated('Use getTradeCalendarByMonth instead')
   Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId, {int? year, int? month});
 
   /// Get portfolios stream for real-time updates
