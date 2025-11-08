@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'portfolio_metrics.dart';
 
 part 'trade_portfolio.freezed.dart';
@@ -16,8 +17,16 @@ class TradePortfolio with _$TradePortfolio {
     @Default(0) int holdingsCount,
     String? description,
     DateTime? lastUpdated,
-  }) = _TradePortfolio;
 
+    // Trade metrics for overview
+    @Default(0) int totalTrades,
+    double? netProfitLoss,
+    double? netProfitLossPercentage,
+    double? winRate,
+    @Default(0) int winningTrades,
+    @Default(0) int losingTrades,
+    @Default(0) int openPositions,
+  }) = _TradePortfolio;
 }
 
 /// Domain entity for comprehensive portfolio summary with advanced metrics
@@ -52,9 +61,5 @@ class TradePortfolioList with _$TradePortfolioList {
   }) = _TradePortfolioList;
 
   /// Create empty portfolio list
-  factory TradePortfolioList.empty(String userId) => TradePortfolioList(
-        userId: userId,
-        portfolios: [],
-        totalCount: 0,
-      );
+  factory TradePortfolioList.empty(String userId) => TradePortfolioList(userId: userId, portfolios: []);
 }

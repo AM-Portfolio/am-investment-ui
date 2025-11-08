@@ -106,6 +106,8 @@ flutter:
     - lib/assets/test_users.json
     - lib/assets/images/
     - lib/assets/mock_data/
+    - lib/assets/mock_data/trade/
+    - lib/assets/mock_data/trade/holdings/
     - assets/mock-data/users/
     - assets/mock-data/tokens/
     - assets/mock-data/google/

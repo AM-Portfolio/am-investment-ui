@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/trade_internal_providers.dart';
+import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../components/templates/trade_holdings_template.dart';
-import '../../components/templates/trade_summary_template.dart';
 import '../../models/trade_holding_view_model.dart';
 
 class TradeHoldingsDashboardMobilePage extends ConsumerStatefulWidget {
@@ -21,36 +21,14 @@ class TradeHoldingsDashboardMobilePage extends ConsumerStatefulWidget {
   ConsumerState<TradeHoldingsDashboardMobilePage> createState() => _TradeHoldingsDashboardMobilePageState();
 }
 
-class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldingsDashboardMobilePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldingsDashboardMobilePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(widget.portfolioName ?? 'Trade Analysis'),
+      title: Text(widget.portfolioName ?? 'Holdings Dashboard'),
       actions: [IconButton(icon: const Icon(Icons.calendar_today), onPressed: () => _navigateToCalendar(context))],
-      bottom: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Holdings', icon: Icon(Icons.account_balance_wallet)),
-          Tab(text: 'Summary', icon: Icon(Icons.analytics)),
-        ],
-      ),
     ),
-    body: TabBarView(controller: _tabController, children: [_buildHoldingsTab(), _buildSummaryTab()]),
+    body: _buildHoldingsTab(),
   );
 
   Widget _buildHoldingsTab() {
@@ -77,36 +55,6 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
     );
   }
 
-  Widget _buildSummaryTab() {
-    final summaryAsync = ref.watch(
-      tradeSummaryStreamProvider((userId: widget.userId, portfolioId: widget.portfolioId)),
-    );
-
-    return summaryAsync.when(
-      data: (summary) => SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: TradeSummaryTemplate(summary: summary, isLoading: false),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Error loading summary: $error'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () =>
-                  ref.refresh(tradeSummaryStreamProvider((userId: widget.userId, portfolioId: widget.portfolioId))),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _navigateToCalendar(BuildContext context) {
     Navigator.pushNamed(
       context,
@@ -116,7 +64,6 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
   }
 
   void _navigateToHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
-    // Navigate to holding details page (to be implemented)
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Holding details for ${holding.symbol}')));
+    TradeDetailDialog.show(context, holding);
   }
 }

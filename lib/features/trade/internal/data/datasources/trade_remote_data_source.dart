@@ -19,7 +19,7 @@ abstract class TradeRemoteDataSource {
   Future<TradePortfolioSummaryDto> getTradeSummary(String userId, String portfolioId);
 
   /// Get trade calendar from remote API
-  Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId);
+  Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId, {int? year, int? month});
 }
 
 /// Concrete implementation of trade remote data source
@@ -160,19 +160,24 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
   }
 
   @override
-  Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId) async {
+  Future<TradeCalendarDto> getTradeCalendar(String userId, String portfolioId, {int? year, int? month}) async {
     AppLogger.methodEntry(
       'getTradeCalendar',
       tag: 'TradeRemoteDataSource',
-      params: {'userId': userId, 'portfolioId': portfolioId},
+      params: {'userId': userId, 'portfolioId': portfolioId, 'year': year, 'month': month},
     );
 
     try {
       // Trade API Spec: GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}
-      // Default to current month for initial calendar view
+      // Default to current month if not specified
       final now = DateTime.now();
+      final targetYear = year ?? now.year;
+      final targetMonth = month ?? now.month;
+
       final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/calendar/month?portfolioId=$portfolioId&year=${now.year}&month=${now.month}';
+          '${_apiConfig.baseUrl}/api/v1/trades/calendar/month?portfolioId=$portfolioId&year=$targetYear&month=$targetMonth';
+
+      AppLogger.info('Fetching calendar for year=$targetYear, month=$targetMonth', tag: 'TradeRemoteDataSource');
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,

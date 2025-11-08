@@ -8,38 +8,25 @@ class GetTradeCalendar {
   final TradeRepository _repository;
 
   /// Execute the use case to get trade calendar for a specific portfolio
-  Future<TradeCalendar> call(String userId, String portfolioId) async {
+  Future<TradeCalendar> call(String userId, String portfolioId, {int? year, int? month}) async {
     AppLogger.methodEntry(
       'GetTradeCalendar.call',
       tag: 'GetTradeCalendar',
-      params: {'userId': userId, 'portfolioId': portfolioId},
+      params: {'userId': userId, 'portfolioId': portfolioId, 'year': year, 'month': month},
     );
 
     if (userId.isEmpty || portfolioId.isEmpty) {
-      AppLogger.error(
-        'Validation failed - empty userId or portfolioId',
-        tag: 'GetTradeCalendar',
-      );
+      AppLogger.error('Validation failed - empty userId or portfolioId', tag: 'GetTradeCalendar');
       throw ArgumentError('User ID and Portfolio ID cannot be empty');
     }
 
     try {
-      AppLogger.info(
-        'Executing get trade calendar use case',
-        tag: 'GetTradeCalendar',
-      );
+      AppLogger.info('Executing get trade calendar use case', tag: 'GetTradeCalendar');
 
-      final result = await _repository.getTradeCalendar(userId, portfolioId);
+      final result = await _repository.getTradeCalendar(userId, portfolioId, year: year, month: month);
 
-      AppLogger.info(
-        'Trade calendar use case completed successfully',
-        tag: 'GetTradeCalendar',
-      );
-      AppLogger.methodExit(
-        'GetTradeCalendar.call',
-        tag: 'GetTradeCalendar',
-        result: 'success',
-      );
+      AppLogger.info('Trade calendar use case completed successfully', tag: 'GetTradeCalendar');
+      AppLogger.methodExit('GetTradeCalendar.call', tag: 'GetTradeCalendar', result: 'success');
 
       return result;
     } catch (e) {
@@ -49,11 +36,7 @@ class GetTradeCalendar {
         error: e,
         stackTrace: StackTrace.current,
       );
-      AppLogger.methodExit(
-        'GetTradeCalendar.call',
-        tag: 'GetTradeCalendar',
-        result: 'error',
-      );
+      AppLogger.methodExit('GetTradeCalendar.call', tag: 'GetTradeCalendar', result: 'error');
       rethrow;
     }
   }

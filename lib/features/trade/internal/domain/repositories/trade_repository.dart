@@ -1,7 +1,7 @@
-import '../entities/trade_portfolio.dart';
-import '../entities/trade_holding.dart';
-import '../entities/trade_summary.dart';
 import '../entities/trade_calendar.dart';
+import '../entities/trade_holding.dart';
+import '../entities/trade_portfolio.dart';
+import '../entities/trade_summary.dart';
 
 /// Repository interface for trade data operations
 abstract class TradeRepository {
@@ -15,7 +15,7 @@ abstract class TradeRepository {
   Future<TradeSummary> getTradeSummary(String userId, String portfolioId);
 
   /// Get calendar analytics for a specific trade portfolio
-  Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId);
+  Future<TradeCalendar> getTradeCalendar(String userId, String portfolioId, {int? year, int? month});
 
   /// Get portfolios stream for real-time updates
   Stream<TradePortfolioList> watchTradePortfolios(String userId);

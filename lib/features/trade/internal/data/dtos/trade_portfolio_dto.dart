@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'trade_portfolio_dto.g.dart';
 
 /// DTO for trade portfolio from API
-/// API Response: { "portfolioId": "...", "name": "..." }
+/// API Response: { "portfolioId": "...", "name": "...", "metrics": { ... } }
 @JsonSerializable()
 class TradePortfolioDto {
   const TradePortfolioDto({
@@ -16,10 +16,17 @@ class TradePortfolioDto {
     this.holdingsCount,
     this.description,
     this.lastUpdated,
+    // Trade metrics (from portfolio summary endpoint)
+    this.totalTrades,
+    this.netProfitLoss,
+    this.netProfitLossPercentage,
+    this.winRate,
+    this.winningTrades,
+    this.losingTrades,
+    this.openPositions,
   });
 
-  factory TradePortfolioDto.fromJson(Map<String, dynamic> json) =>
-      _$TradePortfolioDtoFromJson(json);
+  factory TradePortfolioDto.fromJson(Map<String, dynamic> json) => _$TradePortfolioDtoFromJson(json);
 
   final String portfolioId;
   final String name;
@@ -31,19 +38,24 @@ class TradePortfolioDto {
   final String? description;
   final String? lastUpdated;
 
+  // Trade metrics (optional - from summary data)
+  final int? totalTrades;
+  final double? netProfitLoss;
+  final double? netProfitLossPercentage;
+  final double? winRate;
+  final int? winningTrades;
+  final int? losingTrades;
+  final int? openPositions;
+
   Map<String, dynamic> toJson() => _$TradePortfolioDtoToJson(this);
 }
 
 /// DTO for trade portfolio list from API
 @JsonSerializable()
 class TradePortfolioListDto {
-  const TradePortfolioListDto({
-    required this.portfolios,
-    this.totalCount,
-  });
+  const TradePortfolioListDto({required this.portfolios, this.totalCount});
 
-  factory TradePortfolioListDto.fromJson(Map<String, dynamic> json) =>
-      _$TradePortfolioListDtoFromJson(json);
+  factory TradePortfolioListDto.fromJson(Map<String, dynamic> json) => _$TradePortfolioListDtoFromJson(json);
 
   final List<TradePortfolioDto> portfolios;
   final int? totalCount;
