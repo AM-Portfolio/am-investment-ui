@@ -6,6 +6,7 @@ import '../../../../core/utils/platform_utils.dart';
 import '../../../../shared/widgets/layouts/mobile_layout.dart';
 import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
+import '../../../trade/presentation/mobile/trade_mobile_screen.dart';
 import '../../../trade/presentation/web/trade_web_screen.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
@@ -34,16 +35,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     try {
       await context.read<AuthCubit>().logout();
-      AppLogger.info(
-        'AuthWrapper: Logout completed successfully',
-        tag: 'AuthWrapper',
-      );
+      AppLogger.info('AuthWrapper: Logout completed successfully', tag: 'AuthWrapper');
     } catch (error) {
-      AppLogger.error(
-        'AuthWrapper: Logout failed',
-        tag: 'AuthWrapper',
-        error: error,
-      );
+      AppLogger.error('AuthWrapper: Logout failed', tag: 'AuthWrapper', error: error);
     }
 
     setState(() {
@@ -64,7 +58,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
       case 'Dashboard':
         return _buildPlaceholderScreen('Dashboard');
       case 'Trade':
-        return TradeWebScreen(userId: userId);
+        return PlatformUtils.isWeb
+            ? TradeWebScreen(userId: userId)
+            : TradeMobileScreen(userId: userId, onBack: () => _handleNavigation('Portfolio'));
       case 'Market':
         return _buildPlaceholderScreen('Market');
       case 'News':
@@ -80,21 +76,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.construction,
-          size: 64,
-          color: Theme.of(context).primaryColor.withOpacity(0.6),
-        ),
+        Icon(Icons.construction, size: 64, color: Theme.of(context).primaryColor.withOpacity(0.6)),
         const SizedBox(height: 16),
-        Text(
-          '$title Coming Soon',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text('$title Coming Soon', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        Text(
-          'This feature is under development.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        Text('This feature is under development.', style: Theme.of(context).textTheme.bodyMedium),
       ],
     ),
   );
@@ -109,10 +95,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       // Show error if authentication failed
       if (state is AuthError) {
-        AppLogger.error(
-          'AuthWrapper: Authentication error - ${state.message}',
-          tag: 'AuthWrapper',
-        );
+        AppLogger.error('AuthWrapper: Authentication error - ${state.message}', tag: 'AuthWrapper');
       }
 
       // Show login screen if not authenticated
@@ -122,10 +105,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       // Show main app if authenticated
       final userId = state.user.id;
-      AppLogger.info(
-        'AuthWrapper: User authenticated - ${state.user.email}',
-        tag: 'AuthWrapper',
-      );
+      AppLogger.info('AuthWrapper: User authenticated - ${state.user.email}', tag: 'AuthWrapper');
 
       return PlatformUtils.isWeb
           ? WebLayout(
@@ -142,6 +122,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
               activeNavItem: _currentPage,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
+              hideBottomNav: _currentPage == 'Trade', // Hide bottom nav in Trade section
               child: _getCurrentScreen(userId),
             );
     },

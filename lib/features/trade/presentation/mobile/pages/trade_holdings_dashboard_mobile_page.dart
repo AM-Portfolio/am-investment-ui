@@ -23,13 +23,7 @@ class TradeHoldingsDashboardMobilePage extends ConsumerStatefulWidget {
 
 class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldingsDashboardMobilePage> {
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(widget.portfolioName ?? 'Holdings Dashboard'),
-      actions: [IconButton(icon: const Icon(Icons.calendar_today), onPressed: () => _navigateToCalendar(context))],
-    ),
-    body: _buildHoldingsTab(),
-  );
+  Widget build(BuildContext context) => _buildHoldingsTab();
 
   Widget _buildHoldingsTab() {
     final holdingsAsync = ref.watch(
@@ -52,14 +46,6 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
         onRefresh: () =>
             ref.refresh(tradeHoldingsStreamProvider((userId: widget.userId, portfolioId: widget.portfolioId))),
       ),
-    );
-  }
-
-  void _navigateToCalendar(BuildContext context) {
-    Navigator.pushNamed(
-      context,
-      '/trade/calendar/${widget.portfolioId}',
-      arguments: {'userId': widget.userId, 'portfolioName': widget.portfolioName},
     );
   }
 
