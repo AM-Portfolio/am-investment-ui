@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../config.dart';
 import '../types.dart';
-import 'display_template.dart';
 
 /// Layout template handles the overall structure and presentation
 class CalendarLayoutTemplate extends StatefulWidget {
@@ -27,8 +26,7 @@ class CalendarLayoutTemplate extends StatefulWidget {
   State<CalendarLayoutTemplate> createState() => _CalendarLayoutTemplateState();
 }
 
-class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
-    with SingleTickerProviderStateMixin {
+class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
   bool _isExpanded = true;
@@ -37,14 +35,8 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
   void initState() {
     super.initState();
     _isExpanded = widget.config.initiallyExpanded;
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _expandAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
+    _animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _expandAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
 
     if (_isExpanded) {
       _animationController.forward();
@@ -69,7 +61,14 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
   }
 
   void _clearSelection() {
-    FilterOperations.clearSelection(widget.onSelectionChanged);
+    // Clear selection by setting empty DateSelection
+    const selection = DateSelection(
+      startDate: null,
+      endDate: null,
+      description: 'All Time',
+      filterType: DateFilterMode.quick,
+    );
+    widget.onSelectionChanged(selection);
   }
 
   @override
@@ -88,14 +87,11 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     }
   }
 
-  Widget _buildMinimalLayout() =>
-      Padding(padding: const EdgeInsets.all(4.0), child: widget.child);
+  Widget _buildMinimalLayout() => Padding(padding: const EdgeInsets.all(4.0), child: widget.child);
 
   Widget _buildCompactLayout() => Card(
     elevation: widget.config.cardElevation,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(widget.config.borderRadius),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(widget.config.borderRadius)),
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -108,9 +104,7 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
 
   Widget _buildFullLayout() => Card(
     elevation: widget.config.cardElevation,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(widget.config.borderRadius),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(widget.config.borderRadius)),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -128,16 +122,11 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(widget.config.borderRadius),
-      border: Border.all(
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-      ),
+      border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
     ),
     child: Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        if (widget.config.showHeader) _buildDashboardHeader(),
-        widget.child,
-      ],
+      children: [if (widget.config.showHeader) _buildDashboardHeader(), widget.child],
     ),
   );
 
@@ -157,31 +146,21 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(widget.config.borderRadius),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(widget.config.borderRadius)),
     ),
     child: Row(
       children: [
-        Icon(
-          Icons.filter_list,
-          size: 18,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(Icons.filter_list, size: 18, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 8),
         if (widget.config.headerTitle != null) ...[
           Text(
             widget.config.headerTitle!,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 8),
         ],
         Expanded(child: _buildSelectionDisplay(compact: true)),
-        if (widget.config.showClearButton &&
-            widget.currentSelection.hasDateRange)
-          _buildClearButton(size: 16),
+        if (widget.config.showClearButton && widget.currentSelection.hasDateRange) _buildClearButton(size: 16),
       ],
     ),
   );
@@ -190,9 +169,7 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     padding: const EdgeInsets.all(16.0),
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(widget.config.borderRadius),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(widget.config.borderRadius)),
       border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
     ),
     child: Column(
@@ -200,17 +177,12 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
       children: [
         Row(
           children: [
-            Icon(
-              Icons.date_range,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            Icon(Icons.date_range, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 12),
             if (widget.config.headerTitle != null)
               Text(
                 widget.config.headerTitle!,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             const Spacer(),
             if (widget.config.collapsible)
@@ -222,9 +194,7 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
                 ),
                 onPressed: _toggleExpanded,
               ),
-            if (widget.config.showClearButton &&
-                widget.currentSelection.hasDateRange)
-              _buildClearButton(),
+            if (widget.config.showClearButton && widget.currentSelection.hasDateRange) _buildClearButton(),
           ],
         ),
         const SizedBox(height: 12),
@@ -237,40 +207,25 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     padding: const EdgeInsets.all(12.0),
     child: Row(
       children: [
-        Icon(
-          Icons.schedule,
-          size: 16,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(Icons.schedule, size: 16, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 6),
         Expanded(child: _buildSelectionDisplay(compact: true)),
-        if (widget.config.showClearButton &&
-            widget.currentSelection.hasDateRange)
-          _buildClearButton(size: 14),
+        if (widget.config.showClearButton && widget.currentSelection.hasDateRange) _buildClearButton(size: 14),
       ],
     ),
   );
 
   Widget _buildSelectionDisplay({bool compact = false}) => Container(
-    padding: EdgeInsets.symmetric(
-      horizontal: compact ? 6 : 8,
-      vertical: compact ? 2 : 4,
-    ),
+    padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: compact ? 2 : 4),
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
       borderRadius: BorderRadius.circular(compact ? 4 : 6),
-      border: Border.all(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-      ),
+      border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.calendar_today,
-          size: compact ? 12 : 14,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(Icons.calendar_today, size: compact ? 12 : 14, color: Theme.of(context).colorScheme.primary),
         SizedBox(width: compact ? 4 : 6),
         Flexible(
           child: Text(
@@ -292,9 +247,6 @@ class _CalendarLayoutTemplateState extends State<CalendarLayoutTemplate>
     onPressed: _clearSelection,
     tooltip: 'Clear Filter',
     padding: const EdgeInsets.all(4),
-    constraints: BoxConstraints(
-      minWidth: (size ?? 18) + 16,
-      minHeight: (size ?? 18) + 16,
-    ),
+    constraints: BoxConstraints(minWidth: (size ?? 18) + 16, minHeight: (size ?? 18) + 16),
   );
 }

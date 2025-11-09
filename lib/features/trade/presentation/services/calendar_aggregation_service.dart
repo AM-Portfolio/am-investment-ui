@@ -1,3 +1,4 @@
+import '../../../../core/utils/logger.dart';
 import '../../internal/domain/entities/trade_calendar.dart' as domain;
 import '../models/calendar_view_models.dart';
 
@@ -8,6 +9,16 @@ class CalendarAggregationService {
     required Map<String, List<domain.TradeDetail>> calendarData,
     required int year,
   }) {
+    AppLogger.info(
+      '[AggregationService] Aggregating yearly data for $year with ${calendarData.length} date entries',
+      tag: 'CalendarAggregationService',
+    );
+
+    AppLogger.debug(
+      '[AggregationService] Date keys: ${calendarData.keys.take(5).join(", ")}${calendarData.length > 5 ? "..." : ""}',
+      tag: 'CalendarAggregationService',
+    );
+
     final monthSummaries = <MonthSummary>[];
 
     var totalTrades = 0;
@@ -20,6 +31,11 @@ class CalendarAggregationService {
     // Process each month (1-12)
     for (var month = 1; month <= 12; month++) {
       final monthData = _getMonthData(calendarData, year, month);
+
+      AppLogger.debug(
+        '[AggregationService] Month $month/$year has ${monthData.length} trades',
+        tag: 'CalendarAggregationService',
+      );
 
       if (monthData.isNotEmpty) {
         final summary = _createMonthSummary(monthData, year, month);
@@ -46,6 +62,11 @@ class CalendarAggregationService {
         monthlyPnLs.add(0.0);
       }
     }
+
+    AppLogger.info(
+      '[AggregationService] Year $year summary: $totalTrades trades, totalPnL: $totalPnL',
+      tag: 'CalendarAggregationService',
+    );
 
     final avgMonthlyPnL = monthlyPnLs.isNotEmpty ? monthlyPnLs.reduce((a, b) => a + b) / monthlyPnLs.length : 0.0;
 

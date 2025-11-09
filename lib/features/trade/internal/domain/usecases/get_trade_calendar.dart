@@ -8,8 +8,7 @@ class GetTradeCalendar {
   final TradeRepository _repository;
 
   /// Execute the use case to get trade calendar for a specific portfolio
-  Future<Trade
-  Calendar> call(String userId, String portfolioId, {int? year, int? month}) async {
+  Future<TradeCalendar> call(String userId, String portfolioId, {int? year, int? month}) async {
     AppLogger.methodEntry(
       'GetTradeCalendar.call',
       tag: 'GetTradeCalendar',

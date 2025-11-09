@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/logger.dart';
+import '../year_calendar/year_calendar.dart';
 import 'card_renderer.dart';
 import 'card_types.dart';
 import 'config.dart';
@@ -23,6 +25,9 @@ class UniversalCalendarWidget extends StatefulWidget {
     this.cardConfigs,
     this.dataProvider,
     this.enableCardView = false,
+    this.yearCalendarData,
+    this.currentYear,
+    this.showYearCalendar = false,
   });
 
   /// Callback when date selection changes
@@ -52,9 +57,17 @@ class UniversalCalendarWidget extends StatefulWidget {
   /// Enable card view mode
   final bool enableCardView;
 
+  /// Year calendar data for year calendar view
+  final Map<int, CalendarMonthData>? yearCalendarData;
+
+  /// Current year for year calendar view
+  final int? currentYear;
+
+  /// Show year calendar instead of filter template
+  final bool showYearCalendar;
+
   @override
-  State<UniversalCalendarWidget> createState() =>
-      _UniversalCalendarWidgetState();
+  State<UniversalCalendarWidget> createState() => _UniversalCalendarWidgetState();
 }
 
 class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
@@ -78,10 +91,7 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
     // Initialize data provider
     _dataProvider =
         widget.dataProvider ??
-        CalendarDataProviderFactory.createProvider(
-          context: widget.context,
-          config: {'mockData': null},
-        );
+        CalendarDataProviderFactory.createProvider(context: widget.context, config: {'mockData': null});
 
     // Load initial card data if card view is enabled
     if (widget.enableCardView) {
@@ -92,21 +102,16 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
   @override
   void didUpdateWidget(UniversalCalendarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialSelection != oldWidget.initialSelection &&
-        widget.initialSelection != null) {
+    if (widget.initialSelection != oldWidget.initialSelection && widget.initialSelection != null) {
       _currentSelection = widget.initialSelection!;
     }
 
     // Reload card data if context or data provider changed
     if (widget.enableCardView &&
-        (widget.context != oldWidget.context ||
-            widget.dataProvider != oldWidget.dataProvider)) {
+        (widget.context != oldWidget.context || widget.dataProvider != oldWidget.dataProvider)) {
       _dataProvider =
           widget.dataProvider ??
-          CalendarDataProviderFactory.createProvider(
-            context: widget.context,
-            config: {'mockData': null},
-          );
+          CalendarDataProviderFactory.createProvider(context: widget.context, config: {'mockData': null});
       _loadCardData();
     }
   }
@@ -131,9 +136,7 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
     });
 
     try {
-      final cardTypes =
-          widget.cardConfigs?.map((c) => c.type).toList() ??
-          _dataProvider.getSupportedCardTypes();
+      final cardTypes = widget.cardConfigs?.map((c) => c.type).toList() ?? _dataProvider.getSupportedCardTypes();
 
       final data = await _dataProvider.getCardData(
         startDate: _currentSelection.startDate!,
@@ -159,6 +162,12 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
     // Get effective config (use provided config or generate based on context)
     final effectiveConfig = widget.config ?? _getDefaultConfig();
 
+    AppLogger.debug(
+      'Building UniversalCalendarWidget - showYearCalendar: ${widget.showYearCalendar}, '
+      'hasYearData: ${widget.yearCalendarData != null}, year: ${widget.currentYear}',
+      tag: 'UniversalCalendarWidget',
+    );
+
     if (widget.enableCardView) {
       return Column(
         children: [
@@ -168,6 +177,9 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
             config: effectiveConfig,
             onSelectionChanged: _handleSelectionChanged,
             initialSelection: _currentSelection,
+            yearCalendarData: widget.yearCalendarData,
+            currentYear: widget.currentYear,
+            showYearCalendar: widget.showYearCalendar,
           ),
           const SizedBox(height: 16),
           // Card view section
@@ -182,6 +194,9 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
       config: effectiveConfig,
       onSelectionChanged: _handleSelectionChanged,
       initialSelection: _currentSelection,
+      yearCalendarData: widget.yearCalendarData,
+      currentYear: widget.currentYear,
+      showYearCalendar: widget.showYearCalendar,
     );
   }
 
@@ -191,9 +206,7 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
     }
 
     if (_cardData.isEmpty) {
-      return const Center(
-        child: Text('No data available for selected date range'),
-      );
+      return const Center(child: Text('No data available for selected date range'));
     }
 
     final configs = widget.cardConfigs ?? _dataProvider.getDefaultCardConfigs();
@@ -214,9 +227,7 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   _formatDateHeader(date),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               // Cards grid
@@ -247,29 +258,8 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
   }
 
   String _formatDateHeader(DateTime date) {
-    final weekday = [
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
-    ][date.weekday - 1];
-    final month = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ][date.month - 1];
+    final weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][date.weekday - 1];
+    final month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month - 1];
     return '$weekday, $month ${date.day}, ${date.year}';
   }
 
@@ -280,43 +270,29 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
         return UniversalCalendarConfigManager.getMinimalConfig();
 
       case CalendarTemplateType.compact:
-        return UniversalCalendarConfigManager.getCompactConfig(
-          title: widget.title,
-        );
+        return UniversalCalendarConfigManager.getCompactConfig(title: widget.title);
 
       case CalendarTemplateType.full:
         return UniversalCalendarConfigManager.getFullConfig(
-          title:
-              widget.title ??
-              UniversalCalendarConfigManager.getDefaultTitle(widget.context),
+          title: widget.title ?? UniversalCalendarConfigManager.getDefaultTitle(widget.context),
         );
 
       case CalendarTemplateType.dashboard:
-        return UniversalCalendarConfigManager.getCompactConfig(
-          title: widget.title,
-        );
+        return UniversalCalendarConfigManager.getCompactConfig(title: widget.title);
 
       case CalendarTemplateType.adaptive:
         // Choose config based on context
         switch (widget.context.toLowerCase()) {
           case 'trade':
           case 'trading':
-            return UniversalCalendarConfigManager.getTradeConfig(
-              title: widget.title,
-            );
+            return UniversalCalendarConfigManager.getTradeConfig(title: widget.title);
 
           case 'web':
-            return UniversalCalendarConfigManager.getWebConfig(
-              title: widget.title,
-            );
+            return UniversalCalendarConfigManager.getWebConfig(title: widget.title);
 
           default:
             return UniversalCalendarConfigManager.getBasicConfig(
-              title:
-                  widget.title ??
-                  UniversalCalendarConfigManager.getDefaultTitle(
-                    widget.context,
-                  ),
+              title: widget.title ?? UniversalCalendarConfigManager.getDefaultTitle(widget.context),
             );
         }
     }
@@ -325,11 +301,7 @@ class _UniversalCalendarWidgetState extends State<UniversalCalendarWidget> {
 
 /// Simplified wrapper for quick date filtering
 class QuickDateFilter extends StatelessWidget {
-  const QuickDateFilter({
-    required this.onDateSelectionChanged,
-    super.key,
-    this.initialSelection,
-  });
+  const QuickDateFilter({required this.onDateSelectionChanged, super.key, this.initialSelection});
 
   final Function(DateSelection) onDateSelectionChanged;
   final DateSelection? initialSelection;
@@ -363,21 +335,13 @@ class WebDateFilter extends StatelessWidget {
     onDateSelectionChanged: onDateSelectionChanged,
     title: title,
     initialSelection: initialSelection,
-    config: UniversalCalendarConfigManager.getWebConfig(
-      title: title,
-      fullFeatures: fullFeatures,
-    ),
+    config: UniversalCalendarConfigManager.getWebConfig(title: title, fullFeatures: fullFeatures),
   );
 }
 
 /// Trade-specific date filter optimized for trading analytics
 class TradeDateFilter extends StatelessWidget {
-  const TradeDateFilter({
-    required this.onDateSelectionChanged,
-    super.key,
-    this.title,
-    this.initialSelection,
-  });
+  const TradeDateFilter({required this.onDateSelectionChanged, super.key, this.title, this.initialSelection});
 
   final Function(DateSelection) onDateSelectionChanged;
   final String? title;

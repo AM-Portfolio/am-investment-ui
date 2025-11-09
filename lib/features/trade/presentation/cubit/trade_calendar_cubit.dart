@@ -502,6 +502,11 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
 
   /// Load data appropriate for current view type
   Future<void> _loadDataForCurrentView(String userId, String portfolioId) async {
+    AppLogger.info(
+      '[Cubit] Loading data for view: ${_navigationState.viewType}, portfolioId: $portfolioId, year: ${_navigationState.year}',
+      tag: 'TradeCalendarCubit',
+    );
+
     emit(const TradeCalendarLoading());
 
     try {
@@ -512,6 +517,10 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
       switch (_navigationState.viewType) {
         case view_models.CalendarViewType.yearly:
           // Load entire year data using date range
+          AppLogger.debug(
+            '[Cubit] Loading yearly data from ${dateRange.startDate} to ${dateRange.endDate}',
+            tag: 'TradeCalendarCubit',
+          );
           calendarData = await _getTradeCalendarByDateRange(
             userId,
             portfolioId,
@@ -563,14 +572,17 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
     String userId,
     String portfolioId,
   ) async {
-    // Convert entity to calendar data map
-    final calendarDataMap = TradeCalendarConverter.convertEntityToCalendarData(entity: calendarData);
+    AppLogger.info(
+      '[Cubit] Creating view model from entity with ${calendarData.portfolioTrades.length} portfolios',
+      tag: 'TradeCalendarCubit',
+    );
 
-    // Create traditional view model for backward compatibility
-    final viewModel = TradeCalendarViewModel(
-      portfolioId: portfolioId,
-      calendarData: calendarDataMap,
-      lastUpdated: DateTime.now(),
+    // Use the factory method to properly create view model with tradeDetailsData
+    final viewModel = TradeCalendarViewModel.fromEntity(calendarData);
+
+    AppLogger.info(
+      '[Cubit] View model created with tradeDetailsData: ${viewModel.tradeDetailsData?.length ?? 0} date entries',
+      tag: 'TradeCalendarCubit',
     );
 
     emit(TradeCalendarLoaded(viewModel: viewModel, entityData: calendarData, lastUpdated: DateTime.now()));
@@ -579,21 +591,31 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
   /// Get aggregated yearly calendar data
   view_models.YearlyCalendarData? getYearlyCalendarData() {
     final currentState = state;
-    if (currentState is! TradeCalendarLoaded) return null;
-
-    final calendarData = currentState.viewModel.calendarData;
-
-    // Convert CardData map to TradeDetail map
-    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
-    for (final entry in calendarData.entries) {
-      final dateKey = entry.key;
-      final cardDataList = entry.value;
-
-      // Extract trade details from card data
-      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
+    if (currentState is! TradeCalendarLoaded) {
+      AppLogger.info(
+        '[Cubit] getYearlyCalendarData called but state is not TradeCalendarLoaded',
+        tag: 'TradeCalendarCubit',
+      );
+      return null;
     }
 
-    return _aggregationService.aggregateYearlyData(calendarData: tradeDetailsMap, year: _navigationState.year);
+    final tradeDetailsData = currentState.viewModel.tradeDetailsData ?? {};
+
+    AppLogger.info(
+      '[Cubit] getYearlyCalendarData for year ${_navigationState.year}, tradeDetailsData has ${tradeDetailsData.length} date entries',
+      tag: 'TradeCalendarCubit',
+    );
+
+    if (tradeDetailsData.isEmpty) {
+      AppLogger.error('[Cubit] ⚠️ tradeDetailsData is EMPTY!', tag: 'TradeCalendarCubit');
+    } else {
+      AppLogger.debug(
+        '[Cubit] Sample date keys: ${tradeDetailsData.keys.take(5).join(", ")}',
+        tag: 'TradeCalendarCubit',
+      );
+    }
+
+    return _aggregationService.aggregateYearlyData(calendarData: tradeDetailsData, year: _navigationState.year);
   }
 
   /// Get aggregated monthly calendar data
@@ -601,19 +623,10 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
     final currentState = state;
     if (currentState is! TradeCalendarLoaded || _navigationState.month == null) return null;
 
-    final calendarData = currentState.viewModel.calendarData;
-
-    // Convert CardData map to TradeDetail map
-    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
-    for (final entry in calendarData.entries) {
-      final dateKey = entry.key;
-      final cardDataList = entry.value;
-
-      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
-    }
+    final tradeDetailsData = currentState.viewModel.tradeDetailsData ?? {};
 
     return _aggregationService.aggregateMonthlyData(
-      calendarData: tradeDetailsMap,
+      calendarData: tradeDetailsData,
       year: _navigationState.year,
       month: _navigationState.month!,
     );
@@ -625,53 +638,11 @@ class TradeCalendarCubit extends Cubit<TradeCalendarState> {
     if (currentState is! TradeCalendarLoaded || _navigationState.month == null || _navigationState.day == null)
       return null;
 
-    final calendarData = currentState.viewModel.calendarData;
-
-    // Convert CardData map to TradeDetail map
-    final tradeDetailsMap = <String, List<view_models.TradeDetail>>{};
-    for (final entry in calendarData.entries) {
-      final dateKey = entry.key;
-      final cardDataList = entry.value;
-
-      tradeDetailsMap[dateKey] = _extractTradeDetailsFromCardData(cardDataList);
-    }
+    final tradeDetailsData = currentState.viewModel.tradeDetailsData ?? {};
 
     return _aggregationService.aggregateDailyData(
-      calendarData: tradeDetailsMap,
+      calendarData: tradeDetailsData,
       date: DateTime(_navigationState.year, _navigationState.month!, _navigationState.day!),
     );
-  }
-
-  /// Extract trade details from card data
-  List<view_models.TradeDetail> _extractTradeDetailsFromCardData(List<calendar_types.CardData> cardDataList) {
-    final tradeDetails = <view_models.TradeDetail>[];
-
-    for (final cardData in cardDataList) {
-      // Extract trade information from card data
-      final metadata = cardData.metadata;
-      if (metadata != null) {
-        try {
-          final trade = view_models.TradeDetail(
-            tradeId: metadata['tradeId']?.toString() ?? '',
-            symbol: metadata['symbol']?.toString() ?? '',
-            status: metadata['status']?.toString() ?? '',
-            tradeType: metadata['tradeType']?.toString() ?? '',
-            entryPrice: (metadata['entryPrice'] ?? 0.0).toDouble(),
-            exitPrice: (metadata['exitPrice'] ?? 0.0).toDouble(),
-            quantity: (metadata['quantity'] ?? 0).toInt(),
-            profitLoss: (metadata['profitLoss'] ?? 0.0).toDouble(),
-            profitLossPercentage: (metadata['profitLossPercentage'] ?? 0.0).toDouble(),
-            entryTime: DateTime.parse(metadata['entryTime']?.toString() ?? DateTime.now().toIso8601String()),
-            exitTime: DateTime.parse(metadata['exitTime']?.toString() ?? DateTime.now().toIso8601String()),
-            holdingTime: Duration(minutes: (metadata['holdingTimeMinutes'] ?? 0).toInt()),
-          );
-          tradeDetails.add(trade);
-        } catch (e) {
-          AppLogger.warning('Failed to extract trade detail from card data', tag: 'TradeCalendarCubit', error: e);
-        }
-      }
-    }
-
-    return tradeDetails;
   }
 }

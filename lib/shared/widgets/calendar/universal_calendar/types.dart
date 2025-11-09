@@ -1,6 +1,9 @@
 /// Types and enums for universal calendar date selector system
 library;
 
+// Re-export year calendar types for use in factory without direct dependency
+export '../year_calendar/calendar_types.dart' show CalendarMonthData;
+
 /// Date selector template composition types
 enum CalendarTemplateType {
   minimal, // Filter display only, no selectors
