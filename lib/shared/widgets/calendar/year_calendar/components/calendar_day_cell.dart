@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../calendar_types.dart';
+import '../services/calendar_color_service.dart';
 
 /// Individual calendar day cell component
 class CalendarDayCell extends StatelessWidget {
@@ -11,6 +12,7 @@ class CalendarDayCell extends StatelessWidget {
     super.key,
     this.compactMode = false,
     this.onTap,
+    this.colorService,
   });
 
   final int dayNumber;
@@ -18,21 +20,27 @@ class CalendarDayCell extends StatelessWidget {
   final int month;
   final bool compactMode;
   final Function(DateTime date, CalendarDayData dayData)? onTap;
+  final CalendarColorService? colorService;
 
   @override
   Widget build(BuildContext context) {
     final hasData = dayData?.hasTrades ?? false;
-    final backgroundColor = hasData ? dayData!.getColor(opacity: 0.18) : Colors.transparent;
+    final service = colorService ?? CalendarColorService();
+
+    final backgroundColor = hasData ? service.getDayColor(dayData!, opacity: 0.18) : Colors.transparent;
     final borderColor = hasData
-        ? dayData!.getColor().withOpacity(0.6)
+        ? service.getBorderColor(dayData!)
         : Theme.of(context).colorScheme.outline.withOpacity(0.1);
+    final textColor = hasData
+        ? service.getTextColor(dayData!)
+        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
 
     final dayCell = Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: hasData && onTap != null ? () => onTap!(dayData!.date, dayData!) : null,
         borderRadius: BorderRadius.circular(4),
-        hoverColor: hasData ? dayData!.getColor().withOpacity(0.25) : Colors.grey.withOpacity(0.05),
+        hoverColor: hasData ? service.getDayColor(dayData!, opacity: 0.25) : Colors.grey.withOpacity(0.05),
         child: Container(
           height: compactMode ? 20 : 24,
           decoration: BoxDecoration(
@@ -46,9 +54,7 @@ class CalendarDayCell extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontSize: compactMode ? 9 : 10,
                 fontWeight: hasData ? FontWeight.bold : FontWeight.w500,
-                color: hasData
-                    ? dayData!.getColor().withOpacity(0.95)
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: textColor,
               ),
             ),
           ),

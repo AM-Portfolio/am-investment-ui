@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../calendar_types.dart';
-import 'stat_badge.dart';
 
 /// Month header with name and statistics badges
 class MonthHeader extends StatelessWidget {
@@ -15,32 +14,64 @@ class MonthHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
+    final isTablet = screenWidth >= 600 && screenWidth < 900;
 
-    // Mobile: Stack vertically
+    // Mobile: Ultra compact design with inline stats
     if (isMobile && stats['totalTrades'] > 0) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            monthData?.monthName ?? _getMonthName(month),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
+          // Month name with primary stat inline
+          Row(
             children: [
-              StatBadge(icon: Icons.calendar_today, label: '${stats['tradeDays']}d', color: Colors.purple),
-              StatBadge(icon: Icons.assessment, label: '${stats['totalTrades']}', color: Colors.blue),
-              StatBadge(
-                icon: Icons.trending_up,
-                label: '${stats['winRate'].toStringAsFixed(1)}%',
-                color: stats['winRate'] >= 50 ? Colors.green : Colors.orange,
+              Text(
+                monthData?.monthName ?? _getMonthName(month),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 14),
               ),
-              StatBadge(
-                icon: stats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                label: '\$${stats['totalPnL'] >= 0 ? '+' : ''}${stats['totalPnL'].toStringAsFixed(0)}',
-                color: stats['totalPnL'] >= 0 ? Colors.green : Colors.red,
+              const SizedBox(width: 8),
+              // Compact P&L indicator
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: (stats['totalPnL'] >= 0 ? Colors.green : Colors.red).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: (stats['totalPnL'] >= 0 ? Colors.green : Colors.red).withOpacity(0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      stats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                      size: 10,
+                      color: stats['totalPnL'] >= 0 ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      '\$${stats['totalPnL'] >= 0 ? '+' : ''}${stats['totalPnL'].toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: stats['totalPnL'] >= 0 ? Colors.green.shade700 : Colors.red.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Compact stats row
+          Row(
+            children: [
+              _buildCompactStat(context, Icons.calendar_today, '${stats['tradeDays']}d', Colors.purple),
+              const SizedBox(width: 6),
+              _buildCompactStat(context, Icons.swap_horiz, '${stats['totalTrades']}', Colors.blue),
+              const SizedBox(width: 6),
+              _buildCompactStat(
+                context,
+                Icons.percent,
+                '${stats['winRate'].toStringAsFixed(0)}%',
+                stats['winRate'] >= 50 ? Colors.green : Colors.orange,
               ),
             ],
           ),
@@ -48,45 +79,109 @@ class MonthHeader extends StatelessWidget {
       );
     }
 
-    // Desktop/Tablet: Horizontal row
+    // Tablet: Balanced compact design
+    if (isTablet && stats['totalTrades'] > 0) {
+      return Row(
+        children: [
+          Text(
+            monthData?.monthName ?? _getMonthName(month),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          const Spacer(),
+          // All stats in single row
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildIconStat(context, Icons.calendar_today, '${stats['tradeDays']}d', Colors.purple),
+              const SizedBox(width: 8),
+              _buildIconStat(context, Icons.swap_horiz, '${stats['totalTrades']}', Colors.blue),
+              const SizedBox(width: 8),
+              _buildIconStat(
+                context,
+                Icons.percent,
+                '${stats['winRate'].toStringAsFixed(1)}%',
+                stats['winRate'] >= 50 ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              _buildIconStat(
+                context,
+                stats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                '\$${stats['totalPnL'] >= 0 ? '+' : ''}${stats['totalPnL'].toStringAsFixed(0)}',
+                stats['totalPnL'] >= 0 ? Colors.green : Colors.red,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Desktop: Icon-based stats design - all in one row
     return Row(
       children: [
         // Month name
-        Flexible(
-          child: Text(
-            monthData?.monthName ?? _getMonthName(month),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-            overflow: TextOverflow.ellipsis,
-          ),
+        Text(
+          monthData?.monthName ?? _getMonthName(month),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(width: 8),
+        const Spacer(),
         if (stats['totalTrades'] > 0)
-          // Stats badges aligned to the right
-          Flexible(
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                StatBadge(icon: Icons.calendar_today, label: '${stats['tradeDays']} days', color: Colors.purple),
-                StatBadge(icon: Icons.assessment, label: '${stats['totalTrades']} trades', color: Colors.blue),
-                StatBadge(
-                  icon: Icons.trending_up,
-                  label: '${stats['winRate'].toStringAsFixed(1)}%',
-                  color: stats['winRate'] >= 50 ? Colors.green : Colors.orange,
-                ),
-                StatBadge(
-                  icon: stats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                  label: '\$${stats['totalPnL'] >= 0 ? '+' : ''}${stats['totalPnL'].toStringAsFixed(0)}',
-                  color: stats['totalPnL'] >= 0 ? Colors.green : Colors.red,
-                ),
-              ],
-            ),
+          // All stats in single horizontal row
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildIconStat(context, Icons.calendar_today, '${stats['tradeDays']} days', Colors.purple),
+              const SizedBox(width: 10),
+              _buildIconStat(context, Icons.swap_horiz, '${stats['totalTrades']} trades', Colors.blue),
+              const SizedBox(width: 10),
+              _buildIconStat(
+                context,
+                Icons.percent,
+                '${stats['winRate'].toStringAsFixed(1)}%',
+                stats['winRate'] >= 50 ? Colors.green : Colors.orange,
+              ),
+              const SizedBox(width: 10),
+              _buildIconStat(
+                context,
+                stats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                '\$${stats['totalPnL'] >= 0 ? '+' : ''}${stats['totalPnL'].toStringAsFixed(0)}',
+                stats['totalPnL'] >= 0 ? Colors.green : Colors.red,
+              ),
+            ],
           ),
       ],
     );
   }
+
+  /// Build compact stat indicator for mobile
+  Widget _buildCompactStat(BuildContext context, IconData icon, String label, Color color) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 10, color: color.withOpacity(0.7)),
+      const SizedBox(width: 2),
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ],
+  );
+
+  /// Build icon-based stat (no background badge)
+  Widget _buildIconStat(BuildContext context, IconData icon, String label, Color color) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 12, color: color),
+      const SizedBox(width: 4),
+      Text(
+        label,
+        style: TextStyle(fontSize: 11, color: color.withOpacity(0.9), fontWeight: FontWeight.w600),
+      ),
+    ],
+  );
 
   String _getMonthName(int month) {
     const monthNames = [

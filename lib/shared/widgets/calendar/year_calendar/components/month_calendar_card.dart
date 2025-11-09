@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../calendar_types.dart';
+import '../services/calendar_color_service.dart';
 import 'calendar_day_cell.dart';
 import 'month_header.dart';
 
@@ -14,6 +15,7 @@ class MonthCalendarCard extends StatelessWidget {
     this.showWeekdays = true,
     this.compactMode = false,
     this.onDayTap,
+    this.colorService,
   });
 
   final int year;
@@ -22,6 +24,7 @@ class MonthCalendarCard extends StatelessWidget {
   final bool showWeekdays;
   final bool compactMode;
   final Function(DateTime date, CalendarDayData dayData)? onDayTap;
+  final CalendarColorService? colorService;
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +39,18 @@ class MonthCalendarCard extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
 
+    final service = colorService ?? CalendarColorService();
+    final backgroundColor = service.getMonthBackgroundColor(stats);
+    final borderColor = service.getMonthBorderColor(stats);
+
     return Card(
       elevation: 2,
       shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isMobile ? 8 : 12)),
+      color: backgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
+        side: BorderSide(color: borderColor),
+      ),
       child: Padding(
         padding: EdgeInsets.all(isMobile ? 8 : 12),
         child: Column(
@@ -116,6 +127,7 @@ class MonthCalendarCard extends StatelessWidget {
                   month: month,
                   compactMode: compactMode,
                   onTap: onDayTap,
+                  colorService: colorService,
                 ),
               );
             }),

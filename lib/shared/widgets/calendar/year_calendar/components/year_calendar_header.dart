@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../calendar_types.dart';
+import '../models/calendar_color_mode.dart';
+import 'color_mode_selector.dart';
 import 'year_summary_stats.dart';
 
 /// Header component for year calendar with navigation and summary stats
 class YearCalendarHeader extends StatelessWidget {
-  const YearCalendarHeader({required this.year, required this.monthsData, super.key, this.onYearChanged});
+  const YearCalendarHeader({
+    required this.year,
+    required this.monthsData,
+    super.key,
+    this.onYearChanged,
+    this.currentColorMode,
+    this.onColorModeChanged,
+  });
 
   final int year;
   final Map<int, CalendarMonthData> monthsData;
   final Function(int newYear)? onYearChanged;
+  final CalendarColorMode? currentColorMode;
+  final ValueChanged<CalendarColorMode>? onColorModeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +42,24 @@ class YearCalendarHeader extends StatelessWidget {
       // Year navigation
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [_buildYearNavigation(context), _buildCompactLegend(context)],
+        children: [
+          _buildYearNavigation(context),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onColorModeChanged != null && currentColorMode != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ColorModeSelector(
+                    currentMode: currentColorMode!,
+                    onModeChanged: onColorModeChanged!,
+                    compact: true,
+                  ),
+                ),
+              _buildCompactLegend(context),
+            ],
+          ),
+        ],
       ),
       const SizedBox(height: 12),
       // Year summary stats - scrollable
@@ -91,6 +119,16 @@ class YearCalendarHeader extends StatelessWidget {
           // Year summary stats centered in the middle
           YearSummaryStats(yearStats: yearStats, showLegend: false),
           const Spacer(),
+          // Color mode selector (compact)
+          if (onColorModeChanged != null && currentColorMode != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: ColorModeSelector(
+                currentMode: currentColorMode!,
+                onModeChanged: onColorModeChanged!,
+                compact: true,
+              ),
+            ),
           // Legend on the complete right
           _buildLegend(context),
         ],

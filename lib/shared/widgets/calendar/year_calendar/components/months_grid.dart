@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../calendar_types.dart';
+import '../services/calendar_color_service.dart';
 import 'month_calendar_card.dart';
 
 /// Responsive grid of month calendar cards
@@ -12,6 +13,7 @@ class MonthsGrid extends StatelessWidget {
     this.showWeekdays = true,
     this.compactMode = false,
     this.onDayTap,
+    this.colorService,
   });
 
   final int year;
@@ -19,6 +21,7 @@ class MonthsGrid extends StatelessWidget {
   final bool showWeekdays;
   final bool compactMode;
   final Function(DateTime date, CalendarDayData dayData)? onDayTap;
+  final CalendarColorService? colorService;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -59,6 +62,7 @@ class MonthsGrid extends StatelessWidget {
                       showWeekdays: showWeekdays,
                       compactMode: compactMode,
                       onDayTap: onDayTap,
+                      colorService: colorService,
                     ),
                   ),
                 );
