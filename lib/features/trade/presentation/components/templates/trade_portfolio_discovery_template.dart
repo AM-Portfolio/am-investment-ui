@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/trade_portfolio_view_model.dart';
+import '../mobile/trade_portfolio_mobile_card.dart';
+import '../mobile/trade_portfolio_mobile_filter.dart';
+import '../mobile/trade_portfolio_mobile_header.dart';
 
 class TradePortfolioDiscoveryTemplate extends StatefulWidget {
   const TradePortfolioDiscoveryTemplate({
@@ -125,130 +128,77 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
         ? widget.portfolios.fold<double>(0.0, (sum, p) => sum + (p.winRate ?? 0.0)) / widget.portfolios.length
         : 0.0;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
-        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isMobile = constraints.maxWidth < 600;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        // Use mobile-specific header for mobile
+        if (isMobile) {
+          return TradePortfolioMobileHeader(
+            portfolioCount: widget.portfolios.length,
+            totalValue: totalValue,
+            profitableCount: profitableCount,
+            totalTrades: totalTrades,
+            totalNetProfitLoss: totalNetProfitLoss,
+            avgWinRate: avgWinRate,
+            onRefresh: widget.onRefresh,
+          );
+        }
+
+        // Desktop header
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
+            border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+          ),
+          child: Row(
             children: [
-              // Single row layout: Title | Badges | Refresh
+              // Title section on the left
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title section on the left
-                  Row(
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(Icons.dashboard, color: Theme.of(context).colorScheme.primary, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(isMobile ? 5 : 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Icon(
-                          Icons.dashboard,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: isMobile ? 16 : 18,
-                        ),
+                      Text(
+                        'Trade Portfolios',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(width: isMobile ? 6 : 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Trade Portfolios',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: isMobile ? 15 : 18,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '${widget.portfolios.length} portfolio${widget.portfolios.length != 1 ? 's' : ''} available',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                              fontSize: isMobile ? 10 : 11,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      Text(
+                        '${widget.portfolios.length} portfolio${widget.portfolios.length != 1 ? 's' : ''} available',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  SizedBox(width: isMobile ? 8 : 16),
-
-                  // Stats badges in the middle (desktop only) - wrapped in Expanded to constrain width
-                  if (!isMobile)
-                    Expanded(
-                      child: Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          _buildIconStatBadge(
-                            context,
-                            'Total Value',
-                            '\$${totalValue.toStringAsFixed(2)}',
-                            Icons.account_balance_wallet,
-                            Colors.blue,
-                          ),
-                          _buildIconStatBadge(
-                            context,
-                            'Profitable',
-                            '$profitableCount/${widget.portfolios.length}',
-                            Icons.trending_up,
-                            Colors.green,
-                          ),
-                          _buildIconStatBadge(context, 'Total Trades', '$totalTrades', Icons.swap_horiz, Colors.purple),
-                          _buildIconStatBadge(
-                            context,
-                            'Trade P&L',
-                            '${totalNetProfitLoss >= 0 ? '+' : ''}\$${totalNetProfitLoss.toStringAsFixed(2)}',
-                            totalNetProfitLoss >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                            totalNetProfitLoss >= 0 ? Colors.green : Colors.red,
-                          ),
-                          _buildIconStatBadge(
-                            context,
-                            'Avg Win Rate',
-                            '${avgWinRate.toStringAsFixed(1)}%',
-                            Icons.percent,
-                            avgWinRate >= 50 ? Colors.green : Colors.orange,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // Spacer to push refresh button to the right
-                  if (!isMobile && widget.onRefresh != null) const SizedBox(width: 8),
-
-                  // Refresh button on the far right
-                  if (widget.onRefresh != null)
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      tooltip: 'Refresh Portfolios',
-                      iconSize: isMobile ? 18 : 20,
-                      onPressed: widget.onRefresh,
-                      visualDensity: VisualDensity.compact,
-                      color: Theme.of(context).colorScheme.primary,
-                      padding: EdgeInsets.all(isMobile ? 4 : 8),
-                    ),
                 ],
               ),
+              const SizedBox(width: 16),
 
-              // Mobile badges - show below on mobile
-              if (isMobile) ...[
-                const SizedBox(height: 8),
-                Wrap(
+              // Stats badges in the middle - wrapped in Expanded to constrain width
+              Expanded(
+                child: Wrap(
                   spacing: 4,
                   runSpacing: 4,
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     _buildIconStatBadge(
                       context,
@@ -281,11 +231,26 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                     ),
                   ],
                 ),
-              ],
+              ),
+
+              // Spacer to push refresh button to the right
+              if (widget.onRefresh != null) const SizedBox(width: 8),
+
+              // Refresh button on the far right
+              if (widget.onRefresh != null)
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Refresh Portfolios',
+                  iconSize: 20,
+                  onPressed: widget.onRefresh,
+                  visualDensity: VisualDensity.compact,
+                  color: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.all(8),
+                ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -350,168 +315,46 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
         },
       );
 
-  Widget _buildFiltersBar(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    decoration: BoxDecoration(
-      color: Theme.of(context).cardColor,
-      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5))),
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 1))],
-    ),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < 600;
+  Widget _buildFiltersBar(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final isMobile = constraints.maxWidth < 600;
 
-        if (isMobile) {
-          // Mobile: Enhanced stacked layout
-          return Column(
-            children: [
-              // Search field with enhanced styling
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search by name or description...',
-                  hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
-                  prefixIcon: Container(
-                    padding: const EdgeInsets.all(10),
-                    child: Icon(Icons.search, size: 20, color: Theme.of(context).colorScheme.primary),
-                  ),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.clear,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _searchQuery = '';
-                              _currentPage = 0;
-                            });
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  isDense: true,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                    _currentPage = 0;
-                  });
-                },
-              ),
-              const SizedBox(height: 10),
-              // Enhanced filters row
-              Row(
-                children: [
-                  // Sort dropdown with icon
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Icon(Icons.sort, size: 14, color: Theme.of(context).colorScheme.primary),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButton<String>(
-                              value: _sortBy,
-                              underline: const SizedBox(),
-                              isExpanded: true,
-                              icon: Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.primary),
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(fontSize: 13, fontWeight: FontWeight.w500),
-                              items: const [
-                                DropdownMenuItem(value: 'name', child: Text('Name')),
-                                DropdownMenuItem(value: 'value', child: Text('Value')),
-                                DropdownMenuItem(value: 'performance', child: Text('Performance')),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() {
-                                    _sortBy = value;
-                                    _currentPage = 0;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Enhanced profit filter chip
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _showOnlyProfit = !_showOnlyProfit;
-                          _currentPage = 0;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: _showOnlyProfit
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(_showOnlyProfit ? 1 : 0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.trending_up,
-                              size: 16,
-                              color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Profit',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        }
+      // Use mobile-specific filter for mobile
+      if (isMobile) {
+        return TradePortfolioMobileFilter(
+          searchQuery: _searchQuery,
+          sortBy: _sortBy,
+          showOnlyProfit: _showOnlyProfit,
+          onSearchChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+              _currentPage = 0;
+            });
+          },
+          onSortChanged: (value) {
+            setState(() {
+              _sortBy = value;
+              _currentPage = 0;
+            });
+          },
+          onProfitFilterChanged: (value) {
+            setState(() {
+              _showOnlyProfit = value;
+              _currentPage = 0;
+            });
+          },
+        );
+      }
 
-        // Desktop/Tablet: Enhanced horizontal layout
-        return Row(
+      // Desktop filter bar
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5))),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 1))],
+        ),
+        child: Row(
           children: [
             // Enhanced search field
             Expanded(
@@ -683,9 +526,9 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
               ),
             ),
           ],
-        );
-      },
-    ),
+        ),
+      );
+    },
   );
 
   Widget _buildGridView(List<TradePortfolioViewModel> portfolios) => LayoutBuilder(
@@ -742,12 +585,31 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
     final endIndex = (startIndex + _itemsPerPage).clamp(0, portfolios.length);
     final paginatedPortfolios = portfolios.sublist(startIndex, endIndex);
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: paginatedPortfolios.length,
-      itemBuilder: (context, index) {
-        final portfolio = paginatedPortfolios[index];
-        return _buildPortfolioCard(portfolio);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: paginatedPortfolios.length,
+          itemBuilder: (context, index) {
+            final portfolio = paginatedPortfolios[index];
+
+            // Use mobile-specific card for mobile
+            if (isMobile) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TradePortfolioMobileCard(
+                  portfolio: portfolio,
+                  onTap: () => widget.onPortfolioSelected(portfolio),
+                ),
+              );
+            }
+
+            // Desktop card
+            return _buildPortfolioCard(portfolio);
+          },
+        );
       },
     );
   }
