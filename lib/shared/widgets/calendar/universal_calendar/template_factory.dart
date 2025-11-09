@@ -65,35 +65,35 @@ class UniversalCalendarTemplateFactory {
       tag: 'TemplateFactory',
     );
 
-    // Create display template based on configuration
-    final Widget displayTemplate;
-
+    // If showing year calendar, return it directly without layout wrapper
     if (showYearCalendar && yearCalendarData != null && currentYear != null) {
-      AppLogger.info('Using year calendar view', tag: 'TemplateFactory');
-      // Show year calendar without filter template
-      displayTemplate = createDisplayTemplate(
+      AppLogger.info('Returning year calendar view directly (no layout wrapper)', tag: 'TemplateFactory');
+      return createDisplayTemplate(
         config: config,
         currentSelection: currentSelection,
         onSelectionChanged: onSelectionChanged,
         yearCalendarData: yearCalendarData,
         currentYear: currentYear,
       );
-    } else {
-      AppLogger.info('Using filter template view', tag: 'TemplateFactory');
-      // Create filter template for traditional date selection
-      final filterTemplate = createFilterTemplate(
-        config: config,
-        currentSelection: currentSelection,
-        onSelectionChanged: onSelectionChanged,
-      );
-
-      displayTemplate = createDisplayTemplate(
-        config: config,
-        currentSelection: currentSelection,
-        onSelectionChanged: onSelectionChanged,
-        customContent: filterTemplate,
-      );
     }
+
+    // Create display template based on configuration
+    final Widget displayTemplate;
+
+    AppLogger.info('Using filter template view with layout wrapper', tag: 'TemplateFactory');
+    // Create filter template for traditional date selection
+    final filterTemplate = createFilterTemplate(
+      config: config,
+      currentSelection: currentSelection,
+      onSelectionChanged: onSelectionChanged,
+    );
+
+    displayTemplate = createDisplayTemplate(
+      config: config,
+      currentSelection: currentSelection,
+      onSelectionChanged: onSelectionChanged,
+      customContent: filterTemplate,
+    );
 
     return CalendarLayoutTemplate(
       config: config.layoutConfig,

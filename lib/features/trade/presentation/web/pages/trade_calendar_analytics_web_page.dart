@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/calendar_types.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/data_provider.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
+import '../../../../../shared/widgets/calendar/year_calendar/year_calendar_converter.dart';
 import '../../../trade_calendar_providers.dart';
 import '../../cubit/trade_calendar_cubit.dart';
 import '../../cubit/trade_calendar_state.dart';
@@ -52,8 +53,6 @@ class TradeCalendarAnalyticsWebPage extends ConsumerStatefulWidget {
 
 class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAnalyticsWebPage>
     with TickerProviderStateMixin {
-  bool _isCalendarExpanded = true;
-
   // Year selection
   late int _selectedYear;
 
@@ -81,6 +80,21 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
 
   /// Handle date selection changes through Cubit
   void _onDateSelectionChanged(DateSelection selection, TradeCalendarCubit cubit) {
+    // Check if this is a year change event
+    final isYearChange = selection.metadata?['yearChange'] == true;
+
+    if (isYearChange) {
+      final newYear = selection.metadata?['year'] as int?;
+      if (newYear != null && newYear != _selectedYear) {
+        setState(() {
+          _selectedYear = newYear;
+        });
+        // Navigate to the new year
+        cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: newYear);
+        return;
+      }
+    }
+
     // Apply filter through Cubit
     cubit.applyDateFilter(userId: widget.userId, portfolioId: widget.portfolioId, dateSelection: selection);
 
@@ -135,22 +149,9 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
 
   /// Build enhanced app bar with actions
   PreferredSizeWidget _buildAppBar(BuildContext context, TradeCalendarCubit cubit) => AppBar(
-    title: const Text('Trade Calendar Analytics'),
+    toolbarHeight: 0, // Hide the app bar
     elevation: 0,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    foregroundColor: Theme.of(context).colorScheme.onSurface,
-    actions: [
-      IconButton(
-        icon: Icon(_isCalendarExpanded ? Icons.compress : Icons.expand),
-        onPressed: () {
-          setState(() {
-            _isCalendarExpanded = !_isCalendarExpanded;
-          });
-        },
-        tooltip: _isCalendarExpanded ? 'Collapse Calendar' : 'Expand Calendar',
-      ),
-      const SizedBox(width: 8),
-    ],
   );
 
   /// Build loading state with progress indication
@@ -176,10 +177,19 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
   );
 
   /// Build main content with universal calendar integration
-  Widget _buildMainContent(BuildContext context, TradeCalendarViewModel viewModel, TradeCalendarCubit cubit) => Padding(
-    padding: const EdgeInsets.all(16),
-    child: Card(
-      elevation: 2,
+  Widget _buildMainContent(BuildContext context, TradeCalendarViewModel viewModel, TradeCalendarCubit cubit) {
+    // Convert entity data to year calendar data using selected year
+    final entityData = cubit.currentEntityData;
+    final yearCalendarData = entityData != null
+        ? YearCalendarConverter.convertToMonthsData(
+            entity: entityData,
+            portfolioId: widget.portfolioId,
+            year: _selectedYear,
+          )
+        : null;
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: UniversalCalendarWidget(
         onDateSelectionChanged: (selection) => _onDateSelectionChanged(selection, cubit),
         context: 'trade_analytics',
@@ -190,9 +200,12 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
           portfolioId: widget.portfolioId,
           mockData: _buildMockDataFromViewModel(cubit.currentViewModel),
         ),
+        yearCalendarData: yearCalendarData,
+        currentYear: _selectedYear,
+        showYearCalendar: true,
       ),
-    ),
-  );
+    );
+  }
 
   /// Build filtering state with overlay
   Widget _buildFilteringState(BuildContext context, TradeCalendarViewModel viewModel, TradeCalendarCubit cubit) =>

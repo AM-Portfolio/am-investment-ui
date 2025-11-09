@@ -30,16 +30,12 @@ class CalendarDisplayTemplate extends StatelessWidget {
   Widget build(BuildContext context) {
     AppLogger.debug(
       'CalendarDisplayTemplate building - hasCustomContent: ${customContent != null}, '
-      'hasYearData: ${yearCalendarData != null}, year: $currentYear',
+      'hasYearData: ${yearCalendarData != null}, year: $currentYear, '
+      'monthsCount: ${yearCalendarData?.length ?? 0}',
       tag: 'CalendarDisplayTemplate',
     );
 
-    if (customContent != null) {
-      AppLogger.debug('Using custom content', tag: 'CalendarDisplayTemplate');
-      return customContent!;
-    }
-
-    // If year calendar data is provided, show year calendar
+    // Priority 1: If year calendar data is provided, show year calendar FIRST
     if (yearCalendarData != null && currentYear != null) {
       AppLogger.info(
         'Displaying year calendar for $currentYear with ${yearCalendarData!.length} months',
@@ -48,7 +44,13 @@ class CalendarDisplayTemplate extends StatelessWidget {
       return _buildYearCalendar(context);
     }
 
-    // Otherwise show a placeholder
+    // Priority 2: If custom content provided, show it
+    if (customContent != null) {
+      AppLogger.debug('Using custom content (filter template)', tag: 'CalendarDisplayTemplate');
+      return customContent!;
+    }
+
+    // Priority 3: Show placeholder
     AppLogger.warning('No calendar data available', tag: 'CalendarDisplayTemplate');
     return _buildPlaceholder(context);
   }
@@ -80,6 +82,19 @@ class CalendarDisplayTemplate extends StatelessWidget {
           onSelectionChanged(selection);
         },
       ),
+      onYearChanged: (newYear) {
+        AppLogger.info('Year changed to: $newYear', tag: 'CalendarDisplayTemplate');
+
+        // Notify parent about year change through selection callback
+        final selection = DateSelection(
+          startDate: DateTime(newYear),
+          endDate: DateTime(newYear, 12, 31),
+          description: 'Year: $newYear',
+          filterType: DateFilterMode.custom,
+          metadata: {'yearChange': true, 'year': newYear},
+        );
+        onSelectionChanged(selection);
+      },
     );
   }
 
