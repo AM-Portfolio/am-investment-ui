@@ -64,17 +64,19 @@ class CalendarDayCell extends StatelessWidget {
 
     // Add tooltip with trade details on hover
     if (hasData && dayData != null) {
-      final status = dayData!.status == TradeDayStatus.win
-          ? 'Win'
+      // Determine win rate based on status
+      final winRate = dayData!.status == TradeDayStatus.win
+          ? 100.0
           : dayData!.status == TradeDayStatus.loss
-          ? 'Loss'
-          : 'Breakeven';
+          ? 0.0
+          : 50.0; // breakeven
 
       return Tooltip(
         message:
             '${dayData!.date.day} ${_getMonthName(month)}\n'
-            '${dayData!.tradeCount} trade${dayData!.tradeCount > 1 ? 's' : ''} • $status\n'
-            'P&L: \$${dayData!.pnl.toStringAsFixed(2)}',
+            'Trades: ${dayData!.tradeCount}\n'
+            'Win Rate: ${winRate.toStringAsFixed(0)}%\n'
+            'P&L: \$${dayData!.pnl >= 0 ? '+' : ''}${dayData!.pnl.toStringAsFixed(2)}',
         preferBelow: false,
         verticalOffset: 20,
         decoration: BoxDecoration(
