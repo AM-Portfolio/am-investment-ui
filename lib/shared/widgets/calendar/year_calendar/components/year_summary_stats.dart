@@ -4,9 +4,10 @@ import 'calendar_legend.dart';
 
 /// Year summary statistics component
 class YearSummaryStats extends StatelessWidget {
-  const YearSummaryStats({required this.yearStats, super.key});
+  const YearSummaryStats({required this.yearStats, super.key, this.showLegend = true});
 
   final Map<String, dynamic> yearStats;
+  final bool showLegend;
 
   @override
   Widget build(BuildContext context) => Wrap(
@@ -29,8 +30,8 @@ class YearSummaryStats extends StatelessWidget {
         yearStats['totalPnL'] >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
         yearStats['totalPnL'] >= 0 ? Colors.green : Colors.red,
       ),
-      // Legend
-      const CalendarLegend(),
+      // Legend (optional)
+      if (showLegend) const CalendarLegend(),
     ],
   );
 

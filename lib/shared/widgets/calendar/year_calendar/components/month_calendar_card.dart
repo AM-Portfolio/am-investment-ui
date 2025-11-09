@@ -33,19 +33,22 @@ class MonthCalendarCard extends StatelessWidget {
     // Calculate month statistics
     final stats = _calculateMonthStats(monthData);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     return Card(
       elevation: 2,
       shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isMobile ? 8 : 12)),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(isMobile ? 8 : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             // Month header with stats
             MonthHeader(month: month, monthData: monthData, stats: stats),
-            const SizedBox(height: 10),
+            SizedBox(height: isMobile ? 6 : 10),
 
             // Weekday headers
             if (showWeekdays) ...[_buildWeekdayHeaders(context), const SizedBox(height: 4)],
