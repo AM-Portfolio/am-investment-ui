@@ -90,20 +90,36 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           : null,
       body: Row(
         children: [
-          // Left sidebar for desktop only
+          // Left sidebar for desktop only with responsive width
           if (!isMobile)
-            Container(
-              width: 280,
-              decoration: BoxDecoration(
-                border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
-                color: Theme.of(context).cardColor,
-              ),
-              child: TradeSidebar(
-                selectedView: _selectedView,
-                onViewChanged: _onViewChanged,
-                currentPortfolioId: _currentPortfolioId,
-                currentPortfolioName: _currentPortfolioName,
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate responsive sidebar width based on screen width
+                final screenWidth = MediaQuery.of(context).size.width;
+                double sidebarWidth;
+
+                if (screenWidth < 1000) {
+                  sidebarWidth = 60; // Icon-only mode
+                } else if (screenWidth < 1400) {
+                  sidebarWidth = 150; // Condensed mode
+                } else {
+                  sidebarWidth = 280; // Full mode
+                }
+
+                return Container(
+                  width: sidebarWidth,
+                  decoration: BoxDecoration(
+                    border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
+                    color: Theme.of(context).cardColor,
+                  ),
+                  child: TradeSidebar(
+                    selectedView: _selectedView,
+                    onViewChanged: _onViewChanged,
+                    currentPortfolioId: _currentPortfolioId,
+                    currentPortfolioName: _currentPortfolioName,
+                  ),
+                );
+              },
             ),
 
           // Main content area
@@ -119,10 +135,12 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     final isMobile = screenWidth < 800;
 
     var title = 'Trade Analysis';
+    var showTitle = true;
 
     switch (_selectedView) {
       case TradeViewType.portfolios:
         title = 'Portfolio Discovery';
+        showTitle = false; // Hide title for portfolios view - title is in the content
         break;
       case TradeViewType.holdings:
         title = _currentPortfolioName != null
@@ -138,86 +156,96 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
     return AppBar(
       // Automatically shows menu button on mobile when drawer is present
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(title, overflow: TextOverflow.ellipsis, style: isMobile ? const TextStyle(fontSize: 16) : null),
-          ),
-        ],
-      ),
+      toolbarHeight: showTitle ? kToolbarHeight : 0, // Hide app bar completely when no title
+      title: showTitle
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: isMobile ? const TextStyle(fontSize: 16) : null,
+                  ),
+                ),
+              ],
+            )
+          : null,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
-      actions: [
-        // Back to portfolios button (when portfolio is selected)
-        if (_currentPortfolioId != null && _selectedView != TradeViewType.portfolios)
-          isMobile
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  tooltip: 'Back to Portfolios',
-                  onPressed: () {
-                    setState(() {
-                      _selectedView = TradeViewType.portfolios;
-                      _currentPortfolioId = null;
-                      _currentPortfolioName = null;
-                    });
-                  },
-                )
-              : TextButton.icon(
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back to Portfolios'),
-                  onPressed: () {
-                    setState(() {
-                      _selectedView = TradeViewType.portfolios;
-                      _currentPortfolioId = null;
-                      _currentPortfolioName = null;
-                    });
-                  },
+      actions: showTitle
+          ? [
+              // Back to portfolios button (when portfolio is selected)
+              if (_currentPortfolioId != null && _selectedView != TradeViewType.portfolios)
+                isMobile
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        tooltip: 'Back to Portfolios',
+                        onPressed: () {
+                          setState(() {
+                            _selectedView = TradeViewType.portfolios;
+                            _currentPortfolioId = null;
+                            _currentPortfolioName = null;
+                          });
+                        },
+                      )
+                    : TextButton.icon(
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Back to Portfolios'),
+                        onPressed: () {
+                          setState(() {
+                            _selectedView = TradeViewType.portfolios;
+                            _currentPortfolioId = null;
+                            _currentPortfolioName = null;
+                          });
+                        },
+                      ),
+
+              // Refresh button - hidden for portfolios view (refresh is in the content header)
+              if (_selectedView != TradeViewType.portfolios)
+                Consumer(
+                  builder: (context, ref, child) => IconButton(
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh Data',
+                    onPressed: () {
+                      AppLogger.info('Refreshing trade data for view: $_selectedView', tag: 'TradeWebScreen');
+
+                      // Invalidate relevant providers based on current view
+                      switch (_selectedView) {
+                        case TradeViewType.portfolios:
+                          ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+                          break;
+                        case TradeViewType.holdings:
+                          if (_currentPortfolioId != null) {
+                            final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
+                            ref.invalidate(tradeHoldingsStreamProvider(params));
+                            ref.invalidate(tradeSummaryStreamProvider(params));
+                          }
+                          break;
+                        case TradeViewType.calendar:
+                          if (_currentPortfolioId != null) {
+                            final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
+                            ref.invalidate(tradeCalendarStreamProvider(params));
+                          }
+                          break;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Refreshing ${_selectedView.name} data...'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
                 ),
 
-        // Refresh button
-        Consumer(
-          builder: (context, ref, child) => IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Data',
-            onPressed: () {
-              AppLogger.info('Refreshing trade data for view: $_selectedView', tag: 'TradeWebScreen');
-
-              // Invalidate relevant providers based on current view
-              switch (_selectedView) {
-                case TradeViewType.portfolios:
-                  ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
-                  break;
-                case TradeViewType.holdings:
-                  if (_currentPortfolioId != null) {
-                    final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
-                    ref.invalidate(tradeHoldingsStreamProvider(params));
-                    ref.invalidate(tradeSummaryStreamProvider(params));
-                  }
-                  break;
-                case TradeViewType.calendar:
-                  if (_currentPortfolioId != null) {
-                    final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
-                    ref.invalidate(tradeCalendarStreamProvider(params));
-                  }
-                  break;
-              }
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Refreshing ${_selectedView.name} data...'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-        ),
-
-        const SizedBox(width: 8),
-      ],
+              const SizedBox(width: 8),
+            ]
+          : null,
     );
   }
 

@@ -126,90 +126,162 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
         : 0.0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
         border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxWidth < 800;
+          final isMobile = constraints.maxWidth < 600;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title row
+              // Single row layout: Title | Badges | Refresh
               Row(
                 children: [
-                  Icon(Icons.dashboard, color: Theme.of(context).colorScheme.primary, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Trade Portfolios (${widget.portfolios.length})',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Metrics - wrap on small screens
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  // Portfolio Metrics
-                  _buildCompactStatCard(
-                    context,
-                    'Total Value',
-                    '\$${totalValue.toStringAsFixed(2)}',
-                    Icons.account_balance_wallet,
-                    Colors.blue,
-                  ),
-                  _buildCompactStatCard(
-                    context,
-                    'Profitable',
-                    '$profitableCount/${widget.portfolios.length}',
-                    Icons.check_circle_outline,
-                    Colors.green,
-                  ),
-                  if (!isCompact) ...[
-                    const SizedBox(width: 4),
-                    Container(
-                      height: 40,
-                      width: 2,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Theme.of(context).dividerColor.withOpacity(0.2),
-                            Theme.of(context).dividerColor,
-                            Theme.of(context).dividerColor.withOpacity(0.2),
-                          ],
+                  // Title section on the left
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(isMobile ? 5 : 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.dashboard,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: isMobile ? 16 : 18,
                         ),
                       ),
+                      SizedBox(width: isMobile ? 6 : 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Trade Portfolios',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: isMobile ? 15 : 18,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '${widget.portfolios.length} portfolio${widget.portfolios.length != 1 ? 's' : ''} available',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              fontSize: isMobile ? 10 : 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: isMobile ? 8 : 16),
+
+                  // Stats badges in the middle (desktop only) - wrapped in Expanded to constrain width
+                  if (!isMobile)
+                    Expanded(
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _buildIconStatBadge(
+                            context,
+                            'Total Value',
+                            '\$${totalValue.toStringAsFixed(2)}',
+                            Icons.account_balance_wallet,
+                            Colors.blue,
+                          ),
+                          _buildIconStatBadge(
+                            context,
+                            'Profitable',
+                            '$profitableCount/${widget.portfolios.length}',
+                            Icons.trending_up,
+                            Colors.green,
+                          ),
+                          _buildIconStatBadge(context, 'Total Trades', '$totalTrades', Icons.swap_horiz, Colors.purple),
+                          _buildIconStatBadge(
+                            context,
+                            'Trade P&L',
+                            '${totalNetProfitLoss >= 0 ? '+' : ''}\$${totalNetProfitLoss.toStringAsFixed(2)}',
+                            totalNetProfitLoss >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                            totalNetProfitLoss >= 0 ? Colors.green : Colors.red,
+                          ),
+                          _buildIconStatBadge(
+                            context,
+                            'Avg Win Rate',
+                            '${avgWinRate.toStringAsFixed(1)}%',
+                            Icons.percent,
+                            avgWinRate >= 50 ? Colors.green : Colors.orange,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 4),
-                  ],
-                  // Trade Metrics
-                  _buildCompactStatCard(context, 'Total Trades', '$totalTrades', Icons.swap_horiz, Colors.purple),
-                  _buildCompactStatCard(
-                    context,
-                    'Trade P&L',
-                    '${totalNetProfitLoss >= 0 ? '+' : ''}\$${totalNetProfitLoss.toStringAsFixed(2)}',
-                    totalNetProfitLoss >= 0 ? Icons.trending_up : Icons.trending_down,
-                    totalNetProfitLoss >= 0 ? Colors.green : Colors.red,
-                  ),
-                  _buildCompactStatCard(
-                    context,
-                    'Avg Win Rate',
-                    '${avgWinRate.toStringAsFixed(1)}%',
-                    Icons.analytics,
-                    avgWinRate >= 50 ? Colors.green : Colors.orange,
-                  ),
+
+                  // Spacer to push refresh button to the right
+                  if (!isMobile && widget.onRefresh != null) const SizedBox(width: 8),
+
+                  // Refresh button on the far right
+                  if (widget.onRefresh != null)
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      tooltip: 'Refresh Portfolios',
+                      iconSize: isMobile ? 18 : 20,
+                      onPressed: widget.onRefresh,
+                      visualDensity: VisualDensity.compact,
+                      color: Theme.of(context).colorScheme.primary,
+                      padding: EdgeInsets.all(isMobile ? 4 : 8),
+                    ),
                 ],
               ),
+
+              // Mobile badges - show below on mobile
+              if (isMobile) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    _buildIconStatBadge(
+                      context,
+                      'Total Value',
+                      '\$${totalValue.toStringAsFixed(2)}',
+                      Icons.account_balance_wallet,
+                      Colors.blue,
+                    ),
+                    _buildIconStatBadge(
+                      context,
+                      'Profitable',
+                      '$profitableCount/${widget.portfolios.length}',
+                      Icons.trending_up,
+                      Colors.green,
+                    ),
+                    _buildIconStatBadge(context, 'Total Trades', '$totalTrades', Icons.swap_horiz, Colors.purple),
+                    _buildIconStatBadge(
+                      context,
+                      'Trade P&L',
+                      '${totalNetProfitLoss >= 0 ? '+' : ''}\$${totalNetProfitLoss.toStringAsFixed(2)}',
+                      totalNetProfitLoss >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                      totalNetProfitLoss >= 0 ? Colors.green : Colors.red,
+                    ),
+                    _buildIconStatBadge(
+                      context,
+                      'Avg Win Rate',
+                      '${avgWinRate.toStringAsFixed(1)}%',
+                      Icons.percent,
+                      avgWinRate >= 50 ? Colors.green : Colors.orange,
+                    ),
+                  ],
+                ),
+              ],
             ],
           );
         },
@@ -217,129 +289,402 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
     );
   }
 
-  Widget _buildCompactStatCard(BuildContext context, String label, String value, IconData icon, Color color) =>
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        constraints: const BoxConstraints(minWidth: 100),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 16),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                      fontSize: 10,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: color, fontSize: 13),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+  /// Compact icon-based stat badge
+  Widget _buildIconStatBadge(BuildContext context, String label, String value, IconData icon, Color color) =>
+      LayoutBuilder(
+        builder: (context, constraints) {
+          // Detect if we're in a mobile context (constrained width)
+          final isVeryCompact = constraints.maxWidth < 140;
+
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: isVeryCompact ? 6 : 8, vertical: isVeryCompact ? 6 : 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: color.withOpacity(0.15)),
+              boxShadow: [BoxShadow(color: color.withOpacity(0.05), blurRadius: 2, offset: const Offset(0, 1))],
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isVeryCompact ? 4 : 5),
+                  decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(4)),
+                  child: Icon(icon, color: color, size: isVeryCompact ? 12 : 14),
+                ),
+                SizedBox(width: isVeryCompact ? 4 : 6),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: isVeryCompact ? 9 : 10,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        value,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                          fontSize: isVeryCompact ? 11 : 13,
+                          height: 1.2,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       );
 
   Widget _buildFiltersBar(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     decoration: BoxDecoration(
       color: Theme.of(context).cardColor,
-      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5))),
+      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 1))],
     ),
-    child: Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: SizedBox(
-            height: 40,
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search portfolios...',
-                hintStyle: const TextStyle(fontSize: 14),
-                prefixIcon: const Icon(Icons.search, size: 20),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                isDense: true,
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+
+        if (isMobile) {
+          // Mobile: Enhanced stacked layout
+          return Column(
+            children: [
+              // Search field with enhanced styling
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search by name or description...',
+                  hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                  prefixIcon: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(Icons.search, size: 20, color: Theme.of(context).colorScheme.primary),
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _currentPage = 0;
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  isDense: true,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                    _currentPage = 0;
+                  });
+                },
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                  _currentPage = 0; // Reset to first page when searching
-                });
-              },
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: DropdownButton<String>(
-            value: _sortBy,
-            underline: const SizedBox(),
-            icon: const Icon(Icons.arrow_drop_down, size: 20),
-            style: Theme.of(context).textTheme.bodyMedium,
-            items: const [
-              DropdownMenuItem(value: 'name', child: Text('Name')),
-              DropdownMenuItem(value: 'value', child: Text('Value')),
-              DropdownMenuItem(value: 'performance', child: Text('Performance')),
+              const SizedBox(height: 10),
+              // Enhanced filters row
+              Row(
+                children: [
+                  // Sort dropdown with icon
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Icon(Icons.sort, size: 14, color: Theme.of(context).colorScheme.primary),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButton<String>(
+                              value: _sortBy,
+                              underline: const SizedBox(),
+                              isExpanded: true,
+                              icon: Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.primary),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(fontSize: 13, fontWeight: FontWeight.w500),
+                              items: const [
+                                DropdownMenuItem(value: 'name', child: Text('Name')),
+                                DropdownMenuItem(value: 'value', child: Text('Value')),
+                                DropdownMenuItem(value: 'performance', child: Text('Performance')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _sortBy = value;
+                                    _currentPage = 0;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Enhanced profit filter chip
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _showOnlyProfit = !_showOnlyProfit;
+                          _currentPage = 0;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _showOnlyProfit
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(_showOnlyProfit ? 1 : 0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.trending_up,
+                              size: 16,
+                              color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Profit',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _sortBy = value;
-                  _currentPage = 0; // Reset to first page when sorting
-                });
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
-        FilterChip(
-          label: const Text('Profitable', style: TextStyle(fontSize: 13)),
-          selected: _showOnlyProfit,
-          onSelected: (value) {
-            setState(() {
-              _showOnlyProfit = value;
-              _currentPage = 0; // Reset to first page when filtering
-            });
-          },
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          visualDensity: VisualDensity.compact,
-        ),
-        if (widget.onRefresh != null) ...[
-          const SizedBox(width: 12),
-          IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
-            tooltip: 'Refresh',
-            onPressed: widget.onRefresh,
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
-      ],
+          );
+        }
+
+        // Desktop/Tablet: Enhanced horizontal layout
+        return Row(
+          children: [
+            // Enhanced search field
+            Expanded(
+              flex: 3,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search portfolios by name or description...',
+                  hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                  prefixIcon: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(Icons.search, size: 20, color: Theme.of(context).colorScheme.primary),
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _currentPage = 0;
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  isDense: true,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                    _currentPage = 0;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Enhanced sort dropdown
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(Icons.sort, size: 16, color: Theme.of(context).colorScheme.primary),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButton<String>(
+                    value: _sortBy,
+                    underline: const SizedBox(),
+                    icon: Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.primary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500, fontSize: 13),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'name',
+                        child: Row(
+                          children: [
+                            Icon(Icons.sort_by_alpha, size: 16),
+                            SizedBox(width: 8),
+                            Text('Name', style: TextStyle(fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'value',
+                        child: Row(
+                          children: [
+                            Icon(Icons.attach_money, size: 16),
+                            SizedBox(width: 8),
+                            Text('Value', style: TextStyle(fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'performance',
+                        child: Row(
+                          children: [
+                            Icon(Icons.trending_up, size: 16),
+                            SizedBox(width: 8),
+                            Text('Performance', style: TextStyle(fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _sortBy = value;
+                          _currentPage = 0;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Enhanced profit filter chip
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _showOnlyProfit = !_showOnlyProfit;
+                    _currentPage = 0;
+                  });
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _showOnlyProfit
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(_showOnlyProfit ? 1 : 0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: _showOnlyProfit
+                        ? [
+                            BoxShadow(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.trending_up,
+                        size: 18,
+                        color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Profitable Only',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _showOnlyProfit ? Colors.white : Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     ),
   );
 
@@ -414,18 +759,18 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
         : 'N/A';
 
     return Card(
-      elevation: 3,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: isPositive ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3), width: 1.5),
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: isPositive ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         onTap: () => widget.onPortfolioSelected(portfolio),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Responsive padding based on card width
-            final padding = constraints.maxWidth < 250 ? 12.0 : 16.0;
+            // Compact padding
+            final padding = constraints.maxWidth < 250 ? 10.0 : 12.0;
 
             return Padding(
               padding: EdgeInsets.all(padding),
@@ -435,7 +780,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -444,14 +789,14 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                 ? [Colors.green.withOpacity(0.15), Colors.green.withOpacity(0.05)]
                                 : [Colors.red.withOpacity(0.15), Colors.red.withOpacity(0.05)],
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isPositive ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
                           ),
                         ),
-                        child: Icon(Icons.assessment, color: isPositive ? Colors.green : Colors.red, size: 26),
+                        child: Icon(Icons.assessment, color: isPositive ? Colors.green : Colors.red, size: 20),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -461,35 +806,35 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                 Flexible(
                                   child: Text(
                                     portfolio.displayName,
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 4),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                   decoration: BoxDecoration(
                                     color: Colors.purple.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
+                                    borderRadius: BorderRadius.circular(3),
                                     border: Border.all(color: Colors.purple.withOpacity(0.3)),
                                   ),
                                   child: Text(
                                     'TRADE',
                                     style: TextStyle(
-                                      fontSize: 9,
+                                      fontSize: 8,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.purple[700],
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 0.3,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 1),
                             Text(
                               '${portfolio.displayHoldingsCount} • Updated $formattedDate',
-                              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                             ),
                           ],
                         ),
@@ -497,16 +842,16 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                     ],
                   ),
                   if (portfolio.description != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       portfolio.description!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
                     ),
                   ],
-                  const Divider(height: 16),
-                  // Trade Metrics Section - Always visible for trade portfolios
+                  const Divider(height: 12),
+                  // Trade Metrics Section - Compact
                   LayoutBuilder(
                     builder: (context, metricsConstraints) {
                       // Use column layout if width is very small
@@ -514,12 +859,12 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
 
                       return Container(
                         padding: EdgeInsets.symmetric(
-                          vertical: useColumnLayout ? 8 : 12,
-                          horizontal: useColumnLayout ? 6 : 8,
+                          vertical: useColumnLayout ? 6 : 8,
+                          horizontal: useColumnLayout ? 4 : 6,
                         ),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1)),
                         ),
                         child: useColumnLayout
@@ -532,7 +877,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                     Icons.swap_horiz,
                                     Colors.purple,
                                   ),
-                                  Divider(height: 12, color: Theme.of(context).dividerColor),
+                                  Divider(height: 8, color: Theme.of(context).dividerColor),
                                   _buildCompactMetric(
                                     context,
                                     'Net P&L',
@@ -540,7 +885,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                     portfolio.isTradeProfit ? Icons.trending_up : Icons.trending_down,
                                     portfolio.isTradeProfit ? Colors.green : Colors.red,
                                   ),
-                                  Divider(height: 12, color: Theme.of(context).dividerColor),
+                                  Divider(height: 8, color: Theme.of(context).dividerColor),
                                   _buildCompactMetric(
                                     context,
                                     'Win Rate',
@@ -560,7 +905,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                     Icons.swap_horiz,
                                     Colors.purple,
                                   ),
-                                  Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
+                                  Container(width: 1, height: 30, color: Theme.of(context).dividerColor),
                                   _buildCompactMetric(
                                     context,
                                     'Net P&L',
@@ -568,7 +913,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
                                     portfolio.isTradeProfit ? Icons.trending_up : Icons.trending_down,
                                     portfolio.isTradeProfit ? Colors.green : Colors.red,
                                   ),
-                                  Container(width: 1, height: 40, color: Theme.of(context).dividerColor),
+                                  Container(width: 1, height: 30, color: Theme.of(context).dividerColor),
                                   _buildCompactMetric(
                                     context,
                                     'Win Rate',
@@ -655,7 +1000,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
 
   Widget _buildCompactMetric(BuildContext context, String label, String value, IconData icon, Color color) => Flexible(
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -663,21 +1008,21 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 4),
+              Icon(icon, color: color, size: 12),
+              const SizedBox(width: 3),
               Flexible(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 10, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 9, color: Colors.grey[600], fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             value,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -691,20 +1036,20 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
     final totalPages = (totalItems / _itemsPerPage).ceil();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, -2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, -1))],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Page info
+          // Page info (compact)
           Text(
             'Page ${_currentPage + 1} of $totalPages ($totalItems portfolios)',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontWeight: FontWeight.w500,
             ),
