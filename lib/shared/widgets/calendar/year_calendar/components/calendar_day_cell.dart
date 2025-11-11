@@ -39,6 +39,12 @@ class CalendarDayCell extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: hasData && onTap != null ? () => onTap!(dayData!.date, dayData!) : null,
+        onLongPress: hasData
+            ? () {
+                // On mobile, show tooltip on long press by triggering it programmatically
+                // This is handled by wrapping with Tooltip widget below
+              }
+            : null,
         borderRadius: BorderRadius.circular(4),
         hoverColor: hasData ? service.getDayColor(dayData!, opacity: 0.25) : Colors.grey.withOpacity(0.05),
         child: Container(
@@ -62,7 +68,7 @@ class CalendarDayCell extends StatelessWidget {
       ),
     );
 
-    // Add tooltip with trade details on hover
+    // Add tooltip with trade details on hover (web) and long-press (mobile)
     if (hasData && dayData != null) {
       // Determine win rate based on status
       final winRate = dayData!.status == TradeDayStatus.win
@@ -76,9 +82,12 @@ class CalendarDayCell extends StatelessWidget {
             '${dayData!.date.day} ${_getMonthName(month)}\n'
             'Trades: ${dayData!.tradeCount}\n'
             'Win Rate: ${winRate.toStringAsFixed(0)}%\n'
-            'P&L: \$${dayData!.pnl >= 0 ? '+' : ''}${dayData!.pnl.toStringAsFixed(2)}',
+            'P&L: ₹${dayData!.pnl >= 0 ? '+' : ''}${dayData!.pnl.toStringAsFixed(2)}',
         preferBelow: false,
         verticalOffset: 20,
+        waitDuration: const Duration(milliseconds: 300), // Show faster on mobile
+        showDuration: const Duration(seconds: 3), // Keep visible longer
+        triggerMode: TooltipTriggerMode.longPress, // Explicit long-press for mobile
         decoration: BoxDecoration(
           color: Colors.grey[900],
           borderRadius: BorderRadius.circular(8),

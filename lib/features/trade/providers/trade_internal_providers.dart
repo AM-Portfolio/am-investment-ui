@@ -148,3 +148,14 @@ final tradeCalendarStreamProvider =
       final useCase = ref.watch(_getTradeCalendarProvider);
       return useCase.watch(params.userId, params.portfolioId).map(TradeCalendarViewModel.fromEntity);
     });
+
+/// Provider for trade calendar by month - returns view model
+final tradeCalendarByMonthProvider =
+    FutureProvider.family<TradeCalendarViewModel, ({String userId, String portfolioId, int year, int month})>((
+      ref,
+      params,
+    ) async {
+      final useCase = ref.watch(getTradeCalendarByMonthProvider);
+      final result = await useCase(params.userId, params.portfolioId, year: params.year, month: params.month);
+      return TradeCalendarViewModel.fromEntity(result);
+    });
