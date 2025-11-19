@@ -100,9 +100,126 @@
                 }
             }
         ],
-        "psychologyData": {},
-        "entryReasoning": {},
-        "exitReasoning": {},
+        "psychologyData": {
+            "entryPsychologyFactors": [
+                "FOLLOWING_THE_PLAN",
+                "DISCIPLINED"
+            ],
+            "exitPsychologyFactors": [
+                "DISCIPLINE",
+                "TAKING_PROFITS"
+            ],
+            "behaviorPatterns": [
+                "DISCIPLINED_EXECUTION"
+            ],
+            "categorizedTags": {
+                "STRATEGY": [
+                    "Momentum Trading",
+                    "Breakout Strategy",
+                    "Flag Pattern"
+                ],
+                "MARKET_CONDITION": [
+                    "Bullish Trend",
+                    "High Volume",
+                    "Strong Momentum"
+                ],
+                "SETUP_TYPE": [
+                    "Flag Pattern",
+                    "Breakout",
+                    "EMA Crossover"
+                ],
+                "TIME_FRAME": [
+                    "15 Minutes",
+                    "30 Minutes",
+                    "Intraday"
+                ],
+                "RISK_LEVEL": [
+                    "Medium Risk",
+                    "2.5:1 RR"
+                ],
+                "SECTOR": [
+                    "Index",
+                    "Nifty"
+                ],
+                "TECHNICAL_PATTERN": [
+                    "Bullish Flag",
+                    "MACD Crossover",
+                    "EMA Crossover",
+                    "RSI Momentum"
+                ],
+                "FUNDAMENTAL_FACTOR": [
+                    "GDP Growth",
+                    "FII Buying"
+                ],
+                "SENTIMENT": [
+                    "Bullish",
+                    "Positive Market Sentiment"
+                ],
+                "PERFORMANCE": [
+                    "Win",
+                    "Target Achieved",
+                    "Perfect Execution"
+                ]
+            },
+            "psychologyNotes": "Felt confident after confirming the bullish trend with multiple indicators. Stuck to predetermined entry and exit levels. Morning preparation and pre-market analysis helped in maintaining composure. No FOMO, no greed at exit. Emotional discipline maintained throughout. Entry was planned based on pre-market analysis. Exit was executed perfectly at resistance without hesitation or greed to hold longer."
+        },
+        "entryReasoning": {
+            "technicalReasons": [
+                "TREND_FOLLOWING",
+                "RESISTANCE_BREAKOUT",
+                "MOVING_AVERAGE_CROSSOVER",
+                "MACD_SIGNAL",
+                "VOLUME_SPIKE",
+                "CHART_PATTERN",
+                "SUPPORT_BOUNCE"
+            ],
+            "fundamentalReasons": [
+                "ECONOMIC_DATA",
+                "SECTOR_ROTATION"
+            ],
+            "primaryReason": "Bullish flag breakout with strong momentum and positive fundamentals",
+            "reasoningSummary": "Strong bullish setup with multiple technical confirmations and positive fundamental backdrop. RSI and MACD showing momentum, bullish flag pattern formed with high volume breakout. GDP data positive at 7.2%, FII buying strong at 2500 Cr inflow. Entry at breakout of flag pattern at 22450.75 with good risk-reward ratio of 2.5:1. Stop loss at 22350, targeting 22650 resistance level.",
+            "confidenceLevel": 8,
+            "supportingIndicators": [
+                "RSI 62.5 - above 60 indicating strong momentum with room to move higher",
+                "MACD positive crossover on 15M timeframe indicating bullish momentum",
+                "20 EMA crossed above 50 EMA on 30M timeframe confirming uptrend",
+                "Above average volume (145000 vs 120000) supporting the breakout",
+                "Bullish flag pattern formed after morning gap up",
+                "Support at 22400 and 22350 levels",
+                "Positive GDP growth data - 7.2% growth in Q2 exceeded expectations",
+                "FII buying increased by 2500 Cr in index stocks",
+                "Banking and IT sectors showing strength",
+                "Positive correlation with US futures in pre-market"
+            ],
+            "conflictingIndicators": [
+                "Approaching major resistance at 22500",
+                "Potential profit booking near resistance zone",
+                "US market uncertainty in afternoon session"
+            ]
+        },
+        "exitReasoning": {
+            "technicalReasons": [
+                "RESISTANCE_BREAKOUT",
+                "OVERBOUGHT_RSI",
+                "VOLUME_SPIKE",
+                "DIVERGENCE"
+            ],
+            "primaryReason": "Resistance level reached with overbought RSI and weakening momentum",
+            "reasoningSummary": "Exited at predetermined resistance level of 22675 as per trading plan. RSI showing overbought conditions above 70, volume declining at resistance indicating weakening momentum, minor bearish divergence forming on 5-min chart. Profit target of 1% achieved successfully. Risk-reward ratio of 2.5:1 captured. Adhered to trading plan - booked profits at resistance rather than being greedy. US futures weakness in afternoon provided additional confirmation for exit.",
+            "confidenceLevel": 9,
+            "supportingIndicators": [
+                "RSI 72.5 - moved into overbought territory above 70",
+                "Price reached predetermined resistance zone at 22675",
+                "Volume declining from 145000 to 95000 at resistance",
+                "Bearish divergence forming on 5-min chart",
+                "Profit booking visible in IT and banking sectors",
+                "US futures showing weakness in afternoon session",
+                "Profit target of 1% achieved as planned",
+                "Risk-reward ratio of 2.5:1 successfully captured"
+            ],
+            "exitQualityScore": 9
+        },
         "tradeEndDate": "2020-09-07",
         "tradeDate": "2020-09-07"
     }
