@@ -187,10 +187,7 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
       // API Spec: DELETE /api/v1/favorite-filters/{filterId}?userId={userId}
       final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/$filterId?userId=$userId';
 
-      await _apiClient.delete<void>(
-        fullUri,
-        parser: (_) => null,
-      );
+      await _apiClient.delete<void>(fullUri, parser: (_) {});
 
       AppLogger.info('Favorite filter deleted successfully', tag: 'FavoriteFilterRemoteDataSource');
       AppLogger.methodExit('deleteFavoriteFilter', tag: 'FavoriteFilterRemoteDataSource', result: 'success');

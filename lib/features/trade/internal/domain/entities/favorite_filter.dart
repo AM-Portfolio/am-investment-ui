@@ -34,9 +34,6 @@ class FavoriteFilterList with _$FavoriteFilterList {
 /// Domain entity for bulk delete result
 @freezed
 class BulkDeleteResult with _$BulkDeleteResult {
-  const factory BulkDeleteResult({
-    required int deletedCount,
-    required int totalRequested,
-    String? message,
-  }) = _BulkDeleteResult;
+  const factory BulkDeleteResult({required int deletedCount, required int totalRequested, String? message}) =
+      _BulkDeleteResult;
 }

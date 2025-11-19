@@ -2,12 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Index types for trade filtering
 @JsonEnum(fieldRename: FieldRename.screamingSnake)
-enum IndexTypes {
-  nifty,
-  banknifty,
-  finnifty,
-  midcpnifty,
-}
+enum IndexTypes { nifty, banknifty, finnifty, midcpnifty }
 
 /// Extension for IndexTypes enum
 extension IndexTypesExtension on IndexTypes {

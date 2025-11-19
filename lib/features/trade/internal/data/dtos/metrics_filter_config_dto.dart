@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../../domain/enums/group_by_dimensions.dart';
 import '../../domain/enums/metric_types.dart';
-import '../../domain/enums/time_periods.dart';
 
 part 'metrics_filter_config_dto.g.dart';
 

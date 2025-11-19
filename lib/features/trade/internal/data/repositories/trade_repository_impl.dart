@@ -522,11 +522,7 @@ class TradeRepositoryImpl implements TradeRepository {
     String? description,
     bool? isDefault,
   }) async {
-    AppLogger.methodEntry(
-      'createFavoriteFilter',
-      tag: 'TradeRepository',
-      params: {'userId': userId, 'name': name},
-    );
+    AppLogger.methodEntry('createFavoriteFilter', tag: 'TradeRepository', params: {'userId': userId, 'name': name});
 
     try {
       final request = FavoriteFilterRequestDto(
@@ -681,11 +677,7 @@ class TradeRepositoryImpl implements TradeRepository {
 
   @override
   Future<FavoriteFilter> setDefaultFilter(String userId, String filterId) async {
-    AppLogger.methodEntry(
-      'setDefaultFilter',
-      tag: 'TradeRepository',
-      params: {'userId': userId, 'filterId': filterId},
-    );
+    AppLogger.methodEntry('setDefaultFilter', tag: 'TradeRepository', params: {'userId': userId, 'filterId': filterId});
 
     try {
       final dto = await _remoteDataSource.setDefaultFilter(userId, filterId);
@@ -702,12 +694,7 @@ class TradeRepositoryImpl implements TradeRepository {
 
       return filter;
     } catch (e) {
-      AppLogger.error(
-        'Failed to set default filter',
-        tag: 'TradeRepository',
-        error: e,
-        stackTrace: StackTrace.current,
-      );
+      AppLogger.error('Failed to set default filter', tag: 'TradeRepository', error: e, stackTrace: StackTrace.current);
       AppLogger.methodExit('setDefaultFilter', tag: 'TradeRepository', result: 'error');
 
       rethrow;

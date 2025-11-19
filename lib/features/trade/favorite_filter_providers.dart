@@ -34,8 +34,10 @@ final favoriteFiltersProvider = FutureProvider.family<FavoriteFilterList, String
 });
 
 /// Provider to get a specific favorite filter by ID
-final favoriteFilterByIdProvider =
-    FutureProvider.family<FavoriteFilter, ({String userId, String filterId})>((ref, params) async {
+final favoriteFilterByIdProvider = FutureProvider.family<FavoriteFilter, ({String userId, String filterId})>((
+  ref,
+  params,
+) async {
   final repository = ref.watch(_favoriteFilterRepositoryProvider);
   return repository.getFavoriteFilterById(params.userId, params.filterId);
 });
@@ -47,6 +49,6 @@ final watchFavoriteFiltersProvider = StreamProvider.family<FavoriteFilterList, S
 });
 
 /// Provider to get the repository instance for direct method calls
-final favoriteFilterRepositoryProvider = Provider<FavoriteFilterRepository>((ref) {
-  return ref.watch(_favoriteFilterRepositoryProvider);
-});
+final favoriteFilterRepositoryProvider = Provider<FavoriteFilterRepository>(
+  (ref) => ref.watch(_favoriteFilterRepositoryProvider),
+);

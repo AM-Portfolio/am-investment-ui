@@ -2,7 +2,6 @@ import '../../domain/entities/favorite_filter.dart';
 import '../../domain/entities/filter_criteria.dart';
 import '../../domain/entities/metrics_filter_config.dart';
 import '../dtos/favorite_filter_dto.dart';
-import '../dtos/filter_criteria_dtos.dart';
 import '../dtos/metrics_filter_config_dto.dart';
 
 /// Mapper for favorite filter between DTO and domain entity
@@ -28,18 +27,11 @@ class FavoriteFilterMapper {
 
   /// Convert list of FavoriteFilterResponseDto to FavoriteFilterList entity
   static FavoriteFilterList fromListDto(List<FavoriteFilterResponseDto> dtos, String userId) =>
-      FavoriteFilterList(
-        userId: userId,
-        filters: dtos.map(fromResponseDto).toList(),
-        totalCount: dtos.length,
-      );
+      FavoriteFilterList(userId: userId, filters: dtos.map(fromResponseDto).toList(), totalCount: dtos.length);
 
   /// Convert BulkDeleteResponseDto to BulkDeleteResult entity
-  static BulkDeleteResult fromBulkDeleteDto(BulkDeleteResponseDto dto) => BulkDeleteResult(
-    deletedCount: dto.deletedCount,
-    totalRequested: dto.totalRequested,
-    message: dto.message,
-  );
+  static BulkDeleteResult fromBulkDeleteDto(BulkDeleteResponseDto dto) =>
+      BulkDeleteResult(deletedCount: dto.deletedCount, totalRequested: dto.totalRequested, message: dto.message);
 }
 
 /// Mapper for metrics filter config between DTO and domain entity
@@ -58,8 +50,7 @@ class MetricsFilterConfigMapper {
     tradeCharacteristics: dto.tradeCharacteristics != null
         ? TradeCharacteristicsFilterMapper.fromMap(dto.tradeCharacteristics!)
         : null,
-    profitLossFilters:
-        dto.profitLossFilters != null ? ProfitLossFilterMapper.fromMap(dto.profitLossFilters!) : null,
+    profitLossFilters: dto.profitLossFilters != null ? ProfitLossFilterMapper.fromMap(dto.profitLossFilters!) : null,
   );
 
   /// Convert MetricsFilterConfig entity to MetricsFilterConfigDto
@@ -76,8 +67,9 @@ class MetricsFilterConfigMapper {
     tradeCharacteristics: config.tradeCharacteristics != null
         ? TradeCharacteristicsFilterMapper.toMap(config.tradeCharacteristics!)
         : null,
-    profitLossFilters:
-        config.profitLossFilters != null ? ProfitLossFilterMapper.toMap(config.profitLossFilters!) : null,
+    profitLossFilters: config.profitLossFilters != null
+        ? ProfitLossFilterMapper.toMap(config.profitLossFilters!)
+        : null,
   );
 
   static DateRangeFilter? _parseDateRange(Map<String, dynamic> map) {
@@ -106,17 +98,20 @@ class InstrumentFilterCriteriaMapper {
   static InstrumentFilterCriteria fromMap(Map<String, dynamic> map) {
     // Since the DTO uses Map<String, dynamic>, we need to handle the raw map
     return InstrumentFilterCriteria(
-      marketSegments: map['marketSegments'] != null ? List<String>.from(map['marketSegments'] as List).map((e) {
-        // Convert string to enum if needed
-        return e;
-      }).toList() as List : [],
+      marketSegments: map['marketSegments'] != null
+          ? List<String>.from(map['marketSegments'] as List).map((e) {
+                  // Convert string to enum if needed
+                  return e;
+                }).toList()
+                as List
+          : [],
       baseSymbols: map['baseSymbols'] != null ? List<String>.from(map['baseSymbols'] as List) : [],
-      indexTypes: map['indexTypes'] != null ? List<String>.from(map['indexTypes'] as List).map((e) {
-        return e;
-      }).toList() as List : [],
-      derivativeTypes: map['derivativeTypes'] != null ? List<String>.from(map['derivativeTypes'] as List).map((e) {
-        return e;
-      }).toList() as List : [],
+      indexTypes: map['indexTypes'] != null
+          ? List<String>.from(map['indexTypes'] as List).map((e) => e).toList() as List
+          : [],
+      derivativeTypes: map['derivativeTypes'] != null
+          ? List<String>.from(map['derivativeTypes'] as List).map((e) => e).toList() as List
+          : [],
     );
   }
 
@@ -147,12 +142,10 @@ class TradeCharacteristicsFilterMapper {
   static TradeCharacteristicsFilter fromMap(Map<String, dynamic> map) => TradeCharacteristicsFilter(
     strategies: map['strategies'] != null ? List<String>.from(map['strategies'] as List) : [],
     tags: map['tags'] != null ? List<String>.from(map['tags'] as List) : [],
-    directions: map['directions'] != null ? List<String>.from(map['directions'] as List).map((e) {
-      return e;
-    }).toList() as List : [],
-    statuses: map['statuses'] != null ? List<String>.from(map['statuses'] as List).map((e) {
-      return e;
-    }).toList() as List : [],
+    directions: map['directions'] != null
+        ? List<String>.from(map['directions'] as List).map((e) => e).toList() as List
+        : [],
+    statuses: map['statuses'] != null ? List<String>.from(map['statuses'] as List).map((e) => e).toList() as List : [],
     minHoldingTimeHours: map['minHoldingTimeHours'] as int?,
     maxHoldingTimeHours: map['maxHoldingTimeHours'] as int?,
   );

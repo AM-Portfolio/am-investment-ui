@@ -7,12 +7,7 @@ part 'favorite_filter_dto.g.dart';
 /// DTO for favorite filter request (create/update)
 @JsonSerializable()
 class FavoriteFilterRequestDto {
-  const FavoriteFilterRequestDto({
-    required this.name,
-    required this.filterConfig,
-    this.description,
-    this.isDefault,
-  });
+  const FavoriteFilterRequestDto({required this.name, required this.filterConfig, this.description, this.isDefault});
 
   factory FavoriteFilterRequestDto.fromJson(Map<String, dynamic> json) => _$FavoriteFilterRequestDtoFromJson(json);
 
@@ -53,10 +48,7 @@ class FavoriteFilterResponseDto {
 /// DTO for bulk delete request
 @JsonSerializable()
 class BulkDeleteRequestDto {
-  const BulkDeleteRequestDto({
-    required this.userId,
-    required this.filterIds,
-  });
+  const BulkDeleteRequestDto({required this.userId, required this.filterIds});
 
   factory BulkDeleteRequestDto.fromJson(Map<String, dynamic> json) => _$BulkDeleteRequestDtoFromJson(json);
 
@@ -69,11 +61,7 @@ class BulkDeleteRequestDto {
 /// DTO for bulk delete response
 @JsonSerializable()
 class BulkDeleteResponseDto {
-  const BulkDeleteResponseDto({
-    required this.deletedCount,
-    required this.totalRequested,
-    this.message,
-  });
+  const BulkDeleteResponseDto({required this.deletedCount, required this.totalRequested, this.message});
 
   factory BulkDeleteResponseDto.fromJson(Map<String, dynamic> json) => _$BulkDeleteResponseDtoFromJson(json);
 

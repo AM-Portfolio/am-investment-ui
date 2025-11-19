@@ -2,14 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Trade statuses for filtering
 @JsonEnum(fieldRename: FieldRename.screamingSnake)
-enum TradeStatuses {
-  open,
-  closed,
-  win,
-  loss,
-  breakeven,
-  cancelled,
-}
+enum TradeStatuses { open, closed, win, loss, breakeven, cancelled }
 
 /// Extension for TradeStatuses enum
 extension TradeStatusesExtension on TradeStatuses {

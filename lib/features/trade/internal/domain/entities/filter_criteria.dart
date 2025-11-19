@@ -11,10 +11,7 @@ part 'filter_criteria.freezed.dart';
 /// Domain entity for date range filter
 @freezed
 class DateRangeFilter with _$DateRangeFilter {
-  const factory DateRangeFilter({
-    required DateTime startDate,
-    required DateTime endDate,
-  }) = _DateRangeFilter;
+  const factory DateRangeFilter({required DateTime startDate, required DateTime endDate}) = _DateRangeFilter;
 }
 
 /// Domain entity for instrument filter criteria

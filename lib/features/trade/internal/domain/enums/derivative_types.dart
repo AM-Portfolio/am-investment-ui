@@ -2,10 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Derivative types for trade filtering
 @JsonEnum(fieldRename: FieldRename.screamingSnake)
-enum DerivativeTypes {
-  futures,
-  options,
-}
+enum DerivativeTypes { futures, options }
 
 /// Extension for DerivativeTypes enum
 extension DerivativeTypesExtension on DerivativeTypes {

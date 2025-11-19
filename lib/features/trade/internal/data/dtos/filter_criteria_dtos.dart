@@ -11,10 +11,7 @@ part 'filter_criteria_dtos.g.dart';
 /// DTO for date range filter criteria
 @JsonSerializable()
 class DateRangeFilterDto {
-  const DateRangeFilterDto({
-    required this.startDate,
-    required this.endDate,
-  });
+  const DateRangeFilterDto({required this.startDate, required this.endDate});
 
   factory DateRangeFilterDto.fromJson(Map<String, dynamic> json) => _$DateRangeFilterDtoFromJson(json);
 
@@ -27,14 +24,10 @@ class DateRangeFilterDto {
 /// DTO for instrument filter criteria
 @JsonSerializable()
 class InstrumentFilterCriteriaDto {
-  const InstrumentFilterCriteriaDto({
-    this.marketSegments,
-    this.baseSymbols,
-    this.indexTypes,
-    this.derivativeTypes,
-  });
+  const InstrumentFilterCriteriaDto({this.marketSegments, this.baseSymbols, this.indexTypes, this.derivativeTypes});
 
-  factory InstrumentFilterCriteriaDto.fromJson(Map<String, dynamic> json) => _$InstrumentFilterCriteriaDtoFromJson(json);
+  factory InstrumentFilterCriteriaDto.fromJson(Map<String, dynamic> json) =>
+      _$InstrumentFilterCriteriaDtoFromJson(json);
 
   final List<MarketSegments>? marketSegments;
   final List<String>? baseSymbols;
@@ -56,7 +49,8 @@ class TradeCharacteristicsFilterDto {
     this.maxHoldingTimeHours,
   });
 
-  factory TradeCharacteristicsFilterDto.fromJson(Map<String, dynamic> json) => _$TradeCharacteristicsFilterDtoFromJson(json);
+  factory TradeCharacteristicsFilterDto.fromJson(Map<String, dynamic> json) =>
+      _$TradeCharacteristicsFilterDtoFromJson(json);
 
   final List<String>? strategies;
   final List<String>? tags;
@@ -71,12 +65,7 @@ class TradeCharacteristicsFilterDto {
 /// DTO for profit/loss filter criteria
 @JsonSerializable()
 class ProfitLossFilterDto {
-  const ProfitLossFilterDto({
-    this.minProfitLoss,
-    this.maxProfitLoss,
-    this.minPositionSize,
-    this.maxPositionSize,
-  });
+  const ProfitLossFilterDto({this.minProfitLoss, this.maxProfitLoss, this.minPositionSize, this.maxPositionSize});
 
   factory ProfitLossFilterDto.fromJson(Map<String, dynamic> json) => _$ProfitLossFilterDtoFromJson(json);
 

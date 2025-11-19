@@ -11,7 +11,7 @@ import '../mappers/favorite_filter_mapper.dart';
 /// Repository implementation for favorite filter operations
 class FavoriteFilterRepositoryImpl implements FavoriteFilterRepository {
   FavoriteFilterRepositoryImpl({required FavoriteFilterRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   final FavoriteFilterRemoteDataSource _remoteDataSource;
 

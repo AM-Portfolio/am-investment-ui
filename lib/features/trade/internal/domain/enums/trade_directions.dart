@@ -2,10 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Trade directions for filtering
 @JsonEnum(fieldRename: FieldRename.screamingSnake)
-enum TradeDirections {
-  long,
-  short,
-}
+enum TradeDirections { long, short }
 
 /// Extension for TradeDirections enum
 extension TradeDirectionsExtension on TradeDirections {

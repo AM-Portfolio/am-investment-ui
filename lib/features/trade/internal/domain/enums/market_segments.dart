@@ -2,14 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 /// Market segments for trade filtering
 @JsonEnum(fieldRename: FieldRename.screamingSnake)
-enum MarketSegments {
-  equity,
-  indexSegment,
-  equityFutures,
-  indexFutures,
-  equityOptions,
-  indexOptions,
-}
+enum MarketSegments { equity, indexSegment, equityFutures, indexFutures, equityOptions, indexOptions }
 
 /// Extension for MarketSegments enum
 extension MarketSegmentsExtension on MarketSegments {
