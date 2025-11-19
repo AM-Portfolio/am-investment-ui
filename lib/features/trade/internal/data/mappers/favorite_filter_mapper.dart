@@ -1,6 +1,11 @@
 import '../../domain/entities/favorite_filter.dart';
 import '../../domain/entities/filter_criteria.dart';
 import '../../domain/entities/metrics_filter_config.dart';
+import '../../domain/enums/derivative_types.dart';
+import '../../domain/enums/index_types.dart';
+import '../../domain/enums/market_segments.dart';
+import '../../domain/enums/trade_directions.dart';
+import '../../domain/enums/trade_statuses.dart';
 import '../dtos/favorite_filter_dto.dart';
 import '../dtos/metrics_filter_config_dto.dart';
 
@@ -95,44 +100,127 @@ class MetricsFilterConfigMapper {
 /// Mapper for instrument filter criteria
 class InstrumentFilterCriteriaMapper {
   /// Convert from Map to InstrumentFilterCriteria entity
-  static InstrumentFilterCriteria fromMap(Map<String, dynamic> map) {
-    // Since the DTO uses Map<String, dynamic>, we need to handle the raw map
-    return InstrumentFilterCriteria(
-      marketSegments: map['marketSegments'] != null
-          ? List<String>.from(map['marketSegments'] as List).map((e) {
-                  // Convert string to enum if needed
-                  return e;
-                }).toList()
-                as List
-          : [],
-      baseSymbols: map['baseSymbols'] != null ? List<String>.from(map['baseSymbols'] as List) : [],
-      indexTypes: map['indexTypes'] != null
-          ? List<String>.from(map['indexTypes'] as List).map((e) => e).toList() as List
-          : [],
-      derivativeTypes: map['derivativeTypes'] != null
-          ? List<String>.from(map['derivativeTypes'] as List).map((e) => e).toList() as List
-          : [],
-    );
-  }
+  static InstrumentFilterCriteria fromMap(Map<String, dynamic> map) => InstrumentFilterCriteria(
+    marketSegments: map['marketSegments'] != null
+        ? (map['marketSegments'] as List)
+              .map((e) => _parseMarketSegment(e as String))
+              .whereType<MarketSegments>()
+              .toList()
+        : [],
+    baseSymbols: map['baseSymbols'] != null ? List<String>.from(map['baseSymbols'] as List) : [],
+    indexTypes: map['indexTypes'] != null
+        ? (map['indexTypes'] as List).map((e) => _parseIndexType(e as String)).whereType<IndexTypes>().toList()
+        : [],
+    derivativeTypes: map['derivativeTypes'] != null
+        ? (map['derivativeTypes'] as List)
+              .map((e) => _parseDerivativeType(e as String))
+              .whereType<DerivativeTypes>()
+              .toList()
+        : [],
+  );
 
   /// Convert from InstrumentFilterCriteria entity to Map
   static Map<String, dynamic> toMap(InstrumentFilterCriteria criteria) {
     final map = <String, dynamic>{};
 
     if (criteria.marketSegments.isNotEmpty) {
-      map['marketSegments'] = criteria.marketSegments;
+      map['marketSegments'] = criteria.marketSegments.map(_marketSegmentToString).toList();
     }
     if (criteria.baseSymbols.isNotEmpty) {
       map['baseSymbols'] = criteria.baseSymbols;
     }
     if (criteria.indexTypes.isNotEmpty) {
-      map['indexTypes'] = criteria.indexTypes;
+      map['indexTypes'] = criteria.indexTypes.map(_indexTypeToString).toList();
     }
     if (criteria.derivativeTypes.isNotEmpty) {
-      map['derivativeTypes'] = criteria.derivativeTypes;
+      map['derivativeTypes'] = criteria.derivativeTypes.map(_derivativeTypeToString).toList();
     }
 
     return map;
+  }
+
+  static MarketSegments? _parseMarketSegment(String value) {
+    switch (value.toUpperCase()) {
+      case 'EQUITY':
+        return MarketSegments.equity;
+      case 'INDEX_SEGMENT':
+        return MarketSegments.indexSegment;
+      case 'EQUITY_FUTURES':
+        return MarketSegments.equityFutures;
+      case 'INDEX_FUTURES':
+        return MarketSegments.indexFutures;
+      case 'EQUITY_OPTIONS':
+        return MarketSegments.equityOptions;
+      case 'INDEX_OPTIONS':
+        return MarketSegments.indexOptions;
+      default:
+        return null;
+    }
+  }
+
+  static String _marketSegmentToString(MarketSegments segment) {
+    switch (segment) {
+      case MarketSegments.equity:
+        return 'EQUITY';
+      case MarketSegments.indexSegment:
+        return 'INDEX_SEGMENT';
+      case MarketSegments.equityFutures:
+        return 'EQUITY_FUTURES';
+      case MarketSegments.indexFutures:
+        return 'INDEX_FUTURES';
+      case MarketSegments.equityOptions:
+        return 'EQUITY_OPTIONS';
+      case MarketSegments.indexOptions:
+        return 'INDEX_OPTIONS';
+    }
+  }
+
+  static IndexTypes? _parseIndexType(String value) {
+    switch (value.toUpperCase()) {
+      case 'NIFTY':
+        return IndexTypes.nifty;
+      case 'BANKNIFTY':
+        return IndexTypes.banknifty;
+      case 'FINNIFTY':
+        return IndexTypes.finnifty;
+      case 'MIDCPNIFTY':
+        return IndexTypes.midcpnifty;
+      default:
+        return null;
+    }
+  }
+
+  static String _indexTypeToString(IndexTypes type) {
+    switch (type) {
+      case IndexTypes.nifty:
+        return 'NIFTY';
+      case IndexTypes.banknifty:
+        return 'BANKNIFTY';
+      case IndexTypes.finnifty:
+        return 'FINNIFTY';
+      case IndexTypes.midcpnifty:
+        return 'MIDCPNIFTY';
+    }
+  }
+
+  static DerivativeTypes? _parseDerivativeType(String value) {
+    switch (value.toUpperCase()) {
+      case 'FUTURES':
+        return DerivativeTypes.futures;
+      case 'OPTIONS':
+        return DerivativeTypes.options;
+      default:
+        return null;
+    }
+  }
+
+  static String _derivativeTypeToString(DerivativeTypes type) {
+    switch (type) {
+      case DerivativeTypes.futures:
+        return 'FUTURES';
+      case DerivativeTypes.options:
+        return 'OPTIONS';
+    }
   }
 }
 
@@ -143,9 +231,14 @@ class TradeCharacteristicsFilterMapper {
     strategies: map['strategies'] != null ? List<String>.from(map['strategies'] as List) : [],
     tags: map['tags'] != null ? List<String>.from(map['tags'] as List) : [],
     directions: map['directions'] != null
-        ? List<String>.from(map['directions'] as List).map((e) => e).toList() as List
+        ? (map['directions'] as List)
+              .map((e) => _parseTradeDirection(e as String))
+              .whereType<TradeDirections>()
+              .toList()
         : [],
-    statuses: map['statuses'] != null ? List<String>.from(map['statuses'] as List).map((e) => e).toList() as List : [],
+    statuses: map['statuses'] != null
+        ? (map['statuses'] as List).map((e) => _parseTradeStatus(e as String)).whereType<TradeStatuses>().toList()
+        : [],
     minHoldingTimeHours: map['minHoldingTimeHours'] as int?,
     maxHoldingTimeHours: map['maxHoldingTimeHours'] as int?,
   );
@@ -156,12 +249,68 @@ class TradeCharacteristicsFilterMapper {
 
     if (filter.strategies.isNotEmpty) map['strategies'] = filter.strategies;
     if (filter.tags.isNotEmpty) map['tags'] = filter.tags;
-    if (filter.directions.isNotEmpty) map['directions'] = filter.directions;
-    if (filter.statuses.isNotEmpty) map['statuses'] = filter.statuses;
+    if (filter.directions.isNotEmpty) map['directions'] = filter.directions.map(_tradeDirectionToString).toList();
+    if (filter.statuses.isNotEmpty) map['statuses'] = filter.statuses.map(_tradeStatusToString).toList();
     if (filter.minHoldingTimeHours != null) map['minHoldingTimeHours'] = filter.minHoldingTimeHours;
     if (filter.maxHoldingTimeHours != null) map['maxHoldingTimeHours'] = filter.maxHoldingTimeHours;
 
     return map;
+  }
+
+  static TradeDirections? _parseTradeDirection(String value) {
+    switch (value.toUpperCase()) {
+      case 'LONG':
+        return TradeDirections.long;
+      case 'SHORT':
+        return TradeDirections.short;
+      default:
+        return null;
+    }
+  }
+
+  static String _tradeDirectionToString(TradeDirections direction) {
+    switch (direction) {
+      case TradeDirections.long:
+        return 'LONG';
+      case TradeDirections.short:
+        return 'SHORT';
+    }
+  }
+
+  static TradeStatuses? _parseTradeStatus(String value) {
+    switch (value.toUpperCase()) {
+      case 'OPEN':
+        return TradeStatuses.open;
+      case 'CLOSED':
+        return TradeStatuses.closed;
+      case 'WIN':
+        return TradeStatuses.win;
+      case 'LOSS':
+        return TradeStatuses.loss;
+      case 'BREAKEVEN':
+        return TradeStatuses.breakeven;
+      case 'CANCELLED':
+        return TradeStatuses.cancelled;
+      default:
+        return null;
+    }
+  }
+
+  static String _tradeStatusToString(TradeStatuses status) {
+    switch (status) {
+      case TradeStatuses.open:
+        return 'OPEN';
+      case TradeStatuses.closed:
+        return 'CLOSED';
+      case TradeStatuses.win:
+        return 'WIN';
+      case TradeStatuses.loss:
+        return 'LOSS';
+      case TradeStatuses.breakeven:
+        return 'BREAKEVEN';
+      case TradeStatuses.cancelled:
+        return 'CANCELLED';
+    }
   }
 }
 
