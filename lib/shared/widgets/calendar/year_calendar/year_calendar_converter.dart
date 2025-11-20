@@ -1,4 +1,5 @@
 import '../../../../features/trade/internal/domain/entities/trade_calendar.dart';
+import '../../../../features/trade/internal/domain/entities/trade_controller_entities.dart';
 import 'calendar_types.dart';
 
 /// Converter to transform TradeCalendar entity to year calendar data
@@ -12,16 +13,22 @@ class YearCalendarConverter {
     final trades = entity.portfolioTrades[portfolioId] ?? [];
 
     // Filter trades for the specified year
-    final yearTrades = trades.where((trade) => trade.tradeDate.year == year).toList();
+    final yearTrades = trades.where((trade) {
+      final tradeDate = trade.entryInfo.timestamp;
+      return tradeDate != null && tradeDate.year == year;
+    }).toList();
 
     // Group trades by month and day
-    final monthsMap = <int, Map<int, List<TradeDetail>>>{};
+    final monthsMap = <int, Map<int, List<TradeDetails>>>{};
     for (final trade in yearTrades) {
-      final month = trade.tradeDate.month;
-      final day = trade.tradeDate.day;
+      final tradeDate = trade.entryInfo.timestamp;
+      if (tradeDate != null) {
+        final month = tradeDate.month;
+        final day = tradeDate.day;
 
-      monthsMap.putIfAbsent(month, () => {});
-      monthsMap[month]!.putIfAbsent(day, () => []).add(trade);
+        monthsMap.putIfAbsent(month, () => {});
+        monthsMap[month]!.putIfAbsent(day, () => []).add(trade);
+      }
     }
 
     // Build calendar month data
@@ -38,7 +45,7 @@ class YearCalendarConverter {
 
         var pnl = 0.0;
         for (final trade in dayTrades) {
-          pnl += trade.metrics.profitLoss;
+          pnl += trade.metrics?.profitLoss ?? 0.0;
         }
 
         final status = _getDayStatus(pnl);

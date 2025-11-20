@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../internal/domain/entities/trade_calendar.dart';
+import '../../internal/domain/entities/trade_controller_entities.dart';
 
 part 'calendar_view_models.freezed.dart';
 
@@ -120,7 +120,7 @@ class MonthlyCalendarData with _$MonthlyCalendarData implements CalendarPeriodDa
 class DailyCalendarData with _$DailyCalendarData implements CalendarPeriodData {
   const factory DailyCalendarData({
     required DateTime date,
-    required List<TradeDetail> trades,
+    required List<TradeDetails> trades,
     required int totalTrades,
     required double totalPnL,
     required int winningTrades,
@@ -142,10 +142,11 @@ class DailyCalendarData with _$DailyCalendarData implements CalendarPeriodData {
   double get winRate => totalTrades > 0 ? winningTrades / totalTrades * 100 : 0.0;
 
   @override
+  @override
   bool get isProfitable => totalPnL > 0;
 
   /// Get trades for specific symbol
-  List<TradeDetail> getTradesForSymbol(String symbol) =>
+  List<TradeDetails> getTradesForSymbol(String symbol) =>
       trades.where((t) => t.instrumentInfo.symbol == symbol).toList();
 
   /// Get unique symbols traded

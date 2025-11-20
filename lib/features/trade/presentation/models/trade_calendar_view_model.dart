@@ -2,6 +2,7 @@ import '../../../../../core/utils/logger.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/card_types.dart';
 import '../../../../../shared/widgets/calendar/universal_calendar/types.dart';
 import '../../internal/domain/entities/trade_calendar.dart';
+import '../../internal/domain/entities/trade_controller_entities.dart';
 import '../converters/trade_calendar_converter.dart';
 
 /// View model for trade calendar data optimized for UI consumption
@@ -31,7 +32,7 @@ class TradeCalendarViewModel {
     final calendarData = TradeCalendarConverter.convertEntityToCalendarData(entity: entity);
 
     // Organize trade details by date
-    final tradeDetailsMap = <String, List<TradeDetail>>{};
+    final tradeDetailsMap = <String, List<TradeDetails>>{};
     if (entity.portfolioTrades.isNotEmpty) {
       final trades = entity.portfolioTrades[portfolioId] ?? [];
       AppLogger.info(
@@ -40,11 +41,14 @@ class TradeCalendarViewModel {
       );
 
       for (final trade in trades) {
-        final dateKey = trade.tradeDate.toIso8601String().substring(0, 10);
-        if (!tradeDetailsMap.containsKey(dateKey)) {
-          tradeDetailsMap[dateKey] = [];
+        final tradeDate = trade.entryInfo.timestamp;
+        if (tradeDate != null) {
+          final dateKey = tradeDate.toIso8601String().substring(0, 10);
+          if (!tradeDetailsMap.containsKey(dateKey)) {
+            tradeDetailsMap[dateKey] = [];
+          }
+          tradeDetailsMap[dateKey]!.add(trade);
         }
-        tradeDetailsMap[dateKey]!.add(trade);
       }
 
       AppLogger.info(
@@ -71,7 +75,7 @@ class TradeCalendarViewModel {
   final Map<String, List<CardData>> calendarData;
 
   /// Trade details organized by date (for hierarchical calendar)
-  final Map<String, List<TradeDetail>>? tradeDetailsData;
+  final Map<String, List<TradeDetails>>? tradeDetailsData;
 
   /// Applied date filter
   final DateSelection? dateFilter;
@@ -155,7 +159,7 @@ class TradeCalendarViewModel {
   TradeCalendarViewModel copyWith({
     String? portfolioId,
     Map<String, List<CardData>>? calendarData,
-    Map<String, List<TradeDetail>>? tradeDetailsData,
+    Map<String, List<TradeDetails>>? tradeDetailsData,
     DateSelection? dateFilter,
     DateTime? selectedDate,
     DateTime? lastUpdated,

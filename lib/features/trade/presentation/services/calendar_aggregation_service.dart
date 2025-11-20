@@ -1,14 +1,11 @@
 import '../../../../core/utils/logger.dart';
-import '../../internal/domain/entities/trade_calendar.dart' as domain;
+import '../../internal/domain/entities/trade_controller_entities.dart';
 import '../models/calendar_view_models.dart';
 
 /// Service for aggregating trade calendar data into view models
 class CalendarAggregationService {
   /// Aggregate trade calendar into yearly view data
-  YearlyCalendarData aggregateYearlyData({
-    required Map<String, List<domain.TradeDetail>> calendarData,
-    required int year,
-  }) {
+  YearlyCalendarData aggregateYearlyData({required Map<String, List<TradeDetails>> calendarData, required int year}) {
     AppLogger.info(
       '[AggregationService] Aggregating yearly data for $year with ${calendarData.length} date entries',
       tag: 'CalendarAggregationService',
@@ -102,7 +99,7 @@ class CalendarAggregationService {
 
   /// Aggregate trade calendar into monthly view data
   MonthlyCalendarData aggregateMonthlyData({
-    required Map<String, List<domain.TradeDetail>> calendarData,
+    required Map<String, List<TradeDetails>> calendarData,
     required int year,
     required int month,
   }) {
@@ -187,7 +184,7 @@ class CalendarAggregationService {
 
   /// Aggregate trade calendar into daily view data
   DailyCalendarData aggregateDailyData({
-    required Map<String, List<domain.TradeDetail>> calendarData,
+    required Map<String, List<TradeDetails>> calendarData,
     required DateTime date,
   }) {
     final dateKey = _formatDateKey(date.year, date.month, date.day);
@@ -202,24 +199,24 @@ class CalendarAggregationService {
     final holdingTimes = <Duration>[];
 
     for (final trade in trades) {
-      totalPnL += trade.metrics.profitLoss;
-      totalVolume += trade.entryInfo.totalValue;
+      totalPnL += (trade.metrics?.profitLoss ?? 0.0);
+      totalVolume += (trade.entryInfo.totalValue ?? 0.0);
 
-      if (trade.metrics.profitLoss > 0) {
+      if ((trade.metrics?.profitLoss ?? 0.0) > 0) {
         winningTrades++;
-      } else if (trade.metrics.profitLoss < 0) {
+      } else if ((trade.metrics?.profitLoss ?? 0.0) < 0) {
         losingTrades++;
       }
 
       // Track symbol distribution
       final symbol = trade.instrumentInfo.symbol;
-      symbolDistribution[symbol] = (symbolDistribution[symbol] ?? 0) + 1;
+      symbolDistribution[symbol ?? "UNKNOWN"] = (symbolDistribution[symbol ?? "UNKNOWN"] ?? 0) + 1;
 
       // Track holding time
       final holdingTime = Duration(
-        days: trade.metrics.holdingTimeDays,
-        hours: trade.metrics.holdingTimeHours,
-        minutes: trade.metrics.holdingTimeMinutes,
+        days: (trade.metrics?.holdingTimeDays ?? 0),
+        hours: (trade.metrics?.holdingTimeHours ?? 0),
+        minutes: (trade.metrics?.holdingTimeMinutes ?? 0),
       );
       holdingTimes.add(holdingTime);
     }
@@ -245,8 +242,8 @@ class CalendarAggregationService {
 
   // Helper methods
 
-  List<domain.TradeDetail> _getMonthData(Map<String, List<domain.TradeDetail>> calendarData, int year, int month) {
-    final allTrades = <domain.TradeDetail>[];
+  List<TradeDetails> _getMonthData(Map<String, List<TradeDetails>> calendarData, int year, int month) {
+    final allTrades = <TradeDetails>[];
     final daysInMonth = DateTime(year, month + 1, 0).day;
 
     for (var day = 1; day <= daysInMonth; day++) {
@@ -258,7 +255,7 @@ class CalendarAggregationService {
     return allTrades;
   }
 
-  MonthSummary _createMonthSummary(List<domain.TradeDetail> trades, int year, int month) {
+  MonthSummary _createMonthSummary(List<TradeDetails> trades, int year, int month) {
     final totalTrades = trades.length;
     var totalPnL = 0.0;
     var winningTrades = 0;
@@ -266,15 +263,15 @@ class CalendarAggregationService {
     final tradingDaysSet = <int>{};
 
     for (final trade in trades) {
-      totalPnL += trade.metrics.profitLoss;
+      totalPnL += (trade.metrics?.profitLoss ?? 0.0);
 
-      if (trade.metrics.profitLoss > 0) {
+      if ((trade.metrics?.profitLoss ?? 0.0) > 0) {
         winningTrades++;
-      } else if (trade.metrics.profitLoss < 0) {
+      } else if ((trade.metrics?.profitLoss ?? 0.0) < 0) {
         losingTrades++;
       }
 
-      tradingDaysSet.add(trade.entryInfo.timestamp.day);
+      tradingDaysSet.add((trade.entryInfo.timestamp?.day ?? 0));
     }
 
     return MonthSummary(
@@ -288,18 +285,18 @@ class CalendarAggregationService {
     );
   }
 
-  DaySummary _createDaySummary(List<domain.TradeDetail> trades, int year, int month, int day) {
+  DaySummary _createDaySummary(List<TradeDetails> trades, int year, int month, int day) {
     final totalTrades = trades.length;
     var totalPnL = 0.0;
     var winningTrades = 0;
     var losingTrades = 0;
 
     for (final trade in trades) {
-      totalPnL += trade.metrics.profitLoss;
+      totalPnL += (trade.metrics?.profitLoss ?? 0.0);
 
-      if (trade.metrics.profitLoss > 0) {
+      if ((trade.metrics?.profitLoss ?? 0.0) > 0) {
         winningTrades++;
-      } else if (trade.metrics.profitLoss < 0) {
+      } else if ((trade.metrics?.profitLoss ?? 0.0) < 0) {
         losingTrades++;
       }
     }

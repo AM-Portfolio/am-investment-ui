@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../internal/domain/entities/trade_calendar.dart';
+import '../../internal/domain/entities/trade_controller_entities.dart';
+import '../../internal/domain/enums/trade_statuses.dart';
 
 /// Comprehensive trade detail dialog showing all trade information
 class TradeDetailDialog extends StatelessWidget {
   const TradeDetailDialog({required this.trade, super.key});
 
-  final TradeDetail trade;
+  final TradeDetails trade;
 
   @override
   Widget build(BuildContext context) => Dialog(
