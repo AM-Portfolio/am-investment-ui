@@ -5,12 +5,20 @@ import 'package:flutter/material.dart';
 /// This widget provides a consistent layout for displaying information
 /// in a two-column format (label on left, value on right).
 class InfoRow extends StatelessWidget {
-  const InfoRow({required this.label, required this.value, this.valueColor, this.isBold = false, super.key});
+  const InfoRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.isBold = false,
+    this.maxLines,
+    super.key,
+  });
 
   final String label;
   final String value;
   final Color? valueColor;
   final bool isBold;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -29,6 +37,8 @@ class InfoRow extends StatelessWidget {
           flex: 3,
           child: Text(
             value,
+            maxLines: maxLines,
+            overflow: maxLines != null ? TextOverflow.ellipsis : null,
             style: TextStyle(
               fontSize: 13,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,

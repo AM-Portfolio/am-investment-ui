@@ -2,6 +2,7 @@ import '../../../../../config/app_config.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/utils/logger.dart';
 import '../dtos/trade_calendar_dto.dart';
+import '../dtos/trade_controller_dtos.dart';
 import '../dtos/trade_holding_dto.dart';
 import '../dtos/trade_portfolio_dto.dart';
 import '../dtos/trade_portfolio_summary_dto.dart';
@@ -229,14 +230,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
             }
 
             // Group trades by customPortfolioId
-            final portfolioTrades = <String, List<TradeDetailDto>>{};
+            final portfolioTrades = <String, List<TradeDetailsDto>>{};
 
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
 
               if (portfolioId != null) {
-                final trade = TradeDetailDto.fromJson(tradeJson);
+                final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
@@ -307,14 +308,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
             }
 
             // Group trades by customPortfolioId
-            final portfolioTrades = <String, List<TradeDetailDto>>{};
+            final portfolioTrades = <String, List<TradeDetailsDto>>{};
 
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
 
               if (portfolioId != null) {
-                final trade = TradeDetailDto.fromJson(tradeJson);
+                final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
@@ -404,7 +405,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
             }
 
             // Group trades by customPortfolioId
-            final portfolioTrades = <String, List<TradeDetailDto>>{};
+            final portfolioTrades = <String, List<TradeDetailsDto>>{};
 
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
@@ -417,7 +418,7 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
               );
 
               if (portfolioId != null) {
-                final trade = TradeDetailDto.fromJson(tradeJson);
+                final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
@@ -504,14 +505,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
             }
 
             // Group trades by customPortfolioId
-            final portfolioTrades = <String, List<TradeDetailDto>>{};
+            final portfolioTrades = <String, List<TradeDetailsDto>>{};
 
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
 
               if (portfolioId != null) {
-                final trade = TradeDetailDto.fromJson(tradeJson);
+                final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
@@ -585,14 +586,14 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
             }
 
             // Group trades by customPortfolioId
-            final portfolioTrades = <String, List<TradeDetailDto>>{};
+            final portfolioTrades = <String, List<TradeDetailsDto>>{};
 
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
 
               if (portfolioId != null) {
-                final trade = TradeDetailDto.fromJson(tradeJson);
+                final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }

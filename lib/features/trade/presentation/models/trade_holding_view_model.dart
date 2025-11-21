@@ -30,12 +30,45 @@ class TradeHoldingViewModel {
     this.exitTimestamp,
     this.broker,
     this.executionCount = 0,
+    // New fields from TradeDetails
+    this.strategy,
+    this.notes,
+    this.tags,
+    this.userId,
+    this.returnOnEquity,
+    this.maxAdverseExcursion,
+    this.maxFavorableExcursion,
+    this.isin,
+    this.rawSymbol,
+    this.marketSegment,
+    this.series,
+    this.indexType,
+    this.description,
+    this.currency,
+    this.lotSize,
+    this.derivativeType,
+    this.strikePrice,
+    this.expiryDate,
+    this.optionType,
+    this.underlyingSymbol,
+    this.entryFees,
+    this.exitFees,
+    this.entryReason,
+    this.exitReason,
+    this.entryTotalValue,
+    this.exitTotalValue,
+    this.psychologyData,
+    this.entryReasoning,
+    this.exitReasoning,
+    this.attachments,
   });
 
   /// Factory to create view model from domain entity
   factory TradeHoldingViewModel.fromEntity(TradeDetails entity) {
     final metrics = entity.metrics;
     final exitInfo = entity.exitInfo;
+    final instrumentInfo = entity.instrumentInfo;
+    final derivativeInfo = instrumentInfo.derivativeInfo;
 
     // Extract broker from first execution (if available)
     String? broker;
@@ -46,11 +79,11 @@ class TradeHoldingViewModel {
     return TradeHoldingViewModel(
       tradeId: entity.tradeId,
       portfolioId: entity.portfolioId,
-      symbol: entity.instrumentInfo.symbol ?? 'UNKNOWN',
-      companyName: entity.instrumentInfo.description ?? 'Unknown Company',
-      sector: entity.instrumentInfo.segment?.name,
-      industry: entity.instrumentInfo.series?.name,
-      exchange: entity.instrumentInfo.exchange?.name,
+      symbol: instrumentInfo.symbol ?? 'UNKNOWN',
+      companyName: instrumentInfo.description ?? 'Unknown Company',
+      sector: instrumentInfo.segment?.name,
+      industry: instrumentInfo.series?.name,
+      exchange: instrumentInfo.exchange?.name,
       status: entity.status.name,
       tradePositionType: entity.tradePositionType.name,
       quantity: entity.entryInfo.quantity ?? exitInfo?.quantity,
@@ -70,6 +103,37 @@ class TradeHoldingViewModel {
       exitTimestamp: exitInfo?.timestamp,
       broker: broker,
       executionCount: entity.tradeExecutions?.length ?? 0,
+      // New fields
+      strategy: entity.strategy,
+      notes: entity.notes,
+      tags: entity.tags,
+      userId: entity.userId,
+      returnOnEquity: metrics?.returnOnEquity,
+      maxAdverseExcursion: metrics?.maxAdverseExcursion,
+      maxFavorableExcursion: metrics?.maxFavorableExcursion,
+      isin: instrumentInfo.isin,
+      rawSymbol: instrumentInfo.rawSymbol,
+      marketSegment: instrumentInfo.segment?.name,
+      series: instrumentInfo.series?.name,
+      indexType: instrumentInfo.indexType?.name,
+      description: instrumentInfo.description,
+      currency: instrumentInfo.currency,
+      lotSize: instrumentInfo.lotSize,
+      derivativeType: derivativeInfo?.derivativeType?.name,
+      strikePrice: derivativeInfo?.strikePrice,
+      expiryDate: derivativeInfo?.expiryDate,
+      optionType: derivativeInfo?.optionType?.name,
+      underlyingSymbol: derivativeInfo?.underlyingSymbol,
+      entryFees: entity.entryInfo.fees,
+      exitFees: exitInfo?.fees,
+      entryReason: entity.entryInfo.reason,
+      exitReason: exitInfo?.reason,
+      entryTotalValue: entity.entryInfo.totalValue,
+      exitTotalValue: exitInfo?.totalValue,
+      psychologyData: entity.psychologyData,
+      entryReasoning: entity.entryReasoning,
+      exitReasoning: entity.exitReasoning,
+      attachments: entity.attachments,
     );
   }
 
@@ -98,6 +162,38 @@ class TradeHoldingViewModel {
   final DateTime? exitTimestamp;
   final String? broker;
   final int executionCount;
+
+  // New fields from TradeDetails
+  final String? strategy;
+  final String? notes;
+  final List<String>? tags;
+  final String? userId;
+  final double? returnOnEquity;
+  final double? maxAdverseExcursion;
+  final double? maxFavorableExcursion;
+  final String? isin;
+  final String? rawSymbol;
+  final String? marketSegment;
+  final String? series;
+  final String? indexType;
+  final String? description;
+  final String? currency;
+  final String? lotSize;
+  final String? derivativeType;
+  final double? strikePrice;
+  final DateTime? expiryDate;
+  final String? optionType;
+  final String? underlyingSymbol;
+  final double? entryFees;
+  final double? exitFees;
+  final String? entryReason;
+  final String? exitReason;
+  final double? entryTotalValue;
+  final double? exitTotalValue;
+  final TradePsychologyData? psychologyData;
+  final TradeEntryExitReasoning? entryReasoning;
+  final TradeEntryExitReasoning? exitReasoning;
+  final List<Attachment>? attachments;
 
   /// Computed properties for UI display
   String get displaySymbol => symbol;
@@ -132,6 +228,43 @@ class TradeHoldingViewModel {
 
   bool get isProfit => (profitLoss ?? 0) >= 0;
   bool get isLoss => (profitLoss ?? 0) < 0;
+
+  // Display properties for new fields
+  String get displayStrategy => strategy ?? 'No strategy defined';
+  String get displayNotes => notes ?? 'No notes';
+  bool get hasTags => tags != null && tags!.isNotEmpty;
+  String get displayTags => tags?.join(', ') ?? 'No tags';
+
+  String get displayReturnOnEquity => returnOnEquity != null ? '${returnOnEquity!.toStringAsFixed(2)}%' : 'N/A';
+  String get displayMaxAdverseExcursion =>
+      maxAdverseExcursion != null ? '\$${maxAdverseExcursion!.toStringAsFixed(2)}' : 'N/A';
+  String get displayMaxFavorableExcursion =>
+      maxFavorableExcursion != null ? '\$${maxFavorableExcursion!.toStringAsFixed(2)}' : 'N/A';
+
+  String get displayCurrency => currency ?? 'USD';
+  String get displayLotSize => lotSize ?? 'N/A';
+
+  bool get isDerivative => derivativeType != null;
+  String get displayDerivativeType => derivativeType ?? 'N/A';
+  String get displayStrikePrice => strikePrice != null ? '\$${strikePrice!.toStringAsFixed(2)}' : 'N/A';
+  String get displayExpiryDate =>
+      expiryDate != null ? '${expiryDate!.day}/${expiryDate!.month}/${expiryDate!.year}' : 'N/A';
+  String get displayOptionType => optionType ?? 'N/A';
+  String get displayUnderlyingSymbol => underlyingSymbol ?? 'N/A';
+
+  String get displayEntryFees => entryFees != null ? '\$${entryFees!.toStringAsFixed(2)}' : 'N/A';
+  String get displayExitFees => exitFees != null ? '\$${exitFees!.toStringAsFixed(2)}' : 'N/A';
+  String get displayTotalFees =>
+      (entryFees != null || exitFees != null) ? '\$${((entryFees ?? 0) + (exitFees ?? 0)).toStringAsFixed(2)}' : 'N/A';
+
+  String get displayEntryReason => entryReason ?? 'Not specified';
+  String get displayExitReason => exitReason ?? 'Not specified';
+
+  bool get hasPsychologyData => psychologyData != null;
+  bool get hasEntryReasoning => entryReasoning != null;
+  bool get hasExitReasoning => exitReasoning != null;
+  bool get hasAttachments => attachments != null && attachments!.isNotEmpty;
+  int get attachmentCount => attachments?.length ?? 0;
 
   /// Convert list of entities to view models
   static List<TradeHoldingViewModel> fromEntityList(List<TradeDetails> entities) =>

@@ -22,19 +22,24 @@ part 'trade_controller_dtos.g.dart';
 class DerivativeInfoDto {
   const DerivativeInfoDto({
     this.derivativeType,
+    this.futureType,
     this.strikePrice,
     this.expiryDate,
     this.optionType,
     this.underlyingSymbol,
+    this.isCashSettled,
   });
 
   factory DerivativeInfoDto.fromJson(Map<String, dynamic> json) => _$DerivativeInfoDtoFromJson(json);
 
   final DerivativeTypes? derivativeType;
+  final String? futureType; // API sends this as string like "MONTHLY"
   final double? strikePrice;
   final String? expiryDate; // format: "yyyy-MM-dd"
+  @OptionTypesConverter()
   final OptionTypes? optionType;
   final String? underlyingSymbol;
+  final bool? isCashSettled;
 
   Map<String, dynamic> toJson() => _$DerivativeInfoDtoToJson(this);
 }
@@ -46,14 +51,18 @@ class InstrumentInfoDto {
     this.symbol,
     this.isin,
     this.rawSymbol,
+    this.baseSymbol,
     this.exchange,
     this.segment,
     this.series,
     this.indexType,
     this.derivativeInfo,
     this.description,
+    this.formattedDescription,
     this.currency,
     this.lotSize,
+    this.derivative,
+    this.index,
   });
 
   factory InstrumentInfoDto.fromJson(Map<String, dynamic> json) => _$InstrumentInfoDtoFromJson(json);
@@ -61,14 +70,20 @@ class InstrumentInfoDto {
   final String? symbol;
   final String? isin;
   final String? rawSymbol;
+  final String? baseSymbol;
   final ExchangeTypes? exchange;
+  @MarketSegmentsConverter()
   final MarketSegments? segment;
+  @SeriesTypesConverter()
   final SeriesTypes? series;
   final IndexTypes? indexType;
   final DerivativeInfoDto? derivativeInfo;
   final String? description;
+  final String? formattedDescription;
   final String? currency;
   final String? lotSize;
+  final bool? derivative;
+  final bool? index;
 
   Map<String, dynamic> toJson() => _$InstrumentInfoDtoToJson(this);
 }
@@ -153,8 +168,11 @@ class TradePsychologyDataDto {
 
   factory TradePsychologyDataDto.fromJson(Map<String, dynamic> json) => _$TradePsychologyDataDtoFromJson(json);
 
+  @EntryPsychologyFactorsListConverter()
   final List<EntryPsychologyFactors>? entryPsychologyFactors;
+  @ExitPsychologyFactorsListConverter()
   final List<ExitPsychologyFactors>? exitPsychologyFactors;
+  @BehaviorPatternsListConverter()
   final List<BehaviorPatterns>? behaviorPatterns;
   final Map<String, List<String>>? categorizedTags;
   final String? psychologyNotes;
@@ -184,7 +202,9 @@ class TradeEntryExitReasoningDto {
 
   factory TradeEntryExitReasoningDto.fromJson(Map<String, dynamic> json) => _$TradeEntryExitReasoningDtoFromJson(json);
 
+  @TechnicalReasonsListConverter()
   final List<TechnicalReasons>? technicalReasons;
+  @FundamentalReasonsListConverter()
   final List<FundamentalReasons>? fundamentalReasons;
   final String? primaryReason;
   final String? reasoningSummary;
@@ -221,6 +241,7 @@ class BasicInfoDto {
   final String? tradeDate; // format: "yyyy-MM-dd"
   final String? orderExecutionTime; // format: "yyyy-MM-dd'T'HH:mm:ss'Z'"
   final BrokerTypes? brokerType;
+  @TradeDirectionsConverter()
   final TradeDirections? tradeType;
 
   Map<String, dynamic> toJson() => _$BasicInfoDtoToJson(this);
@@ -243,13 +264,24 @@ class ExecutionInfoDto {
 /// DTO for F&O specific info
 @JsonSerializable()
 class FnOInfoDto {
-  const FnOInfoDto({this.expiryDate, this.strikePrice, this.optionType});
+  const FnOInfoDto({
+    this.instrumentType,
+    this.expiryDate,
+    this.strikePrice,
+    this.optionType,
+    this.lotSize,
+    this.premiumValue,
+  });
 
   factory FnOInfoDto.fromJson(Map<String, dynamic> json) => _$FnOInfoDtoFromJson(json);
 
+  final String? instrumentType;
   final String? expiryDate; // format: "yyyy-MM-dd"
   final double? strikePrice;
+  @OptionTypesConverter()
   final OptionTypes? optionType;
+  final String? lotSize;
+  final double? premiumValue;
 
   Map<String, dynamic> toJson() => _$FnOInfoDtoToJson(this);
 }
@@ -339,6 +371,8 @@ class TradeDetailsDto {
     this.psychologyData,
     this.entryReasoning,
     this.exitReasoning,
+    this.tradeDate,
+    this.tradeEndDate,
   });
 
   factory TradeDetailsDto.fromJson(Map<String, dynamic> json) => _$TradeDetailsDtoFromJson(json);
@@ -348,7 +382,9 @@ class TradeDetailsDto {
   final InstrumentInfoDto instrumentInfo;
   final String? symbol;
   final String? strategy;
+  @TradeStatusesConverter()
   final TradeStatuses status;
+  @TradeDirectionsConverter()
   final TradeDirections tradePositionType;
   final EntryExitInfoDto entryInfo;
   final EntryExitInfoDto? exitInfo;
@@ -361,6 +397,8 @@ class TradeDetailsDto {
   final TradePsychologyDataDto? psychologyData;
   final TradeEntryExitReasoningDto? entryReasoning;
   final TradeEntryExitReasoningDto? exitReasoning;
+  final String? tradeDate; // format: "yyyy-MM-dd"
+  final String? tradeEndDate; // format: "yyyy-MM-dd"
 
   Map<String, dynamic> toJson() => _$TradeDetailsDtoToJson(this);
 }
