@@ -191,6 +191,21 @@ class TradeSidebar extends StatelessWidget {
 
                   // Quick Actions - only show in full mode
                   if (isFull) ...[
+                    // Add Trade action
+                    if (currentPortfolioId != null)
+                      _buildQuickActionItem(
+                        context,
+                        icon: Icons.add_chart,
+                        title: 'Add Trade',
+                        subtitle: 'Record new position',
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/trade/add',
+                            arguments: {'portfolioId': currentPortfolioId, 'portfolioName': currentPortfolioName},
+                          );
+                        },
+                      ),
                     _buildQuickActionItem(
                       context,
                       icon: Icons.analytics,
