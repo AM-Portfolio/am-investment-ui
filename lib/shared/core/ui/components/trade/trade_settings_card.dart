@@ -24,11 +24,10 @@ class TradeSettingsCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,10 +35,10 @@ class TradeSettingsCard extends StatelessWidget {
             children: [
               Icon(Icons.settings, size: 16, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
-              Text('Trade Settings', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Trade Settings', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(

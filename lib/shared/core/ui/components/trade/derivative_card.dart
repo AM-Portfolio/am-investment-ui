@@ -30,105 +30,90 @@ class DerivativeCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
+      padding: const EdgeInsets.all(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.analytics, size: 16, color: Colors.purple.shade700),
-                const SizedBox(width: 8),
-                Text('Derivative (Optional)', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
-              ],
-            ),
+          Row(
+            children: [
+              Icon(Icons.analytics, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text('Derivative (Optional)', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
+          const SizedBox(height: 10),
+          DropdownButtonFormField<DerivativeTypes>(
+            value: selectedDerivativeType,
+            decoration: const InputDecoration(
+              labelText: 'Type',
+              prefixIcon: Icon(Icons.analytics, size: 18),
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            items: DerivativeTypes.values
+                .map(
+                  (type) => DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
+                )
+                .toList(),
+            onChanged: onDerivativeTypeChanged,
+          ),
+          if (selectedDerivativeType != null) ...[
+            const SizedBox(height: 8),
+            Row(
               children: [
-                DropdownButtonFormField<DerivativeTypes>(
-                  value: selectedDerivativeType,
-                  decoration: const InputDecoration(
-                    labelText: 'Type',
-                    prefixIcon: Icon(Icons.analytics, size: 18),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  items: DerivativeTypes.values
-                      .map(
-                        (type) =>
-                            DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
-                      )
-                      .toList(),
-                  onChanged: onDerivativeTypeChanged,
-                ),
-                if (selectedDerivativeType != null) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: strikePriceController,
-                          decoration: const InputDecoration(
-                            labelText: 'Strike',
-                            prefixIcon: Icon(Icons.gavel, size: 18),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: DropdownButtonFormField<OptionTypes>(
-                          value: selectedOptionType,
-                          decoration: const InputDecoration(
-                            labelText: 'Option',
-                            prefixIcon: Icon(Icons.compare_arrows, size: 18),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
-                          items: OptionTypes.values
-                              .map(
-                                (type) => DropdownMenuItem(
-                                  value: type,
-                                  child: Text(type.toString().split('.').last.toUpperCase()),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: onOptionTypeChanged,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  InkWell(
-                    onTap: onExpiryDateTap,
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Expiry',
-                        prefixIcon: Icon(Icons.calendar_today, size: 18),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      child: Text(
-                        expiryDate?.toLocal().toString().split(' ')[0] ?? 'Not selected',
-                        style: theme.textTheme.bodyMedium,
-                      ),
+                Expanded(
+                  child: TextField(
+                    controller: strikePriceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Strike',
+                      prefixIcon: Icon(Icons.gavel, size: 18),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
+                    keyboardType: TextInputType.number,
                   ),
-                ],
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<OptionTypes>(
+                    value: selectedOptionType,
+                    decoration: const InputDecoration(
+                      labelText: 'Option',
+                      prefixIcon: Icon(Icons.compare_arrows, size: 18),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: OptionTypes.values
+                        .map(
+                          (type) =>
+                              DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
+                        )
+                        .toList(),
+                    onChanged: onOptionTypeChanged,
+                  ),
+                ),
               ],
             ),
-          ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: onExpiryDateTap,
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Expiry',
+                  prefixIcon: Icon(Icons.calendar_today, size: 18),
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                child: Text(
+                  expiryDate?.toLocal().toString().split(' ')[0] ?? 'Not selected',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

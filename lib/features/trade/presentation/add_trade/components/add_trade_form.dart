@@ -237,10 +237,10 @@ class _AddTradeFormState extends State<AddTradeForm> {
   }
 
   Widget _buildProgressStepper(ThemeData theme) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     decoration: BoxDecoration(
       color: theme.colorScheme.surface,
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+      border: Border(bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1))),
     ),
     child: Row(
       children: List.generate(_totalSteps, (index) {
@@ -253,8 +253,8 @@ class _AddTradeFormState extends State<AddTradeForm> {
                 child: Column(
                   children: [
                     Container(
-                      width: 36,
-                      height: 36,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: isActive || isCompleted
                             ? theme.colorScheme.primary
@@ -263,7 +263,7 @@ class _AddTradeFormState extends State<AddTradeForm> {
                       ),
                       child: Center(
                         child: isCompleted
-                            ? Icon(Icons.check, color: theme.colorScheme.onPrimary, size: 20)
+                            ? Icon(Icons.check, color: theme.colorScheme.onPrimary, size: 16)
                             : Text(
                                 '${index + 1}',
                                 style: TextStyle(
@@ -271,16 +271,18 @@ class _AddTradeFormState extends State<AddTradeForm> {
                                       ? theme.colorScheme.onPrimary
                                       : theme.colorScheme.onSurface.withOpacity(0.5),
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 13,
                                 ),
                               ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       _getStepTitle(index),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                         color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+                        fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
                     ),

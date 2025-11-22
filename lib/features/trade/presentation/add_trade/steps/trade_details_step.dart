@@ -143,7 +143,7 @@ class TradeDetailsStep extends StatelessWidget {
               onExchangeChanged: onExchangeChanged,
               onSegmentChanged: onSegmentChanged,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             EntryCard(
               entryDate: entryDate,
               entryPriceController: entryPriceController,
@@ -154,7 +154,7 @@ class TradeDetailsStep extends StatelessWidget {
 
           // Exit Section (if closed)
           if (selectedStatus == TradeStatuses.closed) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ExitCard(
               exitDate: exitDate,
               exitPriceController: exitPriceController,
@@ -165,7 +165,7 @@ class TradeDetailsStep extends StatelessWidget {
           ],
 
           // Broker & Order Type Row
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TradeSettingsCard(
             selectedBroker: selectedBroker,
             selectedOrderType: selectedOrderType,
@@ -175,7 +175,7 @@ class TradeDetailsStep extends StatelessWidget {
 
           // Derivatives (if any)
           if (_isDerivativeSegment) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             DerivativeCard(
               selectedDerivativeType: selectedDerivativeType,
               selectedOptionType: selectedOptionType,

@@ -21,77 +21,65 @@ class EntryCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
+      padding: const EdgeInsets.all(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.login, size: 16, color: Colors.green.shade700),
-                const SizedBox(width: 8),
-                Text('Entry', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
-              ],
+          Row(
+            children: [
+              Icon(Icons.login, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text('Entry', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: onDateTap,
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Date *',
+                prefixIcon: Icon(Icons.event, size: 18),
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              child: Text(
+                entryDate?.toLocal().toString().split(' ')[0] ?? 'Not selected',
+                style: theme.textTheme.bodyMedium,
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                InkWell(
-                  onTap: onDateTap,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Date *',
-                      prefixIcon: Icon(Icons.event, size: 18),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    child: Text(
-                      entryDate?.toLocal().toString().split(' ')[0] ?? 'Not selected',
-                      style: theme.textTheme.bodyMedium,
-                    ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: entryPriceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Price *',
+                    prefixIcon: Icon(Icons.currency_rupee, size: 18),
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
+                  keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: entryPriceController,
-                        decoration: const InputDecoration(
-                          labelText: 'Price *',
-                          prefixIcon: Icon(Icons.currency_rupee, size: 18),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: entryQuantityController,
-                        decoration: const InputDecoration(
-                          labelText: 'Qty *',
-                          prefixIcon: Icon(Icons.tag, size: 18),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: entryQuantityController,
+                  decoration: const InputDecoration(
+                    labelText: 'Qty *',
+                    prefixIcon: Icon(Icons.tag, size: 18),
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  keyboardType: TextInputType.number,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
