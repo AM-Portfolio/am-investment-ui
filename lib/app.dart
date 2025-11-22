@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/auth_providers.dart';
 import 'features/authentication/presentation/pages/auth_wrapper.dart';
@@ -8,10 +9,12 @@ import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/authentication/presentation/pages/reset_password_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/trade/presentation/add_trade/pages/add_trade_web_page.dart';
+import 'features/trade/presentation/cubit/trade_controller_cubit.dart';
 import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
 import 'features/trade/presentation/web/pages/trade_calendar_analytics_web_page.dart';
 import 'features/trade/presentation/web/pages/trade_holdings_dashboard_web_page.dart';
 import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
+import 'features/trade/providers/trade_controller_providers.dart';
 // import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
 
 /// Root app widget that sets up DI, router, and theme.
@@ -68,9 +71,20 @@ class _MaterialApp extends StatelessWidget {
         case '/trade/add':
           final args = settings.arguments! as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => AddTradeWebPage(
-              portfolioId: args['portfolioId']! as String,
-              portfolioName: args['portfolioName'] as String?,
+            builder: (context) => Consumer(
+              builder: (context, ref, _) {
+                // Get TradeControllerCubit from Riverpod provider
+                final tradeControllerCubit = ref.watch(tradeControllerCubitProvider);
+
+                // Wrap with BlocProvider so AddTradeWebPage can access it via context.read()
+                return BlocProvider<TradeControllerCubit>.value(
+                  value: tradeControllerCubit,
+                  child: AddTradeWebPage(
+                    portfolioId: args['portfolioId']! as String,
+                    portfolioName: args['portfolioName'] as String?,
+                  ),
+                );
+              },
             ),
           );
         default:

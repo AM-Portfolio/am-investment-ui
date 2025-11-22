@@ -23,6 +23,15 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   String _currentPage = 'Portfolio';
 
+  @override
+  void initState() {
+    super.initState();
+    // Check authentication status on app startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthCubit>().checkAuthStatus();
+    });
+  }
+
   Future<void> _handleLogin(String userId) async {
     // Login is already handled by AuthCubit
     setState(() {
@@ -52,12 +61,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Widget _getCurrentScreen(String userId) {
+    AppLogger.debug(
+      '🎯 _getCurrentScreen called - page: "$_currentPage", userId: "$userId" (length: ${userId.length})',
+      tag: 'AuthWrapper',
+    );
+
     switch (_currentPage) {
       case 'Portfolio':
+        AppLogger.debug('📊 Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PortfolioScreen(userId: userId);
       case 'Dashboard':
         return _buildPlaceholderScreen('Dashboard');
       case 'Trade':
+        AppLogger.debug('📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PlatformUtils.isWeb
             ? TradeWebScreen(userId: userId)
             : TradeMobileScreen(userId: userId, onBack: () => _handleNavigation('Portfolio'));
@@ -68,6 +84,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       case 'Reports':
         return _buildPlaceholderScreen('Reports');
       default:
+        AppLogger.debug('📊 Default: Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PortfolioScreen(userId: userId);
     }
   }
@@ -88,24 +105,54 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) => BlocBuilder<AuthCubit, AuthState>(
     builder: (context, state) {
+      AppLogger.debug('🔄 AuthWrapper build - state: ${state.runtimeType}', tag: 'AuthWrapper');
+
       // Show loading while authentication is in progress
       if (state is AuthLoading || state is AuthInitial) {
+        AppLogger.debug('⏳ Showing loading screen', tag: 'AuthWrapper');
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
 
       // Show error if authentication failed
       if (state is AuthError) {
-        AppLogger.error('AuthWrapper: Authentication error - ${state.message}', tag: 'AuthWrapper');
+        AppLogger.error('❌ AuthWrapper: Authentication error - ${state.message}', tag: 'AuthWrapper');
       }
 
       // Show login screen if not authenticated
       if (state is! Authenticated) {
+        AppLogger.info('🔓 Not authenticated - showing login screen', tag: 'AuthWrapper');
         return LoginScreen(onLogin: _handleLogin);
       }
 
       // Show main app if authenticated
       final userId = state.user.id;
-      AppLogger.info('AuthWrapper: User authenticated - ${state.user.email}', tag: 'AuthWrapper');
+      final email = state.user.email;
+
+      AppLogger.debug(
+        '🔐 Authenticated state received - userId: "$userId" (length: ${userId.length}), email: "$email"',
+        tag: 'AuthWrapper',
+      );
+
+      // CRITICAL: Validate userId is not empty before proceeding
+      if (userId.isEmpty) {
+        AppLogger.error(
+          '🚨 CRITICAL: Authenticated state but userId is EMPTY! Email: "$email", authMethod: ${state.user.authMethod}',
+          tag: 'AuthWrapper',
+        );
+        AppLogger.debug('🔄 Forcing logout due to empty userId...', tag: 'AuthWrapper');
+        // Force logout and show login screen
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<AuthCubit>().logout();
+        });
+        return LoginScreen(onLogin: _handleLogin);
+      }
+
+      AppLogger.info(
+        '✅ AuthWrapper: User authenticated successfully - userId: "$userId", email: "$email"',
+        tag: 'AuthWrapper',
+      );
+
+      AppLogger.debug('🏗️ Building main app screen with userId: "$userId"', tag: 'AuthWrapper');
 
       return PlatformUtils.isWeb
           ? WebLayout(

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../../../config/app_config.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../../../../core/utils/logger.dart';
@@ -21,6 +23,10 @@ abstract class TradeControllerRemoteDataSource {
   /// PUT /api/v1/trades/details/{tradeId}
   /// Update an existing trade
   Future<TradeDetailsDto> updateTrade({required String tradeId, required TradeDetailsDto tradeDetails});
+
+  /// DELETE /api/v1/trades/details/{tradeId}
+  /// Delete a trade by ID
+  Future<void> deleteTrade(String tradeId);
 
   /// GET /api/v1/trades/filter
   /// Filter trades by multiple criteria with pagination
@@ -113,9 +119,22 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     try {
       final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details';
 
+      // Log a summary first (single line) - use DTO properties directly to avoid casting issues
+      AppLogger.info(
+        '📋 Payload Summary: portfolioId=${tradeDetails.portfolioId}, symbol=${tradeDetails.instrumentInfo.symbol}, tradeType=${tradeDetails.tradePositionType}, userId=${tradeDetails.userId}',
+        tag: 'TradeControllerRemoteDataSource',
+      );
+
+      // Convert to JSON for API call
+      final jsonPayload = tradeDetails.toJson();
+
+      // Log the complete JSON payload for debugging (pretty printed, multi-line)
+      final prettyJson = const JsonEncoder.withIndent('  ').convert(jsonPayload);
+      AppLogger.debug('📤 POST Request Payload (Complete JSON):\n$prettyJson', tag: 'TradeControllerRemoteDataSource');
+
       final response = await _apiClient.post<TradeDetailsDto>(
         fullUri,
-        body: tradeDetails.toJson(),
+        body: jsonPayload,
         parser: (data) => TradeDetailsDto.fromJson(data! as Map<String, dynamic>),
       );
 
@@ -150,6 +169,28 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     } catch (e) {
       AppLogger.error(
         'Failed to update trade',
+        tag: 'TradeControllerRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteTrade(String tradeId) async {
+    AppLogger.methodEntry('deleteTrade', tag: 'TradeControllerRemoteDataSource', params: {'tradeId': tradeId});
+
+    try {
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/$tradeId';
+
+      await _apiClient.delete<void>(fullUri, parser: (_) {});
+
+      AppLogger.info('Trade deleted successfully - tradeId: $tradeId', tag: 'TradeControllerRemoteDataSource');
+      AppLogger.methodExit('deleteTrade', tag: 'TradeControllerRemoteDataSource');
+    } catch (e) {
+      AppLogger.error(
+        'Failed to delete trade',
         tag: 'TradeControllerRemoteDataSource',
         error: e,
         stackTrace: StackTrace.current,

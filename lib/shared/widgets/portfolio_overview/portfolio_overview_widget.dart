@@ -4,31 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/portfolio/providers/portfolio_providers.dart';
 import 'adapters/portfolio_overview_data_adapter.dart';
 import 'charts/base/chart_colors.dart';
-import 'charts/sector_allocation/animated_sector_donut_chart.dart';
 import 'charts/market_cap_allocation/animated_market_cap_chart.dart';
+import 'charts/sector_allocation/animated_sector_donut_chart.dart';
 import 'configs/portfolio_overview_config.dart';
 import 'models/portfolio_overview_data.dart';
 
 /// Universal portfolio overview widget
 class PortfolioOverviewWidget extends ConsumerStatefulWidget {
-  const PortfolioOverviewWidget({
-    required this.userId,
-    super.key,
-    this.config,
-    this.onRefresh,
-  });
+  const PortfolioOverviewWidget({required this.userId, super.key, this.config, this.onRefresh});
 
   final String userId;
   final PortfolioOverviewConfig? config;
   final VoidCallback? onRefresh;
 
   @override
-  ConsumerState<PortfolioOverviewWidget> createState() =>
-      _PortfolioOverviewWidgetState();
+  ConsumerState<PortfolioOverviewWidget> createState() => _PortfolioOverviewWidgetState();
 }
 
-class _PortfolioOverviewWidgetState
-    extends ConsumerState<PortfolioOverviewWidget> {
+class _PortfolioOverviewWidgetState extends ConsumerState<PortfolioOverviewWidget> {
   late PortfolioOverviewConfig _config;
   ChartType _selectedChartType = ChartType.donut;
   AllocationType _selectedAllocationType = AllocationType.sector;
@@ -44,35 +37,27 @@ class _PortfolioOverviewWidgetState
   @override
   Widget build(BuildContext context) {
     final summaryAsync = ref.watch(portfolioSummaryProvider(widget.userId));
-    final analyticsAsync = ref.watch(
-      portfolioAnalyticsWithDefaultsProvider(widget.userId),
-    );
+    final analyticsAsync = ref.watch(portfolioAnalyticsWithDefaultsProvider(widget.userId));
     final holdingsAsync = ref.watch(portfolioHoldingsProvider(widget.userId));
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder(
-          future: Future.wait([
-            summaryAsync.value != null
-                ? Future.value(summaryAsync.value!)
-                : summaryAsync.asData?.value,
-            analyticsAsync.value != null
-                ? Future.value(analyticsAsync.value!)
-                : analyticsAsync.asData?.value,
-            holdingsAsync.value != null
-                ? Future.value(holdingsAsync.value!)
-                : holdingsAsync.asData?.value,
-          ].whereType<Future>().toList()),
+          future: Future.wait(
+            [
+              summaryAsync.value != null ? Future.value(summaryAsync.value!) : summaryAsync.asData?.value,
+              analyticsAsync.value != null ? Future.value(analyticsAsync.value!) : analyticsAsync.asData?.value,
+              holdingsAsync.value != null ? Future.value(holdingsAsync.value!) : holdingsAsync.asData?.value,
+            ].whereType<Future>().toList(),
+          ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {
-              return Center(
-                child: Text('Error loading overview: ${snapshot.error}'),
-              );
+              return Center(child: Text('Error loading overview: ${snapshot.error}'));
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -101,9 +86,7 @@ class _PortfolioOverviewWidgetState
                 }
 
                 if (overviewSnapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${overviewSnapshot.error}'),
-                  );
+                  return Center(child: Text('Error: ${overviewSnapshot.error}'));
                 }
 
                 final overviewData = overviewSnapshot.data;
@@ -120,10 +103,7 @@ class _PortfolioOverviewWidgetState
     );
   }
 
-  Widget _buildOverviewContent(
-    BuildContext context,
-    PortfolioOverviewData data,
-  ) {
+  Widget _buildOverviewContent(BuildContext context, PortfolioOverviewData data) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,19 +113,14 @@ class _PortfolioOverviewWidgetState
             children: [
               const Icon(Icons.dashboard, size: 24),
               const SizedBox(width: 8),
-              Text(
-                'Portfolio Overview',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text('Portfolio Overview', style: Theme.of(context).textTheme.titleLarge),
               const Spacer(),
               if (_config.enableRefresh)
                 IconButton(
                   icon: const Icon(Icons.refresh),
                   onPressed: () {
                     ref.invalidate(portfolioSummaryProvider(widget.userId));
-                    ref.invalidate(
-                      portfolioAnalyticsWithDefaultsProvider(widget.userId),
-                    );
+                    ref.invalidate(portfolioAnalyticsWithDefaultsProvider(widget.userId));
                     ref.invalidate(portfolioHoldingsProvider(widget.userId));
                     widget.onRefresh?.call();
                   },
@@ -163,17 +138,13 @@ class _PortfolioOverviewWidgetState
           if (_config.showMovers) const SizedBox(height: 24),
 
           // Allocation Charts
-          if (_config.showAllocation && _config.showCharts)
-            _buildAllocationSection(context, data),
+          if (_config.showAllocation && _config.showCharts) _buildAllocationSection(context, data),
         ],
       ),
     );
   }
 
-  Widget _buildSummarySection(
-    BuildContext context,
-    OverviewSummaryData summary,
-  ) {
+  Widget _buildSummarySection(BuildContext context, OverviewSummaryData summary) {
     return Wrap(
       spacing: 16,
       runSpacing: 16,
@@ -201,13 +172,7 @@ class _PortfolioOverviewWidgetState
           summary.totalGainLoss >= 0 ? Colors.green : Colors.red,
           subtitle: '${summary.totalGainLossPercent.toStringAsFixed(2)}%',
         ),
-        _buildSummaryCard(
-          context,
-          'Holdings',
-          '${summary.totalHoldings}',
-          Icons.list_alt,
-          Colors.orange,
-        ),
+        _buildSummaryCard(context, 'Holdings', '${summary.totalHoldings}', Icons.list_alt, Colors.orange),
       ],
     );
   }
@@ -238,28 +203,16 @@ class _PortfolioOverviewWidgetState
               if (subtitle != null)
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold),
                 ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
+          Text(title, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
           const SizedBox(height: 4),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -269,99 +222,63 @@ class _PortfolioOverviewWidgetState
   Widget _buildMoversSection(BuildContext context, PortfolioOverviewData data) {
     return Row(
       children: [
-        Expanded(
-          child: _buildMoversCard(
-            context,
-            'Top Gainers',
-            data.topGainers,
-            ChartColors.positiveColor,
-          ),
-        ),
+        Expanded(child: _buildMoversCard(context, 'Top Gainers', data.topGainers, ChartColors.positiveColor)),
         const SizedBox(width: 16),
-        Expanded(
-          child: _buildMoversCard(
-            context,
-            'Top Losers',
-            data.topLosers,
-            ChartColors.negativeColor,
-          ),
-        ),
+        Expanded(child: _buildMoversCard(context, 'Top Losers', data.topLosers, ChartColors.negativeColor)),
       ],
     );
   }
 
-  Widget _buildMoversCard(
-    BuildContext context,
-    String title,
-    List<OverviewMoversData> movers,
-    Color color,
-  ) {
+  Widget _buildMoversCard(BuildContext context, String title, List<OverviewMoversData> movers, Color color) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            ...movers.take(5).map((mover) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            ...movers
+                .take(5)
+                .map(
+                  (mover) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(mover.symbol, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              if (mover.sector != null)
+                                Text(mover.sector!, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              mover.symbol,
+                              '\$${mover.currentPrice.toStringAsFixed(2)}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            if (mover.sector != null)
-                              Text(
-                                mover.sector!,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
+                            Text(
+                              '${mover.changePercent >= 0 ? '+' : ''}${mover.changePercent.toStringAsFixed(2)}%',
+                              style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold),
+                            ),
                           ],
                         ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '\$${mover.currentPrice.toStringAsFixed(2)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            '${mover.changePercent >= 0 ? '+' : ''}${mover.changePercent.toStringAsFixed(2)}%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )),
+                ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAllocationSection(
-    BuildContext context,
-    PortfolioOverviewData data,
-  ) {
+  Widget _buildAllocationSection(BuildContext context, PortfolioOverviewData data) {
     final currentAllocation = _selectedAllocationType == AllocationType.sector
         ? data.sectorAllocation
         : data.marketCapAllocation;
@@ -371,13 +288,12 @@ class _PortfolioOverviewWidgetState
       children: [
         Row(
           children: [
-            Text(
-              _selectedAllocationType == AllocationType.sector
-                  ? 'Sector Allocation'
-                  : 'Market Cap Allocation',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+            Flexible(
+              child: Text(
+                _selectedAllocationType == AllocationType.sector ? 'Sector Allocation' : 'Market Cap Allocation',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(width: 12),
             Container(
@@ -416,17 +332,12 @@ class _PortfolioOverviewWidgetState
                   _selectedAllocationType = newSelection.first;
                 });
               },
-              style: ButtonStyle(
-                visualDensity: VisualDensity.compact,
-              ),
+              style: ButtonStyle(visualDensity: VisualDensity.compact),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          height: 350,
-          child: _buildSelectedChart(currentAllocation),
-        ),
+        SizedBox(height: 350, child: _buildSelectedChart(currentAllocation)),
       ],
     );
   }
@@ -437,18 +348,11 @@ class _PortfolioOverviewWidgetState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.pie_chart_outline,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No ${_selectedAllocationType == AllocationType.sector ? "sector" : "market cap"} data available',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -473,12 +377,14 @@ class _PortfolioOverviewWidgetState
           DataColumn(label: Text('Holdings')),
         ],
         rows: allocations.map((item) {
-          return DataRow(cells: [
-            DataCell(Text(item.label)),
-            DataCell(Text('\$${item.value.toStringAsFixed(2)}')),
-            DataCell(Text('${item.percentage.toStringAsFixed(1)}%')),
-            DataCell(Text('${item.count}')),
-          ]);
+          return DataRow(
+            cells: [
+              DataCell(Text(item.label)),
+              DataCell(Text('\$${item.value.toStringAsFixed(2)}')),
+              DataCell(Text('${item.percentage.toStringAsFixed(1)}%')),
+              DataCell(Text('${item.count}')),
+            ],
+          );
         }).toList(),
       ),
     );

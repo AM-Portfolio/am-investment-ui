@@ -18,7 +18,7 @@ import 'metrics_filter_config_dto.dart';
 part 'trade_controller_dtos.g.dart';
 
 /// DTO for derivative information
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class DerivativeInfoDto {
   const DerivativeInfoDto({
     this.derivativeType,
@@ -45,7 +45,7 @@ class DerivativeInfoDto {
 }
 
 /// DTO for instrument information
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class InstrumentInfoDto {
   const InstrumentInfoDto({
     this.symbol,
@@ -89,7 +89,7 @@ class InstrumentInfoDto {
 }
 
 /// DTO for entry/exit information
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class EntryExitInfoDto {
   const EntryExitInfoDto({this.timestamp, this.price, this.quantity, this.totalValue, this.fees, this.reason});
 
@@ -106,7 +106,7 @@ class EntryExitInfoDto {
 }
 
 /// DTO for trade metrics
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TradeMetricsDto {
   const TradeMetricsDto({
     this.profitLoss,
@@ -326,7 +326,7 @@ class FinancialsDto {
 }
 
 /// DTO for trade model (execution based on broker trade book)
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TradeModelDto {
   const TradeModelDto({
     this.basicInfo,
@@ -350,7 +350,7 @@ class TradeModelDto {
 }
 
 /// DTO for complete trade details
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TradeDetailsDto {
   const TradeDetailsDto({
     required this.tradeId,
@@ -430,7 +430,7 @@ class FilterSummaryDto {
 }
 
 /// DTO for filter trade details request
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class FilterTradeDetailsRequestDto {
   const FilterTradeDetailsRequestDto({required this.userId, this.favoriteFilterId, this.metricsConfig});
 
@@ -445,7 +445,7 @@ class FilterTradeDetailsRequestDto {
 }
 
 /// DTO for filter trade details response
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class FilterTradeDetailsResponseDto {
   const FilterTradeDetailsResponseDto({
     this.trades,
@@ -476,7 +476,7 @@ class FilterTradeDetailsResponseDto {
 }
 
 /// DTO for paginated trade response (GET /api/v1/trades/filter)
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PaginatedTradeResponseDto {
   const PaginatedTradeResponseDto({this.content, this.totalElements, this.totalPages, this.size, this.number});
 

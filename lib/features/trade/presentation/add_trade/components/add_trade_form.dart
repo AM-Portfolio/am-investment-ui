@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/logger.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';
@@ -12,10 +13,12 @@ import '../../../internal/domain/enums/psychology_factors.dart';
 import '../../../internal/domain/enums/technical_reasons.dart';
 import '../../../internal/domain/enums/trade_directions.dart';
 import '../../../internal/domain/enums/trade_statuses.dart';
+import '../mappers/trade_form_mapper.dart';
 import '../steps/optional_details_step.dart';
 import '../steps/review_step.dart';
 // Modular step components
 import '../steps/trade_details_step.dart';
+import '../validators/trade_form_validator.dart';
 
 /// Modular 3-step Add Trade Form
 /// Step 1: Trade Details (instrument + entry/exit combined)
@@ -112,27 +115,106 @@ class _AddTradeFormState extends State<AddTradeForm> {
   }
 
   void _saveTrade() {
-    // TODO: Implement proper TradeDetails construction with nested entities
-    // See IMPLEMENTATION_STATUS.md for the correct structure
+    AppLogger.methodEntry('_saveTrade', tag: 'AddTradeForm');
+    AppLogger.info('💾 User clicked Save Trade button', tag: 'AddTradeForm');
 
-    // For now, show a placeholder message
-    if (widget.onSave != null) {
-      // This will be replaced with proper entity construction
+    try {
+      AppLogger.debug('🔍 Validating required fields...', tag: 'AddTradeForm');
+
+      // Validate required fields
+      TradeFormValidator.validateRequiredFields(
+        symbol: _symbolController.text,
+        selectedExchange: _selectedExchange,
+        selectedSegment: _selectedSegment,
+        entryDate: _entryDate,
+        entryPrice: _entryPriceController.text,
+        entryQuantity: _entryQuantityController.text,
+        selectedBroker: _selectedBroker,
+      );
+
+      AppLogger.info('✅ Required fields validation passed', tag: 'AddTradeForm');
+      AppLogger.debug('📊 Parsing numeric values...', tag: 'AddTradeForm');
+
+      // Parse numeric values
+      final entryPrice = double.tryParse(_entryPriceController.text);
+      final entryQuantity = double.tryParse(_entryQuantityController.text);
+      final exitPrice = _exitPriceController.text.isNotEmpty ? double.tryParse(_exitPriceController.text) : null;
+      final exitQuantity = _exitQuantityController.text.isNotEmpty
+          ? double.tryParse(_exitQuantityController.text)
+          : null;
+      final strikePrice = _strikePriceController.text.isNotEmpty ? double.tryParse(_strikePriceController.text) : null;
+
+      AppLogger.debug(
+        '💰 Parsed values - entryPrice: $entryPrice, entryQuantity: $entryQuantity, exitPrice: $exitPrice',
+        tag: 'AddTradeForm',
+      );
+
+      // Validate numeric values
+      TradeFormValidator.validateNumericValues(entryPrice: entryPrice, entryQuantity: entryQuantity);
+
+      AppLogger.info('✅ Numeric validation passed', tag: 'AddTradeForm');
+
+      // Validate closed trade data
+      TradeFormValidator.validateClosedTrade(
+        status: _selectedStatus,
+        exitDate: _exitDate,
+        exitPrice: exitPrice,
+        exitQuantity: exitQuantity,
+      );
+
+      AppLogger.info('✅ Closed trade validation passed', tag: 'AddTradeForm');
+      AppLogger.debug('🏗️ Building TradeDetails entity...', tag: 'AddTradeForm');
+
+      // Map form data to TradeDetails entity
+      final tradeDetails = TradeFormMapper.mapToTradeDetails(
+        symbol: _symbolController.text,
+        exchange: _selectedExchange,
+        segment: _selectedSegment,
+        isin: _isinController.text.isNotEmpty ? _isinController.text : null,
+        description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
+        derivativeType: _selectedDerivativeType,
+        strikePrice: strikePrice,
+        optionType: _selectedOptionType,
+        expiryDate: _expiryDate,
+        entryDate: _entryDate,
+        entryPrice: entryPrice!,
+        entryQuantity: entryQuantity!,
+        exitDate: _exitDate,
+        exitPrice: exitPrice,
+        exitQuantity: exitQuantity,
+        direction: _selectedDirection,
+        status: _selectedStatus,
+        entryPsychology: _selectedEntryPsychology,
+        exitPsychology: _selectedExitPsychology,
+        technicalReasons: _selectedTechnicalReasons,
+        fundamentalReasons: _selectedFundamentalReasons,
+        strategy: _strategyController.text.isNotEmpty ? _strategyController.text : null,
+        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+        portfolioId: widget.initialData?.portfolioId,
+      );
+
+      AppLogger.info(
+        '✅ TradeDetails entity created - symbol: ${_symbolController.text}, portfolioId: ${widget.initialData?.portfolioId}',
+        tag: 'AddTradeForm',
+      );
+
+      // Call the parent's onSave callback
+      if (widget.onSave != null) {
+        AppLogger.info('📤 Calling onSave callback to parent', tag: 'AddTradeForm');
+        widget.onSave!(tradeDetails);
+      } else {
+        AppLogger.warning('⚠️ No onSave callback provided!', tag: 'AddTradeForm');
+      }
+
+      AppLogger.methodExit('_saveTrade', tag: 'AddTradeForm', result: 'success');
+    } catch (e) {
+      AppLogger.error('❌ Trade save failed', tag: 'AddTradeForm', error: e, stackTrace: StackTrace.current);
+
+      // Show error if validation or construction fails
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Save functionality pending - see IMPLEMENTATION_STATUS.md')));
+      ).showSnackBar(SnackBar(content: Text('Failed to save trade: ${e.toString()}'), backgroundColor: Colors.red));
     }
-
-    /* 
-    Proper implementation should construct:
-    1. InstrumentInfo from symbol, exchange, segment, derivative fields
-    2. EntryExitInfo for entry and exit data
-    3. TradePsychologyData from psychology selections
-    4. TradeEntryExitReasoning from reasoning selections
-    5. Then pass complete TradeDetails entity to widget.onSave
-    
-    See IMPLEMENTATION_STATUS.md for complete code example
-    */
   }
 
   @override

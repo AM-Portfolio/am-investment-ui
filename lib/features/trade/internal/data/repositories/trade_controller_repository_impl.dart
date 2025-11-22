@@ -151,6 +151,28 @@ class TradeControllerRepositoryImpl implements TradeControllerRepository {
   }
 
   @override
+  Future<void> deleteTrade(String tradeId) async {
+    AppLogger.methodEntry('deleteTrade', tag: 'TradeControllerRepository', params: {'tradeId': tradeId});
+
+    try {
+      await _remoteDataSource.deleteTrade(tradeId);
+
+      // Clear cache to force refresh
+      await clearCache();
+
+      AppLogger.methodExit('deleteTrade', tag: 'TradeControllerRepository');
+    } catch (e) {
+      AppLogger.error(
+        'Failed to delete trade',
+        tag: 'TradeControllerRepository',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      rethrow;
+    }
+  }
+
+  @override
   Future<PaginatedTradeResponse> getTradesByFilters({
     List<String>? portfolioIds,
     List<String>? symbols,

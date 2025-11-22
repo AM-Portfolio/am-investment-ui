@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
+import '../../../authentication/presentation/cubit/auth_cubit.dart';
 import '../../providers/trade_internal_providers.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
 import '../models/trade_portfolio_view_model.dart';
@@ -43,7 +45,27 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     _currentPortfolioId = widget.selectedPortfolioId;
     _currentPortfolioName = widget.selectedPortfolioName;
 
-    AppLogger.info('TradeWebScreen initialized with view: $_selectedView', tag: 'TradeWebScreen');
+    // CRITICAL: Validate userId is not empty
+    AppLogger.debug(
+      '🔍 TradeWebScreen.initState() called with userId: "${widget.userId}" (length: ${widget.userId.length})',
+      tag: 'TradeWebScreen',
+    );
+
+    if (widget.userId.isEmpty) {
+      AppLogger.error(
+        '🚨 CRITICAL: TradeWebScreen initialized with EMPTY userId! This should NOT happen!',
+        tag: 'TradeWebScreen',
+      );
+      AppLogger.error(
+        '🔎 Debug info - view: $_selectedView, portfolioId: $_currentPortfolioId, portfolioName: $_currentPortfolioName',
+        tag: 'TradeWebScreen',
+      );
+    } else {
+      AppLogger.info(
+        '✅ TradeWebScreen initialized successfully - userId: "${widget.userId}", view: $_selectedView',
+        tag: 'TradeWebScreen',
+      );
+    }
   }
 
   void _onViewChanged(TradeViewType viewType) {
@@ -270,34 +292,62 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
   }
 
   /// Build portfolios view with integrated navigation
-  Widget _buildPortfoliosView() => Consumer(
-    builder: (context, ref, child) {
-      final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
-
-      return portfoliosAsync.when(
-        data: (portfolios) => TradePortfolioDiscoveryTemplate(
-          portfolios: portfolios,
-          isLoading: false,
-          onPortfolioSelected: (portfolio) {
-            _onPortfolioSelected(portfolio.id, portfolio.name);
-          },
-          onRefresh: () {
-            ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
-          },
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => TradePortfolioDiscoveryTemplate(
-          portfolios: const <TradePortfolioViewModel>[],
-          isLoading: false,
-          errorMessage: error.toString(),
-          onPortfolioSelected: (_) {},
-          onRefresh: () {
-            ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
-          },
+  Widget _buildPortfoliosView() {
+    // Show error if userId is empty
+    if (widget.userId.isEmpty) {
+      return Consumer(
+        builder: (context, ref, child) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
+              const SizedBox(height: 16),
+              Text('Authentication Error', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 8),
+              const Text('User ID is missing. Please log in again.', textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  // Force logout and navigate to login
+                  context.read<AuthCubit>().logout();
+                },
+                child: const Text('Log In Again'),
+              ),
+            ],
+          ),
         ),
       );
-    },
-  );
+    }
+
+    return Consumer(
+      builder: (context, ref, child) {
+        final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
+
+        return portfoliosAsync.when(
+          data: (portfolios) => TradePortfolioDiscoveryTemplate(
+            portfolios: portfolios,
+            isLoading: false,
+            onPortfolioSelected: (portfolio) {
+              _onPortfolioSelected(portfolio.id, portfolio.name);
+            },
+            onRefresh: () {
+              ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+            },
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => TradePortfolioDiscoveryTemplate(
+            portfolios: const <TradePortfolioViewModel>[],
+            isLoading: false,
+            errorMessage: error.toString(),
+            onPortfolioSelected: (_) {},
+            onRefresh: () {
+              ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+            },
+          ),
+        );
+      },
+    );
+  }
 
   /// Build prompt to select a portfolio
   Widget _buildSelectPortfolioPrompt() => Center(

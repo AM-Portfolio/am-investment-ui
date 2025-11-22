@@ -1,5 +1,5 @@
-import '../entities/trade_controller_entities.dart';
 import '../../data/dtos/metrics_filter_config_dto.dart';
+import '../entities/trade_controller_entities.dart';
 
 /// Repository interface for Trade Controller operations
 /// This is the domain layer abstraction that defines all trade-related operations
@@ -19,6 +19,10 @@ abstract class TradeControllerRepository {
   /// Update an existing trade
   /// Returns the updated trade details
   Future<TradeDetails> updateTrade({required String tradeId, required TradeDetails tradeDetails});
+
+  /// Delete a trade by ID
+  /// Returns void on successful deletion
+  Future<void> deleteTrade(String tradeId);
 
   /// Filter trades by multiple criteria with pagination
   /// Returns paginated response with trades matching the filters
