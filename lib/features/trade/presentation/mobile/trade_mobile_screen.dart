@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
+import '../../providers/trade_controller_providers.dart';
 import '../../providers/trade_internal_providers.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
+import '../cubit/trade_controller_cubit.dart';
 import '../models/trade_portfolio_view_model.dart';
+import 'pages/add_trade_mobile_page.dart';
 import 'pages/trade_calendar_analytics_mobile_page.dart';
 import 'pages/trade_holdings_dashboard_mobile_page.dart';
 
@@ -87,6 +91,7 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
     appBar: _buildAppBar(context),
     body: _buildMainContent(context),
     bottomNavigationBar: _buildBottomNavigationBar(context),
+    floatingActionButton: _buildFloatingActionButton(context),
   );
 
   /// Build app bar with context-aware title and actions
@@ -318,4 +323,63 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
       ),
     ),
   );
+
+  /// Build floating action button for adding new trade
+  Widget? _buildFloatingActionButton(BuildContext context) {
+    // Only show FAB when a portfolio is selected
+    if (_currentPortfolioId == null) return null;
+
+    return FloatingActionButton.extended(
+      onPressed: () => _navigateToAddTrade(context),
+      icon: const Icon(Icons.add),
+      label: const Text('Add Trade'),
+      tooltip: 'Add New Trade',
+    );
+  }
+
+  /// Navigate to add trade page
+  Future<void> _navigateToAddTrade(BuildContext context) async {
+    if (_currentPortfolioId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a portfolio first')));
+      return;
+    }
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (context) {
+          // Get TradeControllerCubit from Riverpod provider
+          final tradeControllerCubit = ref.read(tradeControllerCubitProvider);
+
+          // Wrap with BlocProvider so AddTradeMobilePage can access it via context.read()
+          return BlocProvider<TradeControllerCubit>.value(
+            value: tradeControllerCubit,
+            child: AddTradeMobilePage(
+              portfolioId: _currentPortfolioId!,
+              portfolioName: _currentPortfolioName,
+              onTradeAdded: () {
+                // Refresh holdings data after trade is added
+                if (_currentPortfolioId != null) {
+                  final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
+                  ref.invalidate(tradeHoldingsStreamProvider(params));
+                  ref.invalidate(tradeSummaryStreamProvider(params));
+                }
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    // If trade was added successfully, show confirmation
+    if (result == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Trade added successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 }

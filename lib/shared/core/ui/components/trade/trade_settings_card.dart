@@ -54,70 +54,146 @@ class TradeSettingsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<BrokerTypes>(
-                  value: selectedBroker,
-                  decoration: InputDecoration(
-                    labelText: 'Broker',
-                    prefixIcon: const Icon(Icons.business_center, size: 18),
-                    isDense: true,
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-                    ),
-                  ),
-                  items: BrokerTypes.values
-                      .map(
-                        (broker) => DropdownMenuItem(
-                          value: broker,
-                          child: Text(broker.toString().split('.').last.toUpperCase()),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Stack vertically on narrow screens (mobile)
+              final isNarrow = constraints.maxWidth < 400;
+
+              if (isNarrow) {
+                return Column(
+                  children: [
+                    DropdownButtonFormField<BrokerTypes>(
+                      value: selectedBroker,
+                      decoration: InputDecoration(
+                        labelText: 'Broker',
+                        prefixIcon: const Icon(Icons.business_center, size: 18),
+                        isDense: true,
+                        filled: true,
+                        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
                         ),
-                      )
-                      .toList(),
-                  onChanged: onBrokerChanged,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: DropdownButtonFormField<OrderTypes>(
-                  value: selectedOrderType,
-                  decoration: InputDecoration(
-                    labelText: 'Order Type',
-                    prefixIcon: const Icon(Icons.receipt_long, size: 18),
-                    isDense: true,
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                        ),
+                      ),
+                      items: BrokerTypes.values
+                          .map(
+                            (broker) => DropdownMenuItem(
+                              value: broker,
+                              child: Text(broker.toString().split('.').last.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: onBrokerChanged,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<OrderTypes>(
+                      value: selectedOrderType,
+                      decoration: InputDecoration(
+                        labelText: 'Order Type',
+                        prefixIcon: const Icon(Icons.receipt_long, size: 18),
+                        isDense: true,
+                        filled: true,
+                        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                        ),
+                      ),
+                      items: OrderTypes.values
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type.toString().split('.').last.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: onOrderTypeChanged,
+                    ),
+                  ],
+                );
+              }
+
+              // Keep horizontal layout for wider screens
+              return Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<BrokerTypes>(
+                      value: selectedBroker,
+                      decoration: InputDecoration(
+                        labelText: 'Broker',
+                        prefixIcon: const Icon(Icons.business_center, size: 18),
+                        isDense: true,
+                        filled: true,
+                        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                        ),
+                      ),
+                      items: BrokerTypes.values
+                          .map(
+                            (broker) => DropdownMenuItem(
+                              value: broker,
+                              child: Text(broker.toString().split('.').last.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: onBrokerChanged,
                     ),
                   ),
-                  items: OrderTypes.values
-                      .map(
-                        (type) =>
-                            DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
-                      )
-                      .toList(),
-                  onChanged: onOrderTypeChanged,
-                ),
-              ),
-            ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<OrderTypes>(
+                      value: selectedOrderType,
+                      decoration: InputDecoration(
+                        labelText: 'Order Type',
+                        prefixIcon: const Icon(Icons.receipt_long, size: 18),
+                        isDense: true,
+                        filled: true,
+                        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                        ),
+                      ),
+                      items: OrderTypes.values
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type.toString().split('.').last.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: onOrderTypeChanged,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

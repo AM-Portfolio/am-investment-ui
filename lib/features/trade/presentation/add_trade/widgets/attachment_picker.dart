@@ -63,6 +63,7 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,26 +73,29 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
+                color: theme.colorScheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(Icons.attach_file, size: 18, color: theme.colorScheme.onPrimaryContainer),
+              child: Icon(Icons.attach_file_rounded, size: 18, color: theme.colorScheme.onSecondaryContainer),
             ),
             const SizedBox(width: 10),
             Text('Attachments', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
             const Spacer(),
-            FilledButton.tonalIcon(
+            FilledButton.icon(
               onPressed: () => _addAttachment(context),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add File'),
-              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: Text(isMobile ? 'Add' : 'Add File'),
+              style: FilledButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 8),
+                visualDensity: VisualDensity.compact,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isMobile ? 16 : 20),
           decoration: BoxDecoration(
             color: _isDragging
                 ? theme.colorScheme.primaryContainer.withOpacity(0.2)
@@ -103,44 +107,59 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
             ),
           ),
           child: widget.attachments.isEmpty
-              ? Column(
-                  children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(
-                        _isDragging ? Icons.cloud_download : Icons.cloud_upload_outlined,
-                        key: ValueKey(_isDragging),
-                        size: 56,
-                        color: _isDragging ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.3),
+              ? InkWell(
+                  onTap: isMobile ? () => _addAttachment(context) : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Column(
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          _isDragging
+                              ? Icons.cloud_download_rounded
+                              : isMobile
+                              ? Icons.add_photo_alternate_outlined
+                              : Icons.cloud_upload_outlined,
+                          key: ValueKey(_isDragging),
+                          size: isMobile ? 48 : 56,
+                          color: _isDragging ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.3),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _isDragging
-                          ? 'Drop files here'
-                          : kIsWeb
-                          ? 'Drag & drop files here'
-                          : 'Tap to add files',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: _isDragging ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
-                        fontWeight: FontWeight.w500,
+                      SizedBox(height: isMobile ? 8 : 12),
+                      Text(
+                        _isDragging
+                            ? 'Drop files here'
+                            : isMobile
+                            ? 'Tap to add files'
+                            : 'Drag & drop files here',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: _isDragging ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
+                          fontSize: isMobile ? 14 : 16,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      kIsWeb ? 'or click "Add File" button' : 'or use "Add File" button above',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Supports: Images, PDFs, Word documents',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.4)),
-                    ),
-                  ],
+                      SizedBox(height: isMobile ? 4 : 6),
+                      if (!isMobile)
+                        Text(
+                          'or click "Add File" button',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      SizedBox(height: isMobile ? 2 : 4),
+                      Text(
+                        isMobile ? 'Images, PDFs, Documents' : 'Supports: Images, PDFs, Word documents',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          fontSize: isMobile ? 11 : 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               : Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: isMobile ? 8 : 12,
+                  runSpacing: isMobile ? 8 : 12,
                   children: widget.attachments
                       .asMap()
                       .entries
@@ -189,42 +208,51 @@ class _AttachmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fileColor = _getFileColor(context);
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: 280),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 280),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 12, vertical: isMobile ? 8 : 10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: isMobile ? MainAxisSize.max : MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: fileColor.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
-            child: Icon(_getFileIcon(), size: 18, color: fileColor),
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(color: fileColor.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+            child: Icon(_getFileIcon(), size: 20, color: fileColor),
           ),
           const SizedBox(width: 10),
           Flexible(
             child: Text(
               filename,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSecondaryContainer,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
+                fontSize: isMobile ? 13 : 14,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
           const SizedBox(width: 8),
-          InkWell(
-            onTap: onRemove,
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              child: Icon(Icons.close, size: 16, color: theme.colorScheme.onSecondaryContainer.withOpacity(0.7)),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onRemove,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close_rounded, size: 16, color: theme.colorScheme.error),
+              ),
             ),
           ),
         ],
