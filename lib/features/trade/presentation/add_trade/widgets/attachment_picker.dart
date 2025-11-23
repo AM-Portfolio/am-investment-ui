@@ -1,8 +1,12 @@
-import 'dart:html' as html;
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-/// Attachment picker with drag-and-drop support for trade screenshots, documents, etc.
+// Conditional import for platform-specific file picking
+import 'attachment_picker_stub.dart'
+    if (dart.library.html) 'attachment_picker_web.dart'
+    if (dart.library.io) 'attachment_picker_mobile.dart';
+
+/// Attachment picker with drag-and-drop support (web) and file picker (mobile)
 class AttachmentPicker extends StatefulWidget {
   const AttachmentPicker({required this.attachments, required this.onAttachmentsChanged, super.key});
   final List<String> attachments;
@@ -14,93 +18,40 @@ class AttachmentPicker extends StatefulWidget {
 
 class _AttachmentPickerState extends State<AttachmentPicker> {
   bool _isDragging = false;
-  final GlobalKey _dropZoneKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupDragAndDrop();
-    });
-  }
-
-  void _setupDragAndDrop() {
-    // Get the current context's render object
-    final renderBox = _dropZoneKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-
-    // Access the HTML body and add drag listeners
-    html.document.body?.onDragOver.listen((event) {
-      event.preventDefault();
-      if (!_isDragging) {
-        setState(() => _isDragging = true);
-      }
-    });
-
-    html.document.body?.onDragLeave.listen((event) {
-      // Check if we're leaving the window
-      if (event.client.x == 0 && event.client.y == 0) {
-        setState(() => _isDragging = false);
-      }
-    });
-
-    html.document.body?.onDrop.listen((event) {
-      event.preventDefault();
-      event.stopPropagation();
-      setState(() => _isDragging = false);
-
-      final files = event.dataTransfer.files;
-      if (files != null && files.isNotEmpty) {
-        final newList = List<String>.from(widget.attachments);
-        for (final file in files) {
-          // Filter for images and documents only
-          if (_isValidFile(file.name)) {
-            newList.add(file.name);
-          }
-        }
-        widget.onAttachmentsChanged(newList);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${files.length} file(s) added'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
+    if (kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setupWebDragAndDrop(
+          onDragStateChanged: (isDragging) {
+            if (mounted) {
+              setState(() => _isDragging = isDragging);
+            }
+          },
+          onFilesDropped: _handleFiles,
         );
-      }
-    });
+      });
+    }
   }
 
-  bool _isValidFile(String filename) {
-    final lower = filename.toLowerCase();
-    return lower.endsWith('.png') ||
-        lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.webp') ||
-        lower.endsWith('.pdf') ||
-        lower.endsWith('.doc') ||
-        lower.endsWith('.docx');
+  void _handleFiles(List<dynamic> files) {
+    // In a real app, you would upload these files and get URLs
+    // For now, we'll just add placeholder names
+    final newAttachments = List<String>.from(widget.attachments);
+    for (final file in files) {
+      newAttachments.add(file.toString());
+    }
+    widget.onAttachmentsChanged(newAttachments);
   }
 
-  void _addAttachment(BuildContext context) {
-    // Create file input element
-    final uploadInput = html.FileUploadInputElement();
-    uploadInput.multiple = true;
-    uploadInput.accept = 'image/*,.pdf,.doc,.docx';
-
-    uploadInput.onChange.listen((event) {
-      final files = uploadInput.files;
-      if (files != null && files.isNotEmpty) {
-        final newList = List<String>.from(widget.attachments);
-        for (final file in files) {
-          newList.add(file.name);
-        }
-        widget.onAttachmentsChanged(newList);
-      }
-    });
-
-    uploadInput.click();
+  Future<void> _addAttachment(BuildContext context) async {
+    if (kIsWeb) {
+      pickFilesWeb(onFilesSelected: _handleFiles);
+    } else {
+      pickFilesMobile(onFilesSelected: _handleFiles);
+    }
   }
 
   void _removeAttachment(int index) {
@@ -114,7 +65,6 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
     final theme = Theme.of(context);
 
     return Column(
-      key: _dropZoneKey,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -166,7 +116,11 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      _isDragging ? 'Drop files here' : 'Drag & drop files here',
+                      _isDragging
+                          ? 'Drop files here'
+                          : kIsWeb
+                          ? 'Drag & drop files here'
+                          : 'Tap to add files',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: _isDragging ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
                         fontWeight: FontWeight.w500,
@@ -174,7 +128,7 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'or click "Add File" button',
+                      kIsWeb ? 'or click "Add File" button' : 'or use "Add File" button above',
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
                     ),
                     const SizedBox(height: 4),

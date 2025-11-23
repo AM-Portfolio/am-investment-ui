@@ -126,7 +126,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
 
           // Tab Content
           SizedBox(
-            height: 240, // Increased height for date-time picker
+            height: 140, // Compact height
             child: TabBarView(
               controller: _tabController,
               children: [
@@ -147,12 +147,12 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
   }
 
   Widget _buildEntryContent(ThemeData theme) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ModernDateTimePicker(initialDateTime: widget.entryDate, onDateTimeChanged: widget.onEntryDateChanged),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -164,7 +164,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                   isDense: true,
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -178,7 +178,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                 keyboardType: TextInputType.number,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: TextField(
                 controller: widget.entryQuantityController,
@@ -188,7 +188,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                   isDense: true,
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -209,12 +209,12 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
   );
 
   Widget _buildExitContent(ThemeData theme) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ModernDateTimePicker(initialDateTime: widget.exitDate, onDateTimeChanged: widget.onExitDateChanged),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -226,7 +226,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                   isDense: true,
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -240,7 +240,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                 keyboardType: TextInputType.number,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: TextField(
                 controller: widget.exitQuantityController,
@@ -250,7 +250,7 @@ class _EntryExitCardState extends State<EntryExitCard> with SingleTickerProvider
                   isDense: true,
                   filled: true,
                   fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),

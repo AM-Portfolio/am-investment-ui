@@ -29,7 +29,7 @@ class TradeSettingsCard extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -53,7 +53,7 @@ class TradeSettingsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -65,7 +65,7 @@ class TradeSettingsCard extends StatelessWidget {
                     isDense: true,
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -87,7 +87,7 @@ class TradeSettingsCard extends StatelessWidget {
                   onChanged: onBrokerChanged,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<OrderTypes>(
                   value: selectedOrderType,
@@ -97,7 +97,7 @@ class TradeSettingsCard extends StatelessWidget {
                     isDense: true,
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
