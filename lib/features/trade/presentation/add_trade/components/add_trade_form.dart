@@ -75,6 +75,15 @@ class _AddTradeFormState extends State<AddTradeForm> {
   @override
   void initState() {
     super.initState();
+    
+    // Set default values
+    _selectedExchange = ExchangeTypes.nse;
+    _selectedSegment = MarketSegments.equity;
+    _selectedBroker = BrokerTypes.zerodha;
+    _selectedOrderType = OrderTypes.market;
+    _entryDate = DateTime.now();
+    _exitDate = DateTime.now();
+    
     if (widget.initialData != null) {
       _loadInitialData();
     }

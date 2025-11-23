@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../features/trade/internal/domain/enums/exchange_types.dart';
 import '../../../../../features/trade/internal/domain/enums/market_segments.dart';
+import '../dropdowns/custom_dropdown.dart';
 
 /// Instrument details card for trade forms
 class InstrumentCard extends StatelessWidget {
@@ -79,60 +80,32 @@ class InstrumentCard extends StatelessWidget {
             textCapitalization: TextCapitalization.characters,
           ),
           const SizedBox(height: 8),
-          DropdownButtonFormField<ExchangeTypes>(
+          CustomDropdown<ExchangeTypes>(
             value: selectedExchange,
-            decoration: InputDecoration(
-              labelText: 'Exchange *',
-              prefixIcon: const Icon(Icons.account_balance, size: 18),
-              isDense: true,
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-              ),
-            ),
+            hint: 'Select Exchange',
+            label: 'Exchange *',
             items: ExchangeTypes.values
                 .map(
-                  (exchange) =>
-                      DropdownMenuItem(value: exchange, child: Text(exchange.toString().split('.').last.toUpperCase())),
+                  (exchange) => exchange.toSimpleDropdownItem(text: exchange.toString().split('.').last.toUpperCase()),
                 )
                 .toList(),
             onChanged: onExchangeChanged,
+            icon: Icons.account_balance,
+            height: 48,
+            fontSize: 14,
           ),
           const SizedBox(height: 8),
-          DropdownButtonFormField<MarketSegments>(
+          CustomDropdown<MarketSegments>(
             value: selectedSegment,
-            decoration: InputDecoration(
-              labelText: 'Segment *',
-              prefixIcon: const Icon(Icons.pie_chart, size: 18),
-              isDense: true,
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-              ),
-            ),
+            hint: 'Select Segment',
+            label: 'Segment *',
             items: MarketSegments.values
-                .map(
-                  (segment) =>
-                      DropdownMenuItem(value: segment, child: Text(segment.toString().split('.').last.toUpperCase())),
-                )
+                .map((segment) => segment.toSimpleDropdownItem(text: segment.toString().split('.').last.toUpperCase()))
                 .toList(),
             onChanged: onSegmentChanged,
+            icon: Icons.pie_chart,
+            height: 48,
+            fontSize: 14,
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../features/trade/internal/domain/enums/broker_types.dart';
 import '../../../../../features/trade/internal/domain/enums/order_types.dart';
+import '../dropdowns/custom_dropdown.dart';
 
 /// Trade settings card (Broker & Order Type)
 class TradeSettingsCard extends StatelessWidget {
@@ -47,67 +48,34 @@ class TradeSettingsCard extends StatelessWidget {
             const SizedBox(width: 10),
           ],
           Expanded(
-            child: DropdownButtonFormField<BrokerTypes>(
+            child: CustomDropdown<BrokerTypes>(
               value: selectedBroker,
-              decoration: InputDecoration(
-                labelText: isMobile ? null : 'Broker',
-                hintText: isMobile && selectedBroker == null ? 'Broker' : null,
-                prefixIcon: isMobile ? null : const Icon(Icons.business_center, size: 18),
-                isDense: true,
-                filled: true,
-                fillColor: theme.colorScheme.surface.withOpacity(0.6),
-                contentPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12, vertical: isMobile ? 6 : 10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.25)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-                ),
-              ),
-              isExpanded: true,
+              hint: isMobile ? 'Broker' : 'Select Broker',
               items: BrokerTypes.values
-                  .map(
-                    (broker) => DropdownMenuItem(
-                      value: broker,
-                      child: Text(broker.toString().split('.').last.toUpperCase(), overflow: TextOverflow.ellipsis),
-                    ),
-                  )
+                  .map((broker) => broker.toSimpleDropdownItem(text: broker.toString().split('.').last.toUpperCase()))
                   .toList(),
               onChanged: onBrokerChanged,
+              icon: isMobile ? null : Icons.business_center,
+              height: isMobile ? 36 : 40,
+              fontSize: isMobile ? 12 : 13,
+              iconSize: isMobile ? 16 : 18,
+              contentPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
             ),
           ),
           SizedBox(width: isMobile ? 6 : 8),
           Expanded(
-            child: DropdownButtonFormField<OrderTypes>(
+            child: CustomDropdown<OrderTypes>(
               value: selectedOrderType,
-              decoration: InputDecoration(
-                labelText: isMobile ? null : 'Order Type',
-                hintText: isMobile && selectedOrderType == null ? 'Order' : null,
-                prefixIcon: isMobile ? null : const Icon(Icons.receipt_long, size: 18),
-                isDense: true,
-                filled: true,
-                fillColor: theme.colorScheme.surface.withOpacity(0.6),
-                contentPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12, vertical: isMobile ? 6 : 10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.25)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-                ),
-              ),
-              isExpanded: true,
+              hint: isMobile ? 'Order' : 'Select Order Type',
               items: OrderTypes.values
-                  .map(
-                    (type) => DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
-                  )
+                  .map((type) => type.toSimpleDropdownItem(text: type.toString().split('.').last.toUpperCase()))
                   .toList(),
               onChanged: onOrderTypeChanged,
+              icon: isMobile ? null : Icons.receipt_long,
+              height: isMobile ? 36 : 40,
+              fontSize: isMobile ? 12 : 13,
+              iconSize: isMobile ? 16 : 18,
+              contentPadding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
             ),
           ),
         ],

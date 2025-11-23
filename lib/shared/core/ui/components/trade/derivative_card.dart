@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../features/trade/internal/domain/enums/derivative_types.dart';
 import '../../../../../features/trade/internal/domain/enums/option_types.dart';
+import '../dropdowns/custom_dropdown.dart';
 
 /// Derivative details card for trade forms
 class DerivativeCard extends StatelessWidget {
@@ -59,21 +60,15 @@ class DerivativeCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Type dropdown
-          DropdownButtonFormField<DerivativeTypes>(
+          CustomDropdown<DerivativeTypes>(
             value: selectedDerivativeType,
-            decoration: InputDecoration(
-              labelText: 'Type',
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            ),
+            hint: 'Select Type',
             items: DerivativeTypes.values
-                .map(
-                  (type) => DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
-                )
+                .map((type) => type.toSimpleDropdownItem(text: type.toString().split('.').last.toUpperCase()))
                 .toList(),
             onChanged: onDerivativeTypeChanged,
+            height: 52,
+            fontSize: 14,
           ),
 
           // Expanded fields when type is selected
@@ -96,22 +91,15 @@ class DerivativeCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: DropdownButtonFormField<OptionTypes>(
+                  child: CustomDropdown<OptionTypes>(
                     value: selectedOptionType,
-                    decoration: InputDecoration(
-                      labelText: 'Option',
-                      filled: true,
-                      fillColor: theme.colorScheme.surfaceContainerHighest,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
+                    hint: 'Select Option',
                     items: OptionTypes.values
-                        .map(
-                          (type) =>
-                              DropdownMenuItem(value: type, child: Text(type.toString().split('.').last.toUpperCase())),
-                        )
+                        .map((type) => type.toSimpleDropdownItem(text: type.toString().split('.').last.toUpperCase()))
                         .toList(),
                     onChanged: onOptionTypeChanged,
+                    height: 52,
+                    fontSize: 14,
                   ),
                 ),
               ],
