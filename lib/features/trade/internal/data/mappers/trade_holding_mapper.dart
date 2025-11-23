@@ -98,16 +98,13 @@ class TradeHoldingMapper {
     switch (status.toUpperCase()) {
       case 'OPEN':
         return TradeStatuses.open;
-      case 'CLOSED':
-        return TradeStatuses.closed;
       case 'WIN':
         return TradeStatuses.win;
       case 'LOSS':
         return TradeStatuses.loss;
       case 'BREAKEVEN':
+      case 'BREAK_EVEN':
         return TradeStatuses.breakeven;
-      case 'CANCELLED':
-        return TradeStatuses.cancelled;
       default:
         return TradeStatuses.open;
     }

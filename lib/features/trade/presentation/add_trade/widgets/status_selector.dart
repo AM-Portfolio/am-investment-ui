@@ -11,86 +11,155 @@ class StatusSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Trade Status', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
+        Row(
           children: [
-            _StatusChip(
-              status: TradeStatuses.open,
-              label: 'Open',
-              icon: Icons.lock_open,
-              color: Colors.blue,
-              isSelected: selectedStatus == TradeStatuses.open,
-              onTap: () => onStatusSelected(TradeStatuses.open),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(Icons.info_outline, size: 16, color: theme.colorScheme.onSecondaryContainer),
             ),
-            _StatusChip(
-              status: TradeStatuses.closed,
-              label: 'Closed',
-              icon: Icons.lock,
-              color: Colors.green,
-              isSelected: selectedStatus == TradeStatuses.closed,
-              onTap: () => onStatusSelected(TradeStatuses.closed),
+            const SizedBox(width: 8),
+            Text(
+              'Status',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ],
+        ),
+        SizedBox(height: isMobile ? 8 : 12),
+        // Modern toggle-style buttons
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ModernStatusButton(
+                  status: TradeStatuses.open,
+                  label: 'Open',
+                  icon: Icons.lock_open_rounded,
+                  selectedIcon: Icons.lock_open,
+                  color: Colors.orange,
+                  isSelected: selectedStatus == TradeStatuses.open,
+                  onTap: () => onStatusSelected(TradeStatuses.open),
+                  isMobile: isMobile,
+                  position: _StatusButtonPosition.left,
+                ),
+              ),
+              Expanded(
+                child: _ModernStatusButton(
+                  status: TradeStatuses.win,
+                  label: 'Win',
+                  icon: Icons.trending_up_outlined,
+                  selectedIcon: Icons.trending_up_rounded,
+                  color: Colors.green,
+                  isSelected: selectedStatus == TradeStatuses.win,
+                  onTap: () => onStatusSelected(TradeStatuses.win),
+                  isMobile: isMobile,
+                  position: _StatusButtonPosition.right,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({
+enum _StatusButtonPosition { left, right }
+
+class _ModernStatusButton extends StatelessWidget {
+  const _ModernStatusButton({
     required this.status,
     required this.label,
     required this.icon,
+    required this.selectedIcon,
     required this.color,
     required this.isSelected,
     required this.onTap,
+    required this.isMobile,
+    required this.position,
   });
   final TradeStatuses status;
   final String label;
   final IconData icon;
+  final IconData selectedIcon;
   final Color color;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool isMobile;
+  final _StatusButtonPosition position;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.15) : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? color : theme.colorScheme.outline.withOpacity(0.3),
-            width: isSelected ? 2 : 1,
-          ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.horizontal(
+          left: position == _StatusButtonPosition.left ? const Radius.circular(10) : Radius.zero,
+          right: position == _StatusButtonPosition.right ? const Radius.circular(10) : Radius.zero,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20, color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.6)),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? color : theme.colorScheme.onSurface,
-              ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: isMobile ? 12 : 14),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+                    colors: [color.withOpacity(0.15), color.withOpacity(0.08)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.horizontal(
+              left: position == _StatusButtonPosition.left ? const Radius.circular(10) : Radius.zero,
+              right: position == _StatusButtonPosition.right ? const Radius.circular(10) : Radius.zero,
             ),
-            if (isSelected) ...[const SizedBox(width: 8), Icon(Icons.check_circle, color: color, size: 18)],
-          ],
+            border: isSelected
+                ? Border.all(color: color.withOpacity(0.5), width: 1.5)
+                : position == _StatusButtonPosition.left
+                ? Border(right: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)))
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  isSelected ? selectedIcon : icon,
+                  key: ValueKey(isSelected),
+                  size: isMobile ? 20 : 22,
+                  color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+              SizedBox(width: isMobile ? 6 : 8),
+              Text(
+                label,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.8),
+                  fontSize: isMobile ? 13 : 14,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

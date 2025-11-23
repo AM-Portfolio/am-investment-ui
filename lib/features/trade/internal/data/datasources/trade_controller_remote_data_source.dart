@@ -130,6 +130,28 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
 
       // Log the complete JSON payload for debugging (pretty printed, multi-line)
       final prettyJson = const JsonEncoder.withIndent('  ').convert(jsonPayload);
+
+      // Single-line JSON for easy copy-paste to Postman
+      final singleLineJson = jsonEncode(jsonPayload);
+
+      // Use print for complete output without truncation
+      print('════════════════════════════════════════════════════════════════');
+      print('📤 COMPLETE JSON PAYLOAD FOR POSTMAN (SINGLE LINE):');
+      print('════════════════════════════════════════════════════════════════');
+
+      // Split single-line JSON into chunks of 800 characters to avoid truncation
+      const chunkSize = 800;
+      for (var i = 0; i < singleLineJson.length; i += chunkSize) {
+        final end = (i + chunkSize < singleLineJson.length) ? i + chunkSize : singleLineJson.length;
+        print(singleLineJson.substring(i, end));
+      }
+
+      print('════════════════════════════════════════════════════════════════');
+      print('📋 Endpoint: POST $fullUri');
+      print('📋 Content-Type: application/json');
+      print('📋 JSON Length: ${singleLineJson.length} characters');
+      print('════════════════════════════════════════════════════════════════');
+
       AppLogger.debug('📤 POST Request Payload (Complete JSON):\n$prettyJson', tag: 'TradeControllerRemoteDataSource');
 
       final response = await _apiClient.post<TradeDetailsDto>(

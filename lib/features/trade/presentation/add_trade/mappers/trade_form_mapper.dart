@@ -60,8 +60,8 @@ class TradeFormMapper {
     // Construct EntryExitInfo for entry
     final entryInfo = EntryExitInfo(timestamp: entryDate, price: entryPrice, quantity: entryQuantity.toInt());
 
-    // Construct EntryExitInfo for exit (if closed)
-    final exitInfo = status == TradeStatuses.closed && exitDate != null
+    // Construct EntryExitInfo for exit (if not open)
+    final exitInfo = status != TradeStatuses.open && exitDate != null
         ? EntryExitInfo(timestamp: exitDate, price: exitPrice, quantity: exitQuantity?.toInt())
         : null;
 

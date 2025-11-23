@@ -139,7 +139,7 @@ class ReviewStep extends StatelessWidget {
               'Status',
               selectedStatus.toString().split('.').last.toUpperCase(),
               Icons.flag,
-              color: selectedStatus == TradeStatuses.closed ? Colors.green : Colors.blue,
+              color: selectedStatus == TradeStatuses.open ? Colors.orange : Colors.green,
             ),
           ]),
 
@@ -163,7 +163,7 @@ class ReviewStep extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (selectedStatus == TradeStatuses.closed && exitDate != null) ...[
+                if (selectedStatus != TradeStatuses.open && exitDate != null) ...[
                   Container(width: 1, height: 60, color: theme.colorScheme.outline.withOpacity(0.3)),
                   const SizedBox(width: 16),
                   Expanded(

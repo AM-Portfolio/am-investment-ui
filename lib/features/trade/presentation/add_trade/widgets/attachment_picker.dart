@@ -37,6 +37,8 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
   }
 
   void _handleFiles(List<dynamic> files) {
+    if (files.isEmpty) return;
+
     // In a real app, you would upload these files and get URLs
     // For now, we'll just add placeholder names
     final newAttachments = List<String>.from(widget.attachments);
@@ -44,13 +46,51 @@ class _AttachmentPickerState extends State<AttachmentPicker> {
       newAttachments.add(file.toString());
     }
     widget.onAttachmentsChanged(newAttachments);
+
+    // Show success feedback on mobile
+    if (!kIsWeb && mounted) {
+      // Use a delayed callback to ensure the widget is still mounted after picker closes
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('${files.length} file(s) attached'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          );
+        }
+      });
+    }
   }
 
   Future<void> _addAttachment(BuildContext context) async {
-    if (kIsWeb) {
-      pickFilesWeb(onFilesSelected: _handleFiles);
-    } else {
-      pickFilesMobile(onFilesSelected: _handleFiles);
+    try {
+      if (kIsWeb) {
+        pickFilesWeb(onFilesSelected: _handleFiles);
+      } else {
+        // Call the mobile picker (it handles the callback internally)
+        pickFilesMobile(onFilesSelected: _handleFiles);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting files: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

@@ -182,7 +182,7 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
       quantity: int.tryParse(_entryQuantityController.text),
     );
 
-    final exitInfo = _selectedStatus == TradeStatuses.closed && _exitDate != null
+    final exitInfo = _selectedStatus != TradeStatuses.open && _exitDate != null
         ? EntryExitInfo(
             timestamp: _exitDate,
             price: double.tryParse(_exitPriceController.text),
@@ -620,7 +620,7 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
         children: [
           _buildSectionHeader(theme, 'Exit Details', Icons.logout),
           const SizedBox(height: 24),
-          if (_selectedStatus != TradeStatuses.closed)
+          if (_selectedStatus == TradeStatuses.open)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -916,7 +916,7 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
               Expanded(
                 child: Column(
                   children: [
-                    if (_selectedStatus == TradeStatuses.closed && _exitDate != null)
+                    if (_selectedStatus != TradeStatuses.open && _exitDate != null)
                       _buildModernReviewCard(theme, 'Exit Details', Icons.logout, [
                         if (_exitDate != null)
                           _buildDetailRow(
@@ -930,7 +930,7 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
                         if (_exitQuantityController.text.isNotEmpty)
                           _buildDetailRow(theme, 'Exit Quantity', _exitQuantityController.text, Icons.tag),
                       ]),
-                    if (_selectedStatus == TradeStatuses.closed && _exitDate != null) const SizedBox(height: 16),
+                    if (_selectedStatus != TradeStatuses.open && _exitDate != null) const SizedBox(height: 16),
                     if (_selectedEntryPsychology.isNotEmpty ||
                         _selectedExitPsychology.isNotEmpty ||
                         _selectedBehaviorPatterns.isNotEmpty)
@@ -1079,7 +1079,7 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
                 if (_strategyController.text.isNotEmpty)
                   _buildDetailRow(theme, 'Strategy', _strategyController.text, Icons.psychology),
               ]),
-              if (_selectedStatus == TradeStatuses.closed && _exitDate != null) ...[
+              if (_selectedStatus != TradeStatuses.open && _exitDate != null) ...[
                 const SizedBox(height: 16),
                 _buildModernReviewCard(theme, 'Exit Details', Icons.logout, [
                   if (_exitDate != null)

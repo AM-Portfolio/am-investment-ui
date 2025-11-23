@@ -51,8 +51,14 @@ class _AddTradeMobilePageState extends State<AddTradeMobilePage> {
 
     AppLogger.info('✅ UserId validated: $userId', tag: 'AddTradeMobilePage');
 
+    // CRITICAL: Set userId since it's not included in the form
+    final tradeToSave = tradeDetails.copyWith(userId: userId);
+
+    AppLogger.debug('📋 Trade Details (with userId): ${tradeToSave.toString()}', tag: 'AddTradeMobilePage');
+    AppLogger.info('🚀 Calling TradeControllerCubit.addNewTrade() with userId: $userId', tag: 'AddTradeMobilePage');
+
     // Trigger the trade save action
-    context.read<TradeControllerCubit>().addNewTrade(tradeDetails);
+    context.read<TradeControllerCubit>().addNewTrade(tradeToSave);
   }
 
   void _handleCancel() {
@@ -131,8 +137,13 @@ class _AddTradeMobilePageState extends State<AddTradeMobilePage> {
         child: SafeArea(
           child: Stack(
             children: [
-              // Main form
-              AddTradeForm(onSave: _handleSave, onCancel: _handleCancel, isLoading: _isLoading),
+              // Main form with portfolioId passed via initialData
+              AddTradeForm(
+                onSave: _handleSave,
+                onCancel: _handleCancel,
+                isLoading: _isLoading,
+                initialData: TradeDetails.empty().copyWith(portfolioId: widget.portfolioId),
+              ),
 
               // Loading overlay
               if (_isLoading)

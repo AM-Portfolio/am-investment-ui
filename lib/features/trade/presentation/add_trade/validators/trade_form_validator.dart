@@ -54,7 +54,7 @@ class TradeFormValidator {
     required double? exitPrice,
     required double? exitQuantity,
   }) {
-    if (status == TradeStatuses.closed) {
+    if (status != TradeStatuses.open) {
       if (exitDate == null) {
         throw ArgumentError('Exit date is required for closed trades');
       }

@@ -281,16 +281,13 @@ class TradeCharacteristicsFilterMapper {
     switch (value.toUpperCase()) {
       case 'OPEN':
         return TradeStatuses.open;
-      case 'CLOSED':
-        return TradeStatuses.closed;
       case 'WIN':
         return TradeStatuses.win;
       case 'LOSS':
         return TradeStatuses.loss;
       case 'BREAKEVEN':
+      case 'BREAK_EVEN':
         return TradeStatuses.breakeven;
-      case 'CANCELLED':
-        return TradeStatuses.cancelled;
       default:
         return null;
     }
@@ -300,16 +297,12 @@ class TradeCharacteristicsFilterMapper {
     switch (status) {
       case TradeStatuses.open:
         return 'OPEN';
-      case TradeStatuses.closed:
-        return 'CLOSED';
       case TradeStatuses.win:
         return 'WIN';
       case TradeStatuses.loss:
         return 'LOSS';
       case TradeStatuses.breakeven:
-        return 'BREAKEVEN';
-      case TradeStatuses.cancelled:
-        return 'CANCELLED';
+        return 'BREAK_EVEN';
     }
   }
 }

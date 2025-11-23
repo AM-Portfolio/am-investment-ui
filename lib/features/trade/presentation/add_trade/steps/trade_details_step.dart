@@ -93,19 +93,51 @@ class TradeDetailsStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 1200;
     final isTablet = MediaQuery.of(context).size.width > 600 && MediaQuery.of(context).size.width <= 1200;
+    final isWeb = isDesktop || isTablet;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isDesktop ? 16 : 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Direction & Status Row
-          DirectionStatusSelector(
-            selectedDirection: selectedDirection,
-            selectedStatus: selectedStatus,
-            onDirectionChanged: onDirectionChanged,
-            onStatusChanged: onStatusChanged,
-          ),
+          // Direction, Status & Trade Settings Row (Web) or Stacked (Mobile)
+          if (isWeb)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DirectionStatusSelector(
+                  selectedDirection: selectedDirection,
+                  selectedStatus: selectedStatus,
+                  onDirectionChanged: onDirectionChanged,
+                  onStatusChanged: onStatusChanged,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TradeSettingsCard(
+                    selectedBroker: selectedBroker,
+                    selectedOrderType: selectedOrderType,
+                    onBrokerChanged: onBrokerChanged,
+                    onOrderTypeChanged: onOrderTypeChanged,
+                  ),
+                ),
+              ],
+            )
+          else ...[
+            // Mobile: Keep stacked layout
+            DirectionStatusSelector(
+              selectedDirection: selectedDirection,
+              selectedStatus: selectedStatus,
+              onDirectionChanged: onDirectionChanged,
+              onStatusChanged: onStatusChanged,
+            ),
+            const SizedBox(height: 12),
+            TradeSettingsCard(
+              selectedBroker: selectedBroker,
+              selectedOrderType: selectedOrderType,
+              onBrokerChanged: onBrokerChanged,
+              onOrderTypeChanged: onOrderTypeChanged,
+            ),
+          ],
 
           const SizedBox(height: 12),
 
@@ -134,7 +166,7 @@ class TradeDetailsStep extends StatelessWidget {
                     exitQuantityController: exitQuantityController,
                     onEntryDateChanged: onEntryDateSelected,
                     onExitDateChanged: onExitDateSelected,
-                    showExit: selectedStatus == TradeStatuses.closed,
+                    showExit: selectedStatus != TradeStatuses.open,
                   ),
                 ),
               ],
@@ -157,18 +189,9 @@ class TradeDetailsStep extends StatelessWidget {
               exitQuantityController: exitQuantityController,
               onEntryDateChanged: onEntryDateSelected,
               onExitDateChanged: onExitDateSelected,
-              showExit: selectedStatus == TradeStatuses.closed,
+              showExit: selectedStatus != TradeStatuses.open,
             ),
           ],
-
-          // Broker & Order Type Row
-          const SizedBox(height: 12),
-          TradeSettingsCard(
-            selectedBroker: selectedBroker,
-            selectedOrderType: selectedOrderType,
-            onBrokerChanged: onBrokerChanged,
-            onOrderTypeChanged: onOrderTypeChanged,
-          ),
 
           // Derivatives (if any)
           if (_isDerivativeSegment) ...[
