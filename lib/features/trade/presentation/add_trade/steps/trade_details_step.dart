@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/core/ui/components/trade/derivative_card.dart';
 import '../../../../../shared/core/ui/components/trade/direction_status_selector.dart';
-import '../../../../../shared/core/ui/components/trade/entry_card.dart';
-import '../../../../../shared/core/ui/components/trade/exit_card.dart';
+import '../../../../../shared/core/ui/components/trade/entry_exit_card.dart';
 import '../../../../../shared/core/ui/components/trade/instrument_card.dart';
 import '../../../../../shared/core/ui/components/trade/trade_settings_card.dart';
 import '../../../internal/domain/enums/broker_types.dart';
@@ -110,7 +109,7 @@ class TradeDetailsStep extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Instrument & Entry in 2 columns (desktop) or stacked (mobile)
+          // Instrument & Entry/Exit in 2 columns (desktop) or stacked (mobile)
           if (isDesktop || isTablet)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,11 +125,16 @@ class TradeDetailsStep extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: EntryCard(
+                  child: EntryExitCard(
                     entryDate: entryDate,
                     entryPriceController: entryPriceController,
                     entryQuantityController: entryQuantityController,
-                    onDateTap: () => _selectEntryDate(context),
+                    exitDate: exitDate,
+                    exitPriceController: exitPriceController,
+                    exitQuantityController: exitQuantityController,
+                    onEntryDateChanged: onEntryDateSelected,
+                    onExitDateChanged: onExitDateSelected,
+                    showExit: selectedStatus == TradeStatuses.closed,
                   ),
                 ),
               ],
@@ -144,23 +148,16 @@ class TradeDetailsStep extends StatelessWidget {
               onSegmentChanged: onSegmentChanged,
             ),
             const SizedBox(height: 12),
-            EntryCard(
+            EntryExitCard(
               entryDate: entryDate,
               entryPriceController: entryPriceController,
               entryQuantityController: entryQuantityController,
-              onDateTap: () => _selectEntryDate(context),
-            ),
-          ],
-
-          // Exit Section (if closed)
-          if (selectedStatus == TradeStatuses.closed) ...[
-            const SizedBox(height: 12),
-            ExitCard(
               exitDate: exitDate,
               exitPriceController: exitPriceController,
               exitQuantityController: exitQuantityController,
-              entryDate: entryDate,
-              onDateTap: () => _selectExitDate(context),
+              onEntryDateChanged: onEntryDateSelected,
+              onExitDateChanged: onExitDateSelected,
+              showExit: selectedStatus == TradeStatuses.closed,
             ),
           ],
 
@@ -193,26 +190,6 @@ class TradeDetailsStep extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _selectEntryDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: entryDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (date != null) onEntryDateSelected(date);
-  }
-
-  Future<void> _selectExitDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: exitDate ?? DateTime.now(),
-      firstDate: entryDate ?? DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (date != null) onExitDateSelected(date);
   }
 
   Future<void> _selectExpiryDate(BuildContext context) async {

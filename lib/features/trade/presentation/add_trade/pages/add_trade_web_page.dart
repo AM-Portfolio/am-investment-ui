@@ -205,22 +205,14 @@ class _AddTradeWebPageState extends State<AddTradeWebPage> {
                             tooltip: 'Back to Trades',
                           ),
                           const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Add New Trade',
-                                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                          if (widget.portfolioName != null)
+                            Text(
+                              widget.portfolioName!,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                fontWeight: FontWeight.w500,
                               ),
-                              if (widget.portfolioName != null)
-                                Text(
-                                  widget.portfolioName!,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                  ),
-                                ),
-                            ],
-                          ),
+                            ),
                         ],
                       ),
                     ),

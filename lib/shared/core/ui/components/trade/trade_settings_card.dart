@@ -24,31 +24,57 @@ class TradeSettingsCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.settings, size: 16, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Text('Trade Settings', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.tune, size: 16, color: Colors.purple),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Trade Settings',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
                 child: DropdownButtonFormField<BrokerTypes>(
                   value: selectedBroker,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Broker',
-                    prefixIcon: Icon(Icons.account_balance, size: 18),
+                    prefixIcon: const Icon(Icons.business_center, size: 18),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                    ),
                   ),
                   items: BrokerTypes.values
                       .map(
@@ -61,15 +87,26 @@ class TradeSettingsCard extends StatelessWidget {
                   onChanged: onBrokerChanged,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: DropdownButtonFormField<OrderTypes>(
                   value: selectedOrderType,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Order Type',
-                    prefixIcon: Icon(Icons.receipt, size: 18),
+                    prefixIcon: const Icon(Icons.receipt_long, size: 18),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                    ),
                   ),
                   items: OrderTypes.values
                       .map(
