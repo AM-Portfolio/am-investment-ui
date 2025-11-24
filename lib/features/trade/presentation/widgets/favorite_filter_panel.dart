@@ -43,71 +43,78 @@ class _FavoriteFilterPanelState extends State<FavoriteFilterPanel> {
       return const SizedBox.shrink(); // Don't show anything if no filters
     }
 
+    final theme = Theme.of(context);
+
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.dividerColor.withOpacity(0.3)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Collapsible Header
+          // Compact Header - Icon Only
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
+            borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(_isExpanded ? Icons.expand_less : Icons.expand_more, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Saved Filters',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${filterList.filters.length}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_isExpanded)
-                    Row(
-                      children: [
-                        if (widget.onCreateNew != null)
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: widget.onCreateNew,
-                            tooltip: 'Create New Filter',
-                            iconSize: 20,
-                          ),
-                        if (widget.onManageFilters != null)
-                          IconButton(
-                            icon: const Icon(Icons.settings),
-                            onPressed: widget.onManageFilters,
-                            tooltip: 'Manage Filters',
-                            iconSize: 20,
-                          ),
-                      ],
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    child: Icon(Icons.bookmark_rounded, size: 18, color: theme.primaryColor),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${filterList.filters.length}',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(_isExpanded ? Icons.expand_less : Icons.expand_more, size: 18, color: theme.hintColor),
+                  if (_isExpanded) ...[
+                    const SizedBox(width: 12),
+                    if (widget.onCreateNew != null)
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline_rounded),
+                        onPressed: widget.onCreateNew,
+                        tooltip: 'Create New Filter',
+                        iconSize: 18,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      ),
+                    if (widget.onManageFilters != null)
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined),
+                        onPressed: widget.onManageFilters,
+                        tooltip: 'Manage Filters',
+                        iconSize: 18,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      ),
+                  ],
                 ],
               ),
             ),
           ),
           // Expandable content
           if (_isExpanded) ...[
-            const Divider(height: 1),
+            Divider(height: 1, color: theme.dividerColor.withOpacity(0.3)),
             // Filter chips
             Padding(
               padding: const EdgeInsets.all(12.0),

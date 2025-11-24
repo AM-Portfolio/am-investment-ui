@@ -165,9 +165,8 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         showTitle = false; // Hide title for portfolios view - title is in the content
         break;
       case TradeViewType.holdings:
-        title = _currentPortfolioName != null
-            ? 'Holdings Dashboard - $_currentPortfolioName'
-            : 'Trade Holdings Dashboard';
+        title = 'Holdings';
+        showTitle = false; // Hide title - portfolio info is in sidebar
         break;
       case TradeViewType.calendar:
         title = _currentPortfolioName != null

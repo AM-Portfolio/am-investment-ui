@@ -47,7 +47,7 @@ class ProfitLossFilterGroup extends FilterGroup {
               const TextInputType.numberWithOptions(decimal: true, signed: true),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           Expanded(
             child: _buildTextField(
               'Max P&L (₹)',
@@ -58,7 +58,7 @@ class ProfitLossFilterGroup extends FilterGroup {
           ),
         ],
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       Row(
         children: [
           Expanded(
@@ -69,7 +69,7 @@ class ProfitLossFilterGroup extends FilterGroup {
               const TextInputType.numberWithOptions(decimal: true),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           Expanded(
             child: _buildTextField(
               'Max Position Size (₹)',
@@ -84,31 +84,34 @@ class ProfitLossFilterGroup extends FilterGroup {
   );
 
   Widget _buildTextField(String label, TextEditingController controller, String hint, TextInputType keyboardType) =>
-      TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 12),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(fontSize: 12),
-          hintText: hint,
-          hintStyle: const TextStyle(fontSize: 11),
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 16),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    controller.clear();
-                    onChanged();
-                  },
-                )
-              : null,
-          isDense: true,
+      SizedBox(
+        height: 40,
+        child: TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(fontSize: 11),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(fontSize: 10),
+            hintText: hint,
+            hintStyle: const TextStyle(fontSize: 9),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            suffixIcon: controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 14),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      controller.clear();
+                      onChanged();
+                    },
+                  )
+                : null,
+            isDense: true,
+          ),
+          onChanged: (_) => onChanged(),
         ),
-        onChanged: (_) => onChanged(),
       );
 
   ProfitLossFilter toFilterCriteria() => ProfitLossFilter(

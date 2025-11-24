@@ -318,29 +318,55 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                           _buildEmptyState(theme)
                         else ...[
                           const SizedBox(height: 8),
-                          // Filter Groups in Grid Layout
+                          // Filter Groups in Single Row Layout for Web
                           LayoutBuilder(
                             builder: (context, constraints) {
                               final isMobile = constraints.maxWidth < 800;
-                              return Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _activeGroups.asMap().entries.map((entry) {
-                                  final index = entry.key;
-                                  final group = entry.value;
-                                  return SizedBox(
-                                    width: isMobile ? constraints.maxWidth : (constraints.maxWidth - 8) / 2,
-                                    child: AnimatedSwitcher(
-                                      duration: const Duration(milliseconds: 200),
-                                      child: FilterGroupCard(
-                                        key: ValueKey(group),
-                                        filterGroup: group,
-                                        onRemove: () => _removeFilterGroup(index),
+
+                              if (isMobile) {
+                                // Mobile: Stack vertically
+                                return Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: _activeGroups.asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final group = entry.value;
+                                    return SizedBox(
+                                      width: constraints.maxWidth,
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 200),
+                                        child: FilterGroupCard(
+                                          key: ValueKey(group),
+                                          filterGroup: group,
+                                          onRemove: () => _removeFilterGroup(index),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
-                              );
+                                    );
+                                  }).toList(),
+                                );
+                              } else {
+                                // Web: Single row with equal widths
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: _activeGroups.asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final group = entry.value;
+                                    return Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: index > 0 ? 8 : 0),
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 200),
+                                          child: FilterGroupCard(
+                                            key: ValueKey(group),
+                                            filterGroup: group,
+                                            onRemove: () => _removeFilterGroup(index),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
+                              }
                             },
                           ),
                         ],

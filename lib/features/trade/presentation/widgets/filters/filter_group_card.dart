@@ -68,7 +68,7 @@ class _FilterGroupCardState extends State<FilterGroupCard> with SingleTickerProv
               },
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
                   gradient: widget.filterGroup.hasActiveFilters
                       ? LinearGradient(
@@ -82,34 +82,34 @@ class _FilterGroupCardState extends State<FilterGroupCard> with SingleTickerProv
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: theme.primaryColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(widget.filterGroup.icon, size: 14, color: theme.primaryColor),
+                      child: Icon(widget.filterGroup.icon, size: 12, color: theme.primaryColor),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         widget.filterGroup.title,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: 11,
                           letterSpacing: 0.1,
                         ),
                       ),
                     ),
                     if (widget.filterGroup.hasActiveFilters)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                         decoration: BoxDecoration(
                           color: theme.primaryColor,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
                               color: theme.primaryColor.withOpacity(0.3),
-                              blurRadius: 3,
+                              blurRadius: 2,
                               offset: const Offset(0, 1),
                             ),
                           ],
@@ -117,30 +117,30 @@ class _FilterGroupCardState extends State<FilterGroupCard> with SingleTickerProv
                         child: const Text(
                           'Active',
                           style: TextStyle(
-                            fontSize: 8,
+                            fontSize: 7,
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.3,
                           ),
                         ),
                       ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     if (widget.canRemove && widget.onRemove != null)
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: widget.onRemove,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           child: Container(
-                            padding: const EdgeInsets.all(3),
-                            child: Icon(Icons.close_rounded, size: 14, color: theme.hintColor),
+                            padding: const EdgeInsets.all(2),
+                            child: Icon(Icons.close_rounded, size: 12, color: theme.hintColor),
                           ),
                         ),
                       ),
                     const SizedBox(width: 2),
                     RotationTransition(
                       turns: _rotationAnimation,
-                      child: Icon(Icons.expand_more_rounded, size: 20, color: theme.hintColor),
+                      child: Icon(Icons.expand_more_rounded, size: 16, color: theme.hintColor),
                     ),
                   ],
                 ),
@@ -154,7 +154,7 @@ class _FilterGroupCardState extends State<FilterGroupCard> with SingleTickerProv
             curve: Curves.easeInOut,
             child: _isExpanded
                 ? Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: isDark ? null : theme.primaryColor.withOpacity(0.01),
                       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),

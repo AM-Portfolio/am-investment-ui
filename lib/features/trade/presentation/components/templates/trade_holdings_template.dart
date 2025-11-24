@@ -12,6 +12,7 @@ class TradeHoldingsTemplate extends StatefulWidget {
     this.onHoldingSelected,
     this.onRefresh,
     this.isWebView = true,
+    this.itemsPerPage = 20,
   });
   final List<TradeHoldingViewModel> holdings;
   final bool isLoading;
@@ -19,6 +20,7 @@ class TradeHoldingsTemplate extends StatefulWidget {
   final Function(TradeHoldingViewModel)? onHoldingSelected;
   final VoidCallback? onRefresh;
   final bool isWebView;
+  final int itemsPerPage;
 
   @override
   State<TradeHoldingsTemplate> createState() => _TradeHoldingsTemplateState();
@@ -26,6 +28,7 @@ class TradeHoldingsTemplate extends StatefulWidget {
 
 class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
   final Set<String> _expandedItems = {};
+  int _currentPage = 0;
 
   void _toggleExpanded(String tradeId) {
     setState(() {
@@ -38,6 +41,20 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
   }
 
   bool _isExpanded(String tradeId) => _expandedItems.contains(tradeId);
+
+  int get _totalPages => (widget.holdings.length / widget.itemsPerPage).ceil();
+
+  List<TradeHoldingViewModel> get _paginatedHoldings {
+    final startIndex = _currentPage * widget.itemsPerPage;
+    final endIndex = (startIndex + widget.itemsPerPage).clamp(0, widget.holdings.length);
+    return widget.holdings.sublist(startIndex, endIndex);
+  }
+
+  void _goToPage(int page) {
+    setState(() {
+      _currentPage = page.clamp(0, _totalPages - 1);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +83,87 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
       return const Center(child: Text('No holdings found'));
     }
 
-    return widget.isWebView ? _buildTableView() : _buildCardView();
+    return Column(
+      children: [
+        // Holdings info bar with pagination
+        if (widget.isWebView)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Showing ${_currentPage * widget.itemsPerPage + 1}-${(_currentPage * widget.itemsPerPage + _paginatedHoldings.length).clamp(0, widget.holdings.length)} of ${widget.holdings.length} holdings',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
+                ),
+                if (_totalPages > 1) _buildPaginationControls(),
+              ],
+            ),
+          ),
+        // Main content
+        Expanded(child: widget.isWebView ? _buildTableView() : _buildCardView()),
+      ],
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: _currentPage > 0 ? () => _goToPage(_currentPage - 1) : null,
+          tooltip: 'Previous page',
+        ),
+        const SizedBox(width: 8),
+        ...List.generate(_totalPages.clamp(0, 5), (index) {
+          // Show first page, last page, current page and neighbors
+          int pageNumber;
+          if (_totalPages <= 5) {
+            pageNumber = index;
+          } else if (_currentPage < 3) {
+            pageNumber = index;
+          } else if (_currentPage > _totalPages - 4) {
+            pageNumber = _totalPages - 5 + index;
+          } else {
+            pageNumber = _currentPage - 2 + index;
+          }
+
+          if (pageNumber < 0 || pageNumber >= _totalPages) return const SizedBox.shrink();
+
+          final isCurrentPage = pageNumber == _currentPage;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: InkWell(
+              onTap: () => _goToPage(pageNumber),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isCurrentPage ? theme.primaryColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: isCurrentPage ? theme.primaryColor : theme.dividerColor),
+                ),
+                child: Text(
+                  '${pageNumber + 1}',
+                  style: TextStyle(
+                    color: isCurrentPage ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
+                    fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.chevron_right),
+          onPressed: _currentPage < _totalPages - 1 ? () => _goToPage(_currentPage + 1) : null,
+          tooltip: 'Next page',
+        ),
+      ],
+    );
   }
 
   Widget _buildTableView() => SingleChildScrollView(
@@ -85,7 +182,7 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
           DataColumn(label: Text('P&L %')),
           DataColumn(label: Text('R:R Ratio')),
         ],
-        rows: widget.holdings.map((holding) {
+        rows: _paginatedHoldings.map((holding) {
           final isPositive = holding.isProfit;
 
           return DataRow(
@@ -120,9 +217,9 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
 
   Widget _buildCardView() => ListView.builder(
     padding: const EdgeInsets.all(16),
-    itemCount: widget.holdings.length,
+    itemCount: _paginatedHoldings.length,
     itemBuilder: (context, index) {
-      final holding = widget.holdings[index];
+      final holding = _paginatedHoldings[index];
       final isPositive = holding.isProfit;
       final pnlColor = isPositive ? Colors.green : Colors.red;
       final isExpanded = _isExpanded(holding.tradeId);

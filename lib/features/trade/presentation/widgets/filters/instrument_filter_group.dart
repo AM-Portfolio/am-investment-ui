@@ -41,45 +41,22 @@ class InstrumentFilterGroup extends FilterGroup {
   @override
   Widget buildContent(BuildContext context) => Column(
     children: [
-      MultiSelectDropdown<MarketSegments>(
-        label: 'Market Segments',
-        selectedValues: selectedSegments,
-        allValues: MarketSegments.values,
-        formatter: _formatMarketSegment,
-        onChanged: (values) {
-          selectedSegments = values;
-          onChanged();
-        },
-      ),
-      const SizedBox(height: 8),
-      TextField(
-        controller: symbolsController,
-        style: const TextStyle(fontSize: 12),
-        decoration: InputDecoration(
-          labelText: 'Symbols (comma-separated)',
-          labelStyle: const TextStyle(fontSize: 12),
-          hintText: 'NIFTY, BANKNIFTY, RELIANCE',
-          hintStyle: const TextStyle(fontSize: 11),
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          suffixIcon: symbolsController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, size: 16),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    symbolsController.clear();
-                    onChanged();
-                  },
-                )
-              : null,
-          isDense: true,
-        ),
-        onChanged: (_) => onChanged(),
-      ),
-      const SizedBox(height: 8),
+      // All three dropdowns in one compact row
       Row(
         children: [
+          Expanded(
+            child: MultiSelectDropdown<MarketSegments>(
+              label: 'Market Segments',
+              selectedValues: selectedSegments,
+              allValues: MarketSegments.values,
+              formatter: _formatMarketSegment,
+              onChanged: (values) {
+                selectedSegments = values;
+                onChanged();
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: MultiSelectDropdown<IndexTypes>(
               label: 'Index Types',
@@ -92,7 +69,7 @@ class InstrumentFilterGroup extends FilterGroup {
               },
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: MultiSelectDropdown<DerivativeTypes>(
               label: 'Derivative Types',
@@ -106,6 +83,35 @@ class InstrumentFilterGroup extends FilterGroup {
             ),
           ),
         ],
+      ),
+      const SizedBox(height: 6),
+      SizedBox(
+        height: 40,
+        child: TextField(
+          controller: symbolsController,
+          style: const TextStyle(fontSize: 11),
+          decoration: InputDecoration(
+            labelText: 'Symbols (comma-separated)',
+            labelStyle: const TextStyle(fontSize: 10),
+            hintText: 'NIFTY, BANKNIFTY, RELIANCE',
+            hintStyle: const TextStyle(fontSize: 9),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            suffixIcon: symbolsController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 14),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      symbolsController.clear();
+                      onChanged();
+                    },
+                  )
+                : null,
+            isDense: true,
+          ),
+          onChanged: (_) => onChanged(),
+        ),
       ),
     ],
   );

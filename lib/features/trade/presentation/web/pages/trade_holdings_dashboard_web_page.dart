@@ -35,13 +35,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Holdings Dashboard'),
-      actions: [IconButton(icon: const Icon(Icons.calendar_today), onPressed: () => _navigateToCalendar(context))],
-    ),
-    body: _buildHoldingsTab(),
-  );
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(), body: _buildHoldingsTab());
 
   Widget _buildHoldingsTab() {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
@@ -49,62 +43,64 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
 
     return Column(
       children: [
-        // Favorite Filter Panel at the top
+        // Compact filter section - moved directly below header
         Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocProvider(
-            create: (_) => ref.read(favoriteFilterCubitProvider),
-            child: FavoriteFilterPanel(
-              userId: widget.userId,
-              onFilterSelected: (filter) {
-                setState(() {
-                  _currentFilter = filter.filterConfig;
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Applied filter: "${filter.name}"'), duration: const Duration(seconds: 2)),
-                );
-              },
-              onCreateNew: () {
-                // TODO: Show dialog to create new filter
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Create filter dialog coming soon')));
-              },
-              onManageFilters: () {
-                // TODO: Navigate to filter management page
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Manage filters page coming soon')));
-              },
-            ),
+          padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 0.0),
+          child: Row(
+            children: [
+              // Favorite Filter Panel - Compact Icon
+              BlocProvider(
+                create: (_) => ref.read(favoriteFilterCubitProvider),
+                child: FavoriteFilterPanel(
+                  userId: widget.userId,
+                  onFilterSelected: (filter) {
+                    setState(() {
+                      _currentFilter = filter.filterConfig;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Applied filter: "${filter.name}"'), duration: const Duration(seconds: 2)),
+                    );
+                  },
+                  onCreateNew: () {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('Create filter dialog coming soon')));
+                  },
+                  onManageFilters: () {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('Manage filters page coming soon')));
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Advanced Filter Panel
+              Expanded(
+                child: CompactAdvancedFilterPanel(
+                  initialConfig: _currentFilter,
+                  onApplyFilter: (config) {
+                    setState(() {
+                      _currentFilter = config;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)),
+                    );
+                  },
+                  onReset: () {
+                    setState(() {
+                      _currentFilter = MetricsFilterConfig.empty();
+                    });
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
+                  },
+                ),
+              ),
+            ],
           ),
         ),
 
-        // Advanced Filter Panel
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: CompactAdvancedFilterPanel(
-            initialConfig: _currentFilter,
-            onApplyFilter: (config) {
-              setState(() {
-                _currentFilter = config;
-              });
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)));
-            },
-            onReset: () {
-              setState(() {
-                _currentFilter = MetricsFilterConfig.empty();
-              });
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
-            },
-          ),
-        ),
-
-        const SizedBox(height: 16),
+        const SizedBox(height: 6),
 
         // Holdings List
         Expanded(
@@ -272,13 +268,5 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
 
   void _showHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
     TradeDetailDialog.show(context, holding);
-  }
-
-  void _navigateToCalendar(BuildContext context) {
-    Navigator.pushNamed(
-      context,
-      '/trade/calendar/${widget.portfolioId}',
-      arguments: {'userId': widget.userId, 'portfolioId': widget.portfolioId},
-    );
   }
 }
