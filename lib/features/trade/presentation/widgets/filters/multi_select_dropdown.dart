@@ -56,6 +56,8 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
   }
 
   void _closeDropdown() {
+    // Apply selections when closing
+    widget.onChanged(_tempSelected);
     _overlayEntry?.remove();
     _overlayEntry = null;
     setState(() => _isOpen = false);
@@ -66,7 +68,10 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
     final size = renderBox.size;
 
     return OverlayEntry(
-      builder: (context) => Stack(children: [_buildBackgroundDismiss(), _buildDropdownContent(size)]),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setOverlayState) =>
+            Stack(children: [_buildBackgroundDismiss(), _buildDropdownContent(size, setOverlayState)]),
+      ),
     );
   }
 
@@ -74,7 +79,7 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
     child: GestureDetector(onTap: _closeDropdown, behavior: HitTestBehavior.translucent),
   );
 
-  Widget _buildDropdownContent(Size size) => Positioned(
+  Widget _buildDropdownContent(Size size, StateSetter setOverlayState) => Positioned(
     width: size.width,
     child: CompositedTransformFollower(
       link: _layerLink,
@@ -90,13 +95,16 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
             borderRadius: BorderRadius.circular(4),
             color: Theme.of(context).scaffoldBackgroundColor,
           ),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [_buildDropdownHeader(), _buildOptionsList()]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [_buildDropdownHeader(setOverlayState), _buildOptionsList(setOverlayState)],
+          ),
         ),
       ),
     ),
   );
 
-  Widget _buildDropdownHeader() => Container(
+  Widget _buildDropdownHeader(StateSetter setOverlayState) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
       color: Colors.grey.shade100,
@@ -106,49 +114,36 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(widget.label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-        _buildHeaderActions(),
+        _buildHeaderActions(setOverlayState),
       ],
     ),
   );
 
-  Widget _buildHeaderActions() => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      if (_tempSelected.isNotEmpty)
-        TextButton(
-          onPressed: () => setState(() => _tempSelected.clear()),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            minimumSize: const Size(0, 24),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: const Text('Clear', style: TextStyle(fontSize: 11)),
-        ),
-      const SizedBox(width: 4),
-      FilledButton(
-        onPressed: () {
-          widget.onChanged(_tempSelected);
-          _closeDropdown();
-        },
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          minimumSize: const Size(0, 24),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        child: const Text('Done', style: TextStyle(fontSize: 11)),
-      ),
-    ],
-  );
+  Widget _buildHeaderActions(StateSetter setOverlayState) {
+    if (_tempSelected.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-  Widget _buildOptionsList() => Flexible(
+    return TextButton(
+      onPressed: () => setOverlayState(() => _tempSelected.clear()),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        minimumSize: const Size(0, 24),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: const Text('Clear', style: TextStyle(fontSize: 11)),
+    );
+  }
+
+  Widget _buildOptionsList(StateSetter setOverlayState) => Flexible(
     child: ListView(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: 4),
-      children: widget.allValues.map(_buildOptionItem).toList(),
+      children: widget.allValues.map((value) => _buildOptionItem(value, setOverlayState)).toList(),
     ),
   );
 
-  Widget _buildOptionItem(T value) {
+  Widget _buildOptionItem(T value, StateSetter setOverlayState) {
     final isSelected = _tempSelected.contains(value);
     return CheckboxListTile(
       title: Text(widget.formatter(value), style: const TextStyle(fontSize: 12)),
@@ -157,7 +152,7 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       visualDensity: VisualDensity.compact,
       onChanged: (checked) {
-        setState(() {
+        setOverlayState(() {
           if (checked == true) {
             _tempSelected.add(value);
           } else {
@@ -175,13 +170,33 @@ class _MultiSelectDropdownState<T> extends State<MultiSelectDropdown<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => CompositedTransformTarget(
-    link: _layerLink,
-    child: InkWell(
-      onTap: _toggleDropdown,
-      child: InputDecorator(decoration: _buildInputDecoration(), child: _buildDisplayText()),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final tooltipMessage = _buildTooltipMessage();
+
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: Tooltip(
+        message: tooltipMessage,
+        preferBelow: false,
+        waitDuration: const Duration(milliseconds: 500),
+        child: InkWell(
+          onTap: _toggleDropdown,
+          child: InputDecorator(decoration: _buildInputDecoration(), child: _buildDisplayText()),
+        ),
+      ),
+    );
+  }
+
+  String _buildTooltipMessage() {
+    if (widget.selectedValues.isEmpty) {
+      return 'No items selected';
+    }
+    if (widget.selectedValues.length == 1) {
+      return widget.formatter(widget.selectedValues.first);
+    }
+    // Show all selected values separated by commas
+    return widget.selectedValues.map(widget.formatter).join(', ');
+  }
 
   InputDecoration _buildInputDecoration() => InputDecoration(
     labelText: widget.label,
