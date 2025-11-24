@@ -40,7 +40,7 @@ class DateRangeFilterGroup extends FilterGroup {
           },
         ),
       ),
-      const SizedBox(width: 8),
+      const SizedBox(width: 6),
       Expanded(
         child: _buildModernDateSelector(
           context,
@@ -64,88 +64,75 @@ class DateRangeFilterGroup extends FilterGroup {
     final theme = Theme.of(context);
     final hasValue = value != null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            fontSize: 10,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
-          ),
-        ),
-        const SizedBox(height: 4),
-        InkWell(
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: value ?? DateTime.now(),
-              firstDate: DateTime(2020),
-              lastDate: DateTime.now().add(const Duration(days: 365)),
-              builder: (context, child) => Theme(
-                data: theme.copyWith(
-                  colorScheme: theme.colorScheme.copyWith(
-                    primary: theme.colorScheme.primary,
-                    onPrimary: theme.colorScheme.onPrimary,
-                  ),
+    return SizedBox(
+      height: 40,
+      child: InkWell(
+        onTap: () async {
+          final picked = await showDatePicker(
+            context: context,
+            initialDate: value ?? DateTime.now(),
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
+            builder: (context, child) => Theme(
+              data: theme.copyWith(
+                colorScheme: theme.colorScheme.copyWith(
+                  primary: theme.colorScheme.primary,
+                  onPrimary: theme.colorScheme.onPrimary,
                 ),
-                child: child!,
               ),
-            );
-            if (picked != null) {
-              onChanged(picked);
-            }
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: hasValue
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                  : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: hasValue
-                    ? theme.colorScheme.primary.withOpacity(0.3)
-                    : theme.colorScheme.outline.withOpacity(0.2),
-              ),
+              child: child!,
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_month_rounded,
-                  size: 14,
-                  color: hasValue ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.5),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    hasValue ? _formatDate(value) : 'Select date',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 11,
-                      color: hasValue ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.5),
-                      fontWeight: hasValue ? FontWeight.w500 : FontWeight.normal,
-                    ),
-                  ),
-                ),
-                if (hasValue)
-                  GestureDetector(
-                    onTap: () => onChanged(null),
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.close_rounded, size: 12, color: theme.colorScheme.primary),
-                    ),
-                  ),
-              ],
+          );
+          if (picked != null) {
+            onChanged(picked);
+          }
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: hasValue
+                ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: hasValue ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.outline.withOpacity(0.2),
             ),
           ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 14,
+                color: hasValue ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.5),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  hasValue ? _formatDate(value) : label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
+                    color: hasValue ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.5),
+                    fontWeight: hasValue ? FontWeight.w500 : FontWeight.normal,
+                  ),
+                ),
+              ),
+              if (hasValue)
+                GestureDetector(
+                  onTap: () => onChanged(null),
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close_rounded, size: 12, color: theme.colorScheme.primary),
+                  ),
+                ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 

@@ -35,7 +35,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(), body: _buildHoldingsTab());
+  Widget build(BuildContext context) => Scaffold(body: _buildHoldingsTab());
 
   Widget _buildHoldingsTab() {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
@@ -43,9 +43,9 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
 
     return Column(
       children: [
-        // Compact filter section - moved directly below header
+        // Compact filter section - no top padding
         Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 0.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
           child: Row(
             children: [
               // Favorite Filter Panel - Compact Icon

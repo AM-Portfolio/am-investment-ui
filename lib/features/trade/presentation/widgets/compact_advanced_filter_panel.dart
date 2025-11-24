@@ -160,6 +160,12 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
           }
           break;
       }
+
+      // Auto-expand the panel when a filter group is added
+      if (!_isExpanded) {
+        _isExpanded = true;
+        _animationController.forward();
+      }
     });
   }
 
@@ -290,6 +296,39 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                       ),
                       const SizedBox(width: 6),
                     ],
+                    // Add Filter Group Icon Button
+                    PopupMenuButton<FilterGroupType>(
+                      itemBuilder: (context) => [
+                        if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
+                          PopupMenuItem(
+                            value: FilterGroupType.dateRange,
+                            child: _buildMenuTile(Icons.date_range_rounded, 'Date Range', theme),
+                          ),
+                        if (!_activeGroups.any((g) => g is InstrumentFilterGroup))
+                          PopupMenuItem(
+                            value: FilterGroupType.instrument,
+                            child: _buildMenuTile(Icons.candlestick_chart_rounded, 'Instruments', theme),
+                          ),
+                        if (!_activeGroups.any((g) => g is TradeCharacteristicsFilterGroup))
+                          PopupMenuItem(
+                            value: FilterGroupType.tradeCharacteristics,
+                            child: _buildMenuTile(Icons.insights_rounded, 'Trade Characteristics', theme),
+                          ),
+                        if (!_activeGroups.any((g) => g is ProfitLossFilterGroup))
+                          PopupMenuItem(
+                            value: FilterGroupType.profitLoss,
+                            child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
+                          ),
+                      ],
+                      onSelected: _addFilterGroup,
+                      offset: const Offset(0, 40),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      tooltip: 'Add Filter Group',
+                      icon: Icon(Icons.add_circle_outline_rounded, size: 18, color: theme.primaryColor),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    ),
+                    const SizedBox(width: 4),
                     RotationTransition(
                       turns: _rotationAnimation,
                       child: Icon(Icons.expand_more_rounded, size: 18, color: theme.hintColor),
@@ -311,13 +350,9 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Add Filter Button
-                        _buildModernAddFilterButton(theme),
-
                         if (_activeGroups.isEmpty)
                           _buildEmptyState(theme)
-                        else ...[
-                          const SizedBox(height: 8),
+                        else
                           // Filter Groups in Single Row Layout for Web
                           LayoutBuilder(
                             builder: (context, constraints) {
@@ -353,7 +388,7 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                                     final group = entry.value;
                                     return Expanded(
                                       child: Padding(
-                                        padding: EdgeInsets.only(left: index > 0 ? 8 : 0),
+                                        padding: EdgeInsets.only(left: index > 0 ? 6 : 0),
                                         child: AnimatedSwitcher(
                                           duration: const Duration(milliseconds: 200),
                                           child: FilterGroupCard(
@@ -369,7 +404,6 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                               }
                             },
                           ),
-                        ],
                       ],
                     ),
                   )
@@ -379,54 +413,6 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
       ),
     );
   }
-
-  Widget _buildModernAddFilterButton(ThemeData theme) => PopupMenuButton<FilterGroupType>(
-    itemBuilder: (context) => [
-      if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
-        PopupMenuItem(
-          value: FilterGroupType.dateRange,
-          child: _buildMenuTile(Icons.date_range_rounded, 'Date Range', theme),
-        ),
-      if (!_activeGroups.any((g) => g is InstrumentFilterGroup))
-        PopupMenuItem(
-          value: FilterGroupType.instrument,
-          child: _buildMenuTile(Icons.candlestick_chart_rounded, 'Instruments', theme),
-        ),
-      if (!_activeGroups.any((g) => g is TradeCharacteristicsFilterGroup))
-        PopupMenuItem(
-          value: FilterGroupType.tradeCharacteristics,
-          child: _buildMenuTile(Icons.insights_rounded, 'Trade Characteristics', theme),
-        ),
-      if (!_activeGroups.any((g) => g is ProfitLossFilterGroup))
-        PopupMenuItem(
-          value: FilterGroupType.profitLoss,
-          child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
-        ),
-    ],
-    onSelected: _addFilterGroup,
-    offset: const Offset(0, 40),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: theme.primaryColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.2), width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_circle_outline_rounded, size: 18, color: theme.primaryColor),
-          const SizedBox(width: 8),
-          Text(
-            'Add Filter Group',
-            style: TextStyle(color: theme.primaryColor, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.2),
-          ),
-        ],
-      ),
-    ),
-  );
 
   Widget _buildMenuTile(IconData icon, String title, ThemeData theme) => Row(
     children: [

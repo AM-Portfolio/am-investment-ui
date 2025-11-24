@@ -29,6 +29,26 @@ class TradeHoldingsTemplate extends StatefulWidget {
 class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
   final Set<String> _expandedItems = {};
   int _currentPage = 0;
+  int? _sortColumnIndex;
+  bool _sortAscending = true;
+  List<TradeHoldingViewModel> _sortedHoldings = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _sortedHoldings = List.from(widget.holdings);
+  }
+
+  @override
+  void didUpdateWidget(TradeHoldingsTemplate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.holdings != oldWidget.holdings) {
+      _sortedHoldings = List.from(widget.holdings);
+      if (_sortColumnIndex != null) {
+        _sort(_sortColumnIndex!, _sortAscending);
+      }
+    }
+  }
 
   void _toggleExpanded(String tradeId) {
     setState(() {
@@ -42,12 +62,58 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
 
   bool _isExpanded(String tradeId) => _expandedItems.contains(tradeId);
 
-  int get _totalPages => (widget.holdings.length / widget.itemsPerPage).ceil();
+  int get _totalPages => (_sortedHoldings.length / widget.itemsPerPage).ceil();
 
   List<TradeHoldingViewModel> get _paginatedHoldings {
     final startIndex = _currentPage * widget.itemsPerPage;
-    final endIndex = (startIndex + widget.itemsPerPage).clamp(0, widget.holdings.length);
-    return widget.holdings.sublist(startIndex, endIndex);
+    final endIndex = (startIndex + widget.itemsPerPage).clamp(0, _sortedHoldings.length);
+    return _sortedHoldings.sublist(startIndex, endIndex);
+  }
+
+  void _sort(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+
+      _sortedHoldings.sort((a, b) {
+        int result;
+        switch (columnIndex) {
+          case 0: // Symbol
+            result = a.displaySymbol.compareTo(b.displaySymbol);
+            break;
+          case 1: // Company
+            result = a.displayCompanyName.compareTo(b.displayCompanyName);
+            break;
+          case 2: // Status
+            result = a.displayStatus.compareTo(b.displayStatus);
+            break;
+          case 3: // Quantity
+            result = (a.quantity ?? 0).compareTo(b.quantity ?? 0);
+            break;
+          case 4: // Entry Price
+            result = (a.entryPrice ?? 0).compareTo(b.entryPrice ?? 0);
+            break;
+          case 5: // Current Price
+            result = (a.currentPrice ?? 0).compareTo(b.currentPrice ?? 0);
+            break;
+          case 6: // Current Value
+            result = (a.currentValue ?? 0).compareTo(b.currentValue ?? 0);
+            break;
+          case 7: // P&L
+            result = (a.profitLoss ?? 0).compareTo(b.profitLoss ?? 0);
+            break;
+          case 8: // P&L %
+            result = (a.profitLossPercentage ?? 0).compareTo(b.profitLossPercentage ?? 0);
+            break;
+          case 9: // R:R Ratio
+            result = (a.riskRewardRatio ?? 0).compareTo(b.riskRewardRatio ?? 0);
+            break;
+          default:
+            result = 0;
+        }
+        return ascending ? result : -result;
+      });
+    });
   }
 
   void _goToPage(int page) {
@@ -85,7 +151,9 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
 
     return Column(
       children: [
-        // Holdings info bar with pagination
+        // Main content
+        Expanded(child: widget.isWebView ? _buildTableView() : _buildCardView()),
+        // Holdings info bar with pagination at bottom
         if (widget.isWebView)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -93,15 +161,13 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Showing ${_currentPage * widget.itemsPerPage + 1}-${(_currentPage * widget.itemsPerPage + _paginatedHoldings.length).clamp(0, widget.holdings.length)} of ${widget.holdings.length} holdings',
+                  'Showing ${_currentPage * widget.itemsPerPage + 1}-${(_currentPage * widget.itemsPerPage + _paginatedHoldings.length).clamp(0, _sortedHoldings.length)} of ${_sortedHoldings.length} holdings',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor),
                 ),
                 if (_totalPages > 1) _buildPaginationControls(),
               ],
             ),
           ),
-        // Main content
-        Expanded(child: widget.isWebView ? _buildTableView() : _buildCardView()),
       ],
     );
   }
@@ -170,17 +236,20 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
     scrollDirection: Axis.horizontal,
     child: SingleChildScrollView(
       child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Symbol')),
-          DataColumn(label: Text('Company')),
-          DataColumn(label: Text('Status')),
-          DataColumn(label: Text('Quantity')),
-          DataColumn(label: Text('Entry Price')),
-          DataColumn(label: Text('Current Price')),
-          DataColumn(label: Text('Current Value')),
-          DataColumn(label: Text('P&L')),
-          DataColumn(label: Text('P&L %')),
-          DataColumn(label: Text('R:R Ratio')),
+        sortColumnIndex: _sortColumnIndex,
+        sortAscending: _sortAscending,
+        headingRowHeight: 56,
+        columns: [
+          DataColumn(label: const Text('Symbol'), onSort: _sort),
+          DataColumn(label: const Text('Company'), onSort: _sort),
+          DataColumn(label: const Text('Status'), onSort: _sort),
+          DataColumn(label: const Text('Quantity'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('Entry Price'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('Current Price'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('Current Value'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('P&L'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('P&L %'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('R:R Ratio'), numeric: true, onSort: _sort),
         ],
         rows: _paginatedHoldings.map((holding) {
           final isPositive = holding.isProfit;

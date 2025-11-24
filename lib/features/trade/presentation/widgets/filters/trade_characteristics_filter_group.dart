@@ -75,7 +75,7 @@ class TradeCharacteristicsFilterGroup extends FilterGroup {
           ),
         ],
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: 4),
       Row(
         children: [
           Expanded(child: _buildTextField('Strategies (comma-separated)', strategiesController, 'Scalping, Swing')),
@@ -83,7 +83,7 @@ class TradeCharacteristicsFilterGroup extends FilterGroup {
           Expanded(child: _buildTextField('Tags (comma-separated)', tagsController, 'earnings, breakout')),
         ],
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: 4),
       Row(
         children: [
           Expanded(child: _buildTextField('Min Holding Hours', minHoldingHoursController, '0', TextInputType.number)),

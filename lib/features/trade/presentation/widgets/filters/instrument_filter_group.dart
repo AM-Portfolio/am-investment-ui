@@ -56,7 +56,7 @@ class InstrumentFilterGroup extends FilterGroup {
               },
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Expanded(
             child: MultiSelectDropdown<IndexTypes>(
               label: 'Index Types',
@@ -69,7 +69,7 @@ class InstrumentFilterGroup extends FilterGroup {
               },
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Expanded(
             child: MultiSelectDropdown<DerivativeTypes>(
               label: 'Derivative Types',
@@ -84,7 +84,7 @@ class InstrumentFilterGroup extends FilterGroup {
           ),
         ],
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: 4),
       SizedBox(
         height: 40,
         child: TextField(
