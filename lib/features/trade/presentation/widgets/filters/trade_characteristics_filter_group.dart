@@ -75,7 +75,7 @@ class TradeCharacteristicsFilterGroup extends FilterGroup {
           ),
         ],
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 8),
       Row(
         children: [
           Expanded(child: _buildTextField('Strategies (comma-separated)', strategiesController, 'Scalping, Swing')),
@@ -83,7 +83,7 @@ class TradeCharacteristicsFilterGroup extends FilterGroup {
           Expanded(child: _buildTextField('Tags (comma-separated)', tagsController, 'earnings, breakout')),
         ],
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 8),
       Row(
         children: [
           Expanded(child: _buildTextField('Min Holding Hours', minHoldingHoursController, '0', TextInputType.number)),
@@ -102,20 +102,25 @@ class TradeCharacteristicsFilterGroup extends FilterGroup {
   ]) => TextField(
     controller: controller,
     keyboardType: keyboardType,
+    style: const TextStyle(fontSize: 12),
     decoration: InputDecoration(
       labelText: label,
+      labelStyle: const TextStyle(fontSize: 12),
       hintText: hint,
+      hintStyle: const TextStyle(fontSize: 11),
       border: const OutlineInputBorder(),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       suffixIcon: controller.text.isNotEmpty
           ? IconButton(
-              icon: const Icon(Icons.clear, size: 18),
+              icon: const Icon(Icons.clear, size: 16),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
               onPressed: () {
                 controller.clear();
                 onChanged();
               },
             )
           : null,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       isDense: true,
     ),
     onChanged: (_) => onChanged(),

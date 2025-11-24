@@ -5,7 +5,7 @@ import '../../internal/domain/entities/favorite_filter.dart';
 import '../cubits/favorite_filter/favorite_filter_cubit.dart';
 
 /// Compact panel widget for displaying and managing favorite filters
-class FavoriteFilterPanel extends StatelessWidget {
+class FavoriteFilterPanel extends StatefulWidget {
   const FavoriteFilterPanel({
     required this.userId,
     super.key,
@@ -18,6 +18,13 @@ class FavoriteFilterPanel extends StatelessWidget {
   final void Function(FavoriteFilter filter)? onFilterSelected;
   final VoidCallback? onCreateNew;
   final VoidCallback? onManageFilters;
+
+  @override
+  State<FavoriteFilterPanel> createState() => _FavoriteFilterPanelState();
+}
+
+class _FavoriteFilterPanelState extends State<FavoriteFilterPanel> {
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
@@ -33,7 +40,7 @@ class FavoriteFilterPanel extends StatelessWidget {
 
   Widget _buildFilterList(BuildContext context, FavoriteFilterList filterList, FavoriteFilter? selectedFilter) {
     if (filterList.filters.isEmpty) {
-      return _buildEmptyState(context);
+      return const SizedBox.shrink(); // Don't show anything if no filters
     }
 
     return Card(
@@ -41,99 +48,104 @@ class FavoriteFilterPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Saved Filters',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    if (onCreateNew != null)
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: onCreateNew,
-                        tooltip: 'Create New Filter',
-                        iconSize: 20,
-                      ),
-                    if (onManageFilters != null)
-                      IconButton(
-                        icon: const Icon(Icons.settings),
-                        onPressed: onManageFilters,
-                        tooltip: 'Manage Filters',
-                        iconSize: 20,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          // Filter chips
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: filterList.filters.map((filter) {
-                final isSelected = selectedFilter?.id == filter.id;
-                final isDefault = filter.isDefault;
-
-                return FilterChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
+          // Collapsible Header
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
                     children: [
-                      if (isDefault)
-                        const Padding(padding: EdgeInsets.only(right: 4.0), child: Icon(Icons.star, size: 14)),
-                      Text(filter.name),
+                      Icon(_isExpanded ? Icons.expand_less : Icons.expand_more, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Saved Filters',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${filterList.filters.length}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected && onFilterSelected != null) {
-                      onFilterSelected!(filter);
-                      context.read<FavoriteFilterCubit>().selectFilter(filter);
-                    }
-                  },
-                  avatar: isDefault ? const Icon(Icons.star, size: 16) : null,
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => _confirmDelete(context, filter),
-                );
-              }).toList(),
+                  if (_isExpanded)
+                    Row(
+                      children: [
+                        if (widget.onCreateNew != null)
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: widget.onCreateNew,
+                            tooltip: 'Create New Filter',
+                            iconSize: 20,
+                          ),
+                        if (widget.onManageFilters != null)
+                          IconButton(
+                            icon: const Icon(Icons.settings),
+                            onPressed: widget.onManageFilters,
+                            tooltip: 'Manage Filters',
+                            iconSize: 20,
+                          ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+          // Expandable content
+          if (_isExpanded) ...[
+            const Divider(height: 1),
+            // Filter chips
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: filterList.filters.map((filter) {
+                  final isSelected = selectedFilter?.id == filter.id;
+                  final isDefault = filter.isDefault;
 
-  Widget _buildEmptyState(BuildContext context) => Card(
-    margin: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          const Icon(Icons.filter_list_off, size: 48, color: Colors.grey),
-          const SizedBox(height: 8),
-          Text('No saved filters', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text('Create a filter to save your preferences', style: Theme.of(context).textTheme.bodySmall),
-          if (onCreateNew != null) ...[
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: onCreateNew,
-              icon: const Icon(Icons.add),
-              label: const Text('Create Filter'),
+                  return FilterChip(
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isDefault)
+                          const Padding(padding: EdgeInsets.only(right: 4.0), child: Icon(Icons.star, size: 14)),
+                        Text(filter.name),
+                      ],
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected && widget.onFilterSelected != null) {
+                        widget.onFilterSelected!(filter);
+                        context.read<FavoriteFilterCubit>().selectFilter(filter);
+                      }
+                    },
+                    avatar: isDefault ? const Icon(Icons.star, size: 16) : null,
+                    deleteIcon: const Icon(Icons.close, size: 18),
+                    onDeleted: () => _confirmDelete(context, filter),
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ],
       ),
-    ),
-  );
+    );
+  }
 
   Widget _buildError(BuildContext context, String message) => Card(
     margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -149,7 +161,7 @@ class FavoriteFilterPanel extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              context.read<FavoriteFilterCubit>().loadFilters(userId);
+              context.read<FavoriteFilterCubit>().loadFilters(widget.userId);
             },
             child: const Text('Retry'),
           ),
@@ -168,7 +180,7 @@ class FavoriteFilterPanel extends StatelessWidget {
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
-              context.read<FavoriteFilterCubit>().deleteFilter(userId, filter.id);
+              context.read<FavoriteFilterCubit>().deleteFilter(widget.userId, filter.id);
               Navigator.of(dialogContext).pop();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),

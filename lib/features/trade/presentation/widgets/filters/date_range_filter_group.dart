@@ -33,7 +33,7 @@ class DateRangeFilterGroup extends FilterGroup {
         startDate = date;
         onChanged(startDate, endDate);
       }),
-      const SizedBox(height: 12),
+      const SizedBox(height: 8),
       _buildDateField(context, 'End Date', endDate, (date) {
         endDate = date;
         onChanged(startDate, endDate);
@@ -56,16 +56,22 @@ class DateRangeFilterGroup extends FilterGroup {
     child: InputDecorator(
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: const TextStyle(fontSize: 12),
         border: const OutlineInputBorder(),
         suffixIcon: value != null
-            ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => onChanged(null))
-            : const Icon(Icons.calendar_today, size: 18),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: 16),
+                onPressed: () => onChanged(null),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              )
+            : const Icon(Icons.calendar_today, size: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         isDense: true,
       ),
       child: Text(
         value != null ? '${value.day}/${value.month}/${value.year}' : 'Select date',
-        style: TextStyle(color: value != null ? null : Colors.grey),
+        style: TextStyle(color: value != null ? null : Colors.grey, fontSize: 12),
       ),
     ),
   );

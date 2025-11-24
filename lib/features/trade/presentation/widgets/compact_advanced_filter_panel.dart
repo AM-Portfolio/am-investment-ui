@@ -22,24 +22,27 @@ class CompactAdvancedFilterPanel extends ConsumerStatefulWidget {
   ConsumerState<CompactAdvancedFilterPanel> createState() => _CompactAdvancedFilterPanelState();
 }
 
-class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilterPanel> with SingleTickerProviderStateMixin {
+class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilterPanel>
+    with SingleTickerProviderStateMixin {
   final List<FilterGroup> _activeGroups = [];
-  bool _isExpanded = true;
+  bool _isExpanded = false; // Start collapsed
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _rotationAnimation = Tween<double>(begin: 0, end: 0.5).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    if (_isExpanded) _animationController.forward();
+    _animationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
+    _rotationAnimation = Tween<double>(
+      begin: 0,
+      end: 0.5,
+    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
     _initializeFromConfig();
+    // Expand if there are active groups
+    if (_activeGroups.isNotEmpty) {
+      _isExpanded = true;
+      _animationController.forward();
+    }
   }
 
   void _initializeFromConfig() {
@@ -120,6 +123,7 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
 
   @override
   void dispose() {
+    _animationController.dispose();
     for (final group in _activeGroups) {
       if (group is InstrumentFilterGroup) {
         group.dispose();
@@ -199,153 +203,245 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      elevation: 2,
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? theme.cardColor : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Icon(Icons.tune, color: theme.primaryColor, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Advanced Filters',
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+          // Modern Compact Header
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() => _isExpanded = !_isExpanded);
+                _isExpanded ? _animationController.forward() : _animationController.reverse();
+              },
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [theme.primaryColor.withOpacity(0.05), theme.primaryColor.withOpacity(0.02)],
                   ),
-                  if (_activeFilterCount > 0)
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Row(
+                  children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         color: theme.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        '$_activeFilterCount active',
-                        style: TextStyle(fontSize: 12, color: theme.primaryColor, fontWeight: FontWeight.bold),
+                      child: Icon(Icons.tune_rounded, color: theme.primaryColor, size: 16),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Filters',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          if (_activeGroups.isNotEmpty)
+                            Text(
+                              '${_activeGroups.length} group${_activeGroups.length > 1 ? 's' : ''} • $_activeFilterCount filter${_activeFilterCount > 1 ? 's' : ''}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.primaryColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                  const SizedBox(width: 8),
-                  Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
-                ],
+                    if (_activeGroups.isNotEmpty) ...[
+                      // Quick Actions
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        onPressed: _resetAllFilters,
+                        tooltip: 'Reset all',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      ),
+                      const SizedBox(width: 4),
+                      FilledButton.tonalIcon(
+                        onPressed: _applyFilters,
+                        icon: const Icon(Icons.check_rounded, size: 16),
+                        label: const Text('Apply', style: TextStyle(fontSize: 12)),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          minimumSize: const Size(0, 28),
+                          visualDensity: VisualDensity.compact,
+                          textStyle: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    RotationTransition(
+                      turns: _rotationAnimation,
+                      child: Icon(Icons.expand_more_rounded, size: 18, color: theme.hintColor),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
 
-          // Filter Groups and Actions
-          if (_isExpanded) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Add Filter Group Button
-                  _buildAddFilterButton(),
-                  const SizedBox(height: 12),
-
-                  // Active Filter Groups
-                  if (_activeGroups.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Column(
-                          children: [
-                            Icon(Icons.filter_alt_outlined, size: 48, color: Colors.grey[400]),
-                            const SizedBox(height: 8),
-                            Text(
-                              'No filter groups added',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Click "Add Filter Group" to start',
-                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _activeGroups.length,
-                      itemBuilder: (context, index) =>
-                          FilterGroupCard(filterGroup: _activeGroups[index], onRemove: () => _removeFilterGroup(index)),
-                    ),
-
-                  // Action Buttons
-                  if (_activeGroups.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Row(
+          // Animated Content
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            child: _isExpanded
+                ? Container(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _resetAllFilters,
-                            icon: const Icon(Icons.clear_all, size: 18),
-                            label: const Text('Reset All'),
+                        // Add Filter Button
+                        _buildModernAddFilterButton(theme),
+
+                        if (_activeGroups.isEmpty)
+                          _buildEmptyState(theme)
+                        else ...[
+                          const SizedBox(height: 8),
+                          // Filter Groups in Grid Layout
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isMobile = constraints.maxWidth < 800;
+                              return Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _activeGroups.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final group = entry.value;
+                                  return SizedBox(
+                                    width: isMobile ? constraints.maxWidth : (constraints.maxWidth - 8) / 2,
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 200),
+                                      child: FilterGroupCard(
+                                        key: ValueKey(group),
+                                        filterGroup: group,
+                                        onRemove: () => _removeFilterGroup(index),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            },
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: ElevatedButton.icon(
-                            onPressed: _applyFilters,
-                            icon: const Icon(Icons.check, size: 18),
-                            label: const Text('Apply Filters'),
-                          ),
-                        ),
+                        ],
                       ],
                     ),
-                  ],
-                ],
-              ),
-            ),
-          ],
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAddFilterButton() => PopupMenuButton<FilterGroupType>(
+  Widget _buildModernAddFilterButton(ThemeData theme) => PopupMenuButton<FilterGroupType>(
     itemBuilder: (context) => [
       if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
-        const PopupMenuItem(
+        PopupMenuItem(
           value: FilterGroupType.dateRange,
-          child: Row(children: [Icon(Icons.date_range, size: 18), SizedBox(width: 8), Text('Date Range')]),
+          child: _buildMenuTile(Icons.date_range_rounded, 'Date Range', theme),
         ),
       if (!_activeGroups.any((g) => g is InstrumentFilterGroup))
-        const PopupMenuItem(
+        PopupMenuItem(
           value: FilterGroupType.instrument,
-          child: Row(children: [Icon(Icons.analytics_outlined, size: 18), SizedBox(width: 8), Text('Instrument')]),
+          child: _buildMenuTile(Icons.candlestick_chart_rounded, 'Instruments', theme),
         ),
       if (!_activeGroups.any((g) => g is TradeCharacteristicsFilterGroup))
-        const PopupMenuItem(
+        PopupMenuItem(
           value: FilterGroupType.tradeCharacteristics,
-          child: Row(children: [Icon(Icons.trending_up, size: 18), SizedBox(width: 8), Text('Trade Characteristics')]),
+          child: _buildMenuTile(Icons.insights_rounded, 'Trade Characteristics', theme),
         ),
       if (!_activeGroups.any((g) => g is ProfitLossFilterGroup))
-        const PopupMenuItem(
+        PopupMenuItem(
           value: FilterGroupType.profitLoss,
-          child: Row(
-            children: [Icon(Icons.attach_money, size: 18), SizedBox(width: 8), Text('Profit/Loss & Position')],
-          ),
+          child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
         ),
     ],
     onSelected: _addFilterGroup,
-    child: OutlinedButton.icon(
-      onPressed: null,
-      icon: const Icon(Icons.add, size: 18),
-      label: const Text('Add Filter Group'),
+    offset: const Offset(0, 40),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.2), width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add_circle_outline_rounded, size: 18, color: theme.primaryColor),
+          const SizedBox(width: 8),
+          Text(
+            'Add Filter Group',
+            style: TextStyle(color: theme.primaryColor, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.2),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _buildMenuTile(IconData icon, String title, ThemeData theme) => Row(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(color: theme.primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+        child: Icon(icon, size: 16, color: theme.primaryColor),
+      ),
+      const SizedBox(width: 12),
+      Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+    ],
+  );
+
+  Widget _buildEmptyState(ThemeData theme) => Container(
+    margin: const EdgeInsets.only(top: 12),
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: theme.primaryColor.withOpacity(0.03),
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: theme.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+          child: Icon(Icons.filter_alt_off_rounded, size: 32, color: theme.primaryColor.withOpacity(0.6)),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'No filter groups active',
+          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: theme.hintColor),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Add filter groups to refine your holdings',
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 12),
+          textAlign: TextAlign.center,
+        ),
+      ],
     ),
   );
 }

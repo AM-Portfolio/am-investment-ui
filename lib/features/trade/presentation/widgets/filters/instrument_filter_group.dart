@@ -51,28 +51,33 @@ class InstrumentFilterGroup extends FilterGroup {
           onChanged();
         },
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 8),
       TextField(
         controller: symbolsController,
+        style: const TextStyle(fontSize: 12),
         decoration: InputDecoration(
           labelText: 'Symbols (comma-separated)',
+          labelStyle: const TextStyle(fontSize: 12),
           hintText: 'NIFTY, BANKNIFTY, RELIANCE',
+          hintStyle: const TextStyle(fontSize: 11),
           border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           suffixIcon: symbolsController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, size: 18),
+                  icon: const Icon(Icons.clear, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   onPressed: () {
                     symbolsController.clear();
                     onChanged();
                   },
                 )
               : null,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           isDense: true,
         ),
         onChanged: (_) => onChanged(),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: 8),
       Row(
         children: [
           Expanded(
