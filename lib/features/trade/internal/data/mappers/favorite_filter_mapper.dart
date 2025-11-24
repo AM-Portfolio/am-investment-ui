@@ -172,6 +172,8 @@ class InstrumentFilterCriteriaMapper {
         return 'EQUITY_OPTIONS';
       case MarketSegments.indexOptions:
         return 'INDEX_OPTIONS';
+      case MarketSegments.unknown:
+        return 'UNKNOWN';
     }
   }
 
