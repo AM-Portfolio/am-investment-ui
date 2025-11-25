@@ -23,12 +23,15 @@ class MobileFilterPanel {
     required Function(MetricsFilterConfig) onApplyFilter,
     VoidCallback? onReset,
   }) async {
+    // Get the cubit from the existing provider - don't create a new one
+    final cubit = ref.read(favoriteFilterCubitProvider);
+
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => BlocProvider(
-        create: (_) => ref.read(favoriteFilterCubitProvider),
+      builder: (sheetContext) => BlocProvider.value(
+        value: cubit,
         child: _FilterBottomSheetContent(
           ref: ref,
           userId: userId,
@@ -168,6 +171,7 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
   }
 
   void _showSaveDialog() {
+    if (!mounted) return;
     final nameController = TextEditingController();
     final descriptionController = TextEditingController();
     final cubit = context.read<FavoriteFilterCubit>();
@@ -320,34 +324,37 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle bar
+          // Handle bar - slightly bigger for easier dragging
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            width: 40,
-            height: 3,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            width: 48,
+            height: 4,
             decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2)),
           ),
 
-          // Compact Header with tabs inline
+          // Header with better spacing
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                Icon(Icons.filter_list_rounded, size: 20, color: theme.primaryColor),
-                const SizedBox(width: 8),
-                Text('Filters', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Icon(Icons.filter_list_rounded, size: 22, color: theme.primaryColor),
+                const SizedBox(width: 10),
+                Text(
+                  'Filters',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 if (_activeFilterCount > 0) ...[
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(color: theme.primaryColor, borderRadius: BorderRadius.circular(12)),
                     child: Text(
                       '$_activeFilterCount',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ],
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 // Favorite Filters Button
                 BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
                   builder: (context, state) => state.when(
@@ -361,30 +368,40 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
                   ),
                 ),
                 const Spacer(),
+                // Close button - bigger touch target
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.close, size: 24),
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
           ),
 
-          // Tab Bar - More compact
+          // Tab Bar - Thumb-friendly for large phones
           TabBar(
             controller: _tabController,
             isScrollable: true,
             labelColor: theme.primaryColor,
             unselectedLabelColor: theme.hintColor,
             indicatorColor: theme.primaryColor,
-            labelPadding: const EdgeInsets.symmetric(horizontal: 12),
-            labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            indicatorWeight: 3,
+            // Larger horizontal padding for better touch targets
+            labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+            // Bigger text for easier reading
+            labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            // Add vertical padding to increase touch area
+            padding: const EdgeInsets.symmetric(vertical: 8),
             tabs: const [
-              Tab(text: 'Date'),
-              Tab(text: 'Instrument'),
-              Tab(text: 'Trade'),
-              Tab(text: 'P&L'),
+              Tab(
+                text: 'Date',
+                height: 48, // Minimum touch target height
+              ),
+              Tab(text: 'Instrument', height: 48),
+              Tab(text: 'Trade', height: 48),
+              Tab(text: 'P&L', height: 48),
             ],
           ),
 
@@ -397,9 +414,9 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
             ),
           ),
 
-          // Bottom Action Bar - Compact
+          // Bottom Action Bar - Thumb-friendly buttons
           Container(
-            padding: EdgeInsets.fromLTRB(12, 6, 12, 8 + bottomPadding),
+            padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottomPadding),
             decoration: BoxDecoration(
               color: theme.cardColor,
               border: Border(top: BorderSide(color: theme.dividerColor.withOpacity(0.3))),
@@ -407,43 +424,43 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
             child: Row(
               children: [
                 if (_activeFilterCount > 0) ...[
-                  // Save as Favorite button
+                  // Save as Favorite button - larger touch target
                   IconButton(
                     onPressed: _showSaveDialog,
-                    icon: const Icon(Icons.bookmark_add_outlined, size: 20),
+                    icon: const Icon(Icons.bookmark_add_outlined, size: 22),
                     tooltip: 'Save as Favorite',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(12),
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                     style: IconButton.styleFrom(
                       backgroundColor: theme.primaryColor.withOpacity(0.1),
                       foregroundColor: theme.primaryColor,
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  // Reset button
+                  const SizedBox(width: 8),
+                  // Reset button - bigger and easier to tap
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _resetFilters,
-                      icon: const Icon(Icons.clear_all, size: 14),
-                      label: const Text('Reset', style: TextStyle(fontSize: 12)),
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('Reset', style: TextStyle(fontSize: 14)),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        minimumSize: const Size(0, 48),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                 ],
-                // Apply button
+                // Apply button - bigger and more prominent
                 Expanded(
                   flex: _activeFilterCount > 0 ? 2 : 1,
                   child: FilledButton.icon(
                     onPressed: _applyFilters,
-                    icon: const Icon(Icons.check, size: 14),
-                    label: const Text('Apply', style: TextStyle(fontSize: 12)),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('Apply', style: TextStyle(fontSize: 14)),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      minimumSize: const Size(0, 48),
                     ),
                   ),
                 ),
@@ -483,32 +500,35 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
     FavoriteFilter? selectedFilter,
   ) => PopupMenuButton<String>(
     icon: Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: selectedFilter != null ? theme.primaryColor.withOpacity(0.15) : theme.cardColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: selectedFilter != null ? theme.primaryColor : theme.dividerColor),
       ),
       child: Icon(
         Icons.bookmark_rounded,
-        size: 20,
+        size: 22,
         color: selectedFilter != null ? theme.primaryColor : theme.hintColor,
       ),
     ),
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
     tooltip: 'Favorite Filters',
     itemBuilder: (context) => [
       PopupMenuItem<String>(
         enabled: false,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            Icon(Icons.bookmark_rounded, size: 18, color: theme.primaryColor),
-            const SizedBox(width: 8),
+            Icon(Icons.bookmark_rounded, size: 20, color: theme.primaryColor),
+            const SizedBox(width: 10),
             Text(
               'Favorites',
-              style: TextStyle(fontWeight: FontWeight.bold, color: theme.primaryColor),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.primaryColor),
             ),
             const Spacer(),
-            Text('${filterList.filters.length}', style: TextStyle(fontSize: 12, color: theme.hintColor)),
+            Text('${filterList.filters.length}', style: TextStyle(fontSize: 13, color: theme.hintColor)),
           ],
         ),
       ),
@@ -517,18 +537,20 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
         final isSelected = selectedFilter?.id == filter.id;
         return PopupMenuItem<String>(
           value: filter.id,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               if (isSelected)
-                Icon(Icons.check_circle, size: 16, color: theme.primaryColor)
+                Icon(Icons.check_circle, size: 18, color: theme.primaryColor)
               else
-                const SizedBox(width: 16),
-              const SizedBox(width: 8),
-              if (filter.isDefault) ...[Icon(Icons.star, size: 14, color: Colors.amber[700]), const SizedBox(width: 4)],
+                const SizedBox(width: 18),
+              const SizedBox(width: 10),
+              if (filter.isDefault) ...[Icon(Icons.star, size: 16, color: Colors.amber[700]), const SizedBox(width: 6)],
               Expanded(
                 child: Text(
                   filter.name,
                   style: TextStyle(
+                    fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                     color: isSelected ? theme.primaryColor : null,
                   ),
@@ -536,27 +558,29 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
               ),
               // Long press menu for each filter
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert, size: 16, color: theme.hintColor),
+                icon: Icon(Icons.more_vert, size: 18, color: theme.hintColor),
                 tooltip: 'Filter options',
                 itemBuilder: (context) => [
                   if (!filter.isDefault)
                     PopupMenuItem<String>(
                       value: 'set_default_${filter.id}',
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       child: Row(
                         children: [
-                          Icon(Icons.star_outline, size: 16, color: theme.hintColor),
-                          const SizedBox(width: 8),
-                          const Text('Set as Default'),
+                          Icon(Icons.star_outline, size: 18, color: theme.hintColor),
+                          const SizedBox(width: 10),
+                          const Text('Set as Default', style: TextStyle(fontSize: 14)),
                         ],
                       ),
                     ),
                   PopupMenuItem<String>(
                     value: 'delete_${filter.id}',
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
                       children: [
-                        Icon(Icons.delete_outline, size: 16, color: Colors.red.shade400),
-                        const SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red.shade400)),
+                        Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
+                        const SizedBox(width: 10),
+                        Text('Delete', style: TextStyle(fontSize: 14, color: Colors.red.shade400)),
                       ],
                     ),
                   ),
@@ -593,18 +617,23 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
         _showManageDialog(filterList);
       } else {
         final filter = filterList.filters.firstWhere((f) => f.id == value);
-        context.read<FavoriteFilterCubit>().selectFilter(filter);
-        _applyFavoriteFilter(filter);
+        // Check if widget is still mounted before updating cubit
+        if (mounted) {
+          context.read<FavoriteFilterCubit>().selectFilter(filter);
+          _applyFavoriteFilter(filter);
+        }
       }
     },
   );
 
   void _setAsDefault(FavoriteFilter filter) {
+    if (!mounted) return;
     context.read<FavoriteFilterCubit>().setAsDefault(widget.userId, filter.id);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${filter.name}" set as default')));
   }
 
   void _confirmDelete(FavoriteFilter filter) {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -614,9 +643,11 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
           TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
-              context.read<FavoriteFilterCubit>().deleteFilter(widget.userId, filter.id);
-              Navigator.of(dialogContext).pop();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${filter.name}" deleted')));
+              if (mounted) {
+                context.read<FavoriteFilterCubit>().deleteFilter(widget.userId, filter.id);
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${filter.name}" deleted')));
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
