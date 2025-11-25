@@ -12,25 +12,57 @@ import '../../widgets/filters/profit_loss_filter_group.dart';
 import '../../widgets/filters/trade_characteristics_filter_group.dart';
 
 /// Mobile-optimized filter panel with bottom sheet and tabs
-class MobileFilterPanel extends ConsumerStatefulWidget {
-  const MobileFilterPanel({
+/// Now used as a utility class to show filter bottom sheet
+class MobileFilterPanel {
+  /// Show filter bottom sheet - can be called from anywhere
+  static Future<void> show({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String userId,
+    required MetricsFilterConfig initialConfig,
+    required Function(MetricsFilterConfig) onApplyFilter,
+    VoidCallback? onReset,
+  }) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => BlocProvider(
+        create: (_) => ref.read(favoriteFilterCubitProvider),
+        child: _FilterBottomSheetContent(
+          ref: ref,
+          userId: userId,
+          initialConfig: initialConfig,
+          onApplyFilter: onApplyFilter,
+          onReset: onReset,
+        ),
+      ),
+    );
+  }
+}
+
+/// Internal stateful widget for filter bottom sheet content
+class _FilterBottomSheetContent extends ConsumerStatefulWidget {
+  const _FilterBottomSheetContent({
+    required this.ref,
     required this.userId,
     required this.initialConfig,
     required this.onApplyFilter,
-    super.key,
     this.onReset,
   });
 
+  final WidgetRef ref;
   final String userId;
   final MetricsFilterConfig initialConfig;
   final Function(MetricsFilterConfig) onApplyFilter;
   final VoidCallback? onReset;
 
   @override
-  ConsumerState<MobileFilterPanel> createState() => _MobileFilterPanelState();
+  ConsumerState<_FilterBottomSheetContent> createState() => _FilterBottomSheetContentState();
 }
 
-class _MobileFilterPanelState extends ConsumerState<MobileFilterPanel> with SingleTickerProviderStateMixin {
+class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetContent>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // Filter groups
@@ -213,15 +245,6 @@ class _MobileFilterPanelState extends ConsumerState<MobileFilterPanel> with Sing
     );
   }
 
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet(),
-    );
-  }
-
   void _applyFavoriteFilter(FavoriteFilter filter) {
     setState(() {
       // Dispose existing filters
@@ -324,6 +347,19 @@ class _MobileFilterPanelState extends ConsumerState<MobileFilterPanel> with Sing
                     ),
                   ),
                 ],
+                const SizedBox(width: 8),
+                // Favorite Filters Button
+                BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
+                  builder: (context, state) => state.when(
+                    initial: () => const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    loaded: (filterList, selectedFilter) {
+                      if (filterList.filters.isEmpty) return const SizedBox.shrink();
+                      return _buildFavoriteButton(theme, filterList, selectedFilter);
+                    },
+                    error: (message) => const SizedBox.shrink(),
+                  ),
+                ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, size: 20),
@@ -439,46 +475,7 @@ class _MobileFilterPanelState extends ConsumerState<MobileFilterPanel> with Sing
     child: _profitLossGroup!.buildContent(context),
   );
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return BlocProvider(
-      create: (_) => ref.read(favoriteFilterCubitProvider),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            // Favorite Filters Dropdown
-            BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
-              builder: (context, state) => state.when(
-                initial: () => const SizedBox.shrink(),
-                loading: () => const SizedBox.shrink(),
-                loaded: (filterList, selectedFilter) {
-                  if (filterList.filters.isEmpty) return const SizedBox.shrink();
-                  return _buildFavoriteButton(theme, filterList, selectedFilter);
-                },
-                error: (message) => const SizedBox.shrink(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Filter Button
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: _showFilterBottomSheet,
-                icon: Icon(Icons.tune_rounded, size: 18, color: _activeFilterCount > 0 ? Colors.white : null),
-                label: Text(_activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: _activeFilterCount > 0 ? theme.primaryColor : theme.primaryColor.withOpacity(0.1),
-                  foregroundColor: _activeFilterCount > 0 ? Colors.white : theme.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => _buildBottomSheet();
 
   Widget _buildFavoriteButton(
     ThemeData theme,
@@ -486,7 +483,7 @@ class _MobileFilterPanelState extends ConsumerState<MobileFilterPanel> with Sing
     FavoriteFilter? selectedFilter,
   ) => PopupMenuButton<String>(
     icon: Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: selectedFilter != null ? theme.primaryColor.withOpacity(0.15) : theme.cardColor,
         borderRadius: BorderRadius.circular(8),

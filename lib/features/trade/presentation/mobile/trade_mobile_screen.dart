@@ -13,7 +13,7 @@ import 'pages/trade_calendar_analytics_mobile_page.dart';
 import 'pages/trade_holdings_dashboard_mobile_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar }
+enum TradeViewType { portfolios, holdings, calendar, addTrade }
 
 /// Mobile-specific trade screen with bottom tab navigation
 class TradeMobileScreen extends ConsumerStatefulWidget {
@@ -156,6 +156,10 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
           ),
         ];
         break;
+      case TradeViewType.addTrade:
+        title = _currentPortfolioName != null ? 'Add Trade - $_currentPortfolioName' : 'Add Trade';
+        actions = [];
+        break;
     }
 
     return AppBar(
@@ -220,6 +224,14 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
             activeIcon: const Icon(Icons.calendar_today),
             label: 'Calendar',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.add_circle_outline,
+              color: hasPortfolio ? null : theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
+            activeIcon: const Icon(Icons.add_circle),
+            label: 'Add Trade',
+          ),
         ],
       ),
     );
@@ -242,6 +254,29 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
           return _buildSelectPortfolioPrompt(TradeViewType.calendar);
         }
         return TradeCalendarAnalyticsMobilePage(userId: widget.userId, portfolioId: _currentPortfolioId!);
+
+      case TradeViewType.addTrade:
+        if (_currentPortfolioId == null) {
+          return _buildSelectPortfolioPrompt(TradeViewType.addTrade);
+        }
+        // Get TradeControllerCubit from Riverpod provider
+        final tradeControllerCubit = ref.read(tradeControllerCubitProvider);
+        // Wrap with BlocProvider so AddTradeMobilePage can access it via context.read()
+        return BlocProvider<TradeControllerCubit>.value(
+          value: tradeControllerCubit,
+          child: AddTradeMobilePage(
+            portfolioId: _currentPortfolioId!,
+            portfolioName: _currentPortfolioName,
+            onTradeAdded: () {
+              // Refresh holdings when trade is added
+              if (_currentPortfolioId != null) {
+                ref.invalidate(tradeHoldingsStreamProvider((userId: widget.userId, portfolioId: _currentPortfolioId!)));
+              }
+              // Switch back to holdings view after adding trade
+              setState(() => _selectedView = TradeViewType.holdings);
+            },
+          ),
+        );
     }
   }
 
@@ -326,60 +361,7 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
 
   /// Build floating action button for adding new trade
   Widget? _buildFloatingActionButton(BuildContext context) {
-    // Only show FAB when a portfolio is selected
-    if (_currentPortfolioId == null) return null;
-
-    return FloatingActionButton.extended(
-      onPressed: () => _navigateToAddTrade(context),
-      icon: const Icon(Icons.add),
-      label: const Text('Add Trade'),
-      tooltip: 'Add New Trade',
-    );
-  }
-
-  /// Navigate to add trade page
-  Future<void> _navigateToAddTrade(BuildContext context) async {
-    if (_currentPortfolioId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a portfolio first')));
-      return;
-    }
-
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute<bool>(
-        builder: (context) {
-          // Get TradeControllerCubit from Riverpod provider
-          final tradeControllerCubit = ref.read(tradeControllerCubitProvider);
-
-          // Wrap with BlocProvider so AddTradeMobilePage can access it via context.read()
-          return BlocProvider<TradeControllerCubit>.value(
-            value: tradeControllerCubit,
-            child: AddTradeMobilePage(
-              portfolioId: _currentPortfolioId!,
-              portfolioName: _currentPortfolioName,
-              onTradeAdded: () {
-                // Refresh holdings data after trade is added
-                if (_currentPortfolioId != null) {
-                  final params = (userId: widget.userId, portfolioId: _currentPortfolioId!);
-                  ref.invalidate(tradeHoldingsStreamProvider(params));
-                  ref.invalidate(tradeSummaryStreamProvider(params));
-                }
-              },
-            ),
-          );
-        },
-      ),
-    );
-
-    // If trade was added successfully, show confirmation
-    if (result == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Trade added successfully'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+    // FAB removed - Add Trade now in bottom navigation
+    return null;
   }
 }
