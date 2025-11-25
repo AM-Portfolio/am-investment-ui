@@ -9,7 +9,6 @@ import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../components/templates/trade_holdings_template.dart';
 import '../../models/trade_holding_view_model.dart';
 import '../../widgets/compact_advanced_filter_panel.dart';
-import '../../widgets/favorite_filter_panel.dart';
 
 class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
   const TradeHoldingsDashboardWebPage({required this.userId, required this.portfolioId, super.key});
@@ -46,58 +45,28 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
         // Compact filter section - no top padding
         Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-          child: Row(
-            children: [
-              // Favorite Filter Panel - Compact Icon
-              BlocProvider(
-                create: (_) => ref.read(favoriteFilterCubitProvider),
-                child: FavoriteFilterPanel(
-                  userId: widget.userId,
-                  onFilterSelected: (filter) {
-                    setState(() {
-                      _currentFilter = filter.filterConfig;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Applied filter: "${filter.name}"'), duration: const Duration(seconds: 2)),
-                    );
-                  },
-                  onCreateNew: () {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('Create filter dialog coming soon')));
-                  },
-                  onManageFilters: () {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('Manage filters page coming soon')));
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Advanced Filter Panel
-              Expanded(
-                child: CompactAdvancedFilterPanel(
-                  userId: widget.userId,
-                  initialConfig: _currentFilter,
-                  onApplyFilter: (config) {
-                    setState(() {
-                      _currentFilter = config;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)),
-                    );
-                  },
-                  onReset: () {
-                    setState(() {
-                      _currentFilter = MetricsFilterConfig.empty();
-                    });
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
-                  },
-                ),
-              ),
-            ],
+          child: BlocProvider(
+            create: (_) => ref.read(favoriteFilterCubitProvider),
+            child: CompactAdvancedFilterPanel(
+              userId: widget.userId,
+              initialConfig: _currentFilter,
+              onApplyFilter: (config) {
+                setState(() {
+                  _currentFilter = config;
+                });
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)));
+              },
+              onReset: () {
+                setState(() {
+                  _currentFilter = MetricsFilterConfig.empty();
+                });
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
+              },
+            ),
           ),
         ),
 
