@@ -57,57 +57,10 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
 
   void _initializeFromConfig() {
     final config = widget.initialConfig;
-
-    if (config.dateRange != null) {
-      _activeGroups.add(
-        DateRangeFilterGroup(
-          startDate: config.dateRange!.startDate,
-          endDate: config.dateRange!.endDate,
-          onChanged: (start, end) => setState(() {}),
-        ),
-      );
-    }
-
-    if (config.instrumentFilters != null && _hasInstrumentFilters(config.instrumentFilters)) {
-      final group = InstrumentFilterGroup(onChanged: () => setState(() {}));
-      group.selectedSegments = List.from(config.instrumentFilters!.marketSegments);
-      group.selectedIndexTypes = List.from(config.instrumentFilters!.indexTypes);
-      group.selectedDerivativeTypes = List.from(config.instrumentFilters!.derivativeTypes);
-      group.symbolsController.text = config.instrumentFilters!.baseSymbols.join(', ');
-      _activeGroups.add(group);
-    }
-
-    if (config.tradeCharacteristics != null && _hasTradeCharacteristics(config.tradeCharacteristics)) {
-      final group = TradeCharacteristicsFilterGroup(onChanged: () => setState(() {}));
-      group.selectedDirections = List.from(config.tradeCharacteristics!.directions);
-      group.selectedStatuses = List.from(config.tradeCharacteristics!.statuses);
-      group.strategiesController.text = config.tradeCharacteristics!.strategies.join(', ');
-      group.tagsController.text = config.tradeCharacteristics!.tags.join(', ');
-      if (config.tradeCharacteristics!.minHoldingTimeHours != null) {
-        group.minHoldingHoursController.text = config.tradeCharacteristics!.minHoldingTimeHours.toString();
-      }
-      if (config.tradeCharacteristics!.maxHoldingTimeHours != null) {
-        group.maxHoldingHoursController.text = config.tradeCharacteristics!.maxHoldingTimeHours.toString();
-      }
-      _activeGroups.add(group);
-    }
-
-    if (config.profitLossFilters != null && _hasProfitLossFilters(config.profitLossFilters)) {
-      final group = ProfitLossFilterGroup(onChanged: () => setState(() {}));
-      if (config.profitLossFilters!.minProfitLoss != null) {
-        group.minPnLController.text = config.profitLossFilters!.minProfitLoss.toString();
-      }
-      if (config.profitLossFilters!.maxProfitLoss != null) {
-        group.maxPnLController.text = config.profitLossFilters!.maxProfitLoss.toString();
-      }
-      if (config.profitLossFilters!.minPositionSize != null) {
-        group.minPositionSizeController.text = config.profitLossFilters!.minPositionSize.toString();
-      }
-      if (config.profitLossFilters!.maxPositionSize != null) {
-        group.maxPositionSizeController.text = config.profitLossFilters!.maxPositionSize.toString();
-      }
-      _activeGroups.add(group);
-    }
+    _loadDateRangeFilter(config);
+    _loadInstrumentFilter(config);
+    _loadTradeCharacteristicsFilter(config);
+    _loadProfitLossFilter(config);
   }
 
   bool _hasInstrumentFilters(filter) =>
@@ -210,6 +163,82 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
       _activeGroups.clear();
     });
     widget.onReset?.call();
+  }
+
+  void _loadDateRangeFilter(MetricsFilterConfig config) {
+    if (config.dateRange != null) {
+      _activeGroups.add(
+        DateRangeFilterGroup(
+          startDate: config.dateRange!.startDate,
+          endDate: config.dateRange!.endDate,
+          onChanged: (start, end) => setState(() {}),
+        ),
+      );
+    }
+  }
+
+  void _loadInstrumentFilter(MetricsFilterConfig config) {
+    if (config.instrumentFilters != null && _hasInstrumentFilters(config.instrumentFilters)) {
+      final group = InstrumentFilterGroup(onChanged: () => setState(() {}));
+      group.selectedSegments = List.from(config.instrumentFilters!.marketSegments);
+      group.selectedIndexTypes = List.from(config.instrumentFilters!.indexTypes);
+      group.selectedDerivativeTypes = List.from(config.instrumentFilters!.derivativeTypes);
+      group.symbolsController.text = config.instrumentFilters!.baseSymbols.join(', ');
+      _activeGroups.add(group);
+    }
+  }
+
+  void _loadTradeCharacteristicsFilter(MetricsFilterConfig config) {
+    if (config.tradeCharacteristics != null && _hasTradeCharacteristics(config.tradeCharacteristics)) {
+      final group = TradeCharacteristicsFilterGroup(onChanged: () => setState(() {}));
+      group.selectedDirections = List.from(config.tradeCharacteristics!.directions);
+      group.selectedStatuses = List.from(config.tradeCharacteristics!.statuses);
+      group.strategiesController.text = config.tradeCharacteristics!.strategies.join(', ');
+      group.tagsController.text = config.tradeCharacteristics!.tags.join(', ');
+      if (config.tradeCharacteristics!.minHoldingTimeHours != null) {
+        group.minHoldingHoursController.text = config.tradeCharacteristics!.minHoldingTimeHours.toString();
+      }
+      if (config.tradeCharacteristics!.maxHoldingTimeHours != null) {
+        group.maxHoldingHoursController.text = config.tradeCharacteristics!.maxHoldingTimeHours.toString();
+      }
+      _activeGroups.add(group);
+    }
+  }
+
+  void _loadProfitLossFilter(MetricsFilterConfig config) {
+    if (config.profitLossFilters != null && _hasProfitLossFilters(config.profitLossFilters)) {
+      final group = ProfitLossFilterGroup(onChanged: () => setState(() {}));
+      if (config.profitLossFilters!.minProfitLoss != null) {
+        group.minPnLController.text = config.profitLossFilters!.minProfitLoss.toString();
+      }
+      if (config.profitLossFilters!.maxProfitLoss != null) {
+        group.maxPnLController.text = config.profitLossFilters!.maxProfitLoss.toString();
+      }
+      if (config.profitLossFilters!.minPositionSize != null) {
+        group.minPositionSizeController.text = config.profitLossFilters!.minPositionSize.toString();
+      }
+      if (config.profitLossFilters!.maxPositionSize != null) {
+        group.maxPositionSizeController.text = config.profitLossFilters!.maxPositionSize.toString();
+      }
+      _activeGroups.add(group);
+    }
+  }
+
+  void _applyFavoriteFilter(MetricsFilterConfig config) {
+    setState(() {
+      _activeGroups.clear();
+      _loadDateRangeFilter(config);
+      _loadInstrumentFilter(config);
+      _loadTradeCharacteristicsFilter(config);
+      _loadProfitLossFilter(config);
+
+      // Expand the panel if filters were added
+      if (_activeGroups.isNotEmpty && !_isExpanded) {
+        _isExpanded = true;
+        _animationController.forward();
+      }
+    });
+    widget.onApplyFilter(config);
   }
 
   void _showSaveDialog() {
@@ -383,68 +412,7 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
                     // Favorite Filter Dropdown
                     FavoriteFilterPanel(
                       userId: widget.userId,
-                      onFilterSelected: (filter) {
-                        // Apply the favorite filter
-                        setState(_activeGroups.clear);
-                        // Re-initialize with the favorite filter config
-                        final config = filter.filterConfig;
-                        if (config.dateRange != null) {
-                          _activeGroups.add(
-                            DateRangeFilterGroup(
-                              startDate: config.dateRange!.startDate,
-                              endDate: config.dateRange!.endDate,
-                              onChanged: (start, end) => setState(() {}),
-                            ),
-                          );
-                        }
-                        if (config.instrumentFilters != null && _hasInstrumentFilters(config.instrumentFilters)) {
-                          final group = InstrumentFilterGroup(onChanged: () => setState(() {}));
-                          group.selectedSegments = List.from(config.instrumentFilters!.marketSegments);
-                          group.selectedIndexTypes = List.from(config.instrumentFilters!.indexTypes);
-                          group.selectedDerivativeTypes = List.from(config.instrumentFilters!.derivativeTypes);
-                          group.symbolsController.text = config.instrumentFilters!.baseSymbols.join(', ');
-                          _activeGroups.add(group);
-                        }
-                        if (config.tradeCharacteristics != null &&
-                            _hasTradeCharacteristics(config.tradeCharacteristics)) {
-                          final group = TradeCharacteristicsFilterGroup(onChanged: () => setState(() {}));
-                          group.selectedDirections = List.from(config.tradeCharacteristics!.directions);
-                          group.selectedStatuses = List.from(config.tradeCharacteristics!.statuses);
-                          group.strategiesController.text = config.tradeCharacteristics!.strategies.join(', ');
-                          group.tagsController.text = config.tradeCharacteristics!.tags.join(', ');
-                          if (config.tradeCharacteristics!.minHoldingTimeHours != null) {
-                            group.minHoldingHoursController.text = config.tradeCharacteristics!.minHoldingTimeHours
-                                .toString();
-                          }
-                          if (config.tradeCharacteristics!.maxHoldingTimeHours != null) {
-                            group.maxHoldingHoursController.text = config.tradeCharacteristics!.maxHoldingTimeHours
-                                .toString();
-                          }
-                          _activeGroups.add(group);
-                        }
-                        if (config.profitLossFilters != null && _hasProfitLossFilters(config.profitLossFilters)) {
-                          final group = ProfitLossFilterGroup(onChanged: () => setState(() {}));
-                          if (config.profitLossFilters!.minProfitLoss != null) {
-                            group.minPnLController.text = config.profitLossFilters!.minProfitLoss.toString();
-                          }
-                          if (config.profitLossFilters!.maxProfitLoss != null) {
-                            group.maxPnLController.text = config.profitLossFilters!.maxProfitLoss.toString();
-                          }
-                          if (config.profitLossFilters!.minPositionSize != null) {
-                            group.minPositionSizeController.text = config.profitLossFilters!.minPositionSize.toString();
-                          }
-                          if (config.profitLossFilters!.maxPositionSize != null) {
-                            group.maxPositionSizeController.text = config.profitLossFilters!.maxPositionSize.toString();
-                          }
-                          _activeGroups.add(group);
-                        }
-                        // Expand the panel if filters were added
-                        if (_activeGroups.isNotEmpty && !_isExpanded) {
-                          _isExpanded = true;
-                          _animationController.forward();
-                        }
-                        widget.onApplyFilter(filter.filterConfig);
-                      },
+                      onFilterSelected: (filter) => _applyFavoriteFilter(filter.filterConfig),
                     ),
                     const Spacer(),
 
@@ -582,59 +550,7 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_activeGroups.isEmpty)
-                          _buildEmptyState(theme)
-                        else
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isMobile = constraints.maxWidth < 800;
-
-                              if (isMobile) {
-                                return Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: _activeGroups.asMap().entries.map((entry) {
-                                    final index = entry.key;
-                                    final group = entry.value;
-                                    return SizedBox(
-                                      width: constraints.maxWidth,
-                                      child: AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 200),
-                                        child: FilterGroupCard(
-                                          key: ValueKey(group),
-                                          filterGroup: group,
-                                          onRemove: () => _removeFilterGroup(index),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              } else {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: _activeGroups.asMap().entries.map((entry) {
-                                    final index = entry.key;
-                                    final group = entry.value;
-                                    return Expanded(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(left: index > 0 ? 6 : 0),
-                                        child: AnimatedSwitcher(
-                                          duration: const Duration(milliseconds: 200),
-                                          child: FilterGroupCard(
-                                            key: ValueKey(group),
-                                            filterGroup: group,
-                                            onRemove: () => _removeFilterGroup(index),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              }
-                            },
-                          ),
-                      ],
+                      children: [_buildFilterGroupsContent(theme)],
                     ),
                   )
                 : const SizedBox.shrink(),
@@ -655,6 +571,48 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
       Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
     ],
   );
+
+  Widget _buildFilterGroupCard(int index, FilterGroup group) => AnimatedSwitcher(
+    duration: const Duration(milliseconds: 200),
+    child: FilterGroupCard(key: ValueKey(group), filterGroup: group, onRemove: () => _removeFilterGroup(index)),
+  );
+
+  Widget _buildMobileLayout(double maxWidth) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: _activeGroups.asMap().entries.map((entry) {
+      final index = entry.key;
+      final group = entry.value;
+      return SizedBox(width: maxWidth, child: _buildFilterGroupCard(index, group));
+    }).toList(),
+  );
+
+  Widget _buildDesktopLayout() => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: _activeGroups.asMap().entries.map((entry) {
+      final index = entry.key;
+      final group = entry.value;
+      return Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(left: index > 0 ? 6 : 0),
+          child: _buildFilterGroupCard(index, group),
+        ),
+      );
+    }).toList(),
+  );
+
+  Widget _buildFilterGroupsContent(ThemeData theme) {
+    if (_activeGroups.isEmpty) {
+      return _buildEmptyState(theme);
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+        return isMobile ? _buildMobileLayout(constraints.maxWidth) : _buildDesktopLayout();
+      },
+    );
+  }
 
   Widget _buildEmptyState(ThemeData theme) => Container(
     margin: const EdgeInsets.only(top: 12),
