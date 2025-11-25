@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../favorite_filter_providers.dart';
-import '../../internal/domain/entities/favorite_filter.dart';
 import '../../internal/domain/entities/metrics_filter_config.dart';
 import '../cubits/favorite_filter/favorite_filter_cubit.dart';
+import 'favorite_filter_panel.dart';
 import 'filters/date_range_filter_group.dart';
 import 'filters/filter_group.dart';
 import 'filters/filter_group_card.dart';
@@ -15,28 +14,28 @@ import 'filters/trade_characteristics_filter_group.dart';
 
 enum FilterGroupType { dateRange, instrument, tradeCharacteristics, profitLoss }
 
-/// Modern Compact Advanced Filter Panel with smooth animations
-class CompactAdvancedFilterPanel extends ConsumerStatefulWidget {
-  const CompactAdvancedFilterPanel({
+/// Clean filter panel for trade holdings - without favorite filter logic
+class FilterPanel extends ConsumerStatefulWidget {
+  const FilterPanel({
+    required this.userId,
     required this.initialConfig,
     required this.onApplyFilter,
     super.key,
     this.onReset,
-    this.userId,
   });
+
+  final String userId;
   final MetricsFilterConfig initialConfig;
   final Function(MetricsFilterConfig) onApplyFilter;
   final VoidCallback? onReset;
-  final String? userId;
 
   @override
-  ConsumerState<CompactAdvancedFilterPanel> createState() => _CompactAdvancedFilterPanelState();
+  ConsumerState<FilterPanel> createState() => _FilterPanelState();
 }
 
-class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilterPanel>
-    with SingleTickerProviderStateMixin {
+class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProviderStateMixin {
   final List<FilterGroup> _activeGroups = [];
-  bool _isExpanded = false; // Start collapsed
+  bool _isExpanded = false;
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
 
@@ -49,24 +48,16 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
       end: 0.5,
     ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
     _initializeFromConfig();
-    // Expand if there are active groups
+
     if (_activeGroups.isNotEmpty) {
       _isExpanded = true;
       _animationController.forward();
-    }
-
-    // Load favorite filters when userId is provided
-    if (widget.userId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(favoriteFilterCubitProvider).loadFilters(widget.userId!);
-      });
     }
   }
 
   void _initializeFromConfig() {
     final config = widget.initialConfig;
 
-    // Only add groups that have data in the initial config
     if (config.dateRange != null) {
       _activeGroups.add(
         DateRangeFilterGroup(
@@ -179,7 +170,6 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
           break;
       }
 
-      // Auto-expand the panel when a filter group is added
       if (!_isExpanded) {
         _isExpanded = true;
         _animationController.forward();
@@ -222,102 +212,84 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
     widget.onReset?.call();
   }
 
-  Future<void> _saveAsFavorite() async {
-    if (widget.userId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cannot save filter: User not logged in'), duration: Duration(seconds: 2)),
-        );
-      }
-      return;
-    }
-
+  void _showSaveDialog() {
     final nameController = TextEditingController();
     final descriptionController = TextEditingController();
+    final cubit = context.read<FavoriteFilterCubit>();
 
-    final result = await showDialog<bool>(
+    showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Save Filter as Favorite'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Filter Name *',
-                hintText: 'e.g., High Profit Trades',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
+      builder: (dialogContext) => BlocProvider.value(
+        value: cubit,
+        child: AlertDialog(
+          title: const Text('Save as Favorite'),
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Filter Name *',
+                    hintText: 'e.g., My Trading Strategy',
+                    border: OutlineInputBorder(),
+                  ),
+                  autofocus: true,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (Optional)',
+                    hintText: 'Brief description of this filter',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (Optional)',
-                hintText: 'Add details about this filter',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+                if (name.isEmpty) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Please enter a filter name')));
+                  return;
+                }
+
+                final config = MetricsFilterConfig(
+                  dateRange: _activeGroups.whereType<DateRangeFilterGroup>().firstOrNull?.toFilterCriteria(),
+                  instrumentFilters: _activeGroups.whereType<InstrumentFilterGroup>().firstOrNull?.toFilterCriteria(),
+                  tradeCharacteristics: _activeGroups
+                      .whereType<TradeCharacteristicsFilterGroup>()
+                      .firstOrNull
+                      ?.toFilterCriteria(),
+                  profitLossFilters: _activeGroups.whereType<ProfitLossFilterGroup>().firstOrNull?.toFilterCriteria(),
+                );
+
+                cubit.createFilter(
+                  userId: widget.userId,
+                  name: name,
+                  filterConfig: config,
+                  description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+                );
+
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Filter "$name" saved successfully')));
+              },
+              child: const Text('Save'),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () {
-              if (nameController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a filter name')));
-                return;
-              }
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
-
-    if (result == true && nameController.text.trim().isNotEmpty) {
-      final config = MetricsFilterConfig(
-        dateRange: _activeGroups.whereType<DateRangeFilterGroup>().firstOrNull?.toFilterCriteria(),
-        instrumentFilters: _activeGroups.whereType<InstrumentFilterGroup>().firstOrNull?.toFilterCriteria(),
-        tradeCharacteristics: _activeGroups
-            .whereType<TradeCharacteristicsFilterGroup>()
-            .firstOrNull
-            ?.toFilterCriteria(),
-        profitLossFilters: _activeGroups.whereType<ProfitLossFilterGroup>().firstOrNull?.toFilterCriteria(),
-      );
-
-      try {
-        final cubit = ref.read(favoriteFilterCubitProvider);
-        await cubit.createFilter(
-          userId: widget.userId!,
-          name: nameController.text.trim(),
-          filterConfig: config,
-          description: descriptionController.text.trim().isNotEmpty ? descriptionController.text.trim() : null,
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Filter "${nameController.text.trim()}" saved successfully'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to save filter: $e'), duration: const Duration(seconds: 3)));
-        }
-      }
-    }
-
-    nameController.dispose();
-    descriptionController.dispose();
   }
 
   int get _activeFilterCount => _activeGroups.where((g) => g.hasActiveFilters).length;
@@ -337,7 +309,7 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Modern Compact Header
+          // Modern Header
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -356,7 +328,7 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                 ),
                 child: Row(
                   children: [
-                    // Left Section: Icon + Title + Stats
+                    // Left Section
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -407,24 +379,80 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                           ),
                       ],
                     ),
+                    const SizedBox(width: 12),
+                    // Favorite Filter Dropdown
+                    FavoriteFilterPanel(
+                      userId: widget.userId,
+                      onFilterSelected: (filter) {
+                        // Apply the favorite filter
+                        setState(_activeGroups.clear);
+                        // Re-initialize with the favorite filter config
+                        final config = filter.filterConfig;
+                        if (config.dateRange != null) {
+                          _activeGroups.add(
+                            DateRangeFilterGroup(
+                              startDate: config.dateRange!.startDate,
+                              endDate: config.dateRange!.endDate,
+                              onChanged: (start, end) => setState(() {}),
+                            ),
+                          );
+                        }
+                        if (config.instrumentFilters != null && _hasInstrumentFilters(config.instrumentFilters)) {
+                          final group = InstrumentFilterGroup(onChanged: () => setState(() {}));
+                          group.selectedSegments = List.from(config.instrumentFilters!.marketSegments);
+                          group.selectedIndexTypes = List.from(config.instrumentFilters!.indexTypes);
+                          group.selectedDerivativeTypes = List.from(config.instrumentFilters!.derivativeTypes);
+                          group.symbolsController.text = config.instrumentFilters!.baseSymbols.join(', ');
+                          _activeGroups.add(group);
+                        }
+                        if (config.tradeCharacteristics != null &&
+                            _hasTradeCharacteristics(config.tradeCharacteristics)) {
+                          final group = TradeCharacteristicsFilterGroup(onChanged: () => setState(() {}));
+                          group.selectedDirections = List.from(config.tradeCharacteristics!.directions);
+                          group.selectedStatuses = List.from(config.tradeCharacteristics!.statuses);
+                          group.strategiesController.text = config.tradeCharacteristics!.strategies.join(', ');
+                          group.tagsController.text = config.tradeCharacteristics!.tags.join(', ');
+                          if (config.tradeCharacteristics!.minHoldingTimeHours != null) {
+                            group.minHoldingHoursController.text = config.tradeCharacteristics!.minHoldingTimeHours
+                                .toString();
+                          }
+                          if (config.tradeCharacteristics!.maxHoldingTimeHours != null) {
+                            group.maxHoldingHoursController.text = config.tradeCharacteristics!.maxHoldingTimeHours
+                                .toString();
+                          }
+                          _activeGroups.add(group);
+                        }
+                        if (config.profitLossFilters != null && _hasProfitLossFilters(config.profitLossFilters)) {
+                          final group = ProfitLossFilterGroup(onChanged: () => setState(() {}));
+                          if (config.profitLossFilters!.minProfitLoss != null) {
+                            group.minPnLController.text = config.profitLossFilters!.minProfitLoss.toString();
+                          }
+                          if (config.profitLossFilters!.maxProfitLoss != null) {
+                            group.maxPnLController.text = config.profitLossFilters!.maxProfitLoss.toString();
+                          }
+                          if (config.profitLossFilters!.minPositionSize != null) {
+                            group.minPositionSizeController.text = config.profitLossFilters!.minPositionSize.toString();
+                          }
+                          if (config.profitLossFilters!.maxPositionSize != null) {
+                            group.maxPositionSizeController.text = config.profitLossFilters!.maxPositionSize.toString();
+                          }
+                          _activeGroups.add(group);
+                        }
+                        // Expand the panel if filters were added
+                        if (_activeGroups.isNotEmpty && !_isExpanded) {
+                          _isExpanded = true;
+                          _animationController.forward();
+                        }
+                        widget.onApplyFilter(filter.filterConfig);
+                      },
+                    ),
                     const Spacer(),
 
-                    // Right Section: Action Buttons
+                    // Right Section
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Favorite Filters Dropdown
-                        if (widget.userId != null) ...[
-                          _buildFavoriteFiltersDropdown(theme),
-                          Container(
-                            height: 24,
-                            width: 1,
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            color: theme.dividerColor.withOpacity(0.3),
-                          ),
-                        ],
-
-                        // Add Filter Group Button
+                        // Add Filter Button
                         PopupMenuButton<FilterGroupType>(
                           itemBuilder: (context) => [
                             if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
@@ -480,23 +508,22 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                         if (_activeGroups.isNotEmpty) ...[
                           const SizedBox(width: 8),
                           // Save as Favorite Button
-                          if (widget.userId != null && _activeFilterCount > 0)
-                            Tooltip(
-                              message: 'Save as favorite',
-                              child: InkWell(
-                                onTap: _saveAsFavorite,
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.amber.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.amber.withOpacity(0.3)),
-                                  ),
-                                  child: Icon(Icons.bookmark_add_outlined, size: 18, color: Colors.amber[700]),
+                          Tooltip(
+                            message: 'Save as favorite',
+                            child: InkWell(
+                              onTap: _showSaveDialog,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
                                 ),
+                                child: Icon(Icons.bookmark_add_rounded, size: 18, color: Colors.amber[700]),
                               ),
                             ),
+                          ),
                           const SizedBox(width: 8),
                           // Reset Button
                           Tooltip(
@@ -532,7 +559,7 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                         ],
 
                         const SizedBox(width: 8),
-                        // Expand/Collapse Indicator
+                        // Expand/Collapse
                         RotationTransition(
                           turns: _rotationAnimation,
                           child: Icon(Icons.expand_more_rounded, size: 20, color: theme.hintColor),
@@ -559,13 +586,11 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                         if (_activeGroups.isEmpty)
                           _buildEmptyState(theme)
                         else
-                          // Filter Groups in Single Row Layout for Web
                           LayoutBuilder(
                             builder: (context, constraints) {
                               final isMobile = constraints.maxWidth < 800;
 
                               if (isMobile) {
-                                // Mobile: Stack vertically
                                 return Wrap(
                                   spacing: 8,
                                   runSpacing: 8,
@@ -586,7 +611,6 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                                   }).toList(),
                                 );
                               } else {
-                                // Web: Single row with equal widths
                                 return Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: _activeGroups.asMap().entries.map((entry) {
@@ -614,307 +638,6 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                     ),
                   )
                 : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFavoriteFiltersDropdown(ThemeData theme) => BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
-    builder: (context, state) => state.when(
-      initial: () => const SizedBox.shrink(),
-      loading: () => const SizedBox.shrink(),
-      loaded: (filterList, selectedFilter) {
-        if (filterList.filters.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return PopupMenuButton<String>(
-          icon: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(Icons.bookmark_rounded, color: theme.primaryColor, size: 20),
-              if (selectedFilter != null)
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.scaffoldBackgroundColor, width: 1.5),
-                    ),
-                    child: const Icon(Icons.check, size: 8, color: Colors.white),
-                  ),
-                ),
-            ],
-          ),
-          tooltip: 'Favorite Filters',
-          itemBuilder: (context) => [
-            // Header
-            PopupMenuItem<String>(
-              enabled: false,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.bookmark_rounded, size: 18, color: theme.primaryColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Favorite Filters',
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${filterList.filters.length}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            const PopupMenuDivider(),
-            // Filter items
-            ...filterList.filters.map((filter) {
-              final isSelected = selectedFilter?.id == filter.id;
-              final isDefault = filter.isDefault;
-
-              return PopupMenuItem<String>(
-                value: filter.id,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Row(
-                  children: [
-                    if (isSelected)
-                      Icon(Icons.check_circle, size: 16, color: theme.primaryColor)
-                    else
-                      const SizedBox(width: 16),
-                    const SizedBox(width: 8),
-                    if (isDefault) ...[Icon(Icons.star, size: 14, color: Colors.amber[700]), const SizedBox(width: 4)],
-                    Expanded(
-                      child: Text(
-                        filter.name,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? theme.primaryColor : null,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 16),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _confirmDeleteFilter(context, filter);
-                      },
-                      tooltip: 'Delete',
-                    ),
-                  ],
-                ),
-              );
-            }),
-            const PopupMenuDivider(),
-            // Manage action
-            PopupMenuItem<String>(
-              value: 'manage',
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.settings_outlined, size: 18, color: theme.hintColor),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Manage Filters',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, color: theme.hintColor),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          onSelected: (value) {
-            if (value == 'manage') {
-              _showManageFiltersDialog(context, filterList);
-            } else {
-              // Find and apply the selected filter
-              final filter = filterList.filters.firstWhere((f) => f.id == value);
-              _applyFavoriteFilter(filter);
-              context.read<FavoriteFilterCubit>().selectFilter(filter);
-            }
-          },
-        );
-      },
-      error: (message) => const SizedBox.shrink(),
-    ),
-  );
-
-  void _applyFavoriteFilter(FavoriteFilter filter) {
-    // Clear existing groups
-    setState(() {
-      for (final group in _activeGroups) {
-        if (group is InstrumentFilterGroup) {
-          group.dispose();
-        } else if (group is TradeCharacteristicsFilterGroup) {
-          group.dispose();
-        } else if (group is ProfitLossFilterGroup) {
-          group.dispose();
-        }
-      }
-      _activeGroups.clear();
-    });
-
-    // Reinitialize from the filter config
-    final config = filter.filterConfig;
-
-    setState(() {
-      if (config.dateRange != null) {
-        _activeGroups.add(
-          DateRangeFilterGroup(
-            startDate: config.dateRange!.startDate,
-            endDate: config.dateRange!.endDate,
-            onChanged: (start, end) => setState(() {}),
-          ),
-        );
-      }
-
-      if (config.instrumentFilters != null && _hasInstrumentFilters(config.instrumentFilters)) {
-        final group = InstrumentFilterGroup(onChanged: () => setState(() {}));
-        group.selectedSegments = List.from(config.instrumentFilters!.marketSegments);
-        group.selectedIndexTypes = List.from(config.instrumentFilters!.indexTypes);
-        group.selectedDerivativeTypes = List.from(config.instrumentFilters!.derivativeTypes);
-        group.symbolsController.text = config.instrumentFilters!.baseSymbols.join(', ');
-        _activeGroups.add(group);
-      }
-
-      if (config.tradeCharacteristics != null && _hasTradeCharacteristics(config.tradeCharacteristics)) {
-        final group = TradeCharacteristicsFilterGroup(onChanged: () => setState(() {}));
-        group.selectedDirections = List.from(config.tradeCharacteristics!.directions);
-        group.selectedStatuses = List.from(config.tradeCharacteristics!.statuses);
-        group.strategiesController.text = config.tradeCharacteristics!.strategies.join(', ');
-        group.tagsController.text = config.tradeCharacteristics!.tags.join(', ');
-        if (config.tradeCharacteristics!.minHoldingTimeHours != null) {
-          group.minHoldingHoursController.text = config.tradeCharacteristics!.minHoldingTimeHours.toString();
-        }
-        if (config.tradeCharacteristics!.maxHoldingTimeHours != null) {
-          group.maxHoldingHoursController.text = config.tradeCharacteristics!.maxHoldingTimeHours.toString();
-        }
-        _activeGroups.add(group);
-      }
-
-      if (config.profitLossFilters != null && _hasProfitLossFilters(config.profitLossFilters)) {
-        final group = ProfitLossFilterGroup(onChanged: () => setState(() {}));
-        if (config.profitLossFilters!.minProfitLoss != null) {
-          group.minPnLController.text = config.profitLossFilters!.minProfitLoss.toString();
-        }
-        if (config.profitLossFilters!.maxProfitLoss != null) {
-          group.maxPnLController.text = config.profitLossFilters!.maxProfitLoss.toString();
-        }
-        if (config.profitLossFilters!.minPositionSize != null) {
-          group.minPositionSizeController.text = config.profitLossFilters!.minPositionSize.toString();
-        }
-        if (config.profitLossFilters!.maxPositionSize != null) {
-          group.maxPositionSizeController.text = config.profitLossFilters!.maxPositionSize.toString();
-        }
-        _activeGroups.add(group);
-      }
-
-      // Auto-expand and apply
-      if (!_isExpanded) {
-        _isExpanded = true;
-        _animationController.forward();
-      }
-    });
-
-    // Apply the filter
-    _applyFilters();
-
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Applied filter: "${filter.name}"'), duration: const Duration(seconds: 2)));
-    }
-  }
-
-  void _showManageFiltersDialog(BuildContext context, FavoriteFilterList filterList) {
-    final cubit = context.read<FavoriteFilterCubit>();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => BlocProvider.value(
-        value: cubit,
-        child: AlertDialog(
-          title: const Text('Manage Favorite Filters'),
-          content: SizedBox(
-            width: 500,
-            child: BlocBuilder<FavoriteFilterCubit, FavoriteFilterState>(
-              builder: (context, state) => state.when(
-                initial: () => const SizedBox.shrink(),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                loaded: (filterList, selectedFilter) => filterList.filters.isEmpty
-                    ? const Center(child: Text('No favorite filters yet'))
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: filterList.filters.length,
-                        itemBuilder: (context, index) {
-                          final filter = filterList.filters[index];
-                          final isDefault = filter.isDefault;
-
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            child: ListTile(
-                              leading: Icon(
-                                isDefault ? Icons.star : Icons.bookmark_outline,
-                                color: isDefault ? Colors.amber[700] : null,
-                              ),
-                              title: Text(filter.name),
-                              subtitle: filter.description != null ? Text(filter.description!) : null,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (!isDefault)
-                                    IconButton(
-                                      icon: const Icon(Icons.star_outline),
-                                      onPressed: () {
-                                        cubit.setAsDefault(widget.userId!, filter.id);
-                                      },
-                                      tooltip: 'Set as default',
-                                    ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                    onPressed: () {
-                                      Navigator.of(dialogContext).pop();
-                                      _confirmDeleteFilter(context, filter);
-                                    },
-                                    tooltip: 'Delete',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                error: (message) => Center(child: Text('Error: $message')),
-              ),
-            ),
-          ),
-          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Close'))],
-        ),
-      ),
-    );
-  }
-
-  void _confirmDeleteFilter(BuildContext context, FavoriteFilter filter) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Favorite Filter'),
-        content: Text('Are you sure you want to delete "${filter.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              context.read<FavoriteFilterCubit>().deleteFilter(widget.userId!, filter.id);
-              Navigator.of(dialogContext).pop();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
           ),
         ],
       ),

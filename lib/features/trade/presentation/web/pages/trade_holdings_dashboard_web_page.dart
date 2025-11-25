@@ -8,7 +8,7 @@ import '../../../providers/trade_internal_providers.dart';
 import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../components/templates/trade_holdings_template.dart';
 import '../../models/trade_holding_view_model.dart';
-import '../../widgets/compact_advanced_filter_panel.dart';
+import '../../widgets/filter_panel.dart';
 
 class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
   const TradeHoldingsDashboardWebPage({required this.userId, required this.portfolioId, super.key});
@@ -42,12 +42,12 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
 
     return Column(
       children: [
-        // Compact filter section - no top padding
+        // Filter section
         Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
           child: BlocProvider(
             create: (_) => ref.read(favoriteFilterCubitProvider),
-            child: CompactAdvancedFilterPanel(
+            child: FilterPanel(
               userId: widget.userId,
               initialConfig: _currentFilter,
               onApplyFilter: (config) {
