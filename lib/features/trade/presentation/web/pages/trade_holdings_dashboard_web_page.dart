@@ -77,6 +77,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
               // Advanced Filter Panel
               Expanded(
                 child: CompactAdvancedFilterPanel(
+                  userId: widget.userId,
                   initialConfig: _currentFilter,
                   onApplyFilter: (config) {
                     setState(() {

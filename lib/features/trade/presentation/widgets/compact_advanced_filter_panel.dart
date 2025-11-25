@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../favorite_filter_providers.dart';
 import '../../internal/domain/entities/metrics_filter_config.dart';
 import 'filters/date_range_filter_group.dart';
 import 'filters/filter_group.dart';
@@ -13,10 +14,17 @@ enum FilterGroupType { dateRange, instrument, tradeCharacteristics, profitLoss }
 
 /// Modern Compact Advanced Filter Panel with smooth animations
 class CompactAdvancedFilterPanel extends ConsumerStatefulWidget {
-  const CompactAdvancedFilterPanel({required this.initialConfig, required this.onApplyFilter, super.key, this.onReset});
+  const CompactAdvancedFilterPanel({
+    required this.initialConfig,
+    required this.onApplyFilter,
+    super.key,
+    this.onReset,
+    this.userId,
+  });
   final MetricsFilterConfig initialConfig;
   final Function(MetricsFilterConfig) onApplyFilter;
   final VoidCallback? onReset;
+  final String? userId;
 
   @override
   ConsumerState<CompactAdvancedFilterPanel> createState() => _CompactAdvancedFilterPanelState();
@@ -204,6 +212,104 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
     widget.onReset?.call();
   }
 
+  Future<void> _saveAsFavorite() async {
+    if (widget.userId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cannot save filter: User not logged in'), duration: Duration(seconds: 2)),
+        );
+      }
+      return;
+    }
+
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Filter as Favorite'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Filter Name *',
+                hintText: 'e.g., High Profit Trades',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description (Optional)',
+                hintText: 'Add details about this filter',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              if (nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a filter name')));
+                return;
+              }
+              Navigator.of(context).pop(true);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && nameController.text.trim().isNotEmpty) {
+      final config = MetricsFilterConfig(
+        dateRange: _activeGroups.whereType<DateRangeFilterGroup>().firstOrNull?.toFilterCriteria(),
+        instrumentFilters: _activeGroups.whereType<InstrumentFilterGroup>().firstOrNull?.toFilterCriteria(),
+        tradeCharacteristics: _activeGroups
+            .whereType<TradeCharacteristicsFilterGroup>()
+            .firstOrNull
+            ?.toFilterCriteria(),
+        profitLossFilters: _activeGroups.whereType<ProfitLossFilterGroup>().firstOrNull?.toFilterCriteria(),
+      );
+
+      try {
+        final cubit = ref.read(favoriteFilterCubitProvider);
+        await cubit.createFilter(
+          userId: widget.userId!,
+          name: nameController.text.trim(),
+          filterConfig: config,
+          description: descriptionController.text.trim().isNotEmpty ? descriptionController.text.trim() : null,
+        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Filter "${nameController.text.trim()}" saved successfully'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to save filter: $e'), duration: const Duration(seconds: 3)));
+        }
+      }
+    }
+
+    nameController.dispose();
+    descriptionController.dispose();
+  }
+
   int get _activeFilterCount => _activeGroups.where((g) => g.hasActiveFilters).length;
 
   @override
@@ -283,6 +389,18 @@ class _CompactAdvancedFilterPanelState extends ConsumerState<CompactAdvancedFilt
                         constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                       ),
                       const SizedBox(width: 4),
+                      // Save as Favorite Button (only show if userId is provided and filters are active)
+                      if (widget.userId != null && _activeFilterCount > 0) ...[
+                        IconButton(
+                          icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+                          onPressed: _saveAsFavorite,
+                          tooltip: 'Save as favorite',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
                       FilledButton.tonalIcon(
                         onPressed: _applyFilters,
                         icon: const Icon(Icons.check_rounded, size: 16),
