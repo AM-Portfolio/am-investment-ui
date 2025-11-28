@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
 import 'utils/journal_helpers.dart';
+import 'widgets/image_attachment_widget.dart';
 import 'widgets/mood_selector.dart';
 import 'widgets/rich_text_editor.dart';
 import 'widgets/sentiment_selector.dart';
@@ -34,6 +35,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   String? _selectedMood;
   String? _marketSentiment;
   final Set<String> _selectedTags = {};
+  List<String> _imageUrls = [];
   bool _isSubmitting = false;
   String? _urlPreview;
 
@@ -62,6 +64,10 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       _selectedTags.addAll(widget.entry!.tags);
     }
 
+    if (widget.entry?.imageUrls != null) {
+      _imageUrls = List.from(widget.entry!.imageUrls);
+    }
+
     _urlController.addListener(_onUrlChanged);
   }
 
@@ -76,9 +82,12 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   void _onUrlChanged() {
     final text = _urlController.text.trim();
+    print('URL Changed: $text'); // Debug
     if (text.isNotEmpty && (text.startsWith('http://') || text.startsWith('https://'))) {
+      print('Setting preview for: $text'); // Debug
       setState(() => _urlPreview = text);
     } else {
+      print('Clearing preview'); // Debug
       setState(() => _urlPreview = null);
     }
   }
@@ -125,6 +134,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             mood: JournalHelpers.getMoodString(_selectedMood),
             marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
+            imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
           );
         } else {
           await widget.cubit.editJournalEntry(
@@ -137,6 +147,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             mood: JournalHelpers.getMoodString(_selectedMood),
             marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
+            imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
           );
         }
       } finally {
@@ -161,8 +172,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             _buildHeader(theme),
             const SizedBox(height: 24),
             _buildMainContent(),
-            const SizedBox(height: 24),
-            TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
             const SizedBox(height: 24),
             _buildOptionalFields(theme),
           ],
@@ -226,7 +235,9 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   Widget _buildTitleField() => TextFormField(
     controller: _titleController,
     decoration: InputDecoration(
-      labelText: 'Title',
+      label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Title')),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      floatingLabelAlignment: FloatingLabelAlignment.start,
       hintText: 'e.g., "AAPL Breakout" or "Lesson: Don\'t Chase"',
       prefixIcon: const Icon(Icons.title, size: 20),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -244,14 +255,16 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       ),
       child: TextFormField(
         controller: _urlController,
-        decoration: const InputDecoration(
-          labelText: 'Add URL (optional)',
+        decoration: InputDecoration(
+          label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Add URL (optional)')),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          floatingLabelAlignment: FloatingLabelAlignment.start,
           hintText: 'https://tradingview.com/chart/...',
-          prefixIcon: Icon(Icons.link, size: 20),
+          prefixIcon: const Icon(Icons.link, size: 20),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -266,6 +279,10 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         selectedSentiment: _marketSentiment,
         onSentimentSelected: (sentiment) => setState(() => _marketSentiment = sentiment),
       ),
+      const SizedBox(height: 20),
+      TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
+      const SizedBox(height: 20),
+      ImageAttachmentWidget(imageUrls: _imageUrls, onImagesChanged: (urls) => setState(() => _imageUrls = urls)),
     ],
   );
 
@@ -286,13 +303,15 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Date (optional)',
-          prefixIcon: Icon(Icons.calendar_today, size: 18),
+        decoration: InputDecoration(
+          label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Date (optional)')),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          floatingLabelAlignment: FloatingLabelAlignment.start,
+          prefixIcon: const Icon(Icons.calendar_today, size: 18),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
         child: Text(DateFormat('MMM dd, yyyy').format(_entryDate), style: theme.textTheme.bodyMedium),
       ),
@@ -306,14 +325,16 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     ),
     child: TextFormField(
       controller: _tradeIdController,
-      decoration: const InputDecoration(
-        labelText: 'Trade ID (optional)',
+      decoration: InputDecoration(
+        label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Trade ID (optional)')),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        floatingLabelAlignment: FloatingLabelAlignment.start,
         hintText: 'Optional',
-        prefixIcon: Icon(Icons.tag, size: 18),
+        prefixIcon: const Icon(Icons.tag, size: 18),
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     ),
   );

@@ -566,7 +566,7 @@ class _FilterBottomSheetContentState extends ConsumerState<_FilterBottomSheetCon
       _buildFilterOptionsMenu(theme, filter),
     ],
   );
-.
+
   Widget _buildSelectionIcon(ThemeData theme, bool isSelected) =>
       isSelected ? Icon(Icons.check_circle, size: 18, color: theme.primaryColor) : const SizedBox(width: 18);
 

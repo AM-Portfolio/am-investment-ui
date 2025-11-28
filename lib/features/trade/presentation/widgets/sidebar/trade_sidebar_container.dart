@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../web/trade_web_screen.dart';
-import 'journal_sidebar_content.dart';
 import 'portfolio_sidebar_content.dart';
 
 class TradeSidebarContainer extends StatelessWidget {
@@ -35,9 +34,7 @@ class TradeSidebarContainer extends StatelessWidget {
             _buildHeader(context, isFull, isCondensed),
 
             // Navigation Items
-            Expanded(
-              child: _buildContent(context, isCompact, isCondensed, isFull),
-            ),
+            Expanded(child: _buildContent(context, isCompact, isCondensed, isFull)),
 
             // Footer
             if (isFull) _buildFooter(context),
@@ -48,17 +45,7 @@ class TradeSidebarContainer extends StatelessWidget {
   );
 
   Widget _buildContent(BuildContext context, bool isCompact, bool isCondensed, bool isFull) {
-    // Determine which content to show based on selected view
-    if (selectedView == TradeViewType.journal) {
-      return JournalSidebarContent(
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
-        isCompact: isCompact,
-        isCondensed: isCondensed,
-        isFull: isFull,
-      );
-    }
-
+    // Always show portfolio sidebar content regardless of selected view
     return PortfolioSidebarContent(
       selectedView: selectedView,
       onViewChanged: onViewChanged,
@@ -96,9 +83,7 @@ class TradeSidebarContainer extends StatelessWidget {
                 children: [
                   Text(
                     'Trade Analysis',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   Text(
                     'Portfolio Management',
@@ -143,29 +128,29 @@ class TradeSidebarContainer extends StatelessWidget {
     }
   }
 
-  Widget _buildFooter(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Theme.of(context).dividerColor))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Trade System v1.0',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-              fontWeight: FontWeight.w500,
-            ),
+  Widget _buildFooter(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Trade System v1.0',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            fontWeight: FontWeight.w500,
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Professional trading analysis',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Professional trading analysis',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+        ),
+      ],
+    ),
+  );
 }
