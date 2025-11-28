@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/auth_providers.dart';
@@ -33,6 +35,13 @@ class _MaterialApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'AM Investment',
+    localizationsDelegates: const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+      FlutterQuillLocalizations.delegate,
+    ],
+    supportedLocales: const [Locale('en', '')],
     theme: ThemeData(
       primarySwatch: Colors.blue,
       useMaterial3: true,

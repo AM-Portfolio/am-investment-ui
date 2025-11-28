@@ -10,9 +10,10 @@ import '../models/trade_portfolio_view_model.dart';
 import '../widgets/trade_sidebar.dart';
 import 'pages/trade_calendar_analytics_web_page.dart';
 import 'pages/trade_holdings_dashboard_web_page.dart';
+import 'journal_web_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar }
+enum TradeViewType { portfolios, holdings, calendar, journal }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -173,6 +174,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
             ? 'Calendar Analytics - $_currentPortfolioName'
             : 'Trade Calendar Analytics';
         break;
+      case TradeViewType.journal:
+        title = 'Trade Journal';
+        showTitle = false; // Custom header in page
+        break;
     }
 
     return AppBar(
@@ -252,6 +257,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                             ref.invalidate(tradeCalendarStreamProvider(params));
                           }
                           break;
+                        case TradeViewType.journal:
+                          // Journal doesn't use providers, no refresh needed
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -287,6 +295,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           return _buildSelectPortfolioPrompt();
         }
         return TradeCalendarAnalyticsWebPage(userId: widget.userId, portfolioId: _currentPortfolioId!);
+      
+      case TradeViewType.journal:
+        return JournalWebPage(userId: widget.userId);
     }
   }
 
