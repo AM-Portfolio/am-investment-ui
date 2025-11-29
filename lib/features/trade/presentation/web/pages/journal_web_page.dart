@@ -10,6 +10,8 @@ import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
 import '../../../internal/presentation/cubits/journal/journal_state.dart';
 import '../../../journal_providers.dart';
 import '../../widgets/journal/journal_entry_form.dart';
+import '../../widgets/journal/models/journal_mood_options.dart';
+import '../../widgets/journal/utils/journal_helpers.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
   const JournalWebPage({required this.userId, super.key});
@@ -62,6 +64,85 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     } catch (e) {
       return content;
     }
+  }
+
+  String _limitToWords(String text, int maxWords) {
+    final words = text.split(RegExp(r'\s+'));
+    if (words.length <= maxWords) return text;
+    return '${words.take(maxWords).join(' ')}...';
+  }
+
+  Widget _buildMoodChip(String mood) {
+    // First try to find by key
+    var moodData = JournalMoodOptions.moods[mood];
+
+    // If not found, try to extract key from formatted string (e.g., "😊 Confident" -> "confident")
+    if (moodData == null) {
+      final moodKey = JournalHelpers.mapMoodFromEntry(mood);
+      if (moodKey != null) {
+        moodData = JournalMoodOptions.moods[moodKey];
+      }
+    }
+
+    if (moodData == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: (moodData['color'] as Color).withOpacity(0.15),
+        border: Border.all(color: moodData['color'] as Color, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '${moodData['emoji']} ${moodData['label']}',
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: moodData['color'] as Color),
+      ),
+    );
+  }
+
+  Widget _buildSentimentChip(String sentiment) {
+    final sentimentData = JournalMoodOptions.sentiments[sentiment];
+    if (sentimentData == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: (sentimentData['color'] as Color).withOpacity(0.15),
+        border: Border.all(color: sentimentData['color'] as Color, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(sentimentData['icon'] as IconData, size: 12, color: sentimentData['color'] as Color),
+          const SizedBox(width: 4),
+          Text(
+            sentimentData['label'] as String,
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: sentimentData['color'] as Color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagChip(String tag) {
+    final tagData = JournalMoodOptions.tags.firstWhere(
+      (t) => t['label'] == tag,
+      orElse: () => {'label': tag, 'color': const Color(0xFF6B7280)},
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: (tagData['color'] as Color).withOpacity(0.15),
+        border: Border.all(color: tagData['color'] as Color, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        tag,
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: tagData['color'] as Color),
+      ),
+    );
   }
 
   @override
@@ -195,28 +276,51 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                           return Card(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              side: BorderSide(color: Theme.of(context).dividerColor),
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5)),
                             ),
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(16),
                               onTap: () => _showEditEntryForm(entry),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Theme.of(context).colorScheme.surface,
+                                      Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                                    ],
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          entry.entryDate.toString().split(' ')[0],
-                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                            color: Theme.of(context).colorScheme.primary,
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            entry.entryDate.toString().split(' ')[0],
+                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.delete_outline, size: 18),
+                                          icon: Icon(
+                                            Icons.delete_outline,
+                                            size: 18,
+                                            color: Theme.of(context).colorScheme.error.withOpacity(0.7),
+                                          ),
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           onPressed: () {
@@ -225,42 +329,49 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 10),
                                     Text(
                                       entry.title,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.2,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 6),
-                                    Expanded(
-                                      child: Text(
-                                        _extractPlainText(entry.content),
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                        ),
-                                        maxLines: 4,
-                                        overflow: TextOverflow.ellipsis,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _limitToWords(_extractPlainText(entry.content), 25),
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
+                                        height: 1.4,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                    const Spacer(),
+                                    // Mood and Sentiment Row
+                                    if (entry.mood != null || entry.marketSentiment != null) ...[
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          if (entry.mood != null) _buildMoodChip(entry.mood!),
+                                          if (entry.mood != null && entry.marketSentiment != null)
+                                            const SizedBox(width: 6),
+                                          if (entry.marketSentiment != null)
+                                            _buildSentimentChip(
+                                              JournalHelpers.mapSentimentFromValue(entry.marketSentiment) ?? 'neutral',
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                    // Tags Row (separate from mood/sentiment)
                                     if (entry.tags.isNotEmpty) ...[
                                       const SizedBox(height: 8),
                                       Wrap(
                                         spacing: 4,
                                         runSpacing: 4,
-                                        children: entry.tags
-                                            .take(3)
-                                            .map(
-                                              (tag) => Chip(
-                                                label: Text(tag, style: const TextStyle(fontSize: 10)),
-                                                padding: const EdgeInsets.symmetric(horizontal: 6),
-                                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                                visualDensity: VisualDensity.compact,
-                                              ),
-                                            )
-                                            .toList(),
+                                        children: entry.tags.take(3).map(_buildTagChip).toList(),
                                       ),
                                     ],
                                   ],
