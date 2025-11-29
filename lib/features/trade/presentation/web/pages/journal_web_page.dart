@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../internal/domain/entities/journal_entry.dart';
@@ -10,8 +7,10 @@ import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
 import '../../../internal/presentation/cubits/journal/journal_state.dart';
 import '../../../journal_providers.dart';
 import '../../widgets/journal/journal_entry_form.dart';
-import '../../widgets/journal/models/journal_mood_options.dart';
 import '../../widgets/journal/utils/journal_helpers.dart';
+import '../utils/journal_helpers.dart' as web_helpers;
+import '../widgets/journal_card.dart';
+import '../widgets/journal_filters_bar.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
   const JournalWebPage({required this.userId, super.key});
@@ -29,11 +28,29 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
   int _currentPage = 0;
   static const int _itemsPerPage = 12;
 
+  // Filter states
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedMoodFilter;
+  String? _selectedSentimentFilter;
+  final Set<String> _selectedTagFilters = {};
+  int? _selectedYear = 2025;
+  int? _selectedMonth = DateTime.now().month;
+  bool _showLast20 = false;
+  String _filterLogic = 'AND'; // 'AND' or 'OR'
+  bool _showFilters = false;
+  bool _showAdvancedFilters = false;
+
   @override
   void initState() {
     super.initState();
     _cubit = ref.read(journalCubitProvider);
     _cubit.loadJournalEntries(widget.userId);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _showNewEntryForm() {
@@ -57,92 +74,109 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     });
   }
 
-  String _extractPlainText(String content) {
-    try {
-      final delta = quill.Document.fromJson(jsonDecode(content));
-      return delta.toPlainText().trim();
-    } catch (e) {
-      return content;
+  List<JournalEntry> _filterEntries(List<JournalEntry> entries) {
+    var filtered = entries;
+
+    // Show last 20 entries (takes priority)
+    if (_showLast20) {
+      final sortedList = List<JournalEntry>.from(filtered);
+      sortedList.sort((a, b) => b.entryDate.compareTo(a.entryDate));
+      return sortedList.take(20).toList();
     }
-  }
 
-  String _limitToWords(String text, int maxWords) {
-    final words = text.split(RegExp(r'\s+'));
-    if (words.length <= maxWords) return text;
-    return '${words.take(maxWords).join(' ')}...';
-  }
+    // Search filter (always applied with AND logic)
+    if (_searchController.text.isNotEmpty) {
+      final searchTerm = _searchController.text.toLowerCase();
+      filtered = filtered
+          .where(
+            (entry) =>
+                entry.title.toLowerCase().contains(searchTerm) ||
+                web_helpers.JournalHelpers.extractPlainText(entry.content).toLowerCase().contains(searchTerm),
+          )
+          .toList();
+    }
 
-  Widget _buildMoodChip(String mood) {
-    // First try to find by key
-    var moodData = JournalMoodOptions.moods[mood];
+    // Apply filters based on AND/OR logic
+    if (_filterLogic == 'OR') {
+      // OR logic: entry passes if it matches ANY filter
+      filtered = filtered.where((entry) {
+        // If no filters are active (except search), include all
+        if (_selectedMoodFilter == null &&
+            _selectedSentimentFilter == null &&
+            _selectedTagFilters.isEmpty &&
+            _selectedYear == null &&
+            _selectedMonth == null) {
+          return true;
+        }
 
-    // If not found, try to extract key from formatted string (e.g., "😊 Confident" -> "confident")
-    if (moodData == null) {
-      final moodKey = JournalHelpers.mapMoodFromEntry(mood);
-      if (moodKey != null) {
-        moodData = JournalMoodOptions.moods[moodKey];
+        // Check each filter - return true if any matches
+        if (_selectedMoodFilter != null) {
+          final moodKey = JournalHelpers.mapMoodFromEntry(entry.mood);
+          if (moodKey == _selectedMoodFilter) return true;
+        }
+
+        if (_selectedSentimentFilter != null) {
+          final sentimentKey = JournalHelpers.mapSentimentFromValue(entry.marketSentiment);
+          if (sentimentKey == _selectedSentimentFilter) return true;
+        }
+
+        if (_selectedTagFilters.isNotEmpty) {
+          if (_selectedTagFilters.any((tag) => entry.tags.contains(tag))) return true;
+        }
+
+        if (_selectedYear != null && entry.entryDate.year == _selectedYear) return true;
+        if (_selectedMonth != null && entry.entryDate.month == _selectedMonth) return true;
+
+        return false;
+      }).toList();
+    } else {
+      // AND logic: entry must match ALL active filters
+      // Mood filter
+      if (_selectedMoodFilter != null) {
+        filtered = filtered.where((entry) {
+          final moodKey = JournalHelpers.mapMoodFromEntry(entry.mood);
+          return moodKey == _selectedMoodFilter;
+        }).toList();
+      }
+
+      // Sentiment filter
+      if (_selectedSentimentFilter != null) {
+        filtered = filtered.where((entry) {
+          final sentimentKey = JournalHelpers.mapSentimentFromValue(entry.marketSentiment);
+          return sentimentKey == _selectedSentimentFilter;
+        }).toList();
+      }
+
+      // Tags filter
+      if (_selectedTagFilters.isNotEmpty) {
+        filtered = filtered.where((entry) => _selectedTagFilters.any((tag) => entry.tags.contains(tag))).toList();
+      }
+
+      // Year filter
+      if (_selectedYear != null) {
+        filtered = filtered.where((entry) => entry.entryDate.year == _selectedYear).toList();
+      }
+
+      // Month filter
+      if (_selectedMonth != null) {
+        filtered = filtered.where((entry) => entry.entryDate.month == _selectedMonth).toList();
       }
     }
 
-    if (moodData == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: (moodData['color'] as Color).withOpacity(0.15),
-        border: Border.all(color: moodData['color'] as Color, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        '${moodData['emoji']} ${moodData['label']}',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: moodData['color'] as Color),
-      ),
-    );
+    return filtered;
   }
 
-  Widget _buildSentimentChip(String sentiment) {
-    final sentimentData = JournalMoodOptions.sentiments[sentiment];
-    if (sentimentData == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: (sentimentData['color'] as Color).withOpacity(0.15),
-        border: Border.all(color: sentimentData['color'] as Color, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(sentimentData['icon'] as IconData, size: 12, color: sentimentData['color'] as Color),
-          const SizedBox(width: 4),
-          Text(
-            sentimentData['label'] as String,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: sentimentData['color'] as Color),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTagChip(String tag) {
-    final tagData = JournalMoodOptions.tags.firstWhere(
-      (t) => t['label'] == tag,
-      orElse: () => {'label': tag, 'color': const Color(0xFF6B7280)},
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: (tagData['color'] as Color).withOpacity(0.15),
-        border: Border.all(color: tagData['color'] as Color, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        tag,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: tagData['color'] as Color),
-      ),
-    );
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _selectedMoodFilter = null;
+      _selectedSentimentFilter = null;
+      _selectedTagFilters.clear();
+      _selectedYear = 2025;
+      _selectedMonth = DateTime.now().month;
+      _showLast20 = false;
+      _currentPage = 0;
+    });
   }
 
   @override
@@ -186,26 +220,67 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
+        // Header with Search
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Trade Journal',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Record your thoughts, emotions, and trade analysis',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Trade Journal',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Record your thoughts, emotions, and trade analysis',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 300,
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search entries...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () => setState(() {
+                            _searchController.clear();
+                            _currentPage = 0;
+                          }),
+                        )
+                      : null,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  isDense: true,
+                ),
+                onChanged: (value) => setState(() => _currentPage = 0),
+              ),
+            ),
+            const SizedBox(width: 12),
+            IconButton.outlined(
+              onPressed: () => setState(() => _showFilters = !_showFilters),
+              icon: Icon(
+                _showFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
+                color:
+                    (_selectedMoodFilter != null ||
+                        _selectedSentimentFilter != null ||
+                        _selectedTagFilters.isNotEmpty ||
+                        _showLast20)
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+              tooltip: 'Filters',
+            ),
+            const SizedBox(width: 12),
             ElevatedButton.icon(
               onPressed: _showNewEntryForm,
               icon: const Icon(Icons.add),
@@ -214,6 +289,56 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
             ),
           ],
         ),
+
+        // Filter chips bar
+        if (_showFilters) ...[
+          const SizedBox(height: 16),
+          JournalFiltersBar(
+            selectedMoodFilter: _selectedMoodFilter,
+            selectedSentimentFilter: _selectedSentimentFilter,
+            selectedTagFilters: _selectedTagFilters,
+            selectedYear: _selectedYear,
+            selectedMonth: _selectedMonth,
+            showLast20: _showLast20,
+            filterLogic: _filterLogic,
+            showAdvancedFilters: _showAdvancedFilters,
+            onMoodChanged: (mood) => setState(() {
+              _selectedMoodFilter = mood;
+              _currentPage = 0;
+            }),
+            onSentimentChanged: (sentiment) => setState(() {
+              _selectedSentimentFilter = sentiment;
+              _currentPage = 0;
+            }),
+            onTagChanged: (tag, selected) => setState(() {
+              if (selected) {
+                _selectedTagFilters.add(tag);
+              } else {
+                _selectedTagFilters.remove(tag);
+              }
+              _currentPage = 0;
+            }),
+            onYearChanged: (year) => setState(() {
+              _selectedYear = year;
+              _currentPage = 0;
+            }),
+            onMonthChanged: (month) => setState(() {
+              _selectedMonth = month;
+              _currentPage = 0;
+            }),
+            onShowLast20Changed: (show) => setState(() {
+              _showLast20 = show;
+              _currentPage = 0;
+            }),
+            onFilterLogicChanged: (logic) => setState(() {
+              _filterLogic = logic;
+              _currentPage = 0;
+            }),
+            onToggleAdvancedFilters: () => setState(() => _showAdvancedFilters = !_showAdvancedFilters),
+            onClearFilters: _clearFilters,
+          ),
+        ],
+
         const SizedBox(height: 16),
 
         // Content
@@ -225,7 +350,10 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
               error: (message) => Center(child: Text('Error: $message')),
               success: (message) => const Center(child: CircularProgressIndicator()),
               loaded: (entries) {
-                if (entries.isEmpty) {
+                // Apply filters
+                final filteredEntries = _filterEntries(entries);
+
+                if (filteredEntries.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -255,10 +383,10 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                 }
 
                 // Pagination calculations
-                final totalPages = (entries.length / _itemsPerPage).ceil();
+                final totalPages = (filteredEntries.length / _itemsPerPage).ceil();
                 final startIndex = _currentPage * _itemsPerPage;
-                final endIndex = (startIndex + _itemsPerPage).clamp(0, entries.length);
-                final paginatedEntries = entries.sublist(startIndex, endIndex);
+                final endIndex = (startIndex + _itemsPerPage).clamp(0, filteredEntries.length);
+                final paginatedEntries = filteredEntries.sublist(startIndex, endIndex);
 
                 return Column(
                   children: [
@@ -273,111 +401,12 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                         itemCount: paginatedEntries.length,
                         itemBuilder: (context, index) {
                           final entry = paginatedEntries[index];
-                          return Card(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5)),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () => _showEditEntryForm(entry),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Theme.of(context).colorScheme.surface,
-                                      Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                                    ],
-                                  ),
-                                ),
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Text(
-                                            entry.entryDate.toString().split(' ')[0],
-                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                              color: Theme.of(context).colorScheme.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.delete_outline,
-                                            size: 18,
-                                            color: Theme.of(context).colorScheme.error.withOpacity(0.7),
-                                          ),
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () {
-                                            _cubit.removeJournalEntry(widget.userId, entry.id);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      entry.title,
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      _limitToWords(_extractPlainText(entry.content), 25),
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
-                                        height: 1.4,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const Spacer(),
-                                    // Mood and Sentiment Row
-                                    if (entry.mood != null || entry.marketSentiment != null) ...[
-                                      const SizedBox(height: 10),
-                                      Row(
-                                        children: [
-                                          if (entry.mood != null) _buildMoodChip(entry.mood!),
-                                          if (entry.mood != null && entry.marketSentiment != null)
-                                            const SizedBox(width: 6),
-                                          if (entry.marketSentiment != null)
-                                            _buildSentimentChip(
-                                              JournalHelpers.mapSentimentFromValue(entry.marketSentiment) ?? 'neutral',
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                    // Tags Row (separate from mood/sentiment)
-                                    if (entry.tags.isNotEmpty) ...[
-                                      const SizedBox(height: 8),
-                                      Wrap(
-                                        spacing: 4,
-                                        runSpacing: 4,
-                                        children: entry.tags.take(3).map(_buildTagChip).toList(),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ),
+                          return JournalCard(
+                            entry: entry,
+                            onTap: () => _showEditEntryForm(entry),
+                            onDelete: () => _cubit.removeJournalEntry(widget.userId, entry.id),
+                            extractPlainText: web_helpers.JournalHelpers.extractPlainText,
+                            limitToWords: web_helpers.JournalHelpers.limitToWords,
                           );
                         },
                       ),
