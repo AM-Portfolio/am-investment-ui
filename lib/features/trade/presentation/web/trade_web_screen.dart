@@ -295,9 +295,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           return _buildSelectPortfolioPrompt();
         }
         return TradeCalendarAnalyticsWebPage(userId: widget.userId, portfolioId: _currentPortfolioId!);
-      
+
       case TradeViewType.journal:
-        return JournalWebPage(userId: widget.userId);
+        return JournalWebPage(userId: widget.userId, portfolioId: _currentPortfolioId);
     }
   }
 

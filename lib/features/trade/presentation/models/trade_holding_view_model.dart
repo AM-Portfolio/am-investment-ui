@@ -73,13 +73,18 @@ class TradeHoldingViewModel {
     // Extract broker from first execution (if available)
     String? broker;
     if (entity.tradeExecutions != null && entity.tradeExecutions!.isNotEmpty) {
-      broker = entity.tradeExecutions!.first.basicInfo?.brokerType?.name;
+      try {
+        broker = entity.tradeExecutions!.first.basicInfo?.brokerType?.name;
+      } catch (e) {
+        // Ignore broker extraction errors
+        broker = null;
+      }
     }
 
     return TradeHoldingViewModel(
       tradeId: entity.tradeId,
       portfolioId: entity.portfolioId,
-      symbol: instrumentInfo.symbol ?? 'UNKNOWN',
+      symbol: instrumentInfo.symbol ?? entity.symbol ?? 'UNKNOWN',
       companyName: instrumentInfo.description ?? 'Unknown Company',
       sector: instrumentInfo.segment?.name,
       industry: instrumentInfo.series?.name,
@@ -267,8 +272,23 @@ class TradeHoldingViewModel {
   int get attachmentCount => attachments?.length ?? 0;
 
   /// Convert list of entities to view models
-  static List<TradeHoldingViewModel> fromEntityList(List<TradeDetails> entities) =>
-      entities.map(TradeHoldingViewModel.fromEntity).toList();
+  /// Gracefully handles conversion errors to prevent one bad trade from breaking the entire list
+  static List<TradeHoldingViewModel> fromEntityList(List<TradeDetails> entities) {
+    final viewModels = <TradeHoldingViewModel>[];
+
+    for (final entity in entities) {
+      try {
+        viewModels.add(TradeHoldingViewModel.fromEntity(entity));
+      } catch (e, stackTrace) {
+        // Log error but continue processing other trades
+        print('Error converting trade ${entity.tradeId} to view model: $e');
+        print('Stack trace: $stackTrace');
+        // Skip this trade and continue with others
+      }
+    }
+
+    return viewModels;
+  }
 }
 
 /// View model for holdings collection

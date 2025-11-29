@@ -50,13 +50,13 @@ class JournalCard extends StatelessWidget {
               const SizedBox(height: 10),
               _buildTitle(theme),
               const SizedBox(height: 8),
-              _buildContent(theme),
-              const Spacer(),
+              Flexible(child: _buildContent(theme)),
               if (entry.mood != null || entry.marketSentiment != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 _buildMoodAndSentiment(),
               ],
-              if (entry.tags.isNotEmpty) ...[const SizedBox(height: 8), _buildTags()],
+              if (entry.relatedTradeIds.isNotEmpty) ...[const SizedBox(height: 6), _buildRelatedTrades(theme)],
+              if (entry.tags.isNotEmpty) ...[const SizedBox(height: 6), _buildTags()],
             ],
           ),
         ),
@@ -179,6 +179,34 @@ class JournalCard extends StatelessWidget {
       child: Text(
         tag,
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: tagData['color'] as Color),
+      ),
+    );
+  }
+
+  Widget _buildRelatedTrades(ThemeData theme) {
+    final tradeCount = entry.relatedTradeIds.length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.colorScheme.secondary.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.analytics_outlined, size: 14, color: theme.colorScheme.secondary),
+          const SizedBox(width: 6),
+          Text(
+            '$tradeCount Trade${tradeCount != 1 ? 's' : ''} Linked',
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.secondary,
+              fontSize: 10,
+            ),
+          ),
+        ],
       ),
     );
   }

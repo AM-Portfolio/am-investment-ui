@@ -13,9 +13,10 @@ import '../widgets/journal_card.dart';
 import '../widgets/journal_filters_bar.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
-  const JournalWebPage({required this.userId, super.key});
+  const JournalWebPage({required this.userId, this.portfolioId, super.key});
 
   final String userId;
+  final String? portfolioId;
 
   @override
   ConsumerState<JournalWebPage> createState() => _JournalWebPageState();
@@ -210,7 +211,12 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       ),
       // Form
       Expanded(
-        child: JournalEntryForm(userId: widget.userId, cubit: _cubit, entry: _editingEntry),
+        child: JournalEntryForm(
+          userId: widget.userId,
+          cubit: _cubit,
+          portfolioId: widget.portfolioId ?? '8a57024c-05c2-475b-a2c4-0545865efa4a',
+          entry: _editingEntry,
+        ),
       ),
     ],
   );

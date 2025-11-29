@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class RichTextEditor extends StatelessWidget {
-  const RichTextEditor({required this.controller, super.key});
+  const RichTextEditor({required this.controller, this.readOnly = false, super.key});
 
   final quill.QuillController controller;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,12 @@ class RichTextEditor extends StatelessWidget {
             border: Border.all(color: theme.dividerColor),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(children: [_buildToolbar(theme), const Divider(height: 1), _buildEditor()]),
+          child: Column(
+            children: [
+              if (!readOnly) ...[_buildToolbar(theme), const Divider(height: 1)],
+              _buildEditor(),
+            ],
+          ),
         ),
       ],
     );
@@ -60,7 +66,10 @@ class RichTextEditor extends StatelessWidget {
     height: 250,
     child: Padding(
       padding: const EdgeInsets.all(16),
-      child: quill.QuillEditor.basic(controller: controller),
+      child: AbsorbPointer(
+        absorbing: readOnly,
+        child: quill.QuillEditor.basic(controller: controller),
+      ),
     ),
   );
 }
