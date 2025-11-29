@@ -55,7 +55,7 @@ class JournalFiltersBar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
@@ -65,12 +65,12 @@ class JournalFiltersBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(theme),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           _buildTimePeriodFilters(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           _buildMoodAndSentimentRow(theme),
           if (showAdvancedFilters) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _buildFilterCategory(theme, 'Tags', _buildTagChips(theme)),
           ],
         ],
@@ -83,8 +83,8 @@ class JournalFiltersBar extends StatelessWidget {
     children: [
       Row(
         children: [
-          Text('Filters', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(width: 12),
+          Text('Filters', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(width: 8),
           SegmentedButton<String>(
             segments: const [
               ButtonSegment(
@@ -99,8 +99,8 @@ class JournalFiltersBar extends StatelessWidget {
             selected: {filterLogic},
             onSelectionChanged: (newSelection) => onFilterLogicChanged(newSelection.first),
             style: ButtonStyle(
-              textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 11)),
-              padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 12, vertical: 4)),
+              textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 10)),
+              padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 8, vertical: 2)),
             ),
           ),
         ],
@@ -109,17 +109,17 @@ class JournalFiltersBar extends StatelessWidget {
         children: [
           TextButton.icon(
             onPressed: onToggleAdvancedFilters,
-            icon: Icon(showAdvancedFilters ? Icons.expand_less : Icons.expand_more, size: 16),
-            label: Text(showAdvancedFilters ? 'Less Filters' : 'More Filters'),
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+            icon: Icon(showAdvancedFilters ? Icons.expand_less : Icons.expand_more, size: 14),
+            label: Text(showAdvancedFilters ? 'Less' : 'More', style: const TextStyle(fontSize: 11)),
+            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4)),
           ),
           if (_hasActiveFilters) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             TextButton.icon(
               onPressed: onClearFilters,
-              icon: const Icon(Icons.clear_all, size: 16),
-              label: const Text('Clear All'),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+              icon: const Icon(Icons.clear_all, size: 14),
+              label: const Text('Clear', style: TextStyle(fontSize: 11)),
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4)),
             ),
           ],
         ],
@@ -138,7 +138,7 @@ class JournalFiltersBar extends StatelessWidget {
           onChanged: (value) => onYearChanged(value != null ? int.parse(value) : null),
         ),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 8),
       Expanded(
         flex: 2,
         child: _buildDropdownFilter(
@@ -161,13 +161,14 @@ class JournalFiltersBar extends StatelessWidget {
           onChanged: (value) => onMonthChanged(value != null ? int.parse(value) : null),
         ),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 8),
       Expanded(
         flex: 3,
         child: FilterChip(
           selected: showLast20,
-          label: const Text('Last 20 Entries', style: TextStyle(fontSize: 12)),
+          label: const Text('Last 20 Entries', style: TextStyle(fontSize: 11)),
           onSelected: onShowLast20Changed,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
       ),
     ],
@@ -177,7 +178,7 @@ class JournalFiltersBar extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(child: _buildFilterCategory(theme, 'Mood', _buildMoodChips(theme))),
-      const SizedBox(width: 16),
+      const SizedBox(width: 12),
       Expanded(child: _buildFilterCategory(theme, 'Market Sentiment', _buildSentimentChips(theme))),
     ],
   );
@@ -187,13 +188,13 @@ class JournalFiltersBar extends StatelessWidget {
     children: [
       Text(
         title,
-        style: theme.textTheme.labelMedium?.copyWith(
+        style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
           color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
-      const SizedBox(height: 8),
-      Wrap(spacing: 6, runSpacing: 6, children: chips),
+      const SizedBox(height: 6),
+      Wrap(spacing: 4, runSpacing: 4, children: chips),
     ],
   );
 
@@ -201,8 +202,9 @@ class JournalFiltersBar extends StatelessWidget {
     final isSelected = selectedMoodFilter == entry.key;
     return FilterChip(
       selected: isSelected,
-      label: Text('${entry.value['emoji']} ${entry.value['label']}', style: const TextStyle(fontSize: 12)),
+      label: Text('${entry.value['emoji']} ${entry.value['label']}', style: const TextStyle(fontSize: 11)),
       onSelected: (selected) => onMoodChanged(selected ? entry.key : null),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: isSelected ? (entry.value['color'] as Color).withOpacity(0.15) : null,
       selectedColor: (entry.value['color'] as Color).withOpacity(0.2),
       checkmarkColor: entry.value['color'] as Color,
@@ -219,11 +221,12 @@ class JournalFiltersBar extends StatelessWidget {
       selected: isSelected,
       avatar: Icon(
         entry.value['icon'] as IconData,
-        size: 14,
+        size: 12,
         color: isSelected ? entry.value['color'] as Color : theme.colorScheme.onSurfaceVariant,
       ),
-      label: Text(entry.value['label'] as String, style: const TextStyle(fontSize: 12)),
+      label: Text(entry.value['label'] as String, style: const TextStyle(fontSize: 11)),
       onSelected: (selected) => onSentimentChanged(selected ? entry.key : null),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: isSelected ? (entry.value['color'] as Color).withOpacity(0.15) : null,
       selectedColor: (entry.value['color'] as Color).withOpacity(0.2),
       checkmarkColor: entry.value['color'] as Color,
@@ -239,8 +242,9 @@ class JournalFiltersBar extends StatelessWidget {
     final isSelected = selectedTagFilters.contains(tag);
     return FilterChip(
       selected: isSelected,
-      label: Text(tag, style: const TextStyle(fontSize: 11)),
+      label: Text(tag, style: const TextStyle(fontSize: 10)),
       onSelected: (selected) => onTagChanged(tag, selected),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       backgroundColor: isSelected ? (tagData['color'] as Color).withOpacity(0.15) : null,
       selectedColor: (tagData['color'] as Color).withOpacity(0.2),
       checkmarkColor: tagData['color'] as Color,
@@ -261,7 +265,7 @@ class JournalFiltersBar extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           isDense: true,
         ),
         items: [
