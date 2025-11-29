@@ -85,11 +85,8 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
   Widget _buildFormView() => Column(
     children: [
       // Back button header
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
-        ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
         child: Row(
           children: [
             IconButton.outlined(onPressed: _hideForm, icon: const Icon(Icons.arrow_back), tooltip: 'Back to list'),

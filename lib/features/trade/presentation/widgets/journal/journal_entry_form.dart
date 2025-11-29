@@ -160,37 +160,9 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildHeader(theme), const SizedBox(height: 12), _buildMainContent()],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(ThemeData theme) => Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    children: [
-      FilledButton.icon(
-        onPressed: _isSubmitting ? null : _submit,
-        icon: _isSubmitting
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              )
-            : const Icon(Icons.check, size: 20),
-        label: Text(widget.entry == null ? 'Create' : 'Update'),
-        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-      ),
-    ],
+  Widget build(BuildContext context) => Form(
+    key: _formKey,
+    child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(24, 8, 24, 16), child: _buildMainContent()),
   );
 
   Widget _buildMainContent() => Builder(
@@ -205,8 +177,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             Expanded(child: _buildRightColumn()),
           ],
         ),
-        const SizedBox(height: 16),
-        _buildBottomFields(context),
       ],
     ),
   );
@@ -250,6 +220,10 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         ),
         const SizedBox(height: 12),
         RichTextEditor(controller: _quillController),
+        const SizedBox(height: 16),
+        _buildBottomFields(context),
+        const SizedBox(height: 16),
+        _buildUpdateButton(),
       ],
     );
   }
@@ -381,14 +355,14 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   Widget _buildBottomFields(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
         borderRadius: BorderRadius.circular(12),
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -400,7 +374,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               Expanded(child: _buildTradeIdField(theme)),
             ],
           ),
-          
+
           // URL expand/collapse button
           const SizedBox(height: 8),
           InkWell(
@@ -410,31 +384,25 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: _isUrlExpanded 
-                    ? theme.colorScheme.primary.withOpacity(0.5) 
-                    : theme.dividerColor.withOpacity(0.3),
+                  color: _isUrlExpanded
+                      ? theme.colorScheme.primary.withOpacity(0.5)
+                      : theme.dividerColor.withOpacity(0.3),
                 ),
                 borderRadius: BorderRadius.circular(8),
-                color: _isUrlExpanded 
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.2)
-                  : null,
+                color: _isUrlExpanded ? theme.colorScheme.primaryContainer.withOpacity(0.2) : null,
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.link,
                     size: 18,
-                    color: _isUrlExpanded 
-                      ? theme.colorScheme.primary 
-                      : theme.colorScheme.onSurfaceVariant,
+                    color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     _isUrlExpanded ? 'Add URL' : 'Add URL (optional)',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: _isUrlExpanded 
-                        ? theme.colorScheme.primary 
-                        : theme.colorScheme.onSurfaceVariant,
+                      color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                       fontWeight: _isUrlExpanded ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
@@ -442,15 +410,13 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
                   Icon(
                     _isUrlExpanded ? Icons.expand_less : Icons.expand_more,
                     size: 20,
-                    color: _isUrlExpanded 
-                      ? theme.colorScheme.primary 
-                      : theme.colorScheme.onSurfaceVariant,
+                    color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
             ),
           ),
-          
+
           // Expandable URL field
           if (_isUrlExpanded) ...[
             const SizedBox(height: 8),
@@ -470,4 +436,16 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       ),
     );
   }
+
+  Widget _buildUpdateButton() => SizedBox(
+    width: double.infinity,
+    child: FilledButton.icon(
+      onPressed: _isSubmitting ? null : _submit,
+      icon: _isSubmitting
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          : const Icon(Icons.check, size: 20),
+      label: Text(widget.entry == null ? 'Create Entry' : 'Update Entry'),
+      style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
+    ),
+  );
 }
