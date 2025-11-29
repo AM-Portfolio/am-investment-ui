@@ -38,6 +38,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   List<String> _imageUrls = [];
   bool _isSubmitting = false;
   String? _urlPreview;
+  bool _isUrlExpanded = false;
 
   @override
   void initState() {
@@ -249,18 +250,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         ),
         const SizedBox(height: 12),
         RichTextEditor(controller: _quillController),
-        const SizedBox(height: 12),
-        _buildUrlField(),
-        if (_urlPreview != null) ...[
-          const SizedBox(height: 8),
-          UrlPreviewWidget(
-            url: _urlPreview!,
-            onClose: () {
-              _urlController.clear();
-              setState(() => _urlPreview = null);
-            },
-          ),
-        ],
       ],
     );
   }
@@ -392,12 +381,93 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   Widget _buildBottomFields(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(child: _buildDateField(theme)),
-        const SizedBox(width: 12),
-        Expanded(child: _buildTradeIdField(theme)),
-      ],
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Date and Trade ID row (always visible)
+          Row(
+            children: [
+              Expanded(child: _buildDateField(theme)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildTradeIdField(theme)),
+            ],
+          ),
+          
+          // URL expand/collapse button
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () => setState(() => _isUrlExpanded = !_isUrlExpanded),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isUrlExpanded 
+                    ? theme.colorScheme.primary.withOpacity(0.5) 
+                    : theme.dividerColor.withOpacity(0.3),
+                ),
+                borderRadius: BorderRadius.circular(8),
+                color: _isUrlExpanded 
+                  ? theme.colorScheme.primaryContainer.withOpacity(0.2)
+                  : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.link,
+                    size: 18,
+                    color: _isUrlExpanded 
+                      ? theme.colorScheme.primary 
+                      : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _isUrlExpanded ? 'Add URL' : 'Add URL (optional)',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: _isUrlExpanded 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: _isUrlExpanded ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isUrlExpanded ? Icons.expand_less : Icons.expand_more,
+                    size: 20,
+                    color: _isUrlExpanded 
+                      ? theme.colorScheme.primary 
+                      : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Expandable URL field
+          if (_isUrlExpanded) ...[
+            const SizedBox(height: 8),
+            _buildUrlField(),
+            if (_urlPreview != null) ...[
+              const SizedBox(height: 8),
+              UrlPreviewWidget(
+                url: _urlPreview!,
+                onClose: () {
+                  _urlController.clear();
+                  setState(() => _urlPreview = null);
+                },
+              ),
+            ],
+          ],
+        ],
+      ),
     );
   }
 }

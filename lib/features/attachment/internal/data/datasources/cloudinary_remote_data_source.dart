@@ -47,7 +47,7 @@ class CloudinaryRemoteDataSource {
 
       AppLogger.debug('📤 Sending POST request...', tag: 'CloudinaryAPI');
       final response = await _client.post(
-        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/upload'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/v1/cloudinary/upload'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(requestBody),
       );
@@ -80,7 +80,7 @@ class CloudinaryRemoteDataSource {
   Future<CloudinaryResourceDto> getResource({required String publicId, String resourceType = 'image'}) async {
     try {
       final response = await _client.get(
-        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/v1/cloudinary/resources/$publicId?resourceType=$resourceType'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -112,7 +112,7 @@ class CloudinaryRemoteDataSource {
       };
 
       final uri = Uri.parse(
-        '${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources',
+        '${_apiConfig.baseUrl}/cloudinary/api/v1/cloudinary/resources',
       ).replace(queryParameters: queryParams);
 
       final response = await _client.get(uri, headers: {'Content-Type': 'application/json'});
@@ -136,7 +136,7 @@ class CloudinaryRemoteDataSource {
   Future<DeleteResponseDto> deleteResource({required String publicId, String resourceType = 'image'}) async {
     try {
       final response = await _client.delete(
-        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/v1/cloudinary/resources/$publicId?resourceType=$resourceType'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -164,7 +164,7 @@ class CloudinaryRemoteDataSource {
   }) async {
     try {
       final response = await _client.post(
-        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/signature'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/v1/cloudinary/signature'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           if (publicId != null) 'publicId': publicId,

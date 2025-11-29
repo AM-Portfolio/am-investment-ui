@@ -200,7 +200,7 @@ class _AttachmentPickerWidgetState extends ConsumerState<AttachmentPickerWidget>
         _uploadProgress = 0.0;
       });
 
-      final uploadService = ref.read(fileUploadServiceProvider);
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       final folder = UploadConfig.getFolderForFeature(widget.featureName);
 
       final url = await uploadService.uploadFile(
@@ -216,7 +216,7 @@ class _AttachmentPickerWidgetState extends ConsumerState<AttachmentPickerWidget>
 
       if (mounted) {
         setState(() {
-          final updatedUrls = [...widget.attachmentUrls, url];
+          final updatedUrls = <String>[...widget.attachmentUrls, url];
           widget.onAttachmentsChanged(updatedUrls);
           _uploadProgress = 1.0;
         });
@@ -305,7 +305,7 @@ class _AttachmentPickerWidgetState extends ConsumerState<AttachmentPickerWidget>
     if (confirmed != true) return;
 
     try {
-      final uploadService = ref.read(fileUploadServiceProvider);
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       await uploadService.deleteFile(widget.attachmentUrls[index]);
 
       if (mounted) {

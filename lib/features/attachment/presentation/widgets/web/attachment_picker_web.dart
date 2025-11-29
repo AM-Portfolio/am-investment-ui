@@ -449,7 +449,7 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
 
     try {
       if (item.isUploaded && item.uploadedUrl != null) {
-        final uploadService = ref.read(fileUploadServiceProvider);
+        final uploadService = await ref.read(fileUploadServiceProvider.future);
         await uploadService.deleteFile(item.uploadedUrl!);
       } else if (item.pendingAttachment != null) {
         _pendingUploads.remove(item.pendingAttachment);

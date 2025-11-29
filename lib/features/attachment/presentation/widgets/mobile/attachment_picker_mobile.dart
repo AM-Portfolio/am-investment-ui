@@ -230,7 +230,7 @@ class _AttachmentPickerMobileState extends ConsumerState<AttachmentPickerMobile>
     });
 
     try {
-      final uploadService = ref.read(fileUploadServiceProvider);
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       final folder = UploadConfig.getFolderForFeature(widget.featureName);
 
       final url = await uploadService.uploadFile(
@@ -277,7 +277,7 @@ class _AttachmentPickerMobileState extends ConsumerState<AttachmentPickerMobile>
     });
 
     try {
-      final uploadService = ref.read(fileUploadServiceProvider);
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       final folder = UploadConfig.getFolderForFeature(widget.featureName);
       final totalFiles = _pendingUploads.length;
 
@@ -349,7 +349,7 @@ class _AttachmentPickerMobileState extends ConsumerState<AttachmentPickerMobile>
 
     try {
       if (item.isUploaded && item.uploadedUrl != null) {
-        final uploadService = ref.read(fileUploadServiceProvider);
+        final uploadService = await ref.read(fileUploadServiceProvider.future);
         await uploadService.deleteFile(item.uploadedUrl!);
       } else if (item.pendingAttachment != null) {
         _pendingUploads.remove(item.pendingAttachment);
