@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../internal/domain/entities/journal_entry.dart';
-import '../../internal/presentation/cubits/journal/journal_cubit.dart';
-import '../../internal/presentation/cubits/journal/journal_state.dart';
-import '../../journal_providers.dart';
-import '../widgets/journal/journal_entry_form.dart';
+import '../../../internal/domain/entities/journal_entry.dart';
+import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
+import '../../../internal/presentation/cubits/journal/journal_state.dart';
+import '../../../journal_providers.dart';
+import '../../widgets/journal/journal_entry_form.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
   const JournalWebPage({required this.userId, super.key});
@@ -85,8 +85,11 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
   Widget _buildFormView() => Column(
     children: [
       // Back button header
-      Padding(
-        padding: const EdgeInsets.all(16.0),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+        ),
         child: Row(
           children: [
             IconButton.outlined(onPressed: _hideForm, icon: const Icon(Icons.arrow_back), tooltip: 'Back to list'),
@@ -101,7 +104,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
   );
 
   Widget _buildListView() => Padding(
-    padding: const EdgeInsets.all(24.0),
+    padding: const EdgeInsets.all(16.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -116,12 +119,12 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                   'Trade Journal',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   'Record your thoughts, emotions, and trade analysis',
                   style: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                  ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
                 ),
               ],
             ),
@@ -129,11 +132,11 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
               onPressed: _showNewEntryForm,
               icon: const Icon(Icons.add),
               label: const Text('New Entry'),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
             ),
           ],
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
 
         // Content
         Expanded(
@@ -184,10 +187,10 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                     Expanded(
                       child: GridView.builder(
                         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 400,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 1.5,
+                          maxCrossAxisExtent: 380,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.6,
                         ),
                         itemCount: paginatedEntries.length,
                         itemBuilder: (context, index) {
@@ -195,14 +198,14 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                           return Card(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(8),
                               side: BorderSide(color: Theme.of(context).dividerColor),
                             ),
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(8),
                               onTap: () => _showEditEntryForm(entry),
                               child: Padding(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -216,14 +219,16 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                                           ),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.delete_outline, size: 20),
+                                          icon: const Icon(Icons.delete_outline, size: 18),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
                                           onPressed: () {
                                             _cubit.removeJournalEntry(widget.userId, entry.id);
                                           },
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     Text(
                                       entry.title,
                                       style: Theme.of(
@@ -232,11 +237,11 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     Expanded(
                                       child: Text(
                                         _extractPlainText(entry.content),
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                         ),
                                         maxLines: 4,
@@ -244,15 +249,16 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                                       ),
                                     ),
                                     if (entry.tags.isNotEmpty) ...[
-                                      const SizedBox(height: 12),
+                                      const SizedBox(height: 8),
                                       Wrap(
                                         spacing: 4,
+                                        runSpacing: 4,
                                         children: entry.tags
                                             .take(3)
                                             .map(
                                               (tag) => Chip(
                                                 label: Text(tag, style: const TextStyle(fontSize: 10)),
-                                                padding: EdgeInsets.zero,
+                                                padding: const EdgeInsets.symmetric(horizontal: 6),
                                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                 visualDensity: VisualDensity.compact,
                                               ),
@@ -271,7 +277,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                     // Pagination controls
                     if (totalPages > 1)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.only(top: 12, bottom: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -279,12 +285,12 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                               onPressed: _currentPage > 0 ? () => setState(() => _currentPage--) : null,
                               icon: const Icon(Icons.chevron_left),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 12),
                             Text(
                               'Page ${_currentPage + 1} of $totalPages',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 12),
                             IconButton(
                               onPressed: _currentPage < totalPages - 1 ? () => setState(() => _currentPage++) : null,
                               icon: const Icon(Icons.chevron_right),

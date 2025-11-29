@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../../../core/utils/logger.dart';
 import '../domain/repositories/cloudinary_repository.dart';
 import 'file_upload_service.dart';
 
@@ -14,21 +15,48 @@ class CloudinaryUploadService implements FileUploadService {
 
   @override
   Future<String> uploadFile(String filePath, {String? folder, Map<String, dynamic>? metadata}) async {
-    try {
-      final file = File(filePath);
-      if (!await file.exists()) {
-        throw FileUploadException('File not found: $filePath');
-      }
+    AppLogger.debug('📤 Starting upload for file: $filePath', tag: 'CloudinaryUpload');
+    AppLogger.debug('📂 Folder: ${folder ?? "none"}', tag: 'CloudinaryUpload');
 
-      // Read file and convert to base64
-      final bytes = await file.readAsBytes();
-      final base64Content = base64Encode(bytes);
-      final filename = file.path.split('/').last;
+    try {
+      String base64Content;
+      String filename;
+
+      // Check if base64 content is already provided in metadata (web platform)
+      if (metadata != null && metadata.containsKey('fileContent')) {
+        AppLogger.debug('🌐 Using pre-encoded base64 content from metadata (web platform)', tag: 'CloudinaryUpload');
+        base64Content = metadata['fileContent'] as String;
+        filename = filePath; // On web, filePath is actually the filename
+        AppLogger.debug('✅ Base64 length: ${base64Content.length} chars', tag: 'CloudinaryUpload');
+        AppLogger.debug('📝 Filename: $filename', tag: 'CloudinaryUpload');
+      } else {
+        // Mobile/Desktop platform - read file from path
+        AppLogger.debug('📱 Reading file from path (mobile/desktop platform)', tag: 'CloudinaryUpload');
+        final file = File(filePath);
+        AppLogger.debug('🔍 Checking if file exists...', tag: 'CloudinaryUpload');
+
+        if (!await file.exists()) {
+          AppLogger.error('❌ File not found: $filePath', tag: 'CloudinaryUpload');
+          throw FileUploadException('File not found: $filePath');
+        }
+
+        AppLogger.debug('✅ File exists, reading bytes...', tag: 'CloudinaryUpload');
+        final bytes = await file.readAsBytes();
+        AppLogger.debug('📊 File size: ${bytes.length} bytes', tag: 'CloudinaryUpload');
+
+        base64Content = base64Encode(bytes);
+        AppLogger.debug('🔐 Base64 encoded, length: ${base64Content.length} chars', tag: 'CloudinaryUpload');
+
+        filename = file.path.split('/').last;
+        AppLogger.debug('📝 Filename: $filename', tag: 'CloudinaryUpload');
+      }
 
       // Determine resource type from file extension
       final extension = filename.split('.').last.toLowerCase();
       final resourceType = _getResourceType(extension);
+      AppLogger.debug('🏷️ Resource type: $resourceType (extension: $extension)', tag: 'CloudinaryUpload');
 
+      AppLogger.debug('🚀 Calling repository upload...', tag: 'CloudinaryUpload');
       // Upload via repository
       final result = await _repository.uploadFile(
         fileContent: base64Content,
@@ -37,8 +65,15 @@ class CloudinaryUploadService implements FileUploadService {
         resourceType: resourceType,
       );
 
+      AppLogger.info('✅ Upload successful!', tag: 'CloudinaryUpload');
+      AppLogger.debug('🔗 URL: ${result.url}', tag: 'CloudinaryUpload');
+      AppLogger.debug('🔒 Secure URL: ${result.secureUrl}', tag: 'CloudinaryUpload');
+      AppLogger.debug('🆔 Public ID: ${result.publicId}', tag: 'CloudinaryUpload');
+
       return result.url;
     } catch (e) {
+      AppLogger.error('❌ Upload failed with error: $e', tag: 'CloudinaryUpload');
+      AppLogger.debug('🔍 Error type: ${e.runtimeType}', tag: 'CloudinaryUpload');
       if (e is FileUploadException) rethrow;
       throw FileUploadException('Failed to upload file', originalError: e);
     }

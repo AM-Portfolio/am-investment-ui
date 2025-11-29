@@ -2,10 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/pending_attachment.dart';
-import 'mobile/attachment_picker_mobile.dart' show AttachmentPickerMobile, AttachmentType;
+import 'attachment_picker_widget.dart' show AttachmentType;
+import 'mobile/attachment_picker_mobile.dart' show AttachmentPickerMobile;
 import 'web/attachment_picker_web.dart' show AttachmentPickerWeb;
 
-export 'mobile/attachment_picker_mobile.dart' show AttachmentType;
+export 'attachment_picker_widget.dart' show AttachmentType;
 
 /// Platform-aware attachment picker that automatically uses the appropriate implementation
 ///

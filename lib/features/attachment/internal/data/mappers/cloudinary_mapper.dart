@@ -4,14 +4,19 @@ import '../dtos/cloudinary_dto.dart';
 /// Mapper for converting between Cloudinary DTOs and domain entities
 class CloudinaryMapper {
   /// Map upload response DTO to UploadResult entity
-  static UploadResult fromUploadResponseDto(UploadResponseDto dto) =>
-      UploadResult(url: dto.secureUrl ?? dto.url, publicId: dto.publicId, format: dto.format, bytes: dto.bytes);
+  static UploadResult fromUploadResponseDto(UploadResponseDto dto) => UploadResult(
+    url: dto.url,
+    secureUrl: dto.secureUrl,
+    publicId: dto.publicId,
+    format: dto.format,
+    bytes: dto.bytes,
+  );
 
   /// Map resource DTO to CloudinaryResource entity
   static CloudinaryResource fromResourceDto(CloudinaryResourceDto dto) => CloudinaryResource(
     publicId: dto.publicId,
-    url: dto.url ?? '',
-    secureUrl: dto.secureUrl ?? '',
+    url: dto.url,
+    secureUrl: dto.secureUrl,
     format: dto.format,
     bytes: dto.bytes,
     width: dto.width,

@@ -165,28 +165,18 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(theme),
-            const SizedBox(height: 24),
-            _buildMainContent(),
-            const SizedBox(height: 24),
-            _buildOptionalFields(theme),
-          ],
+          children: [_buildHeader(theme), const SizedBox(height: 12), _buildMainContent()],
         ),
       ),
     );
   }
 
   Widget _buildHeader(ThemeData theme) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      Text(
-        widget.entry == null ? 'New Journal Entry' : 'Edit Journal Entry',
-        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-      ),
       FilledButton.icon(
         onPressed: _isSubmitting ? null : _submit,
         icon: _isSubmitting
@@ -202,35 +192,78 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     ],
   );
 
-  Widget _buildMainContent() => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(flex: 2, child: _buildLeftColumn()),
-      const SizedBox(width: 24),
-      Expanded(child: _buildRightColumn()),
-    ],
+  Widget _buildMainContent() => Builder(
+    builder: (context) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 2, child: _buildLeftColumn(context)),
+            const SizedBox(width: 20),
+            Expanded(child: _buildRightColumn()),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildBottomFields(context),
+      ],
+    ),
   );
 
-  Widget _buildLeftColumn() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _buildTitleField(),
-      const SizedBox(height: 16),
-      RichTextEditor(controller: _quillController),
-      const SizedBox(height: 16),
-      _buildUrlField(),
-      if (_urlPreview != null) ...[
-        const SizedBox(height: 12),
-        UrlPreviewWidget(
-          url: _urlPreview!,
-          onClose: () {
-            _urlController.clear();
-            setState(() => _urlPreview = null);
-          },
+  Widget _buildLeftColumn(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildTitleField()),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    widget.entry == null ? Icons.add_circle_outline : Icons.edit_outlined,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    widget.entry == null ? 'New Entry' : 'View/Edit',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 12),
+        RichTextEditor(controller: _quillController),
+        const SizedBox(height: 12),
+        _buildUrlField(),
+        if (_urlPreview != null) ...[
+          const SizedBox(height: 8),
+          UrlPreviewWidget(
+            url: _urlPreview!,
+            onClose: () {
+              _urlController.clear();
+              setState(() => _urlPreview = null);
+            },
+          ),
+        ],
       ],
-    ],
-  );
+    );
+  }
 
   Widget _buildTitleField() => TextFormField(
     controller: _titleController,
@@ -248,19 +281,37 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   Widget _buildUrlField() {
     final theme = Theme.of(context);
+    final hasUrl = _urlController.text.trim().isNotEmpty;
+
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        border: Border.all(
+          color: hasUrl ? theme.colorScheme.primary.withOpacity(0.5) : theme.dividerColor.withOpacity(0.5),
+          width: hasUrl ? 1.5 : 1,
+        ),
         borderRadius: BorderRadius.circular(12),
+        color: hasUrl ? theme.colorScheme.primaryContainer.withOpacity(0.1) : null,
       ),
       child: TextFormField(
         controller: _urlController,
         decoration: InputDecoration(
-          label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Add URL (optional)')),
+          label: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Add URL (optional)'),
+                if (hasUrl) ...[
+                  const SizedBox(width: 6),
+                  Icon(Icons.check_circle, size: 14, color: theme.colorScheme.primary),
+                ],
+              ],
+            ),
+          ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           floatingLabelAlignment: FloatingLabelAlignment.start,
           hintText: 'https://tradingview.com/chart/...',
-          prefixIcon: const Icon(Icons.link, size: 20),
+          prefixIcon: Icon(Icons.link, size: 20, color: hasUrl ? theme.colorScheme.primary : null),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
@@ -274,28 +325,23 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       MoodSelector(selectedMood: _selectedMood, onMoodSelected: (mood) => setState(() => _selectedMood = mood)),
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
       SentimentSelector(
         selectedSentiment: _marketSentiment,
         onSentimentSelected: (sentiment) => setState(() => _marketSentiment = sentiment),
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
       TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
       AttachmentPicker(
         initialUrls: _imageUrls,
-        onAttachmentsChanged: (urls) => setState(() => _imageUrls = urls),
+        onAttachmentsChanged: (urls) {
+          print('📎 [FORM] Attachments changed: $urls');
+          setState(() => _imageUrls = urls);
+        },
         featureName: 'journal',
         userId: widget.userId,
       ),
-    ],
-  );
-
-  Widget _buildOptionalFields(ThemeData theme) => Row(
-    children: [
-      Expanded(child: _buildDateField(theme)),
-      const SizedBox(width: 12),
-      Expanded(child: _buildTradeIdField(theme)),
     ],
   );
 
@@ -343,4 +389,15 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       ),
     ),
   );
+
+  Widget _buildBottomFields(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Expanded(child: _buildDateField(theme)),
+        const SizedBox(width: 12),
+        Expanded(child: _buildTradeIdField(theme)),
+      ],
+    );
+  }
 }

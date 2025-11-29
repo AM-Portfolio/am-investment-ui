@@ -51,6 +51,7 @@ class CloudinaryRepositoryImpl implements CloudinaryRepository {
     String? folder,
     String resourceType = 'image',
     int maxResults = 100,
+    String? nextCursor,
   }) async {
     try {
       final resourceDtos = await _remoteDataSource.listResources(
@@ -63,6 +64,11 @@ class CloudinaryRepositoryImpl implements CloudinaryRepository {
     } catch (e) {
       throw Exception('Repository list resources failed: $e');
     }
+  }
+
+  @override
+  Future<void> deleteFile({required String publicId}) async {
+    await deleteResource(publicId: publicId);
   }
 
   @override

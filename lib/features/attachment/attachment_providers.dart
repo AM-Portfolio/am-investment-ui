@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../di/app_providers.dart';
 import 'internal/data/datasources/cloudinary_remote_data_source.dart';
 import 'internal/data/repositories/cloudinary_repository_impl.dart';
 import 'internal/domain/repositories/cloudinary_repository.dart';
@@ -16,30 +17,24 @@ import 'internal/services/file_upload_service.dart';
 /// Provider for HTTP client
 final httpClientProvider = Provider<http.Client>((ref) => http.Client());
 
-/// Provider for base URL (should come from environment config)
-final baseUrlProvider = Provider<String>((ref) {
-  // TODO: Replace with actual backend URL from environment config
-  return 'https://your-backend-api.com';
-});
-
 /// Provider for CloudinaryRemoteDataSource
-final cloudinaryRemoteDataSourceProvider = Provider<CloudinaryRemoteDataSource>((ref) {
+final cloudinaryRemoteDataSourceProvider = FutureProvider<CloudinaryRemoteDataSource>((ref) async {
   final client = ref.watch(httpClientProvider);
-  final baseUrl = ref.watch(baseUrlProvider);
+  final appConfig = await ref.watch(appConfigProvider.future);
 
-  return CloudinaryRemoteDataSource(client: client, baseUrl: baseUrl);
+  return CloudinaryRemoteDataSource(client: client, apiConfig: appConfig.api);
 });
 
 /// Provider for CloudinaryRepository
-final cloudinaryRepositoryProvider = Provider<CloudinaryRepository>((ref) {
-  final remoteDataSource = ref.watch(cloudinaryRemoteDataSourceProvider);
+final cloudinaryRepositoryProvider = FutureProvider<CloudinaryRepository>((ref) async {
+  final remoteDataSource = await ref.watch(cloudinaryRemoteDataSourceProvider.future);
 
   return CloudinaryRepositoryImpl(remoteDataSource: remoteDataSource);
 });
 
 /// Provider for CloudinaryUploadService (using repository)
-final cloudinaryUploadServiceProvider = Provider<FileUploadService>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final cloudinaryUploadServiceProvider = FutureProvider<FileUploadService>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
 
   return CloudinaryUploadService(repository: repository);
 });
@@ -48,42 +43,42 @@ final cloudinaryUploadServiceProvider = Provider<FileUploadService>((ref) {
 ///
 /// Uses Cloudinary via backend API
 /// Backend handles cloud provider interactions, providing abstraction
-final fileUploadServiceProvider = Provider<FileUploadService>((ref) {
+final fileUploadServiceProvider = FutureProvider<FileUploadService>((ref) async {
   // Use Cloudinary via backend API
-  return ref.watch(cloudinaryUploadServiceProvider);
+  return await ref.watch(cloudinaryUploadServiceProvider.future);
 });
 
 // Use Case Providers
-final uploadFileUseCaseProvider = Provider<UploadFileUseCase>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final uploadFileUseCaseProvider = FutureProvider<UploadFileUseCase>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
   return UploadFileUseCase(repository);
 });
 
-final uploadBatchFilesUseCaseProvider = Provider<UploadBatchFilesUseCase>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final uploadBatchFilesUseCaseProvider = FutureProvider<UploadBatchFilesUseCase>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
   return UploadBatchFilesUseCase(repository);
 });
 
-final deleteFileUseCaseProvider = Provider<DeleteFileUseCase>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final deleteFileUseCaseProvider = FutureProvider<DeleteFileUseCase>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
   return DeleteFileUseCase(repository);
 });
 
-final getResourceUseCaseProvider = Provider<GetResourceUseCase>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final getResourceUseCaseProvider = FutureProvider<GetResourceUseCase>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
   return GetResourceUseCase(repository);
 });
 
-final listResourcesUseCaseProvider = Provider<ListResourcesUseCase>((ref) {
-  final repository = ref.watch(cloudinaryRepositoryProvider);
+final listResourcesUseCaseProvider = FutureProvider<ListResourcesUseCase>((ref) async {
+  final repository = await ref.watch(cloudinaryRepositoryProvider.future);
   return ListResourcesUseCase(repository);
 });
 
 // Attachment Cubit Provider
 final attachmentCubitProvider = Provider.autoDispose<AttachmentCubit>(
   (ref) => AttachmentCubit(
-    uploadFileUseCase: ref.read(uploadFileUseCaseProvider),
-    uploadBatchFilesUseCase: ref.read(uploadBatchFilesUseCaseProvider),
-    deleteFileUseCase: ref.read(deleteFileUseCaseProvider),
+    uploadFileUseCase: ref.read(uploadFileUseCaseProvider).value!,
+    uploadBatchFilesUseCase: ref.read(uploadBatchFilesUseCaseProvider).value!,
+    deleteFileUseCase: ref.read(deleteFileUseCaseProvider).value!,
   ),
 );

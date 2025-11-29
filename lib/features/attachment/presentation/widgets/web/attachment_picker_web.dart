@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../config/upload_config.dart';
+import '../../../../../core/utils/logger.dart';
 import '../../../attachment_providers.dart';
 import '../../../internal/services/file_upload_service.dart';
 import '../../models/pending_attachment.dart';
+import '../attachment_picker_widget.dart' show AttachmentType;
 import '../shared/attachment_preview_grid.dart';
-
-enum AttachmentType { image, document, video, any }
 
 /// Web attachment picker with drag-and-drop support
 class AttachmentPickerWeb extends ConsumerStatefulWidget {
@@ -138,7 +138,7 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
           final isHovering = candidateData.isNotEmpty || _isDragging;
 
           return Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: isHovering
                   ? theme.colorScheme.primaryContainer.withOpacity(0.3)
@@ -153,13 +153,13 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
               children: [
                 Icon(
                   isHovering ? Icons.upload : Icons.cloud_upload_outlined,
-                  size: 48,
+                  size: 40,
                   color: isHovering ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   'Drag & drop files here',
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     color: isHovering ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
@@ -167,11 +167,11 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
                 const SizedBox(height: 4),
                 Text(
                   'or click to browse',
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   _getAllowedTypesText(),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -272,22 +272,36 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
   }
 
   Future<void> _handlePickedFile(PendingAttachment pending) async {
+    AppLogger.debug('📋 Handling picked file: ${pending.fileName}', tag: 'WebPicker');
+    AppLogger.debug('📄 File size: ${pending.fileBytes?.length ?? 0} bytes', tag: 'WebPicker');
+    AppLogger.debug('📦 Auto-upload: ${widget.autoUpload}', tag: 'WebPicker');
+
     if (widget.autoUpload) {
+      AppLogger.debug('🚀 Starting auto-upload...', tag: 'WebPicker');
       await _uploadFile(pending);
     } else {
+      AppLogger.debug('💾 Adding to pending uploads (manual mode)', tag: 'WebPicker');
       setState(() {
         _pendingUploads.add(pending);
         _attachments.add(AttachmentItem.pending(pending));
       });
       widget.onPendingAttachmentsChanged?.call(_pendingUploads);
+      AppLogger.debug('✅ Added to pending queue. Total pending: ${_pendingUploads.length}', tag: 'WebPicker');
     }
   }
 
   Future<void> _uploadFile(PendingAttachment pending) async {
+    AppLogger.info('\n🚀 ========== Starting Upload ==========', tag: 'WebUpload');
+    AppLogger.debug('📝 Filename: ${pending.fileName}', tag: 'WebUpload');
+    AppLogger.debug('📂 Feature: ${widget.featureName}', tag: 'WebUpload');
+
     if (pending.fileBytes == null) {
+      AppLogger.error('❌ Error: No file data available', tag: 'WebUpload');
       _showError('No file data available');
       return;
     }
+
+    AppLogger.debug('📊 File bytes length: ${pending.fileBytes!.length}', tag: 'WebUpload');
 
     setState(() {
       _isUploading = true;
@@ -295,12 +309,17 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
     });
 
     try {
-      final uploadService = ref.read(fileUploadServiceProvider);
+      AppLogger.debug('🔧 Getting upload service...', tag: 'WebUpload');
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       final folder = UploadConfig.getFolderForFeature(widget.featureName);
+      AppLogger.debug('📂 Target folder: $folder', tag: 'WebUpload');
 
       // Convert bytes to base64 for upload
+      AppLogger.debug('🔐 Converting to base64...', tag: 'WebUpload');
       final base64Content = base64Encode(pending.fileBytes!);
+      AppLogger.debug('✅ Base64 length: ${base64Content.length} chars', tag: 'WebUpload');
 
+      AppLogger.debug('🎯 Calling uploadFile...', tag: 'WebUpload');
       // Create a temporary file path for the upload service
       // Note: This is a workaround for web - ideally the service should accept bytes directly
       final url = await uploadService.uploadFile(
@@ -315,6 +334,9 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
         },
       );
 
+      AppLogger.info('✅ Upload successful!', tag: 'WebUpload');
+      AppLogger.debug('🔗 URL: $url', tag: 'WebUpload');
+
       if (mounted) {
         setState(() {
           _attachments.add(AttachmentItem.uploaded(url));
@@ -323,10 +345,14 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
 
         _notifyUrlsChanged();
         _showSuccess('File uploaded successfully');
+        AppLogger.debug('🎉 UI updated, attachment added', tag: 'WebUpload');
       }
     } on FileUploadException catch (e) {
-      _showError('Upload failed: ${e.message}');
+      AppLogger.error('❌ FileUploadException: ${e.message}', tag: 'WebUpload');
+      _showError(e.message);
     } catch (e) {
+      AppLogger.error('❌ Unexpected error: $e', tag: 'WebUpload');
+      AppLogger.debug('🔍 Error type: ${e.runtimeType}', tag: 'WebUpload');
       _showError('Error: $e');
     } finally {
       if (mounted) {
@@ -334,6 +360,7 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
           _isUploading = false;
           _uploadProgress = 0.0;
         });
+        AppLogger.info('🏁 ========== Upload Complete ==========\n', tag: 'WebUpload');
       }
     }
   }
@@ -348,7 +375,7 @@ class _AttachmentPickerWebState extends ConsumerState<AttachmentPickerWeb> {
     });
 
     try {
-      final uploadService = ref.read(fileUploadServiceProvider);
+      final uploadService = await ref.read(fileUploadServiceProvider.future);
       final folder = UploadConfig.getFolderForFeature(widget.featureName);
       final totalFiles = _pendingUploads.length;
 

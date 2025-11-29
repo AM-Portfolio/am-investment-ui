@@ -10,7 +10,7 @@ import '../models/trade_portfolio_view_model.dart';
 import '../widgets/trade_sidebar.dart';
 import 'pages/trade_calendar_analytics_web_page.dart';
 import 'pages/trade_holdings_dashboard_web_page.dart';
-import 'journal_web_page.dart';
+import 'pages/journal_web_page.dart';
 
 /// Trade view types for navigation
 enum TradeViewType { portfolios, holdings, calendar, journal }

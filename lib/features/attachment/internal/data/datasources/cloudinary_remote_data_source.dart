@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../../../../config/app_config.dart';
+import '../../../../../../core/utils/logger.dart';
 import '../dtos/cloudinary_dto.dart';
 
 /// Remote data source for Cloudinary operations via backend API
@@ -9,11 +11,11 @@ import '../dtos/cloudinary_dto.dart';
 /// Calls backend endpoints instead of Cloudinary directly, providing abstraction
 /// Backend can switch cloud providers without impacting frontend
 class CloudinaryRemoteDataSource {
-  CloudinaryRemoteDataSource({required http.Client client, required String baseUrl})
+  CloudinaryRemoteDataSource({required http.Client client, required ApiConfig apiConfig})
     : _client = client,
-      _baseUrl = baseUrl;
+      _apiConfig = apiConfig;
   final http.Client _client;
-  final String _baseUrl;
+  final ApiConfig _apiConfig;
 
   /// Upload file to Cloudinary via backend API
   ///
@@ -27,26 +29,46 @@ class CloudinaryRemoteDataSource {
     bool overwrite = false,
     String resourceType = 'image',
   }) async {
+    AppLogger.debug('🌐 Uploading to backend API...', tag: 'CloudinaryAPI');
+    AppLogger.debug('🔗 URL: ${_apiConfig.baseUrl}/api/cloudinary/upload', tag: 'CloudinaryAPI');
+    AppLogger.debug('📝 Filename: $filename', tag: 'CloudinaryAPI');
+    AppLogger.debug('📂 Folder: ${folder ?? "none"}', tag: 'CloudinaryAPI');
+    AppLogger.debug('🏷️ Resource type: $resourceType', tag: 'CloudinaryAPI');
+    AppLogger.debug('📏 Content length: ${fileContent.length} chars', tag: 'CloudinaryAPI');
+
     try {
+      final requestBody = {
+        'fileContent': fileContent,
+        'filename': filename,
+        if (folder != null) 'folder': folder,
+        'overwrite': overwrite,
+        'resourceType': resourceType,
+      };
+
+      AppLogger.debug('📤 Sending POST request...', tag: 'CloudinaryAPI');
       final response = await _client.post(
-        Uri.parse('$_baseUrl/api/cloudinary/upload'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/upload'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'fileContent': fileContent,
-          'filename': filename,
-          if (folder != null) 'folder': folder,
-          'overwrite': overwrite,
-          'resourceType': resourceType,
-        }),
+        body: json.encode(requestBody),
       );
 
+      AppLogger.debug('📥 Response status: ${response.statusCode}', tag: 'CloudinaryAPI');
+      AppLogger.debug('📄 Response body: ${response.body}', tag: 'CloudinaryAPI');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
+        AppLogger.debug('✅ Upload successful, parsing response...', tag: 'CloudinaryAPI');
         final jsonData = json.decode(response.body);
-        return UploadResponseDto.fromJson(jsonData);
+        final dto = UploadResponseDto.fromJson(jsonData);
+        AppLogger.debug('🆔 Public ID: ${dto.publicId}', tag: 'CloudinaryAPI');
+        AppLogger.debug('🔗 URL: ${dto.url}', tag: 'CloudinaryAPI');
+        return dto;
       } else {
+        AppLogger.error('❌ Upload failed with status ${response.statusCode}', tag: 'CloudinaryAPI');
         throw Exception('Upload failed: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      AppLogger.error('❌ Exception during upload: $e', tag: 'CloudinaryAPI');
+      AppLogger.debug('🔍 Error type: ${e.runtimeType}', tag: 'CloudinaryAPI');
       throw Exception('Upload error: $e');
     }
   }
@@ -58,7 +80,7 @@ class CloudinaryRemoteDataSource {
   Future<CloudinaryResourceDto> getResource({required String publicId, String resourceType = 'image'}) async {
     try {
       final response = await _client.get(
-        Uri.parse('$_baseUrl/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -89,7 +111,9 @@ class CloudinaryRemoteDataSource {
         'maxResults': maxResults.toString(),
       };
 
-      final uri = Uri.parse('$_baseUrl/api/cloudinary/resources').replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        '${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources',
+      ).replace(queryParameters: queryParams);
 
       final response = await _client.get(uri, headers: {'Content-Type': 'application/json'});
 
@@ -112,7 +136,7 @@ class CloudinaryRemoteDataSource {
   Future<DeleteResponseDto> deleteResource({required String publicId, String resourceType = 'image'}) async {
     try {
       final response = await _client.delete(
-        Uri.parse('$_baseUrl/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/resources/$publicId?resourceType=$resourceType'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -140,7 +164,7 @@ class CloudinaryRemoteDataSource {
   }) async {
     try {
       final response = await _client.post(
-        Uri.parse('$_baseUrl/api/cloudinary/signature'),
+        Uri.parse('${_apiConfig.baseUrl}/cloudinary/api/cloudinary/signature'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           if (publicId != null) 'publicId': publicId,

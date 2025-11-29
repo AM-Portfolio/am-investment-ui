@@ -7,9 +7,8 @@ import '../../../../../config/upload_config.dart';
 import '../../../attachment_providers.dart';
 import '../../../internal/services/file_upload_service.dart';
 import '../../models/pending_attachment.dart';
+import '../attachment_picker_widget.dart' show AttachmentType;
 import '../shared/attachment_preview_grid.dart';
-
-enum AttachmentType { image, document, video, any }
 
 /// Mobile attachment picker with gallery and file picker support
 class AttachmentPickerMobile extends ConsumerStatefulWidget {
