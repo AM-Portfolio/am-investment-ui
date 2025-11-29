@@ -1,3 +1,5 @@
+
+
 # Trade Journal Enhancements Summary
 
 ## Overview

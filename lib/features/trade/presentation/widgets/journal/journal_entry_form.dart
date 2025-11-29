@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:intl/intl.dart';
 
+import '../../../../attachment/presentation/widgets/attachment_picker.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
 import 'utils/journal_helpers.dart';
-import 'widgets/image_attachment_widget.dart';
 import 'widgets/mood_selector.dart';
 import 'widgets/rich_text_editor.dart';
 import 'widgets/sentiment_selector.dart';
@@ -282,7 +282,12 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       const SizedBox(height: 20),
       TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
       const SizedBox(height: 20),
-      ImageAttachmentWidget(imageUrls: _imageUrls, onImagesChanged: (urls) => setState(() => _imageUrls = urls)),
+      AttachmentPicker(
+        initialUrls: _imageUrls,
+        onAttachmentsChanged: (urls) => setState(() => _imageUrls = urls),
+        featureName: 'journal',
+        userId: widget.userId,
+      ),
     ],
   );
 

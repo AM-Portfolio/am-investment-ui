@@ -32,6 +32,7 @@
         "jwt_decoder",
         "lottie",
         "mime",
+        "path",
         "retrofit",
         "riverpod_annotation",
         "shared_preferences",
@@ -275,6 +276,11 @@
         "vector_math",
         "vm_service"
       ]
+    },
+    {
+      "name": "path",
+      "version": "1.9.1",
+      "dependencies": []
     },
     {
       "name": "image_picker",
@@ -707,11 +713,6 @@
         "async",
         "stack_trace"
       ]
-    },
-    {
-      "name": "path",
-      "version": "1.9.1",
-      "dependencies": []
     },
     {
       "name": "package_config",
