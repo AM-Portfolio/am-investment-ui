@@ -15,23 +15,30 @@ class JournalFormHeader extends StatelessWidget {
     return InkWell(
       onTap: isEditMode ? onDateSelect : null,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Entry Date')),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            prefixIcon: const Icon(Icons.calendar_today, size: 18),
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Entry Date')),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          prefixIcon: const Icon(Icons.calendar_today, size: 18),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
           ),
-          child: Text(DateFormat('MMM dd, yyyy').format(entryDate), style: theme.textTheme.bodyMedium),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
+        child: Text(DateFormat('MMM dd, yyyy').format(entryDate), style: theme.textTheme.bodyMedium),
       ),
     );
   }

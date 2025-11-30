@@ -11,27 +11,29 @@ class RichTextEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'What happened?',
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.dividerColor),
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
+            child: Text(
+              'What happened?',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
           ),
-          child: Column(
-            children: [
-              if (!readOnly) ...[_buildToolbar(theme), const Divider(height: 1)],
-              _buildEditor(),
-            ],
-          ),
-        ),
-      ],
+          if (!readOnly) ...[_buildToolbar(theme), const Divider(height: 1)],
+          _buildEditor(),
+        ],
+      ),
     );
   }
 

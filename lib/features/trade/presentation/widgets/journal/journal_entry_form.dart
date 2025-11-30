@@ -11,14 +11,14 @@ import '../../cubit/journal/journal_cubit.dart';
 import '../../models/trade_holding_view_model.dart';
 import 'components/journal_attachment_section.dart';
 import 'components/journal_form_actions.dart';
-import 'components/journal_form_header.dart';
-import 'components/journal_metadata_section.dart';
 import 'components/journal_trade_section.dart';
+import 'sections/behavior_tracking_section.dart';
+import 'sections/optional_fields_section.dart';
+import 'utils/journal_form_helpers.dart';
 import 'utils/journal_helpers.dart';
 import 'widgets/rich_text_editor.dart';
 import 'widgets/trade_overview_selector.dart';
 import 'widgets/trade_preview_dialog.dart';
-import 'widgets/url_preview_widget.dart';
 
 class JournalEntryForm extends ConsumerStatefulWidget {
   const JournalEntryForm({required this.userId, required this.cubit, required this.portfolioId, super.key, this.entry});
@@ -39,8 +39,22 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
   late TextEditingController _tradeIdController;
   late TextEditingController _urlController;
   late DateTime _entryDate;
-  String? _selectedMood;
-  String? _marketSentiment;
+
+  // Planning phase (pre-market)
+  late TextEditingController _planningBehaviorController;
+  String? _planningMood;
+  String? _planningSentiment;
+
+  // Mid phase (during trading)
+  late TextEditingController _midBehaviorController;
+  String? _midMood;
+  String? _midSentiment;
+
+  // End phase (market close)
+  late TextEditingController _endBehaviorController;
+  String? _endMood;
+  String? _endSentiment;
+
   final Set<String> _selectedTags = {};
   List<String> _imageUrls = [];
   bool _isSubmitting = false;
@@ -73,11 +87,22 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     _urlController = TextEditingController();
     _entryDate = widget.entry?.entryDate ?? DateTime.now();
 
-    // Map mood using helper
-    _selectedMood = JournalHelpers.mapMoodFromEntry(widget.entry?.mood);
+    // Initialize planning phase from customFields
+    _planningBehaviorController = TextEditingController(text: widget.entry?.customFields['planningBehavior'] ?? '');
+    _planningMood = widget.entry?.customFields['planningMood'];
+    _planningSentiment = widget.entry?.customFields['planningSentiment'];
 
-    // Map sentiment using helper
-    _marketSentiment = JournalHelpers.mapSentimentFromValue(widget.entry?.marketSentiment);
+    // Initialize mid phase from customFields
+    _midBehaviorController = TextEditingController(text: widget.entry?.customFields['midBehavior'] ?? '');
+    _midMood = widget.entry?.customFields['midMood'];
+    _midSentiment = widget.entry?.customFields['midSentiment'];
+
+    // Initialize end phase from customFields (with legacy fallback)
+    _endBehaviorController = TextEditingController(text: widget.entry?.customFields['endBehavior'] ?? '');
+    _endMood = widget.entry?.customFields['endMood'] ?? JournalHelpers.mapMoodFromEntry(widget.entry?.mood);
+    _endSentiment =
+        widget.entry?.customFields['endSentiment'] ??
+        JournalHelpers.mapSentimentFromValue(widget.entry?.marketSentiment);
 
     if (widget.entry?.tags != null) {
       _selectedTags.addAll(widget.entry!.tags);
@@ -112,6 +137,9 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     _quillController.dispose();
     _tradeIdController.dispose();
     _urlController.dispose();
+    _planningBehaviorController.dispose();
+    _midBehaviorController.dispose();
+    _endBehaviorController.dispose();
     super.dispose();
   }
 
@@ -270,43 +298,9 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     }
   }
 
-  void _toggleTag(String tag) {
-    setState(() {
-      if (_selectedTags.contains(tag)) {
-        _selectedTags.remove(tag);
-      } else {
-        _selectedTags.add(tag);
-      }
-    });
-  }
-
   String _getQuillContent() {
     final delta = _quillController.document.toDelta();
     return jsonEncode(delta.toJson());
-  }
-
-  /// Convert image URLs to JournalAttachment objects
-  List<JournalAttachment> _convertImageUrlsToAttachments() => _imageUrls.map((url) {
-    final fileName = url.split('/').last.split('?').first;
-    return JournalAttachment(
-      fileName: fileName,
-      fileUrl: url,
-      fileType: _getFileTypeFromUrl(url),
-      uploadedAt: DateTime.now(),
-    );
-  }).toList();
-
-  String? _getFileTypeFromUrl(String url) {
-    final extension = url.split('.').last.split('?').first.toLowerCase();
-    const imageTypes = {
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png',
-      'gif': 'image/gif',
-      'webp': 'image/webp',
-      'svg': 'image/svg+xml',
-    };
-    return imageTypes[extension] ?? 'image/$extension';
   }
 
   Future<void> _submit() async {
@@ -321,12 +315,23 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             content: content,
             entryDate: _entryDate,
             tradeId: _tradeIdController.text.isEmpty ? null : _tradeIdController.text,
-            mood: JournalHelpers.getMoodString(_selectedMood),
-            marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
+            mood: JournalHelpers.getMoodString(_endMood ?? _midMood ?? _planningMood),
+            marketSentiment: JournalHelpers.getSentimentValue(_endSentiment ?? _midSentiment ?? _planningSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
-            attachments: _imageUrls.isEmpty ? null : _convertImageUrlsToAttachments(),
+            attachments: _imageUrls.isEmpty ? null : JournalFormHelpers.convertImageUrlsToAttachments(_imageUrls),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
+            customFields: JournalFormHelpers.buildCustomFields(
+              planningBehavior: _planningBehaviorController.text,
+              planningMood: _planningMood,
+              planningSentiment: _planningSentiment,
+              midBehavior: _midBehaviorController.text,
+              midMood: _midMood,
+              midSentiment: _midSentiment,
+              endBehavior: _endBehaviorController.text,
+              endMood: _endMood,
+              endSentiment: _endSentiment,
+            ),
           );
         } else {
           await widget.cubit.editJournalEntry(
@@ -336,12 +341,23 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             content: content,
             entryDate: _entryDate,
             tradeId: _tradeIdController.text.isEmpty ? null : _tradeIdController.text,
-            mood: JournalHelpers.getMoodString(_selectedMood),
-            marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
+            mood: JournalHelpers.getMoodString(_endMood ?? _midMood ?? _planningMood),
+            marketSentiment: JournalHelpers.getSentimentValue(_endSentiment ?? _midSentiment ?? _planningSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
-            attachments: _imageUrls.isEmpty ? null : _convertImageUrlsToAttachments(),
+            attachments: _imageUrls.isEmpty ? null : JournalFormHelpers.convertImageUrlsToAttachments(_imageUrls),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
+            customFields: JournalFormHelpers.buildCustomFields(
+              planningBehavior: _planningBehaviorController.text,
+              planningMood: _planningMood,
+              planningSentiment: _planningSentiment,
+              midBehavior: _midBehaviorController.text,
+              midMood: _midMood,
+              midSentiment: _midSentiment,
+              endBehavior: _endBehaviorController.text,
+              endMood: _endMood,
+              endSentiment: _endSentiment,
+            ),
           );
         }
       } finally {
@@ -379,9 +395,9 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     children: [
       _buildTitleField(),
       const SizedBox(height: 12),
+      _buildBehaviorTracking(),
+      const SizedBox(height: 12),
       RichTextEditor(controller: _quillController, readOnly: !_isEditMode),
-      const SizedBox(height: 16),
-      _buildBottomFields(context),
       const SizedBox(height: 16),
       JournalFormActions(
         isEditMode: _isEditMode,
@@ -396,68 +412,31 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
   Widget _buildTitleField() {
     final theme = Theme.of(context);
-    return TextFormField(
-      controller: _titleController,
-      enabled: _isEditMode,
-      style: TextStyle(
-        fontWeight: FontWeight.w600,
-        color: _isEditMode ? null : theme.colorScheme.onSurface.withOpacity(0.9),
-      ),
-      decoration: InputDecoration(
-        label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Title')),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        floatingLabelAlignment: FloatingLabelAlignment.start,
-        hintText: 'e.g., "AAPL Breakout" or "Lesson: Don\'t Chase"',
-        prefixIcon: const Icon(Icons.title, size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-    );
-  }
-
-  Widget _buildUrlField() {
-    final theme = Theme.of(context);
-    final hasUrl = _urlController.text.trim().isNotEmpty;
-
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: hasUrl ? theme.colorScheme.primary.withOpacity(0.5) : theme.dividerColor.withOpacity(0.5),
-          width: hasUrl ? 1.5 : 1,
-        ),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(12),
-        color: hasUrl ? theme.colorScheme.primaryContainer.withOpacity(0.1) : null,
       ),
       child: TextFormField(
-        controller: _urlController,
+        controller: _titleController,
+        enabled: _isEditMode,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: _isEditMode ? null : theme.colorScheme.onSurface.withOpacity(0.9),
+        ),
         decoration: InputDecoration(
-          label: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Add URL (optional)'),
-                if (hasUrl) ...[
-                  const SizedBox(width: 6),
-                  Icon(Icons.check_circle, size: 14, color: theme.colorScheme.primary),
-                ],
-              ],
-            ),
-          ),
+          label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Title')),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           floatingLabelAlignment: FloatingLabelAlignment.start,
-          hintText: 'https://tradingview.com/chart/...',
-          prefixIcon: Icon(Icons.link, size: 20, color: hasUrl ? theme.colorScheme.primary : null),
+          hintText: 'e.g., "AAPL Breakout" or "Lesson: Don\'t Chase"',
+          prefixIcon: const Icon(Icons.title, size: 20),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          disabledBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
+        validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
       ),
     );
   }
@@ -465,16 +444,8 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
   Widget _buildRightColumn() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      JournalMetadataSection(
-        selectedMood: _selectedMood,
-        marketSentiment: _marketSentiment,
-        selectedTags: _selectedTags,
-        isEditMode: _isEditMode,
-        onMoodSelected: (mood) => setState(() => _selectedMood = mood),
-        onSentimentSelected: (sentiment) => setState(() => _marketSentiment = sentiment),
-        onTagToggled: _toggleTag,
-      ),
-      const SizedBox(height: 16),
+      _buildOptionalFields(),
+      const SizedBox(height: 12),
 
       // Trade Overview Section - enabled in view mode to allow viewing linked trades
       JournalTradeSection(
@@ -494,7 +465,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
         onTradesSelected: (ids) => setState(() => _relatedTradeIds = ids),
         onViewTrades: _showTradePreview,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 12),
 
       // Attachment Section - clickable in view mode for viewing images
       JournalAttachmentSection(
@@ -507,127 +478,57 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     ],
   );
 
-  Widget _buildTradeIdField(ThemeData theme) => Container(
-    decoration: BoxDecoration(
-      border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: TextFormField(
-      controller: _tradeIdController,
-      decoration: InputDecoration(
-        label: Container(padding: const EdgeInsets.symmetric(horizontal: 4), child: const Text('Trade ID (optional)')),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        floatingLabelAlignment: FloatingLabelAlignment.start,
-        hintText: 'Optional',
-        prefixIcon: const Icon(Icons.tag, size: 18),
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      ),
-    ),
+  Widget _buildOptionalFields() => OptionalFieldsSection(
+    entryDate: _entryDate,
+    tradeIdController: _tradeIdController,
+    urlController: _urlController,
+    isEditMode: _isEditMode,
+    isUrlExpanded: _isUrlExpanded,
+    urlPreview: _urlPreview,
+    onDateSelect: () async {
+      final date = await showDatePicker(
+        context: context,
+        initialDate: _entryDate,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+      );
+      if (date != null) setState(() => _entryDate = date);
+    },
+    onToggleUrlExpansion: () => setState(() => _isUrlExpanded = !_isUrlExpanded),
+    onClearUrl: () {
+      _urlController.clear();
+      setState(() => _urlPreview = null);
+    },
   );
 
-  Widget _buildBottomFields(BuildContext context) {
-    final theme = Theme.of(context);
-    final hasTradeId = _tradeIdController.text.trim().isNotEmpty;
-    final hasUrl = _urlController.text.trim().isNotEmpty;
+  Widget _buildBehaviorTracking() => BehaviorTrackingSection(
+    planningBehaviorController: _planningBehaviorController,
+    planningMood: _planningMood,
+    planningSentiment: _planningSentiment,
+    midBehaviorController: _midBehaviorController,
+    midMood: _midMood,
+    midSentiment: _midSentiment,
+    endBehaviorController: _endBehaviorController,
+    endMood: _endMood,
+    endSentiment: _endSentiment,
+    onPlanningMoodChanged: (mood) => setState(() => _planningMood = mood),
+    onPlanningSentimentChanged: (sentiment) => setState(() => _planningSentiment = sentiment),
+    onMidMoodChanged: (mood) => setState(() => _midMood = mood),
+    onMidSentimentChanged: (sentiment) => setState(() => _midSentiment = sentiment),
+    onEndMoodChanged: (mood) => setState(() => _endMood = mood),
+    onEndSentimentChanged: (sentiment) => setState(() => _endSentiment = sentiment),
+    selectedTags: _selectedTags,
+    onTagToggled: _toggleTag,
+    isEditMode: _isEditMode,
+  );
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(12),
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Date and Trade ID row
-          Row(
-            children: [
-              Expanded(
-                child: JournalFormHeader(
-                  entryDate: _entryDate,
-                  isEditMode: _isEditMode,
-                  onDateSelect: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _entryDate,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (date != null) setState(() => _entryDate = date);
-                  },
-                ),
-              ),
-              // Only show Trade ID field in edit mode or if it has a value
-              if (_isEditMode || hasTradeId) ...[const SizedBox(width: 12), Expanded(child: _buildTradeIdField(theme))],
-            ],
-          ),
-
-          // URL section - only show in edit mode or if URL exists
-          if (_isEditMode || hasUrl) ...[
-            // URL expand/collapse button
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: () => setState(() => _isUrlExpanded = !_isUrlExpanded),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: _isUrlExpanded
-                        ? theme.colorScheme.primary.withOpacity(0.5)
-                        : theme.dividerColor.withOpacity(0.3),
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  color: _isUrlExpanded ? theme.colorScheme.primaryContainer.withOpacity(0.2) : null,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.link,
-                      size: 18,
-                      color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _isUrlExpanded ? 'Add URL' : 'Add URL (optional)',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                        fontWeight: _isUrlExpanded ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      _isUrlExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 20,
-                      color: _isUrlExpanded ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Expandable URL field
-            if (_isUrlExpanded) ...[
-              const SizedBox(height: 8),
-              _buildUrlField(),
-              if (_urlPreview != null) ...[
-                const SizedBox(height: 8),
-                UrlPreviewWidget(
-                  url: _urlPreview!,
-                  onClose: () {
-                    _urlController.clear();
-                    setState(() => _urlPreview = null);
-                  },
-                ),
-              ],
-            ],
-          ],
-        ],
-      ),
-    );
+  void _toggleTag(String tag) {
+    setState(() {
+      if (_selectedTags.contains(tag)) {
+        _selectedTags.remove(tag);
+      } else {
+        _selectedTags.add(tag);
+      }
+    });
   }
 }

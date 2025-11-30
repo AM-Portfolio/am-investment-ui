@@ -66,6 +66,10 @@ class JournalCard extends StatelessWidget {
 
   Widget _buildHeader(ThemeData theme) {
     final attachmentCount = entry.attachments.isNotEmpty ? entry.attachments.length : entry.imageUrls.length;
+    final hasBehaviorTracking =
+        entry.customFields.containsKey('startBehavior') ||
+        entry.customFields.containsKey('midBehavior') ||
+        entry.customFields.containsKey('endBehavior');
 
     return Row(
       children: [
@@ -97,6 +101,10 @@ class JournalCard extends StatelessWidget {
             label: '$attachmentCount',
             color: theme.colorScheme.tertiary,
           ),
+          const SizedBox(width: 6),
+        ],
+        if (hasBehaviorTracking) ...[
+          _buildMetadataChip(theme, icon: Icons.psychology, label: '', color: theme.colorScheme.primary),
         ],
         const Spacer(),
         IconButton(
