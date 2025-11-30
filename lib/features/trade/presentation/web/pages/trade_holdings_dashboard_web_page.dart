@@ -28,8 +28,10 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
     super.initState();
     // Load favorite filters when page initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cubit = ref.read(favoriteFilterCubitProvider);
-      cubit.loadFilters(widget.userId);
+      if (mounted) {
+        final cubit = ref.read(favoriteFilterCubitProvider);
+        cubit.loadFilters(widget.userId);
+      }
     });
   }
 

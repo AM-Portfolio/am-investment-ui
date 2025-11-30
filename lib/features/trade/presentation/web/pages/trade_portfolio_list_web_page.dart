@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../providers/trade_internal_providers.dart';
 import '../../components/templates/trade_portfolio_discovery_template.dart';
 import '../../models/trade_portfolio_view_model.dart';
-import '../../../providers/trade_internal_providers.dart';
 
 class TradePortfolioListWebPage extends ConsumerWidget {
   final String userId;
 
-  const TradePortfolioListWebPage({
-    super.key,
-    required this.userId,
-  });
+  const TradePortfolioListWebPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
