@@ -93,7 +93,7 @@ class TradeDetailViewPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
 
-                      // Symbol and Company
+                      // Symbol and Company with info icon
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +137,8 @@ class TradeDetailViewPage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
+                            // Company Name
                             Text(
                               trade.displayCompanyName,
                               style: TextStyle(
@@ -147,6 +148,42 @@ class TradeDetailViewPage extends StatelessWidget {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            // Company info badges
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                _buildInfoBadge(
+                                  context,
+                                  icon: Icons.category_rounded,
+                                  label: 'Sector',
+                                  value: trade.sector ?? 'N/A',
+                                  color: Colors.blue.shade600,
+                                ),
+                                _buildInfoBadge(
+                                  context,
+                                  icon: Icons.factory_rounded,
+                                  label: 'Industry',
+                                  value: trade.industry ?? 'N/A',
+                                  color: Colors.purple.shade600,
+                                ),
+                                _buildInfoBadge(
+                                  context,
+                                  icon: Icons.currency_exchange_rounded,
+                                  label: 'Exchange',
+                                  value: trade.exchange ?? 'N/A',
+                                  color: Colors.teal.shade600,
+                                ),
+                                _buildInfoBadge(
+                                  context,
+                                  icon: Icons.tag_rounded,
+                                  label: 'ISIN',
+                                  value: trade.isin ?? 'N/A',
+                                  color: Colors.orange.shade600,
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -210,206 +247,113 @@ class TradeDetailViewPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // Bottom Row - Company Info and Trade Details in compact grid
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                  child: Row(
-                    children: [
-                      // Company Information Section
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.2)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade600.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.business_rounded, size: 16, color: Colors.blue.shade600),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Company Information',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        _buildCompactInfoRow(context, 'Symbol', trade.displaySymbol),
-                                        _buildCompactInfoRow(context, 'Company', trade.displayCompanyName),
-                                        _buildCompactInfoRow(context, 'Sector', trade.sector ?? 'N/A'),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        _buildCompactInfoRow(context, 'Industry', trade.industry ?? 'N/A'),
-                                        _buildCompactInfoRow(context, 'Exchange', trade.exchange ?? 'N/A'),
-                                        _buildCompactInfoRow(context, 'ISIN', trade.isin ?? 'N/A'),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // Trade Details Section
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.2)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.purple.shade600.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Icon(Icons.receipt_long_rounded, size: 16, color: Colors.purple.shade600),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Trade Details',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        _buildCompactInfoRow(context, 'Position', trade.tradePositionType ?? 'N/A'),
-                                        _buildCompactInfoRow(context, 'Quantity', trade.displayQuantity),
-                                        _buildCompactInfoRow(context, 'Executions', '${trade.executionCount}'),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        _buildCompactInfoRow(context, 'Avg Price', trade.displayAvgPrice),
-                                        _buildCompactInfoRow(context, 'Holding Period', trade.displayHoldingPeriod),
-                                        _buildCompactInfoRow(context, 'Currency', trade.displayCurrency),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
 
-          // Scrollable Content - Only Price, Fees, Performance
+          // Scrollable Content - Trade Details + Price, Fees, Performance
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: _buildModernCard(
-                      context,
-                      icon: Icons.price_change_rounded,
-                      iconColor: Colors.indigo.shade600,
-                      title: 'Price & Value',
-                      children: [
-                        _buildModernInfoRow(context, 'Entry Price', trade.displayEntryPrice),
-                        _buildModernInfoRow(context, 'Exit Price', trade.displayExitPrice),
-                        _buildModernInfoRow(context, 'Average Price', trade.displayAvgPrice),
-                        _buildModernInfoRow(context, 'Current Price', trade.displayCurrentPrice),
-                        _buildModernInfoRow(context, 'Current Value', trade.displayCurrentValue),
-                      ],
-                    ),
+                  // Trade Details Card
+                  _buildModernCard(
+                    context,
+                    icon: Icons.receipt_long_rounded,
+                    iconColor: Colors.purple.shade600,
+                    title: 'Trade Details',
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                _buildModernInfoRow(context, 'Position', trade.tradePositionType ?? 'N/A'),
+                                _buildModernInfoRow(context, 'Quantity', trade.displayQuantity),
+                                _buildModernInfoRow(context, 'Executions', '${trade.executionCount}'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                _buildModernInfoRow(context, 'Average Price', trade.displayAvgPrice),
+                                _buildModernInfoRow(context, 'Holding Period', trade.displayHoldingPeriod),
+                                _buildModernInfoRow(context, 'Currency', trade.displayCurrency),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: _buildModernCard(
-                      context,
-                      icon: Icons.receipt_rounded,
-                      iconColor: Colors.orange.shade600,
-                      title: 'Fees & Charges',
-                      children: [
-                        _buildModernInfoRow(context, 'Entry Fees', trade.displayEntryFees),
-                        _buildModernInfoRow(context, 'Exit Fees', trade.displayExitFees),
-                        const SizedBox(height: 8),
-                        Divider(color: Theme.of(context).dividerColor.withOpacity(0.3)),
-                        const SizedBox(height: 8),
-                        _buildModernInfoRow(context, 'Total Fees', trade.displayTotalFees, isBold: true),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: _buildModernCard(
-                      context,
-                      icon: Icons.analytics_rounded,
-                      iconColor: isProfit ? Colors.green.shade600 : Colors.red.shade600,
-                      title: 'Performance Metrics',
-                      children: [
-                        _buildModernInfoRow(
+                  const SizedBox(height: 20),
+
+                  // Price, Fees, Performance Row
+                  // Price, Fees, Performance Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildModernCard(
                           context,
-                          'Profit/Loss',
-                          trade.displayProfitLoss,
-                          valueColor: isProfit ? Colors.green.shade700 : Colors.red.shade700,
-                          isBold: true,
+                          icon: Icons.price_change_rounded,
+                          iconColor: Colors.indigo.shade600,
+                          title: 'Price & Value',
+                          children: [
+                            _buildModernInfoRow(context, 'Entry Price', trade.displayEntryPrice),
+                            _buildModernInfoRow(context, 'Exit Price', trade.displayExitPrice),
+                            _buildModernInfoRow(context, 'Average Price', trade.displayAvgPrice),
+                            _buildModernInfoRow(context, 'Current Price', trade.displayCurrentPrice),
+                            _buildModernInfoRow(context, 'Current Value', trade.displayCurrentValue),
+                          ],
                         ),
-                        _buildModernInfoRow(context, 'Return on Equity', trade.displayReturnOnEquity),
-                        const SizedBox(height: 8),
-                        Divider(color: Theme.of(context).dividerColor.withOpacity(0.3)),
-                        const SizedBox(height: 8),
-                        _buildModernInfoRow(context, 'Risk Amount', trade.displayRiskAmount),
-                        _buildModernInfoRow(context, 'Reward Amount', trade.displayRewardAmount),
-                        _buildModernInfoRow(context, 'Risk/Reward Ratio', trade.displayRiskRewardRatio),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: _buildModernCard(
+                          context,
+                          icon: Icons.receipt_rounded,
+                          iconColor: Colors.orange.shade600,
+                          title: 'Fees & Charges',
+                          children: [
+                            _buildModernInfoRow(context, 'Entry Fees', trade.displayEntryFees),
+                            _buildModernInfoRow(context, 'Exit Fees', trade.displayExitFees),
+                            const SizedBox(height: 8),
+                            Divider(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+                            const SizedBox(height: 8),
+                            _buildModernInfoRow(context, 'Total Fees', trade.displayTotalFees, isBold: true),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: _buildModernCard(
+                          context,
+                          icon: Icons.analytics_rounded,
+                          iconColor: isProfit ? Colors.green.shade600 : Colors.red.shade600,
+                          title: 'Performance Metrics',
+                          children: [
+                            _buildModernInfoRow(
+                              context,
+                              'Profit/Loss',
+                              trade.displayProfitLoss,
+                              valueColor: isProfit ? Colors.green.shade700 : Colors.red.shade700,
+                              isBold: true,
+                            ),
+                            _buildModernInfoRow(context, 'Return on Equity', trade.displayReturnOnEquity),
+                            const SizedBox(height: 8),
+                            Divider(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+                            const SizedBox(height: 8),
+                            _buildModernInfoRow(context, 'Risk Amount', trade.displayRiskAmount),
+                            _buildModernInfoRow(context, 'Reward Amount', trade.displayRewardAmount),
+                            _buildModernInfoRow(context, 'Risk/Reward Ratio', trade.displayRiskRewardRatio),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -420,27 +364,35 @@ class TradeDetailViewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactInfoRow(BuildContext context, String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _buildInfoBadge(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: color.withOpacity(0.3)),
+    ),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
+        Icon(icon, size: 12, color: color),
+        const SizedBox(width: 4),
         Text(
-          label,
+          '$label: ',
           style: TextStyle(
-            fontSize: 11,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            fontSize: 10,
             fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            value,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
-            textAlign: TextAlign.right,
-            overflow: TextOverflow.ellipsis,
-          ),
+        Text(
+          value,
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
         ),
       ],
     ),
