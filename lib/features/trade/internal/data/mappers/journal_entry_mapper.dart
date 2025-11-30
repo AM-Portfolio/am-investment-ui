@@ -3,6 +3,22 @@ import '../dtos/journal_entry_dto.dart';
 
 /// Mapper for journal entry between DTO and domain entity
 class JournalEntryMapper {
+  /// Convert BehaviorPatternSummaryDto to BehaviorPatternSummary domain entity
+  static BehaviorPatternSummary fromBehaviorPatternDto(BehaviorPatternSummaryDto dto) => BehaviorPatternSummary(
+    summary: dto.summary,
+    mood: dto.mood,
+    marketSentiment: dto.marketSentiment,
+    tags: dto.tags ?? [],
+  );
+
+  /// Convert BehaviorPatternSummary entity to BehaviorPatternSummaryDto
+  static BehaviorPatternSummaryDto toBehaviorPatternDto(BehaviorPatternSummary summary) => BehaviorPatternSummaryDto(
+    summary: summary.summary,
+    mood: summary.mood,
+    marketSentiment: summary.marketSentiment,
+    tags: summary.tags.isNotEmpty ? summary.tags : null,
+  );
+
   /// Convert JournalAttachmentDto to JournalAttachment domain entity
   static JournalAttachment fromAttachmentDto(JournalAttachmentDto dto) => JournalAttachment(
     fileName: dto.fileName,
@@ -28,9 +44,7 @@ class JournalEntryMapper {
     tradeId: dto.tradeId,
     title: dto.title,
     content: dto.content,
-    mood: dto.mood,
-    marketSentiment: dto.marketSentiment,
-    tags: dto.tags ?? [],
+    behaviorPatternSummaries: dto.behaviorPatternSummaries?.map(fromBehaviorPatternDto).toList() ?? [],
     customFields: dto.customFields ?? {},
     entryDate: DateTime.parse(dto.entryDate),
     imageUrls: dto.imageUrls ?? [],
@@ -47,9 +61,9 @@ class JournalEntryMapper {
     content: entry.content,
     entryDate: entry.entryDate.toIso8601String(),
     tradeId: entry.tradeId,
-    mood: entry.mood,
-    marketSentiment: entry.marketSentiment,
-    tags: entry.tags,
+    behaviorPatternSummaries: entry.behaviorPatternSummaries.isNotEmpty
+        ? entry.behaviorPatternSummaries.map(toBehaviorPatternDto).toList()
+        : null,
     customFields: entry.customFields,
     imageUrls: entry.imageUrls,
     attachments: entry.attachments.map(toAttachmentDto).toList(),

@@ -187,12 +187,22 @@ class _BehaviorTrackingSectionState extends State<BehaviorTrackingSection> with 
     final theme = Theme.of(context);
     final hasBehavior = behaviorController.text.trim().isNotEmpty;
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Behavior notes
+          // Summary label and input
+          Text(
+            'Summary',
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.primary.withOpacity(0.7),
+            ),
+          ),
+          const SizedBox(height: 2),
           Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -207,6 +217,7 @@ class _BehaviorTrackingSectionState extends State<BehaviorTrackingSection> with 
               minLines: 2,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
+                fontWeight: FontWeight.w500,
                 color: widget.isEditMode ? null : theme.colorScheme.onSurface.withOpacity(0.85),
               ),
               decoration: InputDecoration(
@@ -219,7 +230,7 @@ class _BehaviorTrackingSectionState extends State<BehaviorTrackingSection> with 
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 isDense: true,
               ),
             ),

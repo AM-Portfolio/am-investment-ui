@@ -99,13 +99,19 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
     // Initialize end phase from customFields (with legacy fallback)
     _endBehaviorController = TextEditingController(text: widget.entry?.customFields['endBehavior'] ?? '');
-    _endMood = widget.entry?.customFields['endMood'] ?? JournalHelpers.mapMoodFromEntry(widget.entry?.mood);
+    _endMood =
+        widget.entry?.customFields['endMood'] ??
+        (widget.entry?.behaviorPatternSummaries.isNotEmpty == true
+            ? JournalHelpers.mapMoodFromEntry(widget.entry!.behaviorPatternSummaries.first.mood)
+            : null);
     _endSentiment =
         widget.entry?.customFields['endSentiment'] ??
-        JournalHelpers.mapSentimentFromValue(widget.entry?.marketSentiment);
+        (widget.entry?.behaviorPatternSummaries.isNotEmpty == true
+            ? JournalHelpers.mapSentimentFromValue(widget.entry!.behaviorPatternSummaries.first.marketSentiment)
+            : null);
 
-    if (widget.entry?.tags != null) {
-      _selectedTags.addAll(widget.entry!.tags);
+    if (widget.entry?.behaviorPatternSummaries.isNotEmpty == true) {
+      _selectedTags.addAll(widget.entry!.behaviorPatternSummaries.expand((pattern) => pattern.tags).toSet());
     }
 
     // Load image URLs from either attachments or imageUrls
@@ -308,6 +314,10 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
       setState(() => _isSubmitting = true);
       try {
         final content = _getQuillContent();
+
+        // Build behavior pattern summaries from the form data
+        final behaviorPatternSummaries = _buildBehaviorPatternSummaries();
+
         if (widget.entry == null) {
           await widget.cubit.addJournalEntry(
             userId: widget.userId,
@@ -315,9 +325,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             content: content,
             entryDate: _entryDate,
             tradeId: _tradeIdController.text.isEmpty ? null : _tradeIdController.text,
-            mood: JournalHelpers.getMoodString(_endMood ?? _midMood ?? _planningMood),
-            marketSentiment: JournalHelpers.getSentimentValue(_endSentiment ?? _midSentiment ?? _planningSentiment),
-            tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
+            behaviorPatternSummaries: behaviorPatternSummaries,
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
             attachments: _imageUrls.isEmpty ? null : JournalFormHelpers.convertImageUrlsToAttachments(_imageUrls),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
@@ -341,9 +349,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             content: content,
             entryDate: _entryDate,
             tradeId: _tradeIdController.text.isEmpty ? null : _tradeIdController.text,
-            mood: JournalHelpers.getMoodString(_endMood ?? _midMood ?? _planningMood),
-            marketSentiment: JournalHelpers.getSentimentValue(_endSentiment ?? _midSentiment ?? _planningSentiment),
-            tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
+            behaviorPatternSummaries: behaviorPatternSummaries,
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
             attachments: _imageUrls.isEmpty ? null : JournalFormHelpers.convertImageUrlsToAttachments(_imageUrls),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
@@ -366,6 +372,51 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
         }
       }
     }
+  }
+
+  List<BehaviorPatternSummary>? _buildBehaviorPatternSummaries() {
+    final summaries = <BehaviorPatternSummary>[];
+
+    // Aggregate all behavior data into one summary
+    final hasAnyData =
+        _planningBehaviorController.text.isNotEmpty ||
+        _midBehaviorController.text.isNotEmpty ||
+        _endBehaviorController.text.isNotEmpty ||
+        _planningMood != null ||
+        _midMood != null ||
+        _endMood != null ||
+        _planningSentiment != null ||
+        _midSentiment != null ||
+        _endSentiment != null ||
+        _selectedTags.isNotEmpty;
+
+    if (!hasAnyData) return null;
+
+    // Combine behavior summaries from all phases
+    final summaryParts = <String>[];
+    if (_planningBehaviorController.text.isNotEmpty) {
+      summaryParts.add('Planning: ${_planningBehaviorController.text}');
+    }
+    if (_midBehaviorController.text.isNotEmpty) {
+      summaryParts.add('Mid: ${_midBehaviorController.text}');
+    }
+    if (_endBehaviorController.text.isNotEmpty) {
+      summaryParts.add('End: ${_endBehaviorController.text}');
+    }
+
+    final summary = summaryParts.isNotEmpty
+        ? summaryParts.join(' | ')
+        : 'Behavior tracking for ${_titleController.text}';
+
+    // Use the most recent mood/sentiment (end > mid > planning)
+    final mood = JournalHelpers.getMoodString(_endMood ?? _midMood ?? _planningMood);
+    final sentiment = JournalHelpers.getSentimentValue(_endSentiment ?? _midSentiment ?? _planningSentiment);
+
+    summaries.add(
+      BehaviorPatternSummary(summary: summary, mood: mood, marketSentiment: sentiment, tags: _selectedTags.toList()),
+    );
+
+    return summaries;
   }
 
   @override
