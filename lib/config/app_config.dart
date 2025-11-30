@@ -20,6 +20,22 @@ class AppConfig {
   final GoogleConfig google;
 }
 
+/// Cloudinary API configuration
+class CloudinaryApiConfig {
+  const CloudinaryApiConfig({
+    required this.baseUrl,
+    this.connectTimeout = 30,
+    this.receiveTimeout = 60,
+    this.sendTimeout = 60,
+    this.enabled = true,
+  });
+  final String baseUrl;
+  final int connectTimeout;
+  final int receiveTimeout;
+  final int sendTimeout;
+  final bool enabled;
+}
+
 /// API configuration
 class ApiConfig {
   const ApiConfig({
@@ -29,6 +45,7 @@ class ApiConfig {
     required this.portfolio,
     required this.trade,
     this.document,
+    this.cloudinary,
   });
   final String baseUrl;
   final int timeout;
@@ -36,6 +53,7 @@ class ApiConfig {
   final PortfolioApiConfig portfolio;
   final TradeApiConfig trade;
   final DocumentApiConfig? document;
+  final CloudinaryApiConfig? cloudinary;
 }
 
 /// Portfolio API configuration
@@ -106,11 +124,7 @@ class DocumentApiConfig {
 
 /// Environment configuration
 class EnvironmentConfig {
-  const EnvironmentConfig({
-    required this.name,
-    required this.debugMode,
-    required this.logLevel,
-  });
+  const EnvironmentConfig({required this.name, required this.debugMode, required this.logLevel});
   final String name;
   final bool debugMode;
   final String logLevel;
@@ -118,11 +132,9 @@ class EnvironmentConfig {
 
 /// Google Sign-In configuration
 class GoogleConfig {
-  const GoogleConfig({
-    required this.webClientId,
-  });
+  const GoogleConfig({required this.webClientId});
   final String webClientId;
-  
+
   /// Check if Google Sign-In is configured
   bool get isConfigured => webClientId.isNotEmpty;
 }

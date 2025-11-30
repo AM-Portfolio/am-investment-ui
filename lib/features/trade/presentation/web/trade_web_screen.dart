@@ -10,9 +10,10 @@ import '../models/trade_portfolio_view_model.dart';
 import '../widgets/trade_sidebar.dart';
 import 'pages/trade_calendar_analytics_web_page.dart';
 import 'pages/trade_holdings_dashboard_web_page.dart';
+import 'pages/journal_web_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar }
+enum TradeViewType { portfolios, holdings, calendar, journal }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -165,14 +166,17 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         showTitle = false; // Hide title for portfolios view - title is in the content
         break;
       case TradeViewType.holdings:
-        title = _currentPortfolioName != null
-            ? 'Holdings Dashboard - $_currentPortfolioName'
-            : 'Trade Holdings Dashboard';
+        title = 'Holdings';
+        showTitle = false; // Hide title - portfolio info is in sidebar
         break;
       case TradeViewType.calendar:
         title = _currentPortfolioName != null
             ? 'Calendar Analytics - $_currentPortfolioName'
             : 'Trade Calendar Analytics';
+        break;
+      case TradeViewType.journal:
+        title = 'Trade Journal';
+        showTitle = false; // Custom header in page
         break;
     }
 
@@ -253,6 +257,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                             ref.invalidate(tradeCalendarStreamProvider(params));
                           }
                           break;
+                        case TradeViewType.journal:
+                          // Journal doesn't use providers, no refresh needed
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -288,6 +295,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           return _buildSelectPortfolioPrompt();
         }
         return TradeCalendarAnalyticsWebPage(userId: widget.userId, portfolioId: _currentPortfolioId!);
+
+      case TradeViewType.journal:
+        return JournalWebPage(userId: widget.userId, portfolioId: _currentPortfolioId);
     }
   }
 

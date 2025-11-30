@@ -17,6 +17,7 @@
         "flutter",
         "flutter_bloc",
         "flutter_hot_reload",
+        "flutter_quill",
         "flutter_riverpod",
         "flutter_secure_storage",
         "freezed_annotation",
@@ -24,15 +25,18 @@
         "glassmorphism",
         "google_sign_in",
         "http",
+        "image_picker",
         "injectable",
         "intl",
         "json_annotation",
         "jwt_decoder",
         "lottie",
         "mime",
+        "path",
         "retrofit",
         "riverpod_annotation",
-        "shared_preferences"
+        "shared_preferences",
+        "url_launcher"
       ],
       "devDependencies": [
         "analyzer",
@@ -274,6 +278,60 @@
       ]
     },
     {
+      "name": "path",
+      "version": "1.9.1",
+      "dependencies": []
+    },
+    {
+      "name": "image_picker",
+      "version": "1.2.1",
+      "dependencies": [
+        "flutter",
+        "image_picker_android",
+        "image_picker_for_web",
+        "image_picker_ios",
+        "image_picker_linux",
+        "image_picker_macos",
+        "image_picker_platform_interface",
+        "image_picker_windows"
+      ]
+    },
+    {
+      "name": "url_launcher",
+      "version": "6.3.2",
+      "dependencies": [
+        "flutter",
+        "url_launcher_android",
+        "url_launcher_ios",
+        "url_launcher_linux",
+        "url_launcher_macos",
+        "url_launcher_platform_interface",
+        "url_launcher_web",
+        "url_launcher_windows"
+      ]
+    },
+    {
+      "name": "flutter_quill",
+      "version": "11.5.0",
+      "dependencies": [
+        "charcode",
+        "collection",
+        "dart_quill_delta",
+        "flutter",
+        "flutter_colorpicker",
+        "flutter_keyboard_visibility_temp_fork",
+        "flutter_localizations",
+        "flutter_quill_delta_from_html",
+        "html",
+        "intl",
+        "markdown",
+        "meta",
+        "quill_native_bridge",
+        "quiver",
+        "url_launcher"
+      ]
+    },
+    {
       "name": "lottie",
       "version": "3.3.1",
       "dependencies": [
@@ -461,7 +519,7 @@
     },
     {
       "name": "intl",
-      "version": "0.19.0",
+      "version": "0.20.2",
       "dependencies": [
         "clock",
         "meta",
@@ -655,11 +713,6 @@
         "async",
         "stack_trace"
       ]
-    },
-    {
-      "name": "path",
-      "version": "1.9.1",
-      "dependencies": []
     },
     {
       "name": "package_config",
@@ -1151,6 +1204,226 @@
       ]
     },
     {
+      "name": "image_picker_windows",
+      "version": "0.2.2",
+      "dependencies": [
+        "file_selector_platform_interface",
+        "file_selector_windows",
+        "flutter",
+        "image_picker_platform_interface"
+      ]
+    },
+    {
+      "name": "image_picker_platform_interface",
+      "version": "2.11.1",
+      "dependencies": [
+        "cross_file",
+        "flutter",
+        "http",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "image_picker_macos",
+      "version": "0.2.2",
+      "dependencies": [
+        "file_selector_macos",
+        "file_selector_platform_interface",
+        "flutter",
+        "image_picker_platform_interface"
+      ]
+    },
+    {
+      "name": "image_picker_linux",
+      "version": "0.2.2",
+      "dependencies": [
+        "file_selector_linux",
+        "file_selector_platform_interface",
+        "flutter",
+        "image_picker_platform_interface"
+      ]
+    },
+    {
+      "name": "image_picker_ios",
+      "version": "0.8.13",
+      "dependencies": [
+        "flutter",
+        "image_picker_platform_interface"
+      ]
+    },
+    {
+      "name": "image_picker_for_web",
+      "version": "3.1.1",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "image_picker_platform_interface",
+        "mime",
+        "web"
+      ]
+    },
+    {
+      "name": "image_picker_android",
+      "version": "0.8.13+1",
+      "dependencies": [
+        "flutter",
+        "flutter_plugin_android_lifecycle",
+        "image_picker_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_windows",
+      "version": "3.1.5",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_web",
+      "version": "2.4.1",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "url_launcher_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "version": "2.3.2",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_macos",
+      "version": "3.2.3",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_linux",
+      "version": "3.2.2",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_ios",
+      "version": "6.3.4",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_android",
+      "version": "6.3.20",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "quill_native_bridge",
+      "version": "11.1.0",
+      "dependencies": [
+        "flutter",
+        "quill_native_bridge_android",
+        "quill_native_bridge_ios",
+        "quill_native_bridge_macos",
+        "quill_native_bridge_platform_interface",
+        "quill_native_bridge_web",
+        "quill_native_bridge_windows"
+      ]
+    },
+    {
+      "name": "flutter_keyboard_visibility_temp_fork",
+      "version": "0.1.5",
+      "dependencies": [
+        "flutter",
+        "flutter_keyboard_visibility_linux",
+        "flutter_keyboard_visibility_macos",
+        "flutter_keyboard_visibility_platform_interface",
+        "flutter_keyboard_visibility_windows",
+        "flutter_web_plugins",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "charcode",
+      "version": "1.4.0",
+      "dependencies": []
+    },
+    {
+      "name": "markdown",
+      "version": "7.3.0",
+      "dependencies": [
+        "args",
+        "meta"
+      ]
+    },
+    {
+      "name": "flutter_quill_delta_from_html",
+      "version": "1.5.3",
+      "dependencies": [
+        "dart_quill_delta",
+        "html"
+      ]
+    },
+    {
+      "name": "flutter_colorpicker",
+      "version": "1.1.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "html",
+      "version": "0.15.6",
+      "dependencies": [
+        "csslib",
+        "source_span"
+      ]
+    },
+    {
+      "name": "quiver",
+      "version": "3.2.2",
+      "dependencies": [
+        "matcher"
+      ]
+    },
+    {
+      "name": "dart_quill_delta",
+      "version": "10.8.3",
+      "dependencies": [
+        "collection",
+        "diff_match_patch",
+        "quiver"
+      ]
+    },
+    {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "characters",
+        "clock",
+        "collection",
+        "flutter",
+        "intl",
+        "material_color_utilities",
+        "meta",
+        "path",
+        "vector_math"
+      ]
+    },
+    {
       "name": "archive",
       "version": "4.0.7",
       "dependencies": [
@@ -1527,6 +1800,142 @@
         "uuid",
         "yaml"
       ]
+    },
+    {
+      "name": "file_selector_windows",
+      "version": "0.9.3+5",
+      "dependencies": [
+        "cross_file",
+        "file_selector_platform_interface",
+        "flutter"
+      ]
+    },
+    {
+      "name": "file_selector_platform_interface",
+      "version": "2.7.0",
+      "dependencies": [
+        "cross_file",
+        "flutter",
+        "http",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "file_selector_macos",
+      "version": "0.9.4+4",
+      "dependencies": [
+        "cross_file",
+        "file_selector_platform_interface",
+        "flutter"
+      ]
+    },
+    {
+      "name": "file_selector_linux",
+      "version": "0.9.4",
+      "dependencies": [
+        "cross_file",
+        "file_selector_platform_interface",
+        "flutter"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_macos",
+      "version": "0.0.1",
+      "dependencies": [
+        "flutter",
+        "quill_native_bridge_platform_interface"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_ios",
+      "version": "0.0.1",
+      "dependencies": [
+        "flutter",
+        "quill_native_bridge_platform_interface"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_windows",
+      "version": "0.0.2",
+      "dependencies": [
+        "ffi",
+        "file_selector_platform_interface",
+        "file_selector_windows",
+        "flutter",
+        "quill_native_bridge_platform_interface",
+        "win32"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_web",
+      "version": "0.0.2",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "quill_native_bridge_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_platform_interface",
+      "version": "0.0.2+1",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "quill_native_bridge_android",
+      "version": "0.0.1+2",
+      "dependencies": [
+        "flutter",
+        "quill_native_bridge_platform_interface"
+      ]
+    },
+    {
+      "name": "flutter_keyboard_visibility_windows",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter",
+        "flutter_keyboard_visibility_platform_interface"
+      ]
+    },
+    {
+      "name": "flutter_keyboard_visibility_macos",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter",
+        "flutter_keyboard_visibility_platform_interface"
+      ]
+    },
+    {
+      "name": "flutter_keyboard_visibility_linux",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter",
+        "flutter_keyboard_visibility_platform_interface"
+      ]
+    },
+    {
+      "name": "flutter_keyboard_visibility_platform_interface",
+      "version": "2.0.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "csslib",
+      "version": "1.0.2",
+      "dependencies": [
+        "source_span"
+      ]
+    },
+    {
+      "name": "diff_match_patch",
+      "version": "0.4.1",
+      "dependencies": []
     },
     {
       "name": "posix",

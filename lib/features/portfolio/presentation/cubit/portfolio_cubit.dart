@@ -48,7 +48,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         tag: 'PortfolioCubit',
       );
 
-      emit(PortfolioLoaded(summary: summary, holdings: holdings.holdings));
+      if (!isClosed) {
+        emit(PortfolioLoaded(summary: summary, holdings: holdings.holdings));
+      }
 
       AppLogger.methodExit(
         'loadPortfolio',
@@ -69,7 +71,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         stackTrace: StackTrace.current,
       );
 
-      emit(PortfolioError(error.toString()));
+      if (!isClosed) {
+        emit(PortfolioError(error.toString()));
+      }
 
       AppLogger.methodExit(
         'loadPortfolio',
@@ -119,7 +123,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         tag: 'PortfolioCubit',
       );
 
-      emit(PortfolioLoaded(summary: summary, holdings: holdings.holdings));
+      if (!isClosed) {
+        emit(PortfolioLoaded(summary: summary, holdings: holdings.holdings));
+      }
 
       AppLogger.methodExit(
         'loadPortfolioById',
@@ -140,7 +146,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         stackTrace: StackTrace.current,
       );
 
-      emit(PortfolioError(error.toString()));
+      if (!isClosed) {
+        emit(PortfolioError(error.toString()));
+      }
 
       AppLogger.methodExit(
         'loadPortfolioById',
@@ -167,7 +175,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         );
 
         // Keep current state while refreshing, set refreshing to true
-        emit(currentState.copyWith(isRefreshing: true));
+        if (!isClosed) {
+          emit(currentState.copyWith(isRefreshing: true));
+        }
 
         // Use portfolio service to refresh data
         final results = await Future.wait([
@@ -196,7 +206,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
           tag: 'PortfolioCubit',
           error: error,
         );
-        emit(PortfolioError(error.toString()));
+        if (!isClosed) {
+          emit(PortfolioError(error.toString()));
+        }
       }
     } else {
       loadPortfolio(userId);
@@ -214,7 +226,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         );
 
         // Keep current state while refreshing, set refreshing to true
-        emit(currentState.copyWith(isRefreshing: true));
+        if (!isClosed) {
+          emit(currentState.copyWith(isRefreshing: true));
+        }
 
         // Use portfolio service to refresh data by portfolio ID
         final results = await Future.wait([
@@ -225,13 +239,15 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         final holdings = results[0] as PortfolioHoldings;
         final summary = results[1] as PortfolioSummary;
 
-        emit(
-          currentState.copyWith(
-            summary: summary,
-            holdings: holdings.holdings,
-            isRefreshing: false,
-          ),
-        );
+        if (!isClosed) {
+          emit(
+            currentState.copyWith(
+              summary: summary,
+              holdings: holdings.holdings,
+              isRefreshing: false,
+            ),
+          );
+        }
 
         AppLogger.info(
           'Portfolio data refreshed successfully by ID via service',
@@ -243,7 +259,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
           tag: 'PortfolioCubit',
           error: error,
         );
-        emit(PortfolioError(error.toString()));
+        if (!isClosed) {
+          emit(PortfolioError(error.toString()));
+        }
       }
     } else {
       loadPortfolioById(userId, portfolioId);
@@ -283,7 +301,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         tag: 'PortfolioCubit',
       );
 
-      emit(PortfolioListLoaded(portfolioList: portfolioList));
+      if (!isClosed) {
+        emit(PortfolioListLoaded(portfolioList: portfolioList));
+      }
 
       AppLogger.methodExit(
         'loadPortfoliosList',
@@ -304,7 +324,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         stackTrace: StackTrace.current,
       );
 
-      emit(PortfolioListError(error.toString()));
+      if (!isClosed) {
+        emit(PortfolioListError(error.toString()));
+      }
 
       AppLogger.methodExit(
         'loadPortfoliosList',
@@ -325,16 +347,20 @@ class PortfolioCubit extends Cubit<PortfolioState> {
         );
 
         // Keep current state while refreshing, set refreshing to true
-        emit(currentState.copyWith(isRefreshing: true));
+        if (!isClosed) {
+          emit(currentState.copyWith(isRefreshing: true));
+        }
 
         final portfolioList = await _portfolioService.getPortfoliosList(userId);
 
-        emit(
-          currentState.copyWith(
-            portfolioList: portfolioList,
-            isRefreshing: false,
-          ),
-        );
+        if (!isClosed) {
+          emit(
+            currentState.copyWith(
+              portfolioList: portfolioList,
+              isRefreshing: false,
+            ),
+          );
+        }
 
         AppLogger.info(
           'Portfolio list refreshed successfully via service',
@@ -346,7 +372,9 @@ class PortfolioCubit extends Cubit<PortfolioState> {
           tag: 'PortfolioCubit',
           error: error,
         );
-        emit(PortfolioListError(error.toString()));
+        if (!isClosed) {
+          emit(PortfolioListError(error.toString()));
+        }
       }
     } else {
       loadPortfoliosList(userId);

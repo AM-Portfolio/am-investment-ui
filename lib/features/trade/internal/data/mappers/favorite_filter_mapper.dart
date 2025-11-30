@@ -172,6 +172,8 @@ class InstrumentFilterCriteriaMapper {
         return 'EQUITY_OPTIONS';
       case MarketSegments.indexOptions:
         return 'INDEX_OPTIONS';
+      case MarketSegments.unknown:
+        return 'UNKNOWN';
     }
   }
 
@@ -311,11 +313,19 @@ class TradeCharacteristicsFilterMapper {
 class ProfitLossFilterMapper {
   /// Convert from Map to ProfitLossFilter entity
   static ProfitLossFilter fromMap(Map<String, dynamic> map) => ProfitLossFilter(
-    minProfitLoss: map['minProfitLoss'] as double?,
-    maxProfitLoss: map['maxProfitLoss'] as double?,
-    minPositionSize: map['minPositionSize'] as double?,
-    maxPositionSize: map['maxPositionSize'] as double?,
+    minProfitLoss: _toDouble(map['minProfitLoss']),
+    maxProfitLoss: _toDouble(map['maxProfitLoss']),
+    minPositionSize: _toDouble(map['minPositionSize']),
+    maxPositionSize: _toDouble(map['maxPositionSize']),
   );
+
+  /// Helper to safely convert int/double to double?
+  static double? _toDouble(value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return null;
+  }
 
   /// Convert from ProfitLossFilter entity to Map
   static Map<String, dynamic> toMap(ProfitLossFilter filter) {

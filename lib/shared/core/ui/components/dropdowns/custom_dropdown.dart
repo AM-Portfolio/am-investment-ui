@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'dropdown_styles.dart';
+
 /// A customizable dropdown widget that provides consistent styling and behavior
 /// across the application. Supports icons, hints, and custom styling.
 class CustomDropdown<T> extends StatelessWidget {
@@ -76,55 +78,50 @@ class CustomDropdown<T> extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    final effectivePrimaryColor =
-        primaryColor ?? Theme.of(context).primaryColor;
-    final effectiveBackgroundColor =
-        backgroundColor ?? effectivePrimaryColor.withOpacity(0.05);
-    final effectiveBorderColor =
-        borderColor ?? effectivePrimaryColor.withOpacity(0.2);
-
-    return Container(
-      height: height,
-      padding: contentPadding,
-      decoration: BoxDecoration(
-        color: enabled ? effectiveBackgroundColor : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: enabled ? effectiveBorderColor : Colors.grey.shade300,
+  Widget build(BuildContext context) => Container(
+    height: height,
+    padding: contentPadding,
+    decoration: DropdownStyles.createDecoration(
+      context,
+      primaryColor: primaryColor,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      borderRadius: borderRadius,
+      enabled: enabled,
+    ),
+    child: DropdownButtonHideUnderline(
+      child: DropdownButton<T>(
+        value: value,
+        isExpanded: isExpanded,
+        hint: hint != null
+            ? Text(
+                hint!,
+                style: DropdownStyles.createTextStyle(
+                  context,
+                  primaryColor: primaryColor,
+                  fontSize: fontSize,
+                  isPlaceholder: true,
+                  enabled: enabled,
+                ),
+              )
+            : null,
+        icon: Icon(
+          icon ?? Icons.expand_more,
+          color: DropdownStyles.getIconColor(context, primaryColor: primaryColor, enabled: enabled),
+          size: iconSize,
         ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          isExpanded: isExpanded,
-          hint: hint != null
-              ? Text(
-                  hint!,
-                  style: TextStyle(
-                    color: effectivePrimaryColor.withOpacity(0.7),
-                    fontSize: fontSize,
-                  ),
-                )
-              : null,
-          icon: Icon(
-            icon ?? Icons.expand_more,
-            color: enabled
-                ? effectivePrimaryColor.withOpacity(0.7)
-                : Colors.grey.shade400,
-            size: iconSize,
-          ),
-          style: TextStyle(
-            color: enabled ? effectivePrimaryColor : Colors.grey.shade500,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w500,
-          ),
-          items: enabled ? items : [],
-          onChanged: enabled ? onChanged : null,
+        style: DropdownStyles.createTextStyle(
+          context,
+          primaryColor: primaryColor,
+          textColor: textColor,
+          fontSize: fontSize,
+          enabled: enabled,
         ),
+        items: enabled ? items : [],
+        onChanged: enabled ? onChanged : null,
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// Extension to help create dropdown items with consistent styling
@@ -142,10 +139,7 @@ extension DropdownItemHelper<T> on T {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[
-          Icon(icon, size: iconSize, color: iconColor),
-          const SizedBox(width: 8),
-        ],
+        if (icon != null) ...[Icon(icon, size: iconSize, color: iconColor), const SizedBox(width: 8)],
         if (expandText)
           Expanded(
             child: Text(
@@ -161,57 +155,8 @@ extension DropdownItemHelper<T> on T {
   );
 
   /// Creates a simple dropdown item with just text
-  DropdownMenuItem<T> toSimpleDropdownItem({
-    required String text,
-    double fontSize = 13,
-  }) => DropdownMenuItem<T>(
+  DropdownMenuItem<T> toSimpleDropdownItem({required String text, double fontSize = 13}) => DropdownMenuItem<T>(
     value: this,
     child: Text(text, style: TextStyle(fontSize: fontSize)),
   );
-}
-
-/// Predefined dropdown configurations for common use cases
-class DropdownConfig {
-  /// Configuration for compact dropdown (used in selector bars)
-  static const compact = _DropdownConfig(
-    height: 40,
-    fontSize: 13,
-    iconSize: 18,
-    borderRadius: 12,
-    contentPadding: EdgeInsets.symmetric(horizontal: 12),
-  );
-
-  /// Configuration for form dropdown (used in forms)
-  static const form = _DropdownConfig(
-    height: 48,
-    fontSize: 14,
-    iconSize: 20,
-    borderRadius: 8,
-    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-  );
-
-  /// Configuration for large dropdown (used in prominent areas)
-  static const large = _DropdownConfig(
-    height: 56,
-    fontSize: 16,
-    iconSize: 24,
-    borderRadius: 12,
-    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-  );
-}
-
-class _DropdownConfig {
-  const _DropdownConfig({
-    required this.height,
-    required this.fontSize,
-    required this.iconSize,
-    required this.borderRadius,
-    required this.contentPadding,
-  });
-
-  final double height;
-  final double fontSize;
-  final double iconSize;
-  final double borderRadius;
-  final EdgeInsets contentPadding;
 }

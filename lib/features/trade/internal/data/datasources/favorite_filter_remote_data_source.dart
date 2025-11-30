@@ -45,8 +45,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     AppLogger.methodEntry('getFavoriteFilters', tag: 'FavoriteFilterRemoteDataSource', params: {'userId': userId});
 
     try {
-      // API Spec: GET /api/v1/favorite-filters?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters?userId=$userId';
+      // API Spec: GET /api/v1/filters?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters?userId=$userId';
 
       final response = await _apiClient.get<List<FavoriteFilterResponseDto>>(
         fullUri,
@@ -82,8 +82,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: GET /api/v1/favorite-filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/$filterId?userId=$userId';
+      // API Spec: GET /api/v1/filters/{filterId}?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
 
       final response = await _apiClient.get<FavoriteFilterResponseDto>(
         fullUri,
@@ -114,8 +114,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: POST /api/v1/favorite-filters?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters?userId=$userId';
+      // API Spec: POST /api/v1/filters?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters?userId=$userId';
 
       final response = await _apiClient.post<FavoriteFilterResponseDto>(
         fullUri,
@@ -151,8 +151,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: PUT /api/v1/favorite-filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/$filterId?userId=$userId';
+      // API Spec: PUT /api/v1/filters/{filterId}?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
 
       final response = await _apiClient.put<FavoriteFilterResponseDto>(
         fullUri,
@@ -184,8 +184,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: DELETE /api/v1/favorite-filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/$filterId?userId=$userId';
+      // API Spec: DELETE /api/v1/filters/{filterId}?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
 
       await _apiClient.delete<void>(fullUri, parser: (_) {});
 
@@ -211,8 +211,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: DELETE /api/v1/favorite-filters/bulk
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/bulk';
+      // API Spec: DELETE /api/v1/filters/bulk
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/bulk';
 
       final response = await _apiClient.delete<BulkDeleteResponseDto>(
         fullUri,
@@ -244,8 +244,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
     );
 
     try {
-      // API Spec: PUT /api/v1/favorite-filters/{filterId}/set-default?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/favorite-filters/$filterId/set-default?userId=$userId';
+      // API Spec: PUT /api/v1/filters/{filterId}/set-default?userId={userId}
+      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId/set-default?userId=$userId';
 
       final response = await _apiClient.put<FavoriteFilterResponseDto>(
         fullUri,
