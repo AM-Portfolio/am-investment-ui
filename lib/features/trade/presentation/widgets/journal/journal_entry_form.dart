@@ -9,6 +9,7 @@ import '../../../../attachment/presentation/widgets/attachment_picker.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
 import '../../../providers/trade_internal_providers.dart';
+import '../../../trade_controller_providers.dart';
 import '../../models/trade_holding_view_model.dart';
 import 'utils/journal_helpers.dart';
 import 'widgets/mood_selector.dart';
@@ -207,6 +208,60 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
   }
 
   Future<void> _showTradePreview() async {
+    // If in view mode with linked trades, load trades by IDs instead of by date
+    if (!_isEditMode && _relatedTradeIds.isNotEmpty) {
+      // Show loading indicator
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      try {
+        // Load trades by their IDs using the trade controller provider
+        final tradeDetails = await ref.read(tradeDetailsByIdsProvider(_relatedTradeIds).future);
+
+        // Convert TradeDetails to TradeHoldingViewModel
+        final linkedTrades = tradeDetails.map(TradeHoldingViewModel.fromEntity).toList();
+
+        // Close loading indicator
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        // Show dialog with linked trades
+        if (mounted) {
+          await showDialog<void>(
+            context: context,
+            builder: (context) => TradePreviewDialog(
+              date: _tradeOverviewDate,
+              trades: linkedTrades,
+              selectedTradeIds: _relatedTradeIds,
+              periodType: _tradePeriod,
+            ),
+          );
+        }
+      } catch (e) {
+        // Close loading indicator
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to load linked trades: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+      return;
+    }
+
+    // Edit mode: show trade selection dialog with available trades
     final result = await showDialog<List<String>>(
       context: context,
       builder: (context) => TradePreviewDialog(
@@ -217,7 +272,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
       ),
     );
 
-    if (result != null) {
+    if (result != null && _isEditMode) {
       setState(() => _relatedTradeIds = result);
     }
   }
@@ -433,25 +488,23 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
       ),
       const SizedBox(height: 16),
 
-      // Trade Overview Section
-      IgnorePointer(
-        ignoring: !_isEditMode,
-        child: TradeOverviewSelector(
-          selectedDate: _tradeOverviewDate,
-          selectedPeriod: _tradePeriod,
-          selectedTradeIds: _relatedTradeIds,
-          availableTrades: _availableTrades,
-          onDateChanged: (date) {
-            setState(() => _tradeOverviewDate = date);
-            _loadTradesForPeriod(date, _tradePeriod);
-          },
-          onPeriodChanged: (period) {
-            setState(() => _tradePeriod = period);
-            _loadTradesForPeriod(_tradeOverviewDate, period);
-          },
-          onTradesSelected: (ids) => setState(() => _relatedTradeIds = ids),
-          onViewTrades: _showTradePreview,
-        ),
+      // Trade Overview Section - enabled in view mode to allow viewing linked trades
+      TradeOverviewSelector(
+        selectedDate: _tradeOverviewDate,
+        selectedPeriod: _tradePeriod,
+        selectedTradeIds: _relatedTradeIds,
+        availableTrades: _availableTrades,
+        onDateChanged: (date) {
+          setState(() => _tradeOverviewDate = date);
+          _loadTradesForPeriod(date, _tradePeriod);
+        },
+        onPeriodChanged: (period) {
+          setState(() => _tradePeriod = period);
+          _loadTradesForPeriod(_tradeOverviewDate, period);
+        },
+        onTradesSelected: (ids) => setState(() => _relatedTradeIds = ids),
+        onViewTrades: _showTradePreview,
+        readOnly: !_isEditMode,
       ),
       const SizedBox(height: 16),
 

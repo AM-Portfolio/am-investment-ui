@@ -49,7 +49,7 @@ class TagsSelector extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                        color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.85),
                       ),
                     ),
                   ],
