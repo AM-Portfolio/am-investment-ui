@@ -83,7 +83,12 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
       _selectedTags.addAll(widget.entry!.tags);
     }
 
-    if (widget.entry?.imageUrls != null) {
+    // Load image URLs from either attachments or imageUrls
+    if (widget.entry?.attachments != null && widget.entry!.attachments.isNotEmpty) {
+      // Prefer attachments field (new schema)
+      _imageUrls = widget.entry!.attachments.map((a) => a.fileUrl).toList();
+    } else if (widget.entry?.imageUrls != null) {
+      // Fallback to imageUrls (legacy)
       _imageUrls = List.from(widget.entry!.imageUrls);
     }
 
@@ -403,29 +408,35 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     );
   }
 
-  Widget _buildRightColumn() => IgnorePointer(
-    ignoring: !_isEditMode,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IgnorePointer(
-          ignoring: !_isEditMode,
-          child: MoodSelector(
-            selectedMood: _selectedMood,
-            onMoodSelected: (mood) => setState(() => _selectedMood = mood),
-          ),
+  Widget _buildRightColumn() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      IgnorePointer(
+        ignoring: !_isEditMode,
+        child: MoodSelector(
+          selectedMood: _selectedMood,
+          onMoodSelected: (mood) => setState(() => _selectedMood = mood),
         ),
-        const SizedBox(height: 16),
-        SentimentSelector(
+      ),
+      const SizedBox(height: 16),
+      IgnorePointer(
+        ignoring: !_isEditMode,
+        child: SentimentSelector(
           selectedSentiment: _marketSentiment,
           onSentimentSelected: (sentiment) => setState(() => _marketSentiment = sentiment),
         ),
-        const SizedBox(height: 16),
-        TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
-        const SizedBox(height: 16),
+      ),
+      const SizedBox(height: 16),
+      IgnorePointer(
+        ignoring: !_isEditMode,
+        child: TagsSelector(selectedTags: _selectedTags, onTagToggled: _toggleTag),
+      ),
+      const SizedBox(height: 16),
 
-        // Trade Overview Section
-        TradeOverviewSelector(
+      // Trade Overview Section
+      IgnorePointer(
+        ignoring: !_isEditMode,
+        child: TradeOverviewSelector(
           selectedDate: _tradeOverviewDate,
           selectedPeriod: _tradePeriod,
           selectedTradeIds: _relatedTradeIds,
@@ -441,20 +452,21 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
           onTradesSelected: (ids) => setState(() => _relatedTradeIds = ids),
           onViewTrades: _showTradePreview,
         ),
-        const SizedBox(height: 16),
+      ),
+      const SizedBox(height: 16),
 
-        AttachmentPicker(
-          initialUrls: _imageUrls,
-          onAttachmentsChanged: (urls) {
-            print('📎 [FORM] Attachments changed: $urls');
-            setState(() => _imageUrls = urls);
-          },
-          featureName: 'journal',
-          userId: widget.userId,
-          readOnly: !_isEditMode,
-        ),
-      ],
-    ),
+      // AttachmentPicker should remain clickable in readOnly mode for viewing images
+      AttachmentPicker(
+        initialUrls: _imageUrls,
+        onAttachmentsChanged: (urls) {
+          print('📎 [FORM] Attachments changed: $urls');
+          setState(() => _imageUrls = urls);
+        },
+        featureName: 'journal',
+        userId: widget.userId,
+        readOnly: !_isEditMode,
+      ),
+    ],
   );
 
   Widget _buildDateField(ThemeData theme) => InkWell(

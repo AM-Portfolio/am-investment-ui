@@ -34,23 +34,21 @@ class AttachmentPreviewGrid extends StatelessWidget {
     final theme = Theme.of(context);
     final isImage = _isImage(item);
     final canViewImage = isImage && item.isUploaded;
-    var isHovering = false;
 
     AppLogger.debug('🖼️ Building thumbnail $index: isImage=$isImage, canView=$canViewImage', tag: 'AttachmentPreview');
+    AppLogger.debug('   readOnly=$readOnly, onRemove=${onRemove != null}', tag: 'AttachmentPreview');
 
-    return StatefulBuilder(
-      builder: (context, setState) => GestureDetector(
-        onTap: canViewImage
-            ? () {
-                AppLogger.debug('👆 Thumbnail $index clicked!', tag: 'AttachmentPreview');
-                _viewFullImage(context, item);
-              }
-            : null,
-        child: MouseRegion(
-          cursor: canViewImage ? SystemMouseCursors.click : SystemMouseCursors.basic,
-          onEnter: canViewImage ? (_) => setState(() => isHovering = true) : null,
-          onExit: canViewImage ? (_) => setState(() => isHovering = false) : null,
-          child: Stack(
+    return GestureDetector(
+      onTap: canViewImage
+          ? () {
+              AppLogger.debug('👆 Thumbnail $index clicked!', tag: 'AttachmentPreview');
+              _viewFullImage(context, item);
+            }
+          : null,
+      behavior: HitTestBehavior.opaque,
+      child: MouseRegion(
+        cursor: canViewImage ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        child: Stack(
           children: [
             Container(
               width: 100,
