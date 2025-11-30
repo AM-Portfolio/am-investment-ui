@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/trade_portfolio_view_model.dart';
 import '../../web/trade_web_screen.dart';
 import 'portfolio_sidebar_content.dart';
 
@@ -10,12 +11,16 @@ class TradeSidebarContainer extends StatelessWidget {
     super.key,
     this.currentPortfolioId,
     this.currentPortfolioName,
+    this.portfolios = const [],
+    this.onPortfolioSelected,
   });
 
   final TradeViewType selectedView;
   final Function(TradeViewType) onViewChanged;
   final String? currentPortfolioId;
   final String? currentPortfolioName;
+  final List<TradePortfolioViewModel> portfolios;
+  final Function(String portfolioId, String portfolioName)? onPortfolioSelected;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -51,6 +56,8 @@ class TradeSidebarContainer extends StatelessWidget {
       onViewChanged: onViewChanged,
       currentPortfolioId: currentPortfolioId,
       currentPortfolioName: currentPortfolioName,
+      portfolios: portfolios,
+      onPortfolioSelected: onPortfolioSelected,
       isCompact: isCompact,
       isCondensed: isCondensed,
       isFull: isFull,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/trade_portfolio_view_model.dart';
 import '../../web/trade_web_screen.dart';
 import 'sidebar_nav_item.dart';
 
@@ -13,57 +14,61 @@ class PortfolioSidebarContent extends StatelessWidget {
     super.key,
     this.currentPortfolioId,
     this.currentPortfolioName,
+    this.portfolios = const [],
+    this.onPortfolioSelected,
   });
 
   final TradeViewType selectedView;
   final Function(TradeViewType) onViewChanged;
   final String? currentPortfolioId;
   final String? currentPortfolioName;
+  final List<TradePortfolioViewModel> portfolios;
+  final Function(String portfolioId, String portfolioName)? onPortfolioSelected;
   final bool isCompact;
   final bool isCondensed;
   final bool isFull;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      children: [
-        // Current Portfolio Info (if selected) - only show in full mode
-        if (currentPortfolioId != null && isFull)
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.account_balance_wallet, size: 16, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Current Portfolio',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    children: [
+      // Current Portfolio Selector - Always visible in full mode
+      if (isFull)
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.account_balance_wallet, size: 16, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Current Portfolio',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  currentPortfolioName ?? 'Unknown Portfolio',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                currentPortfolioName ?? 'No Portfolio Selected',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (currentPortfolioId != null) ...[
                 const SizedBox(height: 2),
                 Text(
                   'ID: ${currentPortfolioId!.substring(0, 8)}...',
@@ -74,102 +79,143 @@ class PortfolioSidebarContent extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
+              const SizedBox(height: 8),
+              // Portfolio Dropdown Selector
+              if (portfolios.isNotEmpty && onPortfolioSelected != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
+                  ),
+                  child: DropdownButton<String>(
+                    value: currentPortfolioId,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text('Select Portfolio'),
+                    icon: const Icon(Icons.arrow_drop_down, size: 20),
+                    items: portfolios
+                        .map(
+                          (portfolio) => DropdownMenuItem<String>(
+                            value: portfolio.id,
+                            child: Text(
+                              portfolio.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (portfolioId) {
+                      if (portfolioId != null) {
+                        final portfolio = portfolios.firstWhere((p) => p.id == portfolioId);
+                        onPortfolioSelected!(portfolioId, portfolio.name);
+                      }
+                    },
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => onViewChanged(TradeViewType.portfolios),
+                    icon: const Icon(Icons.swap_horiz, size: 16),
+                    label: const Text('Change Portfolio'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ),
+            ],
           ),
-
-        SidebarNavItem(
-          icon: Icons.list_alt,
-          title: 'Portfolio List',
-          subtitle: 'Browse available portfolios',
-          viewType: TradeViewType.portfolios,
-          selectedView: selectedView,
-          onViewChanged: onViewChanged,
-          isEnabled: true,
-          isCompact: isCompact,
-          isCondensed: isCondensed,
-        ),
-        SidebarNavItem(
-          icon: Icons.account_balance_wallet,
-          title: 'Holdings',
-          subtitle: 'Detailed trade positions',
-          viewType: TradeViewType.holdings,
-          selectedView: selectedView,
-          onViewChanged: onViewChanged,
-          isEnabled: currentPortfolioId != null,
-          isCompact: isCompact,
-          isCondensed: isCondensed,
-        ),
-        SidebarNavItem(
-          icon: Icons.calendar_today,
-          title: 'Calendar',
-          subtitle: 'Trade timeline & events',
-          viewType: TradeViewType.calendar,
-          selectedView: selectedView,
-          onViewChanged: onViewChanged,
-          isEnabled: currentPortfolioId != null,
-          isCompact: isCompact,
-          isCondensed: isCondensed,
-        ),
-        
-        // Link to Journal
-        const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
-        
-        SidebarNavItem(
-          icon: Icons.book,
-          title: 'Trade Journal',
-          subtitle: 'Personal trading notes',
-          viewType: TradeViewType.journal,
-          selectedView: selectedView,
-          onViewChanged: onViewChanged,
-          isEnabled: true,
-          isCompact: isCompact,
-          isCondensed: isCondensed,
         ),
 
-        if (isFull)
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
+      if (isFull) const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
 
-        // Quick Actions - only show in full mode
-        if (isFull) ...[
-          // Add Trade action
-          if (currentPortfolioId != null)
-            _buildQuickActionItem(
+      // Main Navigation - Always enabled
+      SidebarNavItem(
+        icon: Icons.list_alt,
+        title: 'Portfolio List',
+        subtitle: 'View all portfolios',
+        viewType: TradeViewType.portfolios,
+        selectedView: selectedView,
+        onViewChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+      SidebarNavItem(
+        icon: Icons.account_balance_wallet,
+        title: 'Holdings',
+        subtitle: 'Detailed trade positions',
+        viewType: TradeViewType.holdings,
+        selectedView: selectedView,
+        onViewChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+      SidebarNavItem(
+        icon: Icons.calendar_today,
+        title: 'Calendar',
+        subtitle: 'Trade timeline & events',
+        viewType: TradeViewType.calendar,
+        selectedView: selectedView,
+        onViewChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      if (isFull) const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
+
+      // Trade Management Section
+      SidebarNavItem(
+        icon: Icons.receipt_long,
+        title: 'View Trades',
+        subtitle: 'All trade transactions',
+        viewType: TradeViewType.trades,
+        selectedView: selectedView,
+        onViewChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      // Quick Actions - Always visible in full mode
+      if (isFull) ...[
+        // Add Trade action - always enabled
+        _buildQuickActionItem(
+          context,
+          icon: Icons.add_chart,
+          title: 'Add Trade',
+          subtitle: 'Record new position',
+          onTap: () {
+            Navigator.pushNamed(
               context,
-              icon: Icons.add_chart,
-              title: 'Add Trade',
-              subtitle: 'Record new position',
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  '/trade/add',
-                  arguments: {'portfolioId': currentPortfolioId, 'portfolioName': currentPortfolioName},
-                );
-              },
-            ),
-          _buildQuickActionItem(
-            context,
-            icon: Icons.analytics,
-            title: 'Analytics Dashboard',
-            subtitle: 'Performance overview',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Analytics dashboard coming soon')));
-            },
-          ),
-          _buildQuickActionItem(
-            context,
-            icon: Icons.download,
-            title: 'Export Data',
-            subtitle: 'Download trade reports',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export functionality coming soon')));
-            },
-          ),
-        ],
+              '/trade/add',
+              arguments: {'portfolioId': currentPortfolioId, 'portfolioName': currentPortfolioName},
+            );
+          },
+        ),
       ],
-    );
-  }
+
+      // Trade Journal - Always enabled
+      SidebarNavItem(
+        icon: Icons.book,
+        title: 'Trade Journal',
+        subtitle: 'Personal trading notes',
+        viewType: TradeViewType.journal,
+        selectedView: selectedView,
+        onViewChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+    ],
+  );
 
   Widget _buildQuickActionItem(
     BuildContext context, {
