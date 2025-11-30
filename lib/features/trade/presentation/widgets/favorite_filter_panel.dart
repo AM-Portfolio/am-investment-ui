@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../internal/domain/entities/favorite_filter.dart';
-import '../cubits/favorite_filter/favorite_filter_cubit.dart';
+import '../cubit/favorite_filter/favorite_filter_cubit.dart';
 
 /// Panel for managing and applying favorite filters
 /// Displays a compact dropdown with all saved filters

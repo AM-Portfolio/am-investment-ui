@@ -10,7 +10,7 @@ import 'internal/domain/usecases/create_favorite_filter_usecase.dart';
 import 'internal/domain/usecases/delete_favorite_filter_usecase.dart';
 import 'internal/domain/usecases/get_favorite_filters_usecase.dart';
 import 'internal/domain/usecases/set_default_filter_usecase.dart';
-import 'presentation/cubits/favorite_filter/favorite_filter_cubit.dart';
+import 'presentation/cubit/favorite_filter/favorite_filter_cubit.dart';
 
 // Infrastructure Providers
 

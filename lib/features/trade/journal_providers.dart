@@ -9,7 +9,7 @@ import 'internal/domain/usecases/create_journal_entry_usecase.dart';
 import 'internal/domain/usecases/delete_journal_entry_usecase.dart';
 import 'internal/domain/usecases/get_journal_entries_usecase.dart';
 import 'internal/domain/usecases/update_journal_entry_usecase.dart';
-import 'internal/presentation/cubits/journal/journal_cubit.dart';
+import 'presentation/cubit/journal/journal_cubit.dart';
 
 // Infrastructure Providers
 

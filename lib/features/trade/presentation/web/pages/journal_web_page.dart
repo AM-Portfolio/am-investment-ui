@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../internal/domain/entities/journal_entry.dart';
-import '../../../internal/presentation/cubits/journal/journal_cubit.dart';
-import '../../../internal/presentation/cubits/journal/journal_state.dart';
 import '../../../journal_providers.dart';
+import '../../cubit/journal/journal_cubit.dart';
+import '../../cubit/journal/journal_state.dart';
 import '../../widgets/journal/journal_entry_form.dart';
 import '../../widgets/journal/utils/journal_helpers.dart';
 import '../utils/journal_helpers.dart' as web_helpers;

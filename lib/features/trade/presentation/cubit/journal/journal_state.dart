@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../domain/entities/journal_entry.dart';
+import '../../../internal/domain/entities/journal_entry.dart';
 
 part 'journal_state.freezed.dart';
 

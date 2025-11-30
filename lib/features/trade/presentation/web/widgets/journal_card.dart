@@ -45,18 +45,18 @@ class JournalCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildHeader(theme),
               const SizedBox(height: 10),
               _buildTitle(theme),
               const SizedBox(height: 8),
-              Flexible(child: _buildContent(theme)),
+              _buildContent(theme),
               if (entry.mood != null || entry.marketSentiment != null) ...[
                 const SizedBox(height: 8),
                 _buildMoodAndSentiment(),
               ],
-              if (entry.relatedTradeIds.isNotEmpty) ...[const SizedBox(height: 6), _buildRelatedTrades(theme)],
-              if (entry.tags.isNotEmpty) ...[const SizedBox(height: 6), _buildTags()],
+              if (entry.tags.isNotEmpty) ...[const SizedBox(height: 8), _buildTags()],
             ],
           ),
         ),
@@ -64,28 +64,50 @@ class JournalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(8),
+  Widget _buildHeader(ThemeData theme) {
+    final attachmentCount = entry.attachments.isNotEmpty ? entry.attachments.length : entry.imageUrls.length;
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            entry.entryDate.toString().split(' ')[0],
+            style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+          ),
         ),
-        child: Text(
-          entry.entryDate.toString().split(' ')[0],
-          style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+        const SizedBox(width: 8),
+        if (entry.relatedTradeIds.isNotEmpty) ...[
+          _buildMetadataChip(
+            theme,
+            icon: Icons.analytics_outlined,
+            label: '${entry.relatedTradeIds.length}',
+            color: theme.colorScheme.secondary,
+          ),
+          const SizedBox(width: 6),
+        ],
+        if (attachmentCount > 0) ...[
+          _buildMetadataChip(
+            theme,
+            icon: Icons.attach_file,
+            label: '$attachmentCount',
+            color: theme.colorScheme.tertiary,
+          ),
+        ],
+        const Spacer(),
+        IconButton(
+          icon: Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error.withOpacity(0.7)),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: onDelete,
         ),
-      ),
-      IconButton(
-        icon: Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error.withOpacity(0.7)),
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        onPressed: onDelete,
-      ),
-    ],
-  );
+      ],
+    );
+  }
 
   Widget _buildTitle(ThemeData theme) => Text(
     entry.title,
@@ -95,7 +117,7 @@ class JournalCard extends StatelessWidget {
   );
 
   Widget _buildContent(ThemeData theme) => Text(
-    limitToWords(extractPlainText(entry.content), 25),
+    limitToWords(extractPlainText(entry.content), 20),
     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.65), height: 1.4),
     maxLines: 2,
     overflow: TextOverflow.ellipsis,
@@ -183,31 +205,24 @@ class JournalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRelatedTrades(ThemeData theme) {
-    final tradeCount = entry.relatedTradeIds.length;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.secondary.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.analytics_outlined, size: 14, color: theme.colorScheme.secondary),
-          const SizedBox(width: 6),
-          Text(
-            '$tradeCount Trade${tradeCount != 1 ? 's' : ''} Linked',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.secondary,
-              fontSize: 10,
+  Widget _buildMetadataChip(ThemeData theme, {required IconData icon, required String label, required Color color}) =>
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600, color: color, fontSize: 10),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

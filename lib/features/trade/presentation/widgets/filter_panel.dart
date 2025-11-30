@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../internal/domain/entities/metrics_filter_config.dart';
-import '../cubits/favorite_filter/favorite_filter_cubit.dart';
+import '../cubit/favorite_filter/favorite_filter_cubit.dart';
 import 'favorite_filter_panel.dart';
 import 'filters/date_range_filter_group.dart';
 import 'filters/filter_group.dart';

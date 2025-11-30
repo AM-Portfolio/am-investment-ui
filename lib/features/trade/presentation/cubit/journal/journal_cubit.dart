@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/journal_entry.dart';
-import '../../../domain/usecases/create_journal_entry_usecase.dart';
-import '../../../domain/usecases/delete_journal_entry_usecase.dart';
-import '../../../domain/usecases/get_journal_entries_usecase.dart';
-import '../../../domain/usecases/update_journal_entry_usecase.dart';
+import '../../../internal/domain/entities/journal_entry.dart';
+import '../../../internal/domain/usecases/create_journal_entry_usecase.dart';
+import '../../../internal/domain/usecases/delete_journal_entry_usecase.dart';
+import '../../../internal/domain/usecases/get_journal_entries_usecase.dart';
+import '../../../internal/domain/usecases/update_journal_entry_usecase.dart';
 import 'journal_state.dart';
 
 class JournalCubit extends Cubit<JournalState> {

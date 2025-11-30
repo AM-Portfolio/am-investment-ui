@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../internal/presentation/cubits/journal/journal_cubit.dart';
-import '../../internal/presentation/cubits/journal/journal_state.dart';
 import '../../journal_providers.dart';
+import '../cubit/journal/journal_cubit.dart';
+import '../cubit/journal/journal_state.dart';
 import '../widgets/journal/journal_entry_form.dart';
 
 class JournalMobilePage extends ConsumerStatefulWidget {

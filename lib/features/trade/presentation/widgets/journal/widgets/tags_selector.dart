@@ -32,8 +32,11 @@ class TagsSelector extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? color.withOpacity(0.15)
-                      : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                  border: Border.all(color: isSelected ? color : Colors.transparent, width: 1.5),
+                      : theme.colorScheme.surfaceContainerHighest.withOpacity(0.8),
+                  border: Border.all(
+                    color: isSelected ? color : theme.colorScheme.outline.withOpacity(0.3),
+                    width: isSelected ? 1.5 : 1,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -48,8 +51,8 @@ class TagsSelector extends StatelessWidget {
                       tag,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                        color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.85),
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected ? color : theme.colorScheme.onSurface.withOpacity(0.75),
                       ),
                     ),
                   ],
