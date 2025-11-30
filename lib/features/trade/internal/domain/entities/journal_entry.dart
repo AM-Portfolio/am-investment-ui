@@ -4,6 +4,18 @@ part 'journal_entry.freezed.dart';
 part 'journal_entry.g.dart';
 
 @freezed
+class BehaviorPatternSummary with _$BehaviorPatternSummary {
+  const factory BehaviorPatternSummary({
+    required String summary,
+    String? mood,
+    int? marketSentiment,
+    @Default([]) List<String> tags,
+  }) = _BehaviorPatternSummary;
+
+  factory BehaviorPatternSummary.fromJson(Map<String, dynamic> json) => _$BehaviorPatternSummaryFromJson(json);
+}
+
+@freezed
 class JournalAttachment with _$JournalAttachment {
   const factory JournalAttachment({
     required String fileName,
@@ -27,9 +39,7 @@ class JournalEntry with _$JournalEntry {
     required DateTime createdAt,
     required DateTime updatedAt,
     String? tradeId,
-    String? mood,
-    int? marketSentiment,
-    @Default([]) List<String> tags,
+    @Default([]) List<BehaviorPatternSummary> behaviorPatternSummaries,
     @Default({}) Map<String, dynamic> customFields,
     @Deprecated('Use attachments instead') @Default([]) List<String> imageUrls,
     @Default([]) List<JournalAttachment> attachments,

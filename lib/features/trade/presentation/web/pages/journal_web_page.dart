@@ -111,18 +111,21 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
         }
 
         // Check each filter - return true if any matches
-        if (_selectedMoodFilter != null) {
-          final moodKey = JournalHelpers.mapMoodFromEntry(entry.mood);
+        if (_selectedMoodFilter != null && entry.behaviorPatternSummaries.isNotEmpty) {
+          final moodKey = JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
           if (moodKey == _selectedMoodFilter) return true;
         }
 
-        if (_selectedSentimentFilter != null) {
-          final sentimentKey = JournalHelpers.mapSentimentFromValue(entry.marketSentiment);
+        if (_selectedSentimentFilter != null && entry.behaviorPatternSummaries.isNotEmpty) {
+          final sentimentKey = JournalHelpers.mapSentimentFromValue(
+            entry.behaviorPatternSummaries.first.marketSentiment,
+          );
           if (sentimentKey == _selectedSentimentFilter) return true;
         }
 
-        if (_selectedTagFilters.isNotEmpty) {
-          if (_selectedTagFilters.any((tag) => entry.tags.contains(tag))) return true;
+        if (_selectedTagFilters.isNotEmpty && entry.behaviorPatternSummaries.isNotEmpty) {
+          final allTags = entry.behaviorPatternSummaries.expand((p) => p.tags).toSet();
+          if (_selectedTagFilters.any(allTags.contains)) return true;
         }
 
         if (_selectedYear != null && entry.entryDate.year == _selectedYear) return true;
@@ -135,7 +138,8 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       // Mood filter
       if (_selectedMoodFilter != null) {
         filtered = filtered.where((entry) {
-          final moodKey = JournalHelpers.mapMoodFromEntry(entry.mood);
+          if (entry.behaviorPatternSummaries.isEmpty) return false;
+          final moodKey = JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
           return moodKey == _selectedMoodFilter;
         }).toList();
       }
@@ -143,14 +147,21 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       // Sentiment filter
       if (_selectedSentimentFilter != null) {
         filtered = filtered.where((entry) {
-          final sentimentKey = JournalHelpers.mapSentimentFromValue(entry.marketSentiment);
+          if (entry.behaviorPatternSummaries.isEmpty) return false;
+          final sentimentKey = JournalHelpers.mapSentimentFromValue(
+            entry.behaviorPatternSummaries.first.marketSentiment,
+          );
           return sentimentKey == _selectedSentimentFilter;
         }).toList();
       }
 
       // Tags filter
       if (_selectedTagFilters.isNotEmpty) {
-        filtered = filtered.where((entry) => _selectedTagFilters.any((tag) => entry.tags.contains(tag))).toList();
+        filtered = filtered.where((entry) {
+          if (entry.behaviorPatternSummaries.isEmpty) return false;
+          final allTags = entry.behaviorPatternSummaries.expand((p) => p.tags).toSet();
+          return _selectedTagFilters.any(allTags.contains);
+        }).toList();
       }
 
       // Year filter

@@ -52,16 +52,24 @@ class JournalCard extends StatelessWidget {
               _buildTitle(theme),
               const SizedBox(height: 8),
               _buildContent(theme),
-              if (entry.mood != null || entry.marketSentiment != null) ...[
-                const SizedBox(height: 8),
-                _buildMoodAndSentiment(),
-              ],
-              if (entry.tags.isNotEmpty) ...[const SizedBox(height: 8), _buildTags()],
+              if (_hasMoodOrSentiment()) ...[const SizedBox(height: 8), _buildMoodAndSentiment()],
+              if (_hasTags()) ...[const SizedBox(height: 8), _buildTags()],
             ],
           ),
         ),
       ),
     );
+  }
+
+  bool _hasMoodOrSentiment() {
+    if (entry.behaviorPatternSummaries.isEmpty) return false;
+    final firstPattern = entry.behaviorPatternSummaries.first;
+    return firstPattern.mood != null || firstPattern.marketSentiment != null;
+  }
+
+  bool _hasTags() {
+    if (entry.behaviorPatternSummaries.isEmpty) return false;
+    return entry.behaviorPatternSummaries.any((pattern) => pattern.tags.isNotEmpty);
   }
 
   Widget _buildHeader(ThemeData theme) {
@@ -131,14 +139,19 @@ class JournalCard extends StatelessWidget {
     overflow: TextOverflow.ellipsis,
   );
 
-  Widget _buildMoodAndSentiment() => Row(
-    children: [
-      if (entry.mood != null) _buildMoodChip(entry.mood!),
-      if (entry.mood != null && entry.marketSentiment != null) const SizedBox(width: 6),
-      if (entry.marketSentiment != null)
-        _buildSentimentChip(JournalHelpers.mapSentimentFromValue(entry.marketSentiment) ?? 'neutral'),
-    ],
-  );
+  Widget _buildMoodAndSentiment() {
+    if (entry.behaviorPatternSummaries.isEmpty) return const SizedBox.shrink();
+    final firstPattern = entry.behaviorPatternSummaries.first;
+
+    return Row(
+      children: [
+        if (firstPattern.mood != null) _buildMoodChip(firstPattern.mood!),
+        if (firstPattern.mood != null && firstPattern.marketSentiment != null) const SizedBox(width: 6),
+        if (firstPattern.marketSentiment != null)
+          _buildSentimentChip(JournalHelpers.mapSentimentFromValue(firstPattern.marketSentiment) ?? 'neutral'),
+      ],
+    );
+  }
 
   Widget _buildMoodChip(String mood) {
     var moodData = JournalMoodOptions.moods[mood];
@@ -191,7 +204,10 @@ class JournalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTags() => Wrap(spacing: 4, runSpacing: 4, children: entry.tags.take(3).map(_buildTagChip).toList());
+  Widget _buildTags() {
+    final allTags = entry.behaviorPatternSummaries.expand((pattern) => pattern.tags).toSet().toList();
+    return Wrap(spacing: 4, runSpacing: 4, children: allTags.take(3).map(_buildTagChip).toList());
+  }
 
   Widget _buildTagChip(String tag) {
     final tagData = JournalMoodOptions.tags.firstWhere(

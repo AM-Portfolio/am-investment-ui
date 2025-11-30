@@ -2,6 +2,21 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'journal_entry_dto.g.dart';
 
+/// DTO for behavior pattern summary within a journal entry
+@JsonSerializable(explicitToJson: true)
+class BehaviorPatternSummaryDto {
+  const BehaviorPatternSummaryDto({required this.summary, this.mood, this.marketSentiment, this.tags});
+
+  factory BehaviorPatternSummaryDto.fromJson(Map<String, dynamic> json) => _$BehaviorPatternSummaryDtoFromJson(json);
+
+  final String summary;
+  final String? mood;
+  final int? marketSentiment;
+  final List<String>? tags;
+
+  Map<String, dynamic> toJson() => _$BehaviorPatternSummaryDtoToJson(this);
+}
+
 /// DTO for journal entry attachments
 @JsonSerializable(explicitToJson: true)
 class JournalAttachmentDto {
@@ -33,9 +48,7 @@ class TradeJournalEntryRequestDto {
     required this.content,
     required this.entryDate,
     this.tradeId,
-    this.mood,
-    this.marketSentiment,
-    this.tags,
+    this.behaviorPatternSummaries,
     this.customFields,
     this.imageUrls,
     this.attachments,
@@ -49,9 +62,7 @@ class TradeJournalEntryRequestDto {
   final String? tradeId;
   final String title;
   final String content;
-  final String? mood;
-  final int? marketSentiment;
-  final List<String>? tags;
+  final List<BehaviorPatternSummaryDto>? behaviorPatternSummaries;
   final Map<String, dynamic>? customFields;
   final String entryDate;
   @Deprecated('Use attachments instead')
@@ -74,9 +85,7 @@ class TradeJournalEntryResponseDto {
     required this.createdAt,
     required this.updatedAt,
     this.tradeId,
-    this.mood,
-    this.marketSentiment,
-    this.tags,
+    this.behaviorPatternSummaries,
     this.customFields,
     this.imageUrls,
     this.attachments,
@@ -91,9 +100,7 @@ class TradeJournalEntryResponseDto {
   final String? tradeId;
   final String title;
   final String content;
-  final String? mood;
-  final int? marketSentiment;
-  final List<String>? tags;
+  final List<BehaviorPatternSummaryDto>? behaviorPatternSummaries;
   final Map<String, dynamic>? customFields;
   final String entryDate;
   @Deprecated('Use attachments instead')
