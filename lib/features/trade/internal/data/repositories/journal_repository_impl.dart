@@ -7,8 +7,7 @@ import '../mappers/journal_entry_mapper.dart';
 
 /// Repository implementation for journal operations
 class JournalRepositoryImpl implements JournalRepository {
-  JournalRepositoryImpl({required JournalRemoteDataSource remoteDataSource})
-    : _remoteDataSource = remoteDataSource;
+  JournalRepositoryImpl({required JournalRemoteDataSource remoteDataSource}) : _remoteDataSource = remoteDataSource;
 
   final JournalRemoteDataSource _remoteDataSource;
 
@@ -24,13 +23,10 @@ class JournalRepositoryImpl implements JournalRepository {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   }) async {
-    AppLogger.methodEntry(
-      'createJournalEntry',
-      tag: 'JournalRepository',
-      params: {'userId': userId, 'title': title},
-    );
+    AppLogger.methodEntry('createJournalEntry', tag: 'JournalRepository', params: {'userId': userId, 'title': title});
 
     try {
       final request = TradeJournalEntryRequestDto(
@@ -44,6 +40,7 @@ class JournalRepositoryImpl implements JournalRepository {
         tags: tags,
         customFields: customFields,
         imageUrls: imageUrls,
+        attachments: attachments?.map(JournalEntryMapper.toAttachmentDto).toList(),
         relatedTradeIds: relatedTradeIds,
       );
 
@@ -101,6 +98,7 @@ class JournalRepositoryImpl implements JournalRepository {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   }) async {
     AppLogger.methodEntry('updateJournalEntry', tag: 'JournalRepository', params: {'entryId': entryId});
@@ -117,6 +115,7 @@ class JournalRepositoryImpl implements JournalRepository {
         tags: tags,
         customFields: customFields,
         imageUrls: imageUrls,
+        attachments: attachments?.map(JournalEntryMapper.toAttachmentDto).toList(),
         relatedTradeIds: relatedTradeIds,
       );
 
@@ -205,16 +204,8 @@ class JournalRepositoryImpl implements JournalRepository {
   }
 
   @override
-  Future<List<JournalEntry>> getJournalEntriesByDateRange(
-    String userId,
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    AppLogger.methodEntry(
-      'getJournalEntriesByDateRange',
-      tag: 'JournalRepository',
-      params: {'userId': userId},
-    );
+  Future<List<JournalEntry>> getJournalEntriesByDateRange(String userId, DateTime startDate, DateTime endDate) async {
+    AppLogger.methodEntry('getJournalEntriesByDateRange', tag: 'JournalRepository', params: {'userId': userId});
 
     try {
       final dtos = await _remoteDataSource.getJournalEntriesByDateRange(

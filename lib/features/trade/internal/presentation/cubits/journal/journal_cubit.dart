@@ -41,6 +41,7 @@ class JournalCubit extends Cubit<JournalState> {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   }) async {
     emit(const JournalState.loading());
@@ -56,6 +57,7 @@ class JournalCubit extends Cubit<JournalState> {
         tags: tags,
         customFields: customFields,
         imageUrls: imageUrls,
+        attachments: attachments,
         relatedTradeIds: relatedTradeIds,
       );
       emit(const JournalState.success('Journal entry created successfully'));
@@ -77,6 +79,7 @@ class JournalCubit extends Cubit<JournalState> {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   }) async {
     emit(const JournalState.loading());
@@ -93,6 +96,7 @@ class JournalCubit extends Cubit<JournalState> {
         tags: tags,
         customFields: customFields,
         imageUrls: imageUrls,
+        attachments: attachments,
         relatedTradeIds: relatedTradeIds,
       );
       emit(const JournalState.success('Journal entry updated successfully'));

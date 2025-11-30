@@ -2,8 +2,30 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'journal_entry_dto.g.dart';
 
+/// DTO for journal entry attachments
+@JsonSerializable(explicitToJson: true)
+class JournalAttachmentDto {
+  const JournalAttachmentDto({
+    required this.fileName,
+    required this.fileUrl,
+    this.fileType,
+    this.uploadedAt,
+    this.description,
+  });
+
+  factory JournalAttachmentDto.fromJson(Map<String, dynamic> json) => _$JournalAttachmentDtoFromJson(json);
+
+  final String fileName;
+  final String fileUrl;
+  final String? fileType;
+  final String? uploadedAt;
+  final String? description;
+
+  Map<String, dynamic> toJson() => _$JournalAttachmentDtoToJson(this);
+}
+
 /// DTO for creating/updating a journal entry
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TradeJournalEntryRequestDto {
   const TradeJournalEntryRequestDto({
     required this.userId,
@@ -16,6 +38,7 @@ class TradeJournalEntryRequestDto {
     this.tags,
     this.customFields,
     this.imageUrls,
+    this.attachments,
     this.relatedTradeIds,
   });
 
@@ -31,14 +54,16 @@ class TradeJournalEntryRequestDto {
   final List<String>? tags;
   final Map<String, dynamic>? customFields;
   final String entryDate;
+  @Deprecated('Use attachments instead')
   final List<String>? imageUrls;
+  final List<JournalAttachmentDto>? attachments;
   final List<String>? relatedTradeIds;
 
   Map<String, dynamic> toJson() => _$TradeJournalEntryRequestDtoToJson(this);
 }
 
 /// DTO for journal entry response
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TradeJournalEntryResponseDto {
   const TradeJournalEntryResponseDto({
     required this.id,
@@ -54,6 +79,7 @@ class TradeJournalEntryResponseDto {
     this.tags,
     this.customFields,
     this.imageUrls,
+    this.attachments,
     this.relatedTradeIds,
   });
 
@@ -70,7 +96,9 @@ class TradeJournalEntryResponseDto {
   final List<String>? tags;
   final Map<String, dynamic>? customFields;
   final String entryDate;
+  @Deprecated('Use attachments instead')
   final List<String>? imageUrls;
+  final List<JournalAttachmentDto>? attachments;
   final List<String>? relatedTradeIds;
   final String createdAt;
   final String updatedAt;

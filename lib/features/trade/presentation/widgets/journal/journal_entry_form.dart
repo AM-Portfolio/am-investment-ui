@@ -244,6 +244,30 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     return jsonEncode(delta.toJson());
   }
 
+  /// Convert image URLs to JournalAttachment objects
+  List<JournalAttachment> _convertImageUrlsToAttachments() => _imageUrls.map((url) {
+    final fileName = url.split('/').last.split('?').first;
+    return JournalAttachment(
+      fileName: fileName,
+      fileUrl: url,
+      fileType: _getFileTypeFromUrl(url),
+      uploadedAt: DateTime.now(),
+    );
+  }).toList();
+
+  String? _getFileTypeFromUrl(String url) {
+    final extension = url.split('.').last.split('?').first.toLowerCase();
+    const imageTypes = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'svg': 'image/svg+xml',
+    };
+    return imageTypes[extension] ?? 'image/$extension';
+  }
+
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSubmitting = true);
@@ -260,6 +284,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
+            attachments: _imageUrls.isEmpty ? null : _convertImageUrlsToAttachments(),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
           );
         } else {
@@ -274,6 +299,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
             marketSentiment: JournalHelpers.getSentimentValue(_marketSentiment),
             tags: _selectedTags.isEmpty ? null : _selectedTags.toList(),
             imageUrls: _imageUrls.isEmpty ? null : _imageUrls,
+            attachments: _imageUrls.isEmpty ? null : _convertImageUrlsToAttachments(),
             relatedTradeIds: _relatedTradeIds.isEmpty ? null : _relatedTradeIds,
           );
         }
@@ -425,6 +451,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
           },
           featureName: 'journal',
           userId: widget.userId,
+          readOnly: !_isEditMode,
         ),
       ],
     ),

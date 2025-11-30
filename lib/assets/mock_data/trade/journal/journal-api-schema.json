@@ -1,9 +1,39 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Trade Journal API Schema",
-    "description": "Complete JSON Schema for TradeJournalController API",
-    "version": "1.0.0",
+    "description": "Complete JSON Schema for TradeJournalController API with enhanced attachment support",
+    "version": "2.0.0",
     "definitions": {
+        "Attachment": {
+            "type": "object",
+            "required": [
+                "fileName",
+                "fileUrl"
+            ],
+            "properties": {
+                "fileName": {
+                    "type": "string",
+                    "description": "Name of the attached file"
+                },
+                "fileUrl": {
+                    "type": "string",
+                    "description": "URL to access the file"
+                },
+                "fileType": {
+                    "type": "string",
+                    "description": "MIME type or file extension (e.g., image/png, application/pdf)"
+                },
+                "uploadedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timestamp when file was uploaded"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Optional description or notes about the file"
+                }
+            }
+        },
         "TradeJournalEntryRequest": {
             "type": "object",
             "required": [
@@ -59,7 +89,43 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "URLs to attached images"
+                    "description": "DEPRECATED: URLs to attached images (use attachments instead)",
+                    "deprecated": true
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Attachment"
+                    },
+                    "description": "List of attachments with metadata (fileName, fileUrl, fileType, uploadedAt, description)"
+                },
+                "chartUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to chart analysis images"
+                },
+                "documentUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to PDF documents, notes, etc."
+                },
+                "videoUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to video analysis or recordings"
+                },
+                "externalUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "External reference URLs (news articles, etc.)"
                 },
                 "relatedTradeIds": {
                     "type": "array",
@@ -88,66 +154,104 @@
                 },
                 "userId": {
                     "type": "string",
-                    "description": "User ID"
+                    "description": "User ID who created the journal entry"
                 },
                 "tradeId": {
                     "type": "string",
-                    "description": "Associated Trade ID"
+                    "description": "Associated trade ID (optional)"
                 },
                 "title": {
                     "type": "string",
-                    "description": "Title of the entry"
+                    "description": "Journal entry title"
                 },
                 "content": {
                     "type": "string",
-                    "description": "Content of the entry"
+                    "description": "Journal entry content/body"
                 },
                 "mood": {
                     "type": "string",
-                    "description": "Trading mood/psychology"
+                    "description": "Trading mood/psychology (e.g., CONFIDENT, ANXIOUS, NEUTRAL)"
                 },
                 "marketSentiment": {
                     "type": "integer",
-                    "description": "Market sentiment scale 1-10"
+                    "description": "Market sentiment scale (1-10: 1=bearish, 10=bullish)"
                 },
                 "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "description": "Tags for categorizing the journal entry"
                 },
                 "customFields": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": true,
+                    "description": "Custom fields for extensibility"
                 },
                 "entryDate": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Date of the entry"
+                    "description": "Date of the journal entry"
                 },
                 "imageUrls": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     },
-                    "description": "URLs to attached images"
+                    "description": "DEPRECATED: Legacy image URLs (use attachments instead)",
+                    "deprecated": true
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Attachment"
+                    },
+                    "description": "List of attachments with metadata (fileName, fileUrl, fileType, uploadedAt, description)"
+                },
+                "chartUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to chart analysis images"
+                },
+                "documentUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to PDF documents, notes, etc."
+                },
+                "videoUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "URLs to video analysis or recordings"
+                },
+                "externalUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "External reference URLs (news articles, etc.)"
                 },
                 "relatedTradeIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     },
-                    "description": "Other related trades"
+                    "description": "IDs of related trades"
                 },
                 "createdAt": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Creation timestamp"
+                    "description": "Timestamp when the entry was created"
                 },
                 "updatedAt": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "Last update timestamp"
+                    "description": "Timestamp when the entry was last updated"
                 }
             }
         },

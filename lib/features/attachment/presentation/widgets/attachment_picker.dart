@@ -43,6 +43,7 @@ class AttachmentPicker extends StatelessWidget {
     this.userId,
     this.autoUpload = true,
     this.onPendingAttachmentsChanged,
+    this.readOnly = false,
   });
 
   final List<String> initialUrls;
@@ -59,6 +60,9 @@ class AttachmentPicker extends StatelessWidget {
   /// If false, caller must explicitly trigger upload by calling uploadPendingFiles()
   final bool autoUpload;
 
+  /// If true, shows attachments in read-only mode (no add/remove, clickable to view)
+  final bool readOnly;
+
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
@@ -73,6 +77,7 @@ class AttachmentPicker extends StatelessWidget {
         label: label,
         userId: userId,
         autoUpload: autoUpload,
+        readOnly: readOnly,
       );
     } else {
       return AttachmentPickerMobile(
@@ -86,6 +91,7 @@ class AttachmentPicker extends StatelessWidget {
         label: label,
         userId: userId,
         autoUpload: autoUpload,
+        readOnly: readOnly,
       );
     }
   }

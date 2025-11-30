@@ -14,6 +14,7 @@ abstract class JournalRepository {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   });
 
@@ -33,6 +34,7 @@ abstract class JournalRepository {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
   });
 
@@ -46,9 +48,5 @@ abstract class JournalRepository {
   Future<List<JournalEntry>> getJournalEntriesByTrade(String tradeId);
 
   /// Get journal entries by date range
-  Future<List<JournalEntry>> getJournalEntriesByDateRange(
-    String userId,
-    DateTime startDate,
-    DateTime endDate,
-  );
+  Future<List<JournalEntry>> getJournalEntriesByDateRange(String userId, DateTime startDate, DateTime endDate);
 }

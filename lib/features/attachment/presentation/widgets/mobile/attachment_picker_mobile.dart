@@ -24,6 +24,7 @@ class AttachmentPickerMobile extends ConsumerStatefulWidget {
     this.userId,
     this.autoUpload = true,
     this.onPendingAttachmentsChanged,
+    this.readOnly = false,
   });
 
   final List<String> initialUrls;
@@ -35,7 +36,8 @@ class AttachmentPickerMobile extends ConsumerStatefulWidget {
   final bool showPreview;
   final String? label;
   final String? userId;
-  final bool autoUpload; // If false, caller controls when to upload
+  final bool autoUpload;
+  final bool readOnly;
 
   @override
   ConsumerState<AttachmentPickerMobile> createState() => _AttachmentPickerMobileState();
@@ -65,59 +67,66 @@ class _AttachmentPickerMobileState extends ConsumerState<AttachmentPickerMobile>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Label with count
-        Row(
-          children: [
-            if (widget.label != null)
-              Text(widget.label!, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))
-            else
-              Text('Attachments', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(width: 8),
-            Text(
-              '(${_attachments.length}/${widget.maxAttachments})',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
-            ),
-            if (_pendingUploads.isNotEmpty && !widget.autoUpload) ...[
+        if (!widget.readOnly || _attachments.isNotEmpty)
+          Row(
+            children: [
+              if (widget.label != null)
+                Text(widget.label!, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))
+              else
+                Text('Attachments', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(width: 8),
-              Chip(
-                label: Text('${_pendingUploads.length} pending', style: const TextStyle(fontSize: 11)),
-                backgroundColor: theme.colorScheme.secondaryContainer,
-                padding: EdgeInsets.zero,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              Text(
+                widget.readOnly ? '(${_attachments.length})' : '(${_attachments.length}/${widget.maxAttachments})',
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
               ),
+              if (_pendingUploads.isNotEmpty && !widget.autoUpload && !widget.readOnly) ...[
+                const SizedBox(width: 8),
+                Chip(
+                  label: Text('${_pendingUploads.length} pending', style: const TextStyle(fontSize: 11)),
+                  backgroundColor: theme.colorScheme.secondaryContainer,
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ],
             ],
-          ],
-        ),
+          ),
 
         const SizedBox(height: 12),
 
         // Preview Grid
         if (widget.showPreview && _attachments.isNotEmpty) ...[
-          AttachmentPreviewGrid(attachments: _attachments, onRemove: _removeAttachment),
+          AttachmentPreviewGrid(
+            attachments: _attachments,
+            onRemove: widget.readOnly ? null : _removeAttachment,
+            readOnly: widget.readOnly,
+          ),
           const SizedBox(height: 12),
         ],
 
         // Upload Buttons
-        if (canAddMore) _buildUploadButtons() else _buildMaxReachedMessage(theme),
+        if (!widget.readOnly) ...[
+          if (canAddMore) _buildUploadButtons() else _buildMaxReachedMessage(theme),
 
-        // Upload pending button (only shown if autoUpload is false)
-        if (!widget.autoUpload && _pendingUploads.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: _isUploading ? null : uploadPendingFiles,
-            icon: const Icon(Icons.cloud_upload),
-            label: Text('Upload ${_pendingUploads.length} file(s)'),
-          ),
-        ],
+          // Upload pending button (only shown if autoUpload is false)
+          if (!widget.autoUpload && _pendingUploads.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: _isUploading ? null : uploadPendingFiles,
+              icon: const Icon(Icons.cloud_upload),
+              label: Text('Upload ${_pendingUploads.length} file(s)'),
+            ),
+          ],
 
-        // Progress Indicator
-        if (_isUploading) ...[
-          const SizedBox(height: 12),
-          LinearProgressIndicator(value: _uploadProgress),
-          const SizedBox(height: 4),
-          Text(
-            'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
-          ),
+          // Progress Indicator
+          if (_isUploading) ...[
+            const SizedBox(height: 12),
+            LinearProgressIndicator(value: _uploadProgress),
+            const SizedBox(height: 4),
+            Text(
+              'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+            ),
+          ],
         ],
       ],
     );

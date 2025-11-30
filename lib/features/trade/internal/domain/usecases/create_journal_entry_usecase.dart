@@ -17,20 +17,20 @@ class CreateJournalEntryUseCase {
     List<String>? tags,
     Map<String, dynamic>? customFields,
     List<String>? imageUrls,
+    List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
-  }) {
-    return _repository.createJournalEntry(
-      userId: userId,
-      title: title,
-      content: content,
-      entryDate: entryDate,
-      tradeId: tradeId,
-      mood: mood,
-      marketSentiment: marketSentiment,
-      tags: tags,
-      customFields: customFields,
-      imageUrls: imageUrls,
-      relatedTradeIds: relatedTradeIds,
-    );
-  }
+  }) => _repository.createJournalEntry(
+    userId: userId,
+    title: title,
+    content: content,
+    entryDate: entryDate,
+    tradeId: tradeId,
+    mood: mood,
+    marketSentiment: marketSentiment,
+    tags: tags,
+    customFields: customFields,
+    imageUrls: imageUrls,
+    attachments: attachments,
+    relatedTradeIds: relatedTradeIds,
+  );
 }
