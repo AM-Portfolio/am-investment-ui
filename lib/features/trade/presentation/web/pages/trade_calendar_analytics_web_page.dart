@@ -188,22 +188,54 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
           )
         : null;
 
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: UniversalCalendarWidget(
-        onDateSelectionChanged: (selection) => _onDateSelectionChanged(selection, cubit),
-        context: 'trade_analytics',
-        templateType: CalendarTemplateType.full,
-        title: 'Trading Analytics Calendar',
-        cardConfigs: cubit.getUniversalCardConfigs(),
-        dataProvider: TradeCalendarDataProvider(
-          portfolioId: widget.portfolioId,
-          mockData: _buildMockDataFromViewModel(cubit.currentViewModel),
+    return Column(
+      children: [
+        // Header with back and refresh buttons
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Back to Portfolio'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Refresh Data',
+                onPressed: () {
+                  cubit.refresh(userId: widget.userId, portfolioId: widget.portfolioId);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Refreshing calendar data...'), duration: Duration(seconds: 2)),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-        yearCalendarData: yearCalendarData,
-        currentYear: _selectedYear,
-        showYearCalendar: true,
-      ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: UniversalCalendarWidget(
+              onDateSelectionChanged: (selection) => _onDateSelectionChanged(selection, cubit),
+              context: 'trade_analytics',
+              templateType: CalendarTemplateType.full,
+              title: 'Trading Analytics Calendar',
+              cardConfigs: cubit.getUniversalCardConfigs(),
+              dataProvider: TradeCalendarDataProvider(
+                portfolioId: widget.portfolioId,
+                mockData: _buildMockDataFromViewModel(cubit.currentViewModel),
+              ),
+              yearCalendarData: yearCalendarData,
+              currentYear: _selectedYear,
+              showYearCalendar: true,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -8,9 +8,9 @@ import '../../providers/trade_internal_providers.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
 import '../models/trade_portfolio_view_model.dart';
 import '../widgets/trade_sidebar.dart';
+import 'pages/journal_web_page.dart';
 import 'pages/trade_calendar_analytics_web_page.dart';
 import 'pages/trade_holdings_dashboard_web_page.dart';
-import 'pages/journal_web_page.dart';
 
 /// Trade view types for navigation
 enum TradeViewType { portfolios, holdings, calendar, journal }
@@ -182,8 +182,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
     return AppBar(
       // Automatically shows menu button on mobile when drawer is present
-      toolbarHeight: showTitle ? kToolbarHeight : 0, // Hide app bar completely when no title
-      title: showTitle
+      toolbarHeight: showTitle && _selectedView != TradeViewType.calendar
+          ? kToolbarHeight
+          : 0, // Hide app bar completely when no title or in calendar view
+      title: showTitle && _selectedView != TradeViewType.calendar
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -202,7 +204,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
-      actions: showTitle
+      actions: showTitle && _selectedView != TradeViewType.calendar
           ? [
               // Back to portfolios button (when portfolio is selected)
               if (_currentPortfolioId != null && _selectedView != TradeViewType.portfolios)
