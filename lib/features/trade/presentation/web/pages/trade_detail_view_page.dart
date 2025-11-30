@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../providers/trade_internal_providers.dart';
+import '../../components/templates/trade_holdings_template.dart';
 import '../../models/trade_holding_view_model.dart';
 
 /// Dedicated page for displaying detailed trade information in a compact single-view layout
-class TradeDetailViewPage extends StatelessWidget {
-  const TradeDetailViewPage({required this.trade, this.onClose, super.key});
+class TradeDetailViewPage extends ConsumerWidget {
+  const TradeDetailViewPage({
+    required this.trade,
+    required this.userId,
+    required this.portfolioId,
+    this.onClose,
+    super.key,
+  });
 
   final TradeHoldingViewModel trade;
+  final String userId;
+  final String portfolioId;
   final VoidCallback? onClose;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isProfit = trade.isProfit;
     final statusColor = _getStatusColor(trade.status);
+    final params = (userId: userId, portfolioId: portfolioId);
+    final holdingsAsync = ref.watch(tradeHoldingsStreamProvider(params));
 
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerLowest,
@@ -292,7 +305,6 @@ class TradeDetailViewPage extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Price, Fees, Performance Row
-                  // Price, Fees, Performance Row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -354,6 +366,105 @@ class TradeDetailViewPage extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // All Similar Trades Section
+                  holdingsAsync.when(
+                    data: (tradeHoldings) {
+                      // Filter trades with same symbol (including current trade)
+                      final similarTrades = tradeHoldings.holdings.where((h) => h.symbol == trade.symbol).toList();
+
+                      if (similarTrades.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.15)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.blue.shade600.withOpacity(0.08),
+                                    Colors.blue.shade600.withOpacity(0.03),
+                                  ],
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(16),
+                                  topRight: Radius.circular(16),
+                                ),
+                                border: Border(
+                                  bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade600.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(Icons.history, size: 20, color: Colors.blue.shade600),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'All Similar Trades Executed (${similarTrades.length})',
+                                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    'Symbol: ${trade.displaySymbol}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.blue.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Table
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: SizedBox(
+                                height: 400,
+                                child: TradeHoldingsTemplate(
+                                  holdings: similarTrades,
+                                  isLoading: false,
+                                  itemsPerPage: 10,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
                 ],
               ),

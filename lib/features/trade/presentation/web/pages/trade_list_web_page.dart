@@ -333,6 +333,8 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
 
     return TradeDetailViewPage(
       trade: _selectedTrade!,
+      userId: widget.userId,
+      portfolioId: widget.portfolioId,
       onClose: () {
         setState(() {
           _selectedTrade = null;
