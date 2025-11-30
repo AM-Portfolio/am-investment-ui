@@ -27,7 +27,7 @@ class JournalFormActions extends StatelessWidget {
         child: FilledButton.icon(
           onPressed: onToggleEditMode,
           icon: const Icon(Icons.edit, size: 18),
-          label: const Text('Edit Entry'),
+          label: const Text('Edit Journal'),
           style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
         ),
       );
@@ -57,7 +57,7 @@ class JournalFormActions extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : Icon(isNewEntry ? Icons.add : Icons.save, size: 18),
-            label: Text(isSubmitting ? 'Saving...' : (isNewEntry ? 'Create Entry' : 'Update Entry')),
+            label: Text(isSubmitting ? 'Saving...' : (isNewEntry ? 'Create Journal' : 'Update Journal')),
             style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14)),
           ),
         ),
