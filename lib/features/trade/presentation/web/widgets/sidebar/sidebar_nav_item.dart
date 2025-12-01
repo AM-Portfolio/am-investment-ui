@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../web/trade_web_screen.dart';
+import '../../trade_web_screen.dart';
 
 class SidebarNavItem extends StatelessWidget {
   const SidebarNavItem({

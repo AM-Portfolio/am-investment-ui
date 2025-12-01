@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/trade_internal_providers.dart';
-import '../../../components/templates/trade_holdings_template.dart';
+import '../../../holdings/components/trade_holdings_template.dart';
 import '../../../models/trade_holding_view_model.dart';
 
 class SimilarTradesSection extends ConsumerWidget {

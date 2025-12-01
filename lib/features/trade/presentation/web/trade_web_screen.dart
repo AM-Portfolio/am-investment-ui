@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../authentication/presentation/cubit/auth_cubit.dart';
 import '../../providers/trade_internal_providers.dart';
+import '../calendar/pages/trade_calendar_analytics_web_page.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
+import '../holdings/pages/trade_holdings_dashboard_web_page.dart';
+import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
-import '../widgets/trade_sidebar.dart';
-import 'pages/journal_web_page.dart';
-import 'pages/trade_calendar_analytics_web_page.dart';
-import 'pages/trade_holdings_dashboard_web_page.dart';
 import 'pages/trade_list_web_page.dart';
+import 'widgets/trade_sidebar.dart';
 
 /// Trade view types for navigation
 enum TradeViewType { portfolios, holdings, calendar, trades, journal }

@@ -7,7 +7,7 @@ import '../../../favorite_filter_providers.dart';
 import '../../../internal/domain/entities/metrics_filter_config.dart';
 import '../../../providers/trade_internal_providers.dart';
 import '../../components/dialogs/trade_detail_dialog.dart';
-import '../../components/templates/trade_holdings_template.dart';
+import '../../holdings/components/trade_holdings_template.dart';
 import '../../models/trade_holding_view_model.dart';
 import '../widgets/mobile_filter_panel.dart';
 

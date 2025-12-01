@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../models/trade_portfolio_view_model.dart';
-import '../web/trade_web_screen.dart';
+import '../../models/trade_portfolio_view_model.dart';
+import '../trade_web_screen.dart';
 import 'sidebar/trade_sidebar_container.dart';
 
 /// Trade sidebar widget with view selection

@@ -9,8 +9,8 @@ import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../cubit/trade_controller_cubit.dart';
 import '../../cubit/trade_controller_state.dart';
 import '../../web/trade_web_screen.dart';
-import '../../widgets/responsive_sidebar.dart';
-import '../../widgets/trade_sidebar.dart';
+import '../../web/widgets/responsive_sidebar.dart';
+import '../../web/widgets/trade_sidebar.dart';
 import '../components/add_trade_form.dart';
 
 /// Web page for adding new trades with responsive design
@@ -28,6 +28,15 @@ class AddTradeWebPage extends StatefulWidget {
 
 class _AddTradeWebPageState extends State<AddTradeWebPage> {
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    AppLogger.info(
+      '[AddTradeWebPage] ✅ Page initialized - portfolioId: ${widget.portfolioId}, portfolioName: ${widget.portfolioName}',
+      tag: 'AddTradeWebPage',
+    );
+  }
 
   void _handleSave(TradeDetails tradeDetails) {
     AppLogger.methodEntry('_handleSave', tag: 'AddTradeWebPage');
