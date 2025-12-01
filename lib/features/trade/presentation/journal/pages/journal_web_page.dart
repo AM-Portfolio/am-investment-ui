@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,11 +6,11 @@ import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../journal_providers.dart';
 import '../../cubit/journal/journal_cubit.dart';
 import '../../cubit/journal/journal_state.dart';
-import '../../widgets/journal/journal_entry_form.dart';
-import '../../widgets/journal/utils/journal_helpers.dart';
-import '../utils/journal_helpers.dart' as web_helpers;
-import '../widgets/journal_card.dart';
-import '../widgets/journal_filters_bar.dart';
+import '../../web/utils/journal_helpers.dart' as web_helpers;
+import '../../web/widgets/journal/journal_entry_form.dart';
+import '../../web/widgets/journal/utils/journal_helpers.dart' as form_helpers;
+import '../../web/widgets/journal_card.dart';
+import '../../web/widgets/journal_filters_bar.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
   const JournalWebPage({required this.userId, this.portfolioId, super.key});
@@ -112,12 +112,12 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
 
         // Check each filter - return true if any matches
         if (_selectedMoodFilter != null && entry.behaviorPatternSummaries.isNotEmpty) {
-          final moodKey = JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
+          final moodKey = form_helpers.JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
           if (moodKey == _selectedMoodFilter) return true;
         }
 
         if (_selectedSentimentFilter != null && entry.behaviorPatternSummaries.isNotEmpty) {
-          final sentimentKey = JournalHelpers.mapSentimentFromValue(
+          final sentimentKey = form_helpers.JournalHelpers.mapSentimentFromValue(
             entry.behaviorPatternSummaries.first.marketSentiment,
           );
           if (sentimentKey == _selectedSentimentFilter) return true;
@@ -139,7 +139,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       if (_selectedMoodFilter != null) {
         filtered = filtered.where((entry) {
           if (entry.behaviorPatternSummaries.isEmpty) return false;
-          final moodKey = JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
+          final moodKey = form_helpers.JournalHelpers.mapMoodFromEntry(entry.behaviorPatternSummaries.first.mood);
           return moodKey == _selectedMoodFilter;
         }).toList();
       }
@@ -148,7 +148,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       if (_selectedSentimentFilter != null) {
         filtered = filtered.where((entry) {
           if (entry.behaviorPatternSummaries.isEmpty) return false;
-          final sentimentKey = JournalHelpers.mapSentimentFromValue(
+          final sentimentKey = form_helpers.JournalHelpers.mapSentimentFromValue(
             entry.behaviorPatternSummaries.first.marketSentiment,
           );
           return sentimentKey == _selectedSentimentFilter;
@@ -462,3 +462,4 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     ),
   );
 }
+

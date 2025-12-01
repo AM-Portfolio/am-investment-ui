@@ -2,9 +2,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/trade_holding_view_model.dart';
-import 'trade_detail_widgets/similar_trades_section.dart';
-import 'trade_detail_widgets/trade_detail_header.dart';
-import 'trade_detail_widgets/trade_detail_summary.dart';
+import '../widgets/trade_detail_widgets/similar_trades_section.dart';
+import '../widgets/trade_detail_widgets/trade_detail_header.dart';
+import '../widgets/trade_detail_widgets/trade_detail_summary.dart';
 
 /// Dedicated page for displaying detailed trade information in a modular layout
 class TradeDetailViewPage extends ConsumerStatefulWidget {

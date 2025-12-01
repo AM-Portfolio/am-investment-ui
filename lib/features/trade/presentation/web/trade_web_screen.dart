@@ -10,7 +10,7 @@ import '../components/templates/trade_portfolio_discovery_template.dart';
 import '../holdings/pages/trade_holdings_dashboard_web_page.dart';
 import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
-import 'pages/trade_list_web_page.dart';
+import '../trades/pages/trade_list_web_page.dart';
 import 'widgets/trade_sidebar.dart';
 
 /// Trade view types for navigation

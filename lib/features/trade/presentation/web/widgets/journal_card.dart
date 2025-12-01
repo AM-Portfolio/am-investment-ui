@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../internal/domain/entities/journal_entry.dart';
-import '../../widgets/journal/models/journal_mood_options.dart';
-import '../../widgets/journal/utils/journal_helpers.dart';
+import 'journal/models/journal_mood_options.dart';
+import 'journal/utils/journal_helpers.dart';
 
 class JournalCard extends StatelessWidget {
   const JournalCard({

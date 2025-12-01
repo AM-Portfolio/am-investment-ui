@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../attachment/presentation/widgets/attachment_picker.dart';
+import '../../../../../../attachment/presentation/widgets/attachment_picker.dart';
 
 class JournalAttachmentSection extends StatelessWidget {
   const JournalAttachmentSection({

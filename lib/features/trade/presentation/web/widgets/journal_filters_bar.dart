@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/journal/models/journal_mood_options.dart';
+import 'journal/models/journal_mood_options.dart';
 
 class JournalFiltersBar extends StatelessWidget {
   const JournalFiltersBar({
