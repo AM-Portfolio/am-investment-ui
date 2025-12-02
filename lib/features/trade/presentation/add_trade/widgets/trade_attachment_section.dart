@@ -2,27 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../../shared/widgets/components/shared_attachment_section.dart';
 
-/// Wrapper component for journal-specific attachment handling.
+/// Wrapper component for trade-specific attachment handling.
 ///
-/// This component wraps [SharedAttachmentSection] with journal-specific defaults.
-/// Use this in journal forms and pages for a consistent attachment experience.
+/// This component wraps [SharedAttachmentSection] with trade-specific defaults.
+/// Use this in trade forms for a consistent attachment experience.
 ///
 /// For other features, use [SharedAttachmentSection] directly with custom parameters.
-class JournalAttachmentSection extends StatelessWidget {
-  const JournalAttachmentSection({
+class TradeAttachmentSection extends StatelessWidget {
+  const TradeAttachmentSection({
     required this.imageUrls,
     required this.onAttachmentsChanged,
-    required this.featureName,
     required this.userId,
     required this.isEditMode,
     super.key,
     this.label,
-    this.maxAttachments = 10,
+    this.maxAttachments = 15,
   });
 
   final List<String> imageUrls;
   final ValueChanged<List<String>> onAttachmentsChanged;
-  final String featureName;
   final String userId;
   final bool isEditMode;
   final String? label;
@@ -32,10 +30,10 @@ class JournalAttachmentSection extends StatelessWidget {
   Widget build(BuildContext context) => SharedAttachmentSection(
     imageUrls: imageUrls,
     onAttachmentsChanged: onAttachmentsChanged,
-    featureName: featureName,
+    featureName: 'trade',
     userId: userId,
     isEditMode: isEditMode,
-    label: label ?? 'Supporting Evidence',
+    label: label ?? 'Trade Screenshots & Documents',
     maxAttachments: maxAttachments,
   );
 }

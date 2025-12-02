@@ -14,7 +14,7 @@ import '../../../internal/domain/enums/series_types.dart';
 import '../../../internal/domain/enums/technical_reasons.dart';
 import '../../../internal/domain/enums/trade_directions.dart';
 import '../../../internal/domain/enums/trade_statuses.dart';
-import '../../add_trade/widgets/attachment_picker.dart';
+import '../../add_trade/widgets/trade_attachment_section.dart';
 
 /// Modern, responsive template for adding new trades
 /// Features:
@@ -527,11 +527,11 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
           Builder(
             builder: (context) {
               AppLogger.debug(
-                '[AddTradeTemplate] Building AttachmentPicker - current attachments: ${_attachmentUrls.length}',
+                '[AddTradeTemplate] Building TradeAttachmentSection - current attachments: ${_attachmentUrls.length}',
                 tag: 'AddTradeTemplate',
               );
-              return AttachmentPicker(
-                attachments: _attachmentUrls,
+              return TradeAttachmentSection(
+                imageUrls: _attachmentUrls,
                 onAttachmentsChanged: (urls) {
                   AppLogger.info(
                     '[AddTradeTemplate] Attachments changed - previous: ${_attachmentUrls.length}, new: ${urls.length}',
@@ -542,6 +542,8 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
                     _attachmentUrls.addAll(urls);
                   });
                 },
+                userId: widget.userId,
+                isEditMode: true,
               );
             },
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../features/attachment/presentation/models/pending_attachment.dart';
+import '../../../../../features/attachment/presentation/widgets/shared/attachment_preview_grid.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';
 import '../../../internal/domain/enums/exchange_types.dart';
@@ -261,19 +263,7 @@ class ReviewStep extends StatelessWidget {
           if (attachments.isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildCompactReviewCard(theme, 'Attachments', Icons.attach_file, [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: attachments
-                    .map(
-                      (file) => Chip(
-                        label: Text(file, style: theme.textTheme.bodySmall),
-                        avatar: const Icon(Icons.file_present, size: 16),
-                        padding: EdgeInsets.zero,
-                      ),
-                    )
-                    .toList(),
-              ),
+              AttachmentPreviewGrid(attachments: attachments.map(AttachmentItem.uploaded).toList(), readOnly: true),
             ]),
           ],
 
