@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../trade/providers/trade_internal_providers.dart';
 
@@ -133,7 +134,7 @@ class StatCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
   }
 }
 
@@ -250,7 +251,7 @@ class ZellaScoreChart extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 800.ms).scale(curve: Curves.easeOutBack);
   }
 }
 
@@ -373,7 +374,7 @@ class NetCumulativePnLChart extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 800.ms, delay: 200.ms).scale(curve: Curves.easeOutBack);
   }
 }
 
@@ -512,7 +513,7 @@ class NetDailyPnLChart extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 800.ms, delay: 400.ms).scale(curve: Curves.easeOutBack);
   }
 }
 
@@ -582,7 +583,9 @@ class RecentTradesWidget extends ConsumerWidget {
               // Show last 5 trades
               final recentTrades = holdings.take(5).toList();
               return Column(
-                children: recentTrades.map((holding) {
+                children: recentTrades.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final holding = entry.value;
                   // Use formatted date if available, else mock or parse
                   // TradeHoldingViewModel might not have close date directly exposed in a nice format
                   // We'll use displaySymbol and displayProfitLoss
@@ -590,7 +593,7 @@ class RecentTradesWidget extends ConsumerWidget {
                     '08/15/2023', // Placeholder date as it's not in view model easily
                     holding.displaySymbol,
                     holding.profitLoss ?? 0.0,
-                  );
+                  ).animate().fadeIn(delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
                 }).toList(),
               );
             },
@@ -605,7 +608,7 @@ class RecentTradesWidget extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(duration: 800.ms, delay: 600.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildEmptyState(String message) {

@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubit/portfolio_cubit.dart';
@@ -14,7 +15,7 @@ class PortfolioOverviewWidget extends StatelessWidget {
       BlocBuilder<PortfolioCubit, PortfolioState>(
         builder: (context, state) {
           if (state is PortfolioLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildOverviewSkeleton(context);
           } else if (state is PortfolioError) {
             return Center(
               child: Column(
@@ -72,28 +73,28 @@ class PortfolioOverviewWidget extends StatelessWidget {
         Icons.account_balance_wallet,
         const Color(0xFF6C5DD3), // Purple accent
         isGlossy: true,
-      ),
+      ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
       _buildSummaryCard(
         'Today Change',
         '\$${summary.todayChange.toStringAsFixed(2)}',
         Icons.trending_up,
         summary.todayChange >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675), // Green/Red
         isGlossy: true,
-      ),
+      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
       _buildSummaryCard(
         'Total P&L',
         '\$${summary.totalGainLoss.toStringAsFixed(2)}',
         Icons.show_chart,
         summary.totalGainLoss >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
         isGlossy: true,
-      ),
+      ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
       _buildSummaryCard(
         'Holdings',
         '${summary.totalHoldings}',
         Icons.pie_chart,
         const Color(0xFFFFA502), // Orange accent
         isGlossy: true,
-      ),
+      ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
     ],
   );
 
@@ -225,7 +226,7 @@ class PortfolioOverviewWidget extends StatelessWidget {
               'Today',
               '${summary.todayChangePercentage.toStringAsFixed(2)}%',
               summary.todayChangePercentage >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
-            ),
+            ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.1, end: 0),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -233,7 +234,7 @@ class PortfolioOverviewWidget extends StatelessWidget {
               'Total',
               '${summary.totalGainLossPercentage.toStringAsFixed(2)}%',
               summary.totalGainLossPercentage >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
-            ),
+            ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1, end: 0),
           ),
         ],
       ),
@@ -304,4 +305,80 @@ class PortfolioOverviewWidget extends StatelessWidget {
           ],
         ),
       );
+
+  Widget _buildOverviewSkeleton(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 200,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C2C3E),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.05)),
+          const SizedBox(height: 24),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            childAspectRatio: 1.8,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            children: List.generate(4, (index) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C2C3E),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+              ).animate(onPlay: (controller) => controller.repeat())
+               .shimmer(duration: 1200.ms, delay: (100 * index).ms, color: Colors.white.withOpacity(0.05));
+            }),
+          ),
+          const SizedBox(height: 24),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 150,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C2C3E),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.05)),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2C2C3E),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, delay: 400.ms, color: Colors.white.withOpacity(0.05)),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2C2C3E),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, delay: 500.ms, color: Colors.white.withOpacity(0.05)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

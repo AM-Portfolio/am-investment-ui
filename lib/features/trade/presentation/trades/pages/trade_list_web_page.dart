@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/trade_internal_providers.dart';
@@ -42,7 +43,7 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
                   Text('Add your first trade to get started', style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
-            );
+            ).animate().fadeIn(duration: 600.ms).scale();
           }
 
           return Row(
@@ -115,7 +116,7 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
             ),
           ],
         ),
-      );
+      ).animate().slideX(begin: -0.2, end: 0, duration: 300.ms);
     }
 
     // Full sidebar with trade list
@@ -188,13 +189,14 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
                 final holding = holdings[index];
                 final isSelected = _selectedTrade?.tradeId == holding.tradeId;
 
-                return _buildTradeSidebarItem(holding, isSelected);
+                return _buildTradeSidebarItem(holding, isSelected)
+                    .animate().fadeIn(delay: (30 * index).ms).slideX(begin: -0.1, end: 0);
               },
             ),
           ),
         ],
       ),
-    );
+    ).animate().slideX(begin: -0.1, end: 0, duration: 300.ms);
   }
 
   Widget _buildTradeSidebarItem(TradeHoldingViewModel holding, bool isSelected) {
@@ -326,7 +328,7 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
         ),
       ],
     ),
-  );
+  ).animate().fadeIn(duration: 600.ms);
 
   Widget _buildTradeDetailView() {
     if (_selectedTrade == null) return const SizedBox();
@@ -340,7 +342,7 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
           _selectedTrade = null;
         });
       },
-    );
+    ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.05, end: 0);
   }
 
   IconData _getStatusIcon(String? status) {

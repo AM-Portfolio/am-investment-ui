@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -215,7 +216,7 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
               ),
             ],
           ),
-        ),
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -232,7 +233,7 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
               yearCalendarData: yearCalendarData,
               currentYear: _selectedYear,
               showYearCalendar: true,
-            ),
+            ).animate().fadeIn(duration: 600.ms, delay: 200.ms).scale(curve: Curves.easeOutQuad),
           ),
         ),
       ],

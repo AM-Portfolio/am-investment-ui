@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart';
@@ -52,7 +53,7 @@ class _PortfolioAnalysisWebPageState
               border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
             ),
             child: _buildAnalysisControls(context),
-          ),
+          ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
 
           // Main Analysis Content
           Expanded(
@@ -66,7 +67,10 @@ class _PortfolioAnalysisWebPageState
                       // Performance Chart Section
                       Expanded(
                         flex: 2,
-                        child: _buildPerformanceSection(context, summaryAsync),
+                        child: _buildPerformanceSection(context, summaryAsync)
+                            .animate()
+                            .fadeIn(duration: 600.ms, delay: 200.ms)
+                            .slideX(begin: -0.1, end: 0),
                       ),
 
                       // Analytics Grid
@@ -91,7 +95,7 @@ class _PortfolioAnalysisWebPageState
                     ),
                   ),
                   child: _buildInsightsPanel(context),
-                ),
+                ).animate().fadeIn(duration: 600.ms, delay: 400.ms).slideX(begin: 0.1, end: 0),
               ],
             ),
           ),
@@ -218,7 +222,7 @@ class _PortfolioAnalysisWebPageState
           Expanded(
             child: summaryAsync.when(
               data: (summary) => _buildPerformanceChart(context, summary),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => _buildPerformanceChartSkeleton(context),
               error: (error, stack) => _buildErrorPlaceholder(
                 context,
                 'Performance Chart',
@@ -292,32 +296,32 @@ class _PortfolioAnalysisWebPageState
             data: (analytics) => holdingsAsync.when(
               data: (holdings) =>
                   _buildAnalyticsCharts(context, analytics, holdings),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => _buildAnalyticsGridSkeleton(context),
               error: (error, stack) =>
                   Center(child: Text('Error loading holdings: $error')),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stack) => Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading analytics',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading analytics',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
+      ),
       ],
     ),
   );
@@ -360,10 +364,22 @@ class _PortfolioAnalysisWebPageState
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       children: [
-        _buildSectorAllocationCard(context, sectorData),
-        _buildMarketCapCard(context, marketCapData),
-        _buildTopHoldingsCard(context, holdings),
-        _buildRiskMetricsCard(context),
+        _buildSectorAllocationCard(context, sectorData)
+            .animate()
+            .fadeIn(delay: 300.ms)
+            .slideY(begin: 0.1, end: 0),
+        _buildMarketCapCard(context, marketCapData)
+            .animate()
+            .fadeIn(delay: 400.ms)
+            .slideY(begin: 0.1, end: 0),
+        _buildTopHoldingsCard(context, holdings)
+            .animate()
+            .fadeIn(delay: 500.ms)
+            .slideY(begin: 0.1, end: 0),
+        _buildRiskMetricsCard(context)
+            .animate()
+            .fadeIn(delay: 600.ms)
+            .slideY(begin: 0.1, end: 0),
       ],
     );
   }
@@ -869,6 +885,101 @@ class _PortfolioAnalysisWebPageState
       ),
     ),
   );
+
+  Widget _buildPerformanceChartSkeleton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Container(
+              height: 40,
+              width: 200,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1200.ms, color: Colors.grey.shade300),
+            const SizedBox(height: 20),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(10, (index) {
+                  return Container(
+                    width: 20,
+                    height: 50.0 + (index * 10) % 100,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ).animate(onPlay: (controller) => controller.repeat())
+                   .shimmer(duration: 1200.ms, delay: (100 * index).ms, color: Colors.grey.shade300);
+                }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsGridSkeleton(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      children: List.generate(4, (index) {
+        return Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 120,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ).animate(onPlay: (controller) => controller.repeat())
+           .shimmer(duration: 1200.ms, delay: (200 * index).ms, color: Colors.grey.shade100),
+        );
+      }),
+    );
+  }
 
   void _showExportDialog(BuildContext context) {
     showDialog(

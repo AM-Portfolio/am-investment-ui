@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../../shared/widgets/holdings/universal_holdings.dart';
 
@@ -32,7 +33,7 @@ class PortfolioHoldingsWebPage extends StatelessWidget {
             // Show holding details in dialog or navigate to details page
             _showHoldingDetails(context, holding);
           },
-        ),
+        ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0),
       ),
     );
   }

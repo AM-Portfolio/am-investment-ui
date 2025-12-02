@@ -15,6 +15,7 @@
         "file_picker",
         "fl_chart",
         "flutter",
+        "flutter_animate",
         "flutter_bloc",
         "flutter_hot_reload",
         "flutter_quill",
@@ -275,6 +276,14 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "flutter_animate",
+      "version": "4.5.2",
+      "dependencies": [
+        "flutter",
+        "flutter_shaders"
       ]
     },
     {
@@ -2059,6 +2068,14 @@
       "name": "sprintf",
       "version": "7.0.0",
       "dependencies": []
+    },
+    {
+      "name": "flutter_shaders",
+      "version": "0.1.3",
+      "dependencies": [
+        "flutter",
+        "vector_math"
+      ]
     }
   ],
   "configVersion": 1

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/trade_holding_view_model.dart';
@@ -146,7 +147,7 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
     }
 
     if (widget.holdings.isEmpty) {
-      return const Center(child: Text('No holdings found'));
+      return const Center(child: Text('No holdings found')).animate().fadeIn(duration: 600.ms);
     }
 
     return Column(
@@ -282,7 +283,7 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
         }).toList(),
       ),
     ),
-  );
+  ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0);
 
   Widget _buildCardView() => ListView.builder(
     padding: const EdgeInsets.all(16),
@@ -501,7 +502,7 @@ class _TradeHoldingsTemplateState extends State<TradeHoldingsTemplate> {
             ),
           ),
         ),
-      );
+      ).animate().fadeIn(delay: (50 * index).ms).slideY(begin: 0.1, end: 0);
     },
   );
 

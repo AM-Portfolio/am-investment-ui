@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -227,7 +228,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
           cubit: _cubit,
           portfolioId: widget.portfolioId ?? '8a57024c-05c2-475b-a2c4-0545865efa4a',
           entry: _editingEntry,
-        ),
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
       ),
     ],
   );
@@ -305,7 +306,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
               style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
             ),
           ],
-        ),
+        ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.05, end: 0),
 
         // Filter chips bar
         if (_showFilters) ...[
@@ -353,7 +354,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
             }),
             onToggleAdvancedFilters: () => setState(() => _showAdvancedFilters = !_showAdvancedFilters),
             onClearFilters: _clearFilters,
-          ),
+          ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
         ],
 
         const SizedBox(height: 16),
@@ -396,7 +397,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                         ),
                       ],
                     ),
-                  );
+                  ).animate().fadeIn(duration: 600.ms);
                 }
 
                 // Pagination calculations
@@ -424,7 +425,7 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                             onDelete: () => _cubit.removeJournalEntry(widget.userId, entry.id),
                             extractPlainText: web_helpers.JournalHelpers.extractPlainText,
                             limitToWords: web_helpers.JournalHelpers.limitToWords,
-                          );
+                          ).animate().fadeIn(delay: (50 * index).ms).slideY(begin: 0.1, end: 0);
                         },
                       ),
                     ),
