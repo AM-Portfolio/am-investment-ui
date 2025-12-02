@@ -119,6 +119,10 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
                 _selectedView = viewType;
               });
             },
+            currentPortfolioId: _currentPortfolioId,
+            currentPortfolioName: widget.selectedPortfolioName,
+            portfolios: widget.portfolios ?? [],
+            onPortfolioSelected: widget.onPortfolioChanged,
           ),
         ),
         // Main content area
