@@ -24,12 +24,16 @@ class TradeWebScreen extends ConsumerStatefulWidget {
     this.selectedPortfolioId,
     this.selectedPortfolioName,
     this.initialView = TradeViewType.portfolios,
+    this.isSidebarVisible = true,
+    this.onToggleSidebar,
   });
 
   final String userId;
   final String? selectedPortfolioId;
   final String? selectedPortfolioName;
   final TradeViewType initialView;
+  final bool isSidebarVisible;
+  final VoidCallback? onToggleSidebar;
 
   @override
   ConsumerState<TradeWebScreen> createState() => _TradeWebScreenState();
@@ -164,32 +168,42 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                   sidebarWidth = 280; // Full mode
                 }
 
-                return Container(
-                  width: sidebarWidth,
-                  decoration: BoxDecoration(
-                    border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
-                    color: Theme.of(context).cardColor,
-                  ),
-                  child: portfoliosAsyncValue.when(
-                    data: (portfolios) => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
-                      portfolios: portfolios,
-                      onPortfolioSelected: _onPortfolioSelected,
-                    ),
-                    loading: () => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
-                    ),
-                    error: (_, __) => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: widget.isSidebarVisible ? sidebarWidth : 0,
+                  curve: Curves.easeInOut,
+                  child: OverflowBox(
+                    minWidth: sidebarWidth,
+                    maxWidth: sidebarWidth,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: sidebarWidth,
+                      decoration: BoxDecoration(
+                        border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
+                        color: Theme.of(context).cardColor,
+                      ),
+                      child: portfoliosAsyncValue.when(
+                        data: (portfolios) => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                          portfolios: portfolios,
+                          onPortfolioSelected: _onPortfolioSelected,
+                        ),
+                        loading: () => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                        ),
+                        error: (_, __) => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                        ),
+                      ),
                     ),
                   ),
                 );

@@ -23,12 +23,16 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
     this.selectedPortfolioName,
     this.portfolios,
     this.onPortfolioChanged,
+    this.isSidebarVisible = true,
+    this.onToggleSidebar,
   });
   final String userId;
   final String? selectedPortfolioId;
   final String? selectedPortfolioName;
   final List<PortfolioItem>? portfolios;
   final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
+  final bool isSidebarVisible;
+  final VoidCallback? onToggleSidebar;
 
   @override
   ConsumerState<PortfolioWebScreen> createState() => _PortfolioWebScreenState();
@@ -107,22 +111,32 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
     body: Row(
       children: [
         // Left sidebar for navigation
-        Container(
-          width: 250,
-          decoration: BoxDecoration(
-            border: Border(right: BorderSide(color: Colors.grey.shade300)),
-          ),
-          child: PortfolioSidebar(
-            selectedView: _selectedView,
-            onViewChanged: (viewType) {
-              setState(() {
-                _selectedView = viewType;
-              });
-            },
-            currentPortfolioId: _currentPortfolioId,
-            currentPortfolioName: widget.selectedPortfolioName,
-            portfolios: widget.portfolios ?? [],
-            onPortfolioSelected: widget.onPortfolioChanged,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          width: widget.isSidebarVisible ? 250 : 0,
+          curve: Curves.easeInOut,
+          child: OverflowBox(
+            minWidth: 250,
+            maxWidth: 250,
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: 250,
+              decoration: BoxDecoration(
+                border: Border(right: BorderSide(color: Colors.grey.shade300)),
+              ),
+              child: PortfolioSidebar(
+                selectedView: _selectedView,
+                onViewChanged: (viewType) {
+                  setState(() {
+                    _selectedView = viewType;
+                  });
+                },
+                currentPortfolioId: _currentPortfolioId,
+                currentPortfolioName: widget.selectedPortfolioName,
+                portfolios: widget.portfolios ?? [],
+                onPortfolioSelected: widget.onPortfolioChanged,
+              ),
+            ),
           ),
         ),
         // Main content area

@@ -11,9 +11,16 @@ import '../widgets/dashboard_sidebar.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class DashboardWebPage extends ConsumerStatefulWidget {
-  const DashboardWebPage({super.key, required this.userId});
+  const DashboardWebPage({
+    super.key,
+    required this.userId,
+    this.isSidebarVisible = true,
+    this.onToggleSidebar,
+  });
 
   final String userId;
+  final bool isSidebarVisible;
+  final VoidCallback? onToggleSidebar;
 
   @override
   ConsumerState<DashboardWebPage> createState() => _DashboardWebPageState();
@@ -21,7 +28,6 @@ class DashboardWebPage extends ConsumerStatefulWidget {
 
 class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
   String _currentView = 'Dashboard';
-  bool _isSidebarVisible = true;
   String? _selectedPortfolioId;
   String? _selectedPortfolioName;
 
@@ -36,7 +42,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
           // Sidebar
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            width: _isSidebarVisible ? 280 : 0,
+            width: widget.isSidebarVisible ? 280 : 0,
             curve: Curves.easeInOut,
             child: OverflowBox(
               minWidth: 280,
@@ -124,12 +130,10 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
         children: [
           // Toggle Sidebar Button
           IconButton(
-            icon: Icon(_isSidebarVisible ? Icons.menu_open : Icons.menu),
+            icon: Icon(widget.isSidebarVisible ? Icons.menu_open : Icons.menu),
             color: Colors.grey[600],
             onPressed: () {
-              setState(() {
-                _isSidebarVisible = !_isSidebarVisible;
-              });
+              widget.onToggleSidebar?.call();
             },
           ),
           const SizedBox(width: 8),

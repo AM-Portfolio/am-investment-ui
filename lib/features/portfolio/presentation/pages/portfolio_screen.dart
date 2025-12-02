@@ -8,8 +8,16 @@ import '../../../../core/utils/logger.dart';
 /// Routes to mobile or web specific portfolio screens based on platform
 /// Now uses PortfolioListWrapper for portfolio selection functionality
 class PortfolioScreen extends StatelessWidget {
-  const PortfolioScreen({required this.userId, super.key});
+  const PortfolioScreen({
+    required this.userId,
+    super.key,
+    this.isSidebarVisible = true,
+    this.onToggleSidebar,
+  });
+
   final String userId;
+  final bool isSidebarVisible;
+  final VoidCallback? onToggleSidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +36,11 @@ class PortfolioScreen extends StatelessWidget {
 
     // Use PortfolioListWrapper to handle portfolio selection
     // The wrapper will automatically select appropriate screens based on platform
-    return PortfolioListWrapper(userId: userId, isMobile: isMobile);
+    return PortfolioListWrapper(
+      userId: userId,
+      isMobile: isMobile,
+      isSidebarVisible: isSidebarVisible,
+      onToggleSidebar: onToggleSidebar,
+    );
   }
 }

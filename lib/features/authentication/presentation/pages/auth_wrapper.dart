@@ -23,6 +23,7 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   String _currentPage = 'Portfolio';
+  bool _isSidebarExpanded = true;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Login is already handled by AuthCubit
     setState(() {
       _currentPage = 'Portfolio';
+      _isSidebarExpanded = true;
     });
   }
 
@@ -52,12 +54,24 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     setState(() {
       _currentPage = 'Portfolio';
+      _isSidebarExpanded = true;
     });
   }
 
   void _handleNavigation(String navItem) {
     setState(() {
-      _currentPage = navItem;
+      if (_currentPage == navItem) {
+        _isSidebarExpanded = !_isSidebarExpanded;
+      } else {
+        _currentPage = navItem;
+        _isSidebarExpanded = true;
+      }
+    });
+  }
+
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarExpanded = !_isSidebarExpanded;
     });
   }
 
@@ -70,13 +84,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
     switch (_currentPage) {
       case 'Portfolio':
         AppLogger.debug('📊 Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
-        return PortfolioScreen(userId: userId);
+        return PortfolioScreen(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
       case 'Dashboard':
-        return DashboardWebPage(userId: userId);
+        return DashboardWebPage(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
       case 'Trade':
         AppLogger.debug('📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PlatformUtils.isWeb
-            ? TradeWebScreen(userId: userId)
+            ? TradeWebScreen(
+                userId: userId,
+                isSidebarVisible: _isSidebarExpanded,
+                onToggleSidebar: _toggleSidebar,
+              )
             : TradeMobileScreen(userId: userId, onBack: () => _handleNavigation('Portfolio'));
       case 'Market':
         return _buildPlaceholderScreen('Market');
@@ -86,7 +112,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
         return _buildPlaceholderScreen('Reports');
       default:
         AppLogger.debug('📊 Default: Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
-        return PortfolioScreen(userId: userId);
+        return PortfolioScreen(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
     }
   }
 

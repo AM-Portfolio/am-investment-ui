@@ -360,7 +360,8 @@ class TradeRepositoryImpl implements TradeRepository {
       params: {'userId': userId, 'portfolioId': portfolioId},
     );
 
-    if (_cachedHoldings != null) {
+    // Check if cache exists AND matches the requested portfolio
+    if (_cachedHoldings != null && _cachedHoldings!.portfolioId == portfolioId) {
       Future.microtask(() => _holdingsController.add(_cachedHoldings!));
     } else {
       getTradeHoldings(userId, portfolioId).catchError((error) {
@@ -396,7 +397,8 @@ class TradeRepositoryImpl implements TradeRepository {
       params: {'userId': userId, 'portfolioId': portfolioId},
     );
 
-    if (_cachedSummary != null) {
+    // Check if cache exists AND matches the requested portfolio
+    if (_cachedSummary != null && _cachedSummary!.portfolioId == portfolioId) {
       Future.microtask(() => _summaryController.add(_cachedSummary!));
     } else {
       getTradeSummary(userId, portfolioId).catchError((error) {
@@ -416,7 +418,8 @@ class TradeRepositoryImpl implements TradeRepository {
       params: {'userId': userId, 'portfolioId': portfolioId},
     );
 
-    if (_cachedCalendar != null) {
+    // Check if cache exists AND contains data for the requested portfolio
+    if (_cachedCalendar != null && _cachedCalendar!.portfolioTrades.containsKey(portfolioId)) {
       Future.microtask(() => _calendarController.add(_cachedCalendar!));
     } else {
       getTradeCalendar(userId, portfolioId).catchError((error) {
