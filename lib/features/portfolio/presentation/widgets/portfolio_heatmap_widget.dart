@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
+import '../../../../shared/widgets/heatmap/loaders/heatmap_skeleton_loader.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_analytics_state.dart';
@@ -217,20 +218,7 @@ class _PortfolioHeatmapWidgetState
       tag: '${widget.config.logTag}.UI',
     );
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            state.message ?? 'Loading heatmap data...',
-            style: const TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    return const HeatmapSkeletonLoader();
   }
 
   /// Builds error state UI

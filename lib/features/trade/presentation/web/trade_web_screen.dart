@@ -429,21 +429,34 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
 
         return portfoliosAsync.when(
-          data: (portfolios) => TradePortfolioDiscoveryTemplate(
-            portfolios: portfolios,
-            isLoading: false,
-            onPortfolioSelected: (portfolio) {
-              // When clicking a portfolio card, select it and go to holdings
-              setState(() {
-                _currentPortfolioId = portfolio.id;
-                _currentPortfolioName = portfolio.name;
-                _selectedView = TradeViewType.holdings;
+          data: (portfolios) {
+            // Auto-select first portfolio if none selected and portfolios exist
+            // But only if we are in the portfolios view (initial load)
+            if (_currentPortfolioId == null && portfolios.isNotEmpty && _selectedView == TradeViewType.portfolios) {
+              // Schedule the state update to avoid build-phase errors
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _onPortfolioSelected(portfolios.first.id, portfolios.first.name);
+                }
               });
-            },
-            onRefresh: () {
-              ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
-            },
-          ),
+            }
+
+            return TradePortfolioDiscoveryTemplate(
+              portfolios: portfolios,
+              isLoading: false,
+              onPortfolioSelected: (portfolio) {
+                // When clicking a portfolio card, select it and go to holdings
+                setState(() {
+                  _currentPortfolioId = portfolio.id;
+                  _currentPortfolioName = portfolio.name;
+                  _selectedView = TradeViewType.holdings;
+                });
+              },
+              onRefresh: () {
+                ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+              },
+            );
+          },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => TradePortfolioDiscoveryTemplate(
             portfolios: const <TradePortfolioViewModel>[],

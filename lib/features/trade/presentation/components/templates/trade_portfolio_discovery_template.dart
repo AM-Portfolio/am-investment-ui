@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../models/trade_portfolio_view_model.dart';
+import '../loaders/trade_portfolio_skeleton_loader.dart';
 import '../mobile/trade_portfolio_mobile_card.dart';
 import '../mobile/trade_portfolio_mobile_filter.dart';
 import '../mobile/trade_portfolio_mobile_header.dart';
@@ -37,7 +40,7 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
   @override
   Widget build(BuildContext context) {
     if (widget.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return TradePortfolioSkeletonLoader(isWebView: widget.isWebView);
     }
 
     if (widget.errorMessage != null) {
@@ -573,7 +576,10 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
         itemCount: paginatedPortfolios.length,
         itemBuilder: (context, index) {
           final portfolio = paginatedPortfolios[index];
-          return _buildPortfolioCard(portfolio);
+          return _buildPortfolioCard(portfolio)
+              .animate()
+              .fadeIn(duration: 600.ms, delay: (100 * index).ms)
+              .slideY(begin: 0.1, end: 0, duration: 600.ms, delay: (100 * index).ms);
         },
       );
     },
@@ -607,7 +613,10 @@ class _TradePortfolioDiscoveryTemplateState extends State<TradePortfolioDiscover
             }
 
             // Desktop card
-            return _buildPortfolioCard(portfolio);
+            return _buildPortfolioCard(portfolio)
+                .animate()
+                .fadeIn(duration: 600.ms, delay: (100 * index).ms)
+                .slideX(begin: 0.1, end: 0, duration: 600.ms, delay: (100 * index).ms);
           },
         );
       },
