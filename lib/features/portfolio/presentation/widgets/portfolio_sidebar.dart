@@ -13,40 +13,43 @@ class PortfolioSidebar extends StatelessWidget {
   final Function(PortfolioViewType) onViewChanged;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          'Portfolio Navigation',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  Widget build(BuildContext context) => Container(
+    color: const Color(0xFF1E1E2E), // Dark background
+    child: Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Portfolio Navigation',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
         ),
-      ),
-      _buildNavItem(
-        context,
-        icon: Icons.dashboard,
-        title: 'Overview',
-        viewType: PortfolioViewType.overview,
-      ),
-      _buildNavItem(
-        context,
-        icon: Icons.account_balance_wallet,
-        title: 'Holdings',
-        viewType: PortfolioViewType.holdings,
-      ),
-      _buildNavItem(
-        context,
-        icon: Icons.analytics,
-        title: 'Analytics',
-        viewType: PortfolioViewType.analysis,
-      ),
-      _buildNavItem(
-        context,
-        icon: Icons.grid_view,
-        title: 'Heatmap',
-        viewType: PortfolioViewType.heatmap,
-      ),
-    ],
+        _buildNavItem(
+          context,
+          icon: Icons.dashboard,
+          title: 'Overview',
+          viewType: PortfolioViewType.overview,
+        ),
+        _buildNavItem(
+          context,
+          icon: Icons.account_balance_wallet,
+          title: 'Holdings',
+          viewType: PortfolioViewType.holdings,
+        ),
+        _buildNavItem(
+          context,
+          icon: Icons.analytics,
+          title: 'Analytics',
+          viewType: PortfolioViewType.analysis,
+        ),
+        _buildNavItem(
+          context,
+          icon: Icons.grid_view,
+          title: 'Heatmap',
+          viewType: PortfolioViewType.heatmap,
+        ),
+      ],
+    ),
   );
 
   Widget _buildNavItem(
@@ -56,20 +59,23 @@ class PortfolioSidebar extends StatelessWidget {
     required PortfolioViewType viewType,
   }) {
     final isSelected = selectedView == viewType;
+    const activeColor = Color(0xFF6C5DD3);
+    final inactiveColor = Colors.white.withValues(alpha: 0.7);
 
     return ListTile(
       leading: Icon(
         icon,
-        color: isSelected ? Theme.of(context).primaryColor : null,
+        color: isSelected ? activeColor : inactiveColor,
       ),
       title: Text(
         title,
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Theme.of(context).primaryColor : null,
+          color: isSelected ? activeColor : inactiveColor,
         ),
       ),
       selected: isSelected,
+      selectedTileColor: activeColor.withValues(alpha: 0.1),
       onTap: () => onViewChanged(viewType),
     );
   }

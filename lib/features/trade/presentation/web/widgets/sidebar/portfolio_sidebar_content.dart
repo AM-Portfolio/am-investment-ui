@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../shared/widgets/navigation/sidebar_nav_item.dart';
 import '../../../models/trade_portfolio_view_model.dart';
 import '../../trade_web_screen.dart';
-import 'sidebar_nav_item.dart';
 
 class PortfolioSidebarContent extends StatelessWidget {
   const PortfolioSidebarContent({
@@ -135,35 +135,35 @@ class PortfolioSidebarContent extends StatelessWidget {
       if (isFull) const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
 
       // Main Navigation - Always enabled
-      SidebarNavItem(
+      SidebarNavItem<TradeViewType>(
         icon: Icons.list_alt,
         title: 'Portfolio List',
         subtitle: 'View all portfolios',
-        viewType: TradeViewType.portfolios,
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
+        value: TradeViewType.portfolios,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
         isEnabled: true,
         isCompact: isCompact,
         isCondensed: isCondensed,
       ),
-      SidebarNavItem(
+      SidebarNavItem<TradeViewType>(
         icon: Icons.account_balance_wallet,
         title: 'Holdings',
         subtitle: 'Detailed trade positions',
-        viewType: TradeViewType.holdings,
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
+        value: TradeViewType.holdings,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
         isEnabled: true,
         isCompact: isCompact,
         isCondensed: isCondensed,
       ),
-      SidebarNavItem(
+      SidebarNavItem<TradeViewType>(
         icon: Icons.calendar_today,
         title: 'Calendar',
         subtitle: 'Trade timeline & events',
-        viewType: TradeViewType.calendar,
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
+        value: TradeViewType.calendar,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
         isEnabled: true,
         isCompact: isCompact,
         isCondensed: isCondensed,
@@ -172,13 +172,13 @@ class PortfolioSidebarContent extends StatelessWidget {
       if (isFull) const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
 
       // Trade Management Section
-      SidebarNavItem(
+      SidebarNavItem<TradeViewType>(
         icon: Icons.receipt_long,
         title: 'View Trades',
         subtitle: 'All trade transactions',
-        viewType: TradeViewType.trades,
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
+        value: TradeViewType.trades,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
         isEnabled: true,
         isCompact: isCompact,
         isCondensed: isCondensed,
@@ -203,13 +203,13 @@ class PortfolioSidebarContent extends StatelessWidget {
       ],
 
       // Trade Journal - Always enabled
-      SidebarNavItem(
+      SidebarNavItem<TradeViewType>(
         icon: Icons.book,
         title: 'Trade Journal',
         subtitle: 'Personal trading notes',
-        viewType: TradeViewType.journal,
-        selectedView: selectedView,
-        onViewChanged: onViewChanged,
+        value: TradeViewType.journal,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
         isEnabled: true,
         isCompact: isCompact,
         isCondensed: isCondensed,

@@ -30,20 +30,43 @@ class TradeSidebarContainer extends StatelessWidget {
       final isCondensed = constraints.maxWidth >= 100 && constraints.maxWidth < 200; // Minimal text mode
       final isFull = constraints.maxWidth >= 200; // Full mode
 
-      return Container(
-        color: Theme.of(context).cardColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Sidebar Header
-            _buildHeader(context, isFull, isCondensed),
+      // Define dark theme for sidebar
+      final darkTheme = Theme.of(context).copyWith(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF1E1E2E),
+        cardColor: const Color(0xFF1E1E2E),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF6C5DD3),
+          surface: Color(0xFF1E1E2E),
+          onSurface: Colors.white,
+          primaryContainer: Color(0xFF2C2C3E), // Slightly lighter for containers
+          onPrimaryContainer: Colors.white,
+          outline: Colors.white24,
+        ),
+        textTheme: Theme.of(context).textTheme.apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
+        ),
+        dividerColor: Colors.white.withValues(alpha: 0.1),
+      );
 
-            // Navigation Items
-            Expanded(child: _buildContent(context, isCompact, isCondensed, isFull)),
+      return Theme(
+        data: darkTheme,
+        child: Container(
+          color: const Color(0xFF1E1E2E), // Dark background
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sidebar Header
+              _buildHeader(context, isFull, isCondensed),
 
-            // Footer
-            if (isFull) _buildFooter(context),
-          ],
+              // Navigation Items
+              Expanded(child: _buildContent(context, isCompact, isCondensed, isFull)),
+
+              // Footer
+              if (isFull) _buildFooter(context),
+            ],
+          ),
         ),
       );
     },
@@ -69,18 +92,18 @@ class TradeSidebarContainer extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
-          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+          color: Colors.transparent,
+          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary, size: 18),
+              child: const Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 18),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -88,14 +111,14 @@ class TradeSidebarContainer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     'Trade Analysis',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
                   ),
                   Text(
                     'Portfolio Management',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 11,
                     ),
                   ),
@@ -109,17 +132,17 @@ class TradeSidebarContainer extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
-          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+          color: Colors.transparent,
+          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         ),
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary, size: 18),
+            child: const Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 18),
           ),
         ),
       );
@@ -127,10 +150,10 @@ class TradeSidebarContainer extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
-          border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+          color: Colors.transparent,
+          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
         ),
-        child: Center(child: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.primary, size: 20)),
+        child: const Center(child: Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 20)),
       );
     }
   }
@@ -138,7 +161,7 @@ class TradeSidebarContainer extends StatelessWidget {
   Widget _buildFooter(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
+      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

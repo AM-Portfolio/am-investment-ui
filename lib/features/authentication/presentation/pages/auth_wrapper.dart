@@ -10,6 +10,7 @@ import '../../../trade/presentation/mobile/trade_mobile_screen.dart';
 import '../../../trade/presentation/web/trade_web_screen.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
+import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
 import 'login_screen.dart';
 
 /// Authentication-aware wrapper that manages authentication state
@@ -71,7 +72,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         AppLogger.debug('📊 Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PortfolioScreen(userId: userId);
       case 'Dashboard':
-        return _buildPlaceholderScreen('Dashboard');
+        return DashboardWebPage(userId: userId);
       case 'Trade':
         AppLogger.debug('📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"', tag: 'AuthWrapper');
         return PlatformUtils.isWeb

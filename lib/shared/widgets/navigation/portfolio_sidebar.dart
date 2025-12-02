@@ -22,9 +22,9 @@ class PortfolioSidebar extends StatelessWidget {
     return Container(
       width: 220,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: const Color(0xFF1E1E2E), // Dark background
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -40,6 +40,7 @@ class PortfolioSidebar extends StatelessWidget {
                 'Portfolio',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -75,7 +76,8 @@ class PortfolioSidebar extends StatelessWidget {
     IconData icon,
     bool isActive,
   ) {
-    final theme = Theme.of(context);
+    const activeColor = Color(0xFF6C5DD3);
+    final inactiveColor = Colors.white.withValues(alpha: 0.7);
 
     return InkWell(
       onTap: () => onPageSelected(title),
@@ -83,11 +85,11 @@ class PortfolioSidebar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
           color: isActive
-              ? theme.colorScheme.primary.withOpacity(0.1)
+              ? activeColor.withValues(alpha: 0.1)
               : Colors.transparent,
           border: Border(
             left: BorderSide(
-              color: isActive ? theme.colorScheme.primary : Colors.transparent,
+              color: isActive ? activeColor : Colors.transparent,
               width: 4,
             ),
           ),
@@ -97,18 +99,14 @@ class PortfolioSidebar extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isActive
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withOpacity(0.7),
+              color: isActive ? activeColor : inactiveColor,
             ),
             const SizedBox(width: 12),
             Text(
               title,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: TextStyle(
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.7),
+                color: isActive ? activeColor : inactiveColor,
               ),
             ),
           ],

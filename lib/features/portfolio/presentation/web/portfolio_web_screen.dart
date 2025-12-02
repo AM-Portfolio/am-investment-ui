@@ -59,7 +59,8 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
+    appBar: null, // Hidden as per user request for cleaner UI
+    /* AppBar(
       title: Text(widget.selectedPortfolioName ?? 'Portfolio'),
       actions: [
         // Portfolio selector dropdown
@@ -102,7 +103,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
           },
         ),
       ],
-    ),
+    ), */
     body: Row(
       children: [
         // Left sidebar for navigation
