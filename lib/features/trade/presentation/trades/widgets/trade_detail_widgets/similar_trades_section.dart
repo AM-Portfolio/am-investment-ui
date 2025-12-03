@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/trade_internal_providers.dart';
-import '../../../holdings/components/trade_holdings_template.dart';
+import '../../../holdings/components/trade_holdings_advanced_template.dart';
 import '../../../models/trade_holding_view_model.dart';
 
 class SimilarTradesSection extends ConsumerWidget {
@@ -45,15 +45,19 @@ class SimilarTradesSection extends ConsumerWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Header
               _buildHeader(context, similarTrades.length, filterSymbol),
-              // Table
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: SizedBox(
-                  height: 400,
-                  child: TradeHoldingsTemplate(holdings: similarTrades, isLoading: false, itemsPerPage: 10),
+              // Advanced Table with constrained height
+              SizedBox(
+                height: 500,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  child: TradeHoldingsAdvancedTemplate(holdings: similarTrades, isLoading: false, itemsPerPage: 10),
                 ),
               ),
             ],
