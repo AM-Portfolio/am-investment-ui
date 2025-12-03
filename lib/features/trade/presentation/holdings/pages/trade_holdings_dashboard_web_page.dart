@@ -8,7 +8,7 @@ import '../../../providers/trade_internal_providers.dart';
 import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../models/trade_holding_view_model.dart';
 import '../../widgets/filter_panel.dart';
-import '../components/trade_holdings_template.dart';
+import '../components/trade_holdings_advanced_template.dart';
 
 class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
   const TradeHoldingsDashboardWebPage({required this.userId, required this.portfolioId, super.key});
@@ -81,7 +81,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
               // Apply filters to holdings
               final filteredHoldings = _applyFilters(tradeHoldings.holdings, _currentFilter);
 
-              return TradeHoldingsTemplate(
+              return TradeHoldingsAdvancedTemplate(
                 holdings: filteredHoldings,
                 isLoading: false,
                 onHoldingSelected: (holding) => _showHoldingDetails(context, holding),
@@ -91,7 +91,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => TradeHoldingsTemplate(
+            error: (error, stack) => TradeHoldingsAdvancedTemplate(
               holdings: const [],
               isLoading: false,
               errorMessage: error.toString(),
