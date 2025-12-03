@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import '../../../internal/domain/entities/notebook_item.dart';
 import '../../../internal/domain/entities/notebook_tag.dart';
+import '../../../internal/domain/entities/journal_entry.dart';
 
 class JournalNavigationSidebar extends StatelessWidget {
   const JournalNavigationSidebar({
@@ -12,6 +14,7 @@ class JournalNavigationSidebar extends StatelessWidget {
     this.folders = const [],
     this.tags = const [],
     this.onAddFolder,
+    this.onEntryDropped,
     super.key,
   });
 
@@ -22,6 +25,7 @@ class JournalNavigationSidebar extends StatelessWidget {
   final List<NotebookItem> folders;
   final List<NotebookTag> tags;
   final VoidCallback? onAddFolder;
+  final Function(JournalEntry entry, String folderId)? onEntryDropped;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +123,9 @@ class JournalNavigationSidebar extends StatelessWidget {
                     isSelected: selectedFolder == 'All notes',
                     isCollapsed: isCollapsed,
                     onTap: () => onFolderSelected('All notes'),
+                    onEntryDropped: onEntryDropped != null 
+                      ? (entry) => onEntryDropped!(entry, 'all-notes')
+                      : null,
                   ),
                   JournalFolderItem(
                     title: 'Trade Notes',
@@ -126,6 +133,9 @@ class JournalNavigationSidebar extends StatelessWidget {
                     isSelected: selectedFolder == 'Trade Notes',
                     isCollapsed: isCollapsed,
                     onTap: () => onFolderSelected('Trade Notes'),
+                    onEntryDropped: onEntryDropped != null 
+                      ? (entry) => onEntryDropped!(entry, 'trade-notes')
+                      : null,
                   ),
                   JournalFolderItem(
                     title: 'Daily Journal',
@@ -133,6 +143,9 @@ class JournalNavigationSidebar extends StatelessWidget {
                     isSelected: selectedFolder == 'Daily Journal',
                     isCollapsed: isCollapsed,
                     onTap: () => onFolderSelected('Daily Journal'),
+                    onEntryDropped: onEntryDropped != null 
+                      ? (entry) => onEntryDropped!(entry, 'daily-journal')
+                      : null,
                   ),
                   JournalFolderItem(
                     title: 'Sessions Recap',
@@ -140,18 +153,32 @@ class JournalNavigationSidebar extends StatelessWidget {
                     isSelected: selectedFolder == 'Sessions Recap',
                     isCollapsed: isCollapsed,
                     onTap: () => onFolderSelected('Sessions Recap'),
+                    onEntryDropped: onEntryDropped != null 
+                      ? (entry) => onEntryDropped!(entry, 'sessions-recap')
+                      : null,
                   ),
                   
                   if (!isCollapsed) ...[
                     const Divider(height: 32),
                     
-                    // Dynamic Folders
-                    ...folders.map((folder) => JournalFolderItem(
-                      title: folder.title,
-                      isSelected: selectedFolder == folder.title, // Or use ID
-                      isCollapsed: isCollapsed,
-                      onTap: () => onFolderSelected(folder.title), // Or pass ID
-                    )),
+                    // Dynamic Folders with nested entries
+                    ...folders.where((f) => f.type.toString().contains('FOLDER')).map((folder) {
+                      // Get entries (NOTE items) that belong to this folder
+                      final folderEntries = folders.where((item) => 
+                        item.parentId == folder.id && 
+                        item.type.toString().contains('NOTE')
+                      ).toList();
+                      
+                      return ExpandableFolderItem(
+                        folder: folder,
+                        entries: folderEntries,
+                        isSelected: selectedFolder == folder.title,
+                        onTap: () => onFolderSelected(folder.title),
+                        onEntryDropped: onEntryDropped != null && folder.id != null
+                          ? (entry) => onEntryDropped!(entry, folder.id!)
+                          : null,
+                      );
+                    }),
                     
                     const SizedBox(height: 24),
                     _buildSectionHeader(context, 'Tags'),
@@ -243,6 +270,7 @@ class JournalFolderItem extends StatefulWidget {
     required this.isCollapsed,
     required this.onTap,
     this.icon,
+    this.onEntryDropped,
     super.key,
   });
 
@@ -251,6 +279,7 @@ class JournalFolderItem extends StatefulWidget {
   final bool isSelected;
   final bool isCollapsed;
   final VoidCallback onTap;
+  final Function(JournalEntry)? onEntryDropped;
 
   @override
   State<JournalFolderItem> createState() => _JournalFolderItemState();
@@ -258,6 +287,7 @@ class JournalFolderItem extends StatefulWidget {
 
 class _JournalFolderItemState extends State<JournalFolderItem> {
   bool _isHovered = false;
+  bool _isDragOver = false;
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +298,7 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
             ? Icon(
                 widget.icon,
                 size: 20,
-                color: widget.isSelected || _isHovered
+                color: widget.isSelected || _isHovered || _isDragOver
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               )
@@ -288,7 +318,7 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
             Icon(
               widget.icon,
               size: 18,
-              color: widget.isSelected || _isHovered
+              color: widget.isSelected || _isHovered || _isDragOver
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -308,7 +338,7 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
             child: Text(
               widget.title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: widget.isSelected || _isHovered
+                    color: widget.isSelected || _isHovered || _isDragOver
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.onSurface,
                     fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -317,13 +347,17 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (widget.isSelected)
-            Icon(Icons.more_horiz, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          if (widget.isSelected || _isDragOver)
+            Icon(
+              _isDragOver ? Icons.add_circle_outline : Icons.more_horiz, 
+              size: 16, 
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ],
       );
     }
 
-    return Tooltip(
+    Widget folderItem = Tooltip(
       message: widget.title,
       waitDuration: const Duration(milliseconds: 500),
       child: MouseRegion(
@@ -338,16 +372,48 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
             decoration: BoxDecoration(
               color: widget.isSelected
                   ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
-                  : _isHovered
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                      : null,
+                  : _isDragOver
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                      : _isHovered
+                          ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                          : null,
               borderRadius: BorderRadius.circular(8),
+              border: _isDragOver
+                  ? Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    )
+                  : null,
             ),
             child: content,
           ),
         ),
       ).animate().fadeIn(),
     );
+
+    // Wrap with DragTarget if onEntryDropped is provided
+    if (widget.onEntryDropped != null) {
+      return DragTarget<JournalEntry>(
+        onWillAccept: (entry) => entry != null,
+        onAccept: (entry) {
+          widget.onEntryDropped!(entry);
+          setState(() => _isDragOver = false);
+        },
+        onLeave: (_) {
+          setState(() => _isDragOver = false);
+        },
+        onMove: (_) {
+          if (!_isDragOver) {
+            setState(() => _isDragOver = true);
+          }
+        },
+        builder: (context, candidateData, rejectedData) {
+          return folderItem;
+        },
+      );
+    }
+
+    return folderItem;
   }
 
   Color _getColorForFolder(String title) {
@@ -361,5 +427,245 @@ class _JournalFolderItemState extends State<JournalFolderItem> {
       Colors.teal,
     ];
     return colors[title.hashCode % colors.length];
+  }
+}
+
+// Expandable Folder Item with nested entries
+class ExpandableFolderItem extends StatefulWidget {
+  const ExpandableFolderItem({
+    required this.folder,
+    required this.entries,
+    required this.isSelected,
+    required this.onTap,
+    this.onEntryDropped,
+    super.key,
+  });
+
+  final NotebookItem folder;
+  final List<NotebookItem> entries;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final Function(JournalEntry)? onEntryDropped;
+
+  @override
+  State<ExpandableFolderItem> createState() => _ExpandableFolderItemState();
+}
+
+class _ExpandableFolderItemState extends State<ExpandableFolderItem> {
+  bool _isExpanded = false;
+  bool _isHovered = false;
+  bool _isDragOver = false;
+
+  Color _getFolderColor() {
+    if (widget.folder.metadata != null && widget.folder.metadata!['color'] != null) {
+      try {
+        final colorHex = widget.folder.metadata!['color'] as String;
+        return Color(int.parse('0x$colorHex'));
+      } catch (e) {
+        return Colors.blue;
+      }
+    }
+    return Colors.blue;
+  }
+
+  IconData _getFolderIcon() {
+    if (widget.folder.metadata != null && widget.folder.metadata!['icon'] != null) {
+      try {
+        final iconCode = widget.folder.metadata!['icon'] as int;
+        return IconData(iconCode, fontFamily: 'MaterialIcons');
+      } catch (e) {
+        return Icons.folder;
+      }
+    }
+    return Icons.folder;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final folderColor = _getFolderColor();
+    final folderIcon = _getFolderIcon();
+    final entryCount = widget.entries.length;
+
+    Widget folderHeader = MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _isExpanded = !_isExpanded);
+          widget.onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? folderColor.withOpacity(0.15)
+                : _isDragOver
+                    ? folderColor.withOpacity(0.2)
+                    : _isHovered
+                        ? folderColor.withOpacity(0.08)
+                        : null,
+            borderRadius: BorderRadius.circular(8),
+            border: _isDragOver
+                ? Border.all(color: folderColor, width: 2)
+                : null,
+          ),
+          child: Row(
+            children: [
+              // Expand/Collapse icon
+              AnimatedRotation(
+                turns: _isExpanded ? 0.25 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: _isHovered || widget.isSelected || _isDragOver
+                      ? folderColor
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Folder icon
+              Icon(
+                folderIcon,
+                size: 18,
+                color: _isHovered || widget.isSelected || _isDragOver
+                    ? folderColor
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              // Folder title
+              Expanded(
+                child: Text(
+                  widget.folder.title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: widget.isSelected || _isHovered || _isDragOver
+                            ? folderColor
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Entry count badge
+              if (entryCount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: folderColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$entryCount',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: folderColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn();
+
+    // Wrap with DragTarget
+    Widget folderWithDragTarget = folderHeader;
+    if (widget.onEntryDropped != null) {
+      folderWithDragTarget = DragTarget<JournalEntry>(
+        onWillAccept: (entry) => entry != null,
+        onAccept: (entry) {
+          widget.onEntryDropped!(entry);
+          setState(() {
+            _isDragOver = false;
+            _isExpanded = true; // Auto-expand on drop
+          });
+        },
+        onLeave: (_) => setState(() => _isDragOver = false),
+        onMove: (_) {
+          if (!_isDragOver) setState(() => _isDragOver = true);
+        },
+        builder: (context, candidateData, rejectedData) => folderHeader,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        folderWithDragTarget,
+        // Nested entries
+        if (_isExpanded && widget.entries.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 24, top: 4, bottom: 4),
+            child: Column(
+              children: widget.entries.map((entry) {
+                return _buildEntryCard(context, entry, folderColor);
+              }).toList(),
+            ),
+          ).animate().fadeIn(duration: 200.ms).slideY(begin: -0.1, end: 0),
+      ],
+    );
+  }
+
+  Widget _buildEntryCard(BuildContext context, NotebookItem entry, Color folderColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: folderColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 24,
+            decoration: BoxDecoration(
+              color: folderColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.title,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (entry.metadata != null && entry.metadata!['entryDate'] != null)
+                  Text(
+                    DateFormat('MMM dd, yyyy').format(
+                      DateTime.parse(entry.metadata!['entryDate'] as String),
+                    ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.article_outlined,
+            size: 16,
+            color: folderColor.withOpacity(0.6),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 50.ms);
   }
 }

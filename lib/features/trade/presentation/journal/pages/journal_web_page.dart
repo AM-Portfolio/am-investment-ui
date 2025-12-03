@@ -1,10 +1,14 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 
 import '../../../journal_providers.dart';
 import '../../../notebook_providers.dart';
+import '../../../internal/domain/enums/notebook_item_type.dart';
+import '../../../internal/domain/entities/notebook_item.dart';
+import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../config/environment.dart';
 import '../../cubit/journal/journal_cubit.dart';
@@ -12,6 +16,7 @@ import '../../cubit/journal/journal_state.dart';
 import '../../notebook/cubit/notebook_cubit.dart';
 import '../../notebook/cubit/notebook_state.dart';
 import '../widgets/journal_three_column_layout.dart';
+import '../widgets/add_folder_dialog.dart';
 
 class JournalWebPage extends ConsumerStatefulWidget {
   const JournalWebPage({required this.userId, this.portfolioId, super.key});
@@ -51,6 +56,99 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     _notebookCubit.loadNotebook(widget.userId);
   }
 
+  Future<void> _handleAddFolder() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AddFolderDialog(userId: widget.userId),
+    );
+
+    if (result != null && mounted) {
+      final folderName = result['name'] as String;
+      final color = result['color'] as Color;
+      final icon = result['icon'] as IconData;
+
+      // Create metadata to store color and icon
+      final metadata = {
+        'color': color.value.toRadixString(16),
+        'icon': icon.codePoint,
+      };
+
+      // Create NotebookItem for the folder
+      final folder = NotebookItem(
+        userId: widget.userId,
+        type: NotebookItemType.FOLDER,
+        title: folderName,
+        metadata: metadata,
+      );
+
+      // Call cubit to create folder
+      await _notebookCubit.createItem(folder);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Folder "$folderName" created successfully'),
+            backgroundColor: color,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleEntryDropped(JournalEntry entry, String folderId) async {
+    // Create a NOTE item in the folder that references the journal entry
+    final note = NotebookItem(
+      userId: widget.userId,
+      type: NotebookItemType.NOTE,
+      title: 'Journal Entry - ${DateFormat('MMM dd, yyyy').format(entry.entryDate)}',
+      parentId: folderId,
+      content: entry.content ?? '',
+      metadata: {
+        'journalEntryId': entry.id,
+        'linkedAt': DateTime.now().toIso8601String(),
+        'entryDate': entry.entryDate.toIso8601String(),
+      },
+      tagIds: entry.tagIds,
+    );
+
+    // Call cubit to create note
+    await _notebookCubit.createItem(note);
+    
+    // Refresh notebook to show updated folder structure
+    await _notebookCubit.loadNotebook(widget.userId);
+
+    // Show success message
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Journal entry added to folder'),
+              ),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'Undo',
+            textColor: Colors.white,
+            onPressed: () {
+              // TODO: Implement undo
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
         providers: [
@@ -89,6 +187,8 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
                           userId: widget.userId,
                           journalCubit: _journalCubit,
                           notebookCubit: _notebookCubit,
+                          onAddFolder: _handleAddFolder,
+                          onEntryDropped: _handleEntryDropped,
                         ),
                     );
                   },

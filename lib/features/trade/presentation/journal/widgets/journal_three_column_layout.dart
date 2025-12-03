@@ -16,6 +16,8 @@ class JournalThreeColumnLayout extends StatefulWidget {
     required this.userId,
     required this.journalCubit,
     required this.notebookCubit,
+    this.onAddFolder,
+    this.onEntryDropped,
     super.key,
   });
 
@@ -23,6 +25,8 @@ class JournalThreeColumnLayout extends StatefulWidget {
   final String userId;
   final JournalCubit journalCubit;
   final NotebookCubit notebookCubit;
+  final VoidCallback? onAddFolder;
+  final Function(JournalEntry entry, String folderId)? onEntryDropped;
 
   @override
   State<JournalThreeColumnLayout> createState() => _JournalThreeColumnLayoutState();
@@ -83,9 +87,8 @@ class _JournalThreeColumnLayoutState extends State<JournalThreeColumnLayout> {
                 onToggleCollapse: () => setState(() => _isLeftSidebarCollapsed = !_isLeftSidebarCollapsed),
                 folders: folders,
                 tags: tags,
-                onAddFolder: () {
-                  // TODO: Show add folder dialog
-                },
+                onAddFolder: widget.onAddFolder,
+                onEntryDropped: widget.onEntryDropped,
               );
             },
           ),
