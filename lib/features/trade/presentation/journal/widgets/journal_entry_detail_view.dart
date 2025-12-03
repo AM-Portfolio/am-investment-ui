@@ -69,65 +69,7 @@ class JournalEntryDetailView extends StatelessWidget {
                 const Divider(),
                 const SizedBox(height: 16),
                 
-                // P&L and Stats (Mocked/Placeholder as per plan)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Net P&L \$1,330.00', // Placeholder
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: Colors.green, // Hardcoded for now
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Created: $createdStr  Last updated: $updatedStr',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Chart Placeholder
-                          Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.green.withOpacity(0.2),
-                                  Colors.green.withOpacity(0.0),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              border: Border(bottom: BorderSide(color: Colors.green, width: 2)),
-                            ),
-                            child: Center(child: Text('Chart Placeholder', style: TextStyle(color: Colors.green))),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 32),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          _buildStatRow(context, 'Total Trades', '11'),
-                          _buildStatRow(context, 'Winrate', '54.55%'),
-                          _buildStatRow(context, 'Winners', '6'),
-                          _buildStatRow(context, 'Losers', '5'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
+
                 
                 // Action Buttons
                 Row(
@@ -163,16 +105,5 @@ class JournalEntryDetailView extends StatelessWidget {
     ).animate().fadeIn(duration: 400.ms);
   }
 
-  Widget _buildStatRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+
 }

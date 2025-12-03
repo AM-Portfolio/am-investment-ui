@@ -39,7 +39,7 @@ class TradeFormMapper {
     required String? strategy,
     required String? notes,
     required String? portfolioId,
-    required List<Attachment> attachments,
+    required List<String> attachments,
   }) {
     // Construct InstrumentInfo
     final instrumentInfo = InstrumentInfo(
