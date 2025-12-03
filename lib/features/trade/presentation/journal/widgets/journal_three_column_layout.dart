@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
+import '../../../internal/domain/entities/notebook_item.dart';
+import '../../../internal/domain/entities/notebook_tag.dart';
 import '../../cubit/journal/journal_cubit.dart';
+import '../../notebook/cubit/notebook_cubit.dart';
+import '../../notebook/cubit/notebook_state.dart';
 import 'journal_entry_detail_view.dart';
 import 'journal_entry_list_view.dart';
 import 'journal_navigation_sidebar.dart';
@@ -9,13 +14,15 @@ class JournalThreeColumnLayout extends StatefulWidget {
   const JournalThreeColumnLayout({
     required this.entries,
     required this.userId,
-    required this.cubit,
+    required this.journalCubit,
+    required this.notebookCubit,
     super.key,
   });
 
   final List<JournalEntry> entries;
   final String userId;
-  final JournalCubit cubit;
+  final JournalCubit journalCubit;
+  final NotebookCubit notebookCubit;
 
   @override
   State<JournalThreeColumnLayout> createState() => _JournalThreeColumnLayoutState();
@@ -63,11 +70,24 @@ class _JournalThreeColumnLayoutState extends State<JournalThreeColumnLayout> {
       child: Row(
         children: [
           // Left Column: Navigation
-          JournalNavigationSidebar(
-            selectedFolder: _selectedFolder,
-            onFolderSelected: (folder) => setState(() => _selectedFolder = folder),
-            isCollapsed: _isLeftSidebarCollapsed,
-            onToggleCollapse: () => setState(() => _isLeftSidebarCollapsed = !_isLeftSidebarCollapsed),
+          BlocBuilder<NotebookCubit, NotebookState>(
+            bloc: widget.notebookCubit,
+            builder: (context, state) {
+              final folders = state is NotebookLoaded ? state.items : <NotebookItem>[]; // Assuming items are folders for now, or filter by type
+              final tags = state is NotebookLoaded ? state.tags : <NotebookTag>[];
+              
+              return JournalNavigationSidebar(
+                selectedFolder: _selectedFolder,
+                onFolderSelected: (folder) => setState(() => _selectedFolder = folder),
+                isCollapsed: _isLeftSidebarCollapsed,
+                onToggleCollapse: () => setState(() => _isLeftSidebarCollapsed = !_isLeftSidebarCollapsed),
+                folders: folders,
+                tags: tags,
+                onAddFolder: () {
+                  // TODO: Show add folder dialog
+                },
+              );
+            },
           ),
           
           VerticalDivider(width: 1, color: Theme.of(context).dividerColor.withOpacity(0.2)),
@@ -86,7 +106,7 @@ class _JournalThreeColumnLayoutState extends State<JournalThreeColumnLayout> {
             child: JournalEntryDetailView(
               entry: selectedEntry,
               userId: widget.userId,
-              cubit: widget.cubit,
+              cubit: widget.journalCubit,
             ),
           ),
         ],

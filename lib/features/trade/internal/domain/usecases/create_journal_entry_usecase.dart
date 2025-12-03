@@ -17,6 +17,7 @@ class CreateJournalEntryUseCase {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) => _repository.createJournalEntry(
     userId: userId,
     title: title,
@@ -28,5 +29,6 @@ class CreateJournalEntryUseCase {
     imageUrls: imageUrls,
     attachments: attachments,
     relatedTradeIds: relatedTradeIds,
+    tagIds: tagIds,
   );
 }

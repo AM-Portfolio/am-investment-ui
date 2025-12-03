@@ -44,6 +44,7 @@ class JournalEntry with _$JournalEntry {
     @Deprecated('Use attachments instead') @Default([]) List<String> imageUrls,
     @Default([]) List<JournalAttachment> attachments,
     @Default([]) List<String> relatedTradeIds,
+    @Default([]) List<String> tagIds,
   }) = _JournalEntry;
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) => _$JournalEntryFromJson(json);

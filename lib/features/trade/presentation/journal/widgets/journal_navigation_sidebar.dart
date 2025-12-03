@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../internal/domain/entities/notebook_item.dart';
+import '../../../internal/domain/entities/notebook_tag.dart';
 
 class JournalNavigationSidebar extends StatelessWidget {
   const JournalNavigationSidebar({
@@ -7,6 +9,9 @@ class JournalNavigationSidebar extends StatelessWidget {
     required this.onToggleCollapse,
     this.selectedFolder = 'Daily Journal',
     this.isCollapsed = false,
+    this.folders = const [],
+    this.tags = const [],
+    this.onAddFolder,
     super.key,
   });
 
@@ -14,6 +19,9 @@ class JournalNavigationSidebar extends StatelessWidget {
   final VoidCallback onToggleCollapse;
   final String selectedFolder;
   final bool isCollapsed;
+  final List<NotebookItem> folders;
+  final List<NotebookTag> tags;
+  final VoidCallback? onAddFolder;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +89,7 @@ class JournalNavigationSidebar extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: onAddFolder ?? () {},
                 icon: const Icon(Icons.create_new_folder_outlined, size: 18),
                 label: const Text('Add folder'),
                 style: OutlinedButton.styleFrom(
@@ -103,6 +111,8 @@ class JournalNavigationSidebar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!isCollapsed) _buildSectionHeader(context, 'Folders'),
+                  
+                  // Default/System Folders
                   JournalFolderItem(
                     title: 'All notes',
                     icon: Icons.notes,
@@ -131,24 +141,23 @@ class JournalNavigationSidebar extends StatelessWidget {
                     isCollapsed: isCollapsed,
                     onTap: () => onFolderSelected('Sessions Recap'),
                   ),
+                  
                   if (!isCollapsed) ...[
                     const Divider(height: 32),
-                    JournalFolderItem(title: 'Quarterly Goals 📅', isSelected: selectedFolder == 'Quarterly Goals 📅', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Quarterly Goals 📅')),
-                    JournalFolderItem(title: 'Trading Goals 🚀', isSelected: selectedFolder == 'Trading Goals 🚀', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Trading Goals 🚀')),
-                    JournalFolderItem(title: 'Trading Plan 📝', isSelected: selectedFolder == 'Trading Plan 📝', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Trading Plan 📝')),
-                    JournalFolderItem(title: '2023 Goals + Plan 🗺️', isSelected: selectedFolder == '2023 Goals + Plan 🗺️', isCollapsed: isCollapsed, onTap: () => onFolderSelected('2023 Goals + Plan 🗺️')),
-                    JournalFolderItem(title: 'Notes 🍂', isSelected: selectedFolder == 'Notes 🍂', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Notes 🍂')),
-                    JournalFolderItem(title: 'Plan of Action ✍️', isSelected: selectedFolder == 'Plan of Action ✍️', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Plan of Action ✍️')),
-                    JournalFolderItem(title: 'Mistakes Reflection', isSelected: selectedFolder == 'Mistakes Reflection', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Mistakes Reflection')),
+                    
+                    // Dynamic Folders
+                    ...folders.map((folder) => JournalFolderItem(
+                      title: folder.title,
+                      isSelected: selectedFolder == folder.title, // Or use ID
+                      isCollapsed: isCollapsed,
+                      onTap: () => onFolderSelected(folder.title), // Or pass ID
+                    )),
                     
                     const SizedBox(height: 24),
                     _buildSectionHeader(context, 'Tags'),
-                    _buildTagItem(context, 'FOMC', 1),
-                    _buildTagItem(context, 'Goals', 1),
-                    _buildTagItem(context, 'Market News', 1),
-                    _buildTagItem(context, 'Mistakes', 1),
-                    _buildTagItem(context, 'Plan of Action', 1),
-                    _buildTagItem(context, 'Trading Rules', 1),
+                    
+                    // Dynamic Tags
+                    ...tags.map((tag) => _buildTagItem(context, tag.name, 0)), // Count placeholder
                     
                     const SizedBox(height: 16),
                     const SizedBox(height: 16),

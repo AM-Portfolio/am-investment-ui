@@ -23,6 +23,7 @@ class JournalRepositoryImpl implements JournalRepository {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) async {
     AppLogger.methodEntry('createJournalEntry', tag: 'JournalRepository', params: {'userId': userId, 'title': title});
 
@@ -38,6 +39,7 @@ class JournalRepositoryImpl implements JournalRepository {
         imageUrls: imageUrls,
         attachments: attachments?.map(JournalEntryMapper.toAttachmentDto).toList(),
         relatedTradeIds: relatedTradeIds,
+        tagIds: tagIds,
       );
 
       final dto = await _remoteDataSource.createJournalEntry(request);
@@ -94,6 +96,7 @@ class JournalRepositoryImpl implements JournalRepository {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) async {
     AppLogger.methodEntry('updateJournalEntry', tag: 'JournalRepository', params: {'entryId': entryId});
 
@@ -109,6 +112,7 @@ class JournalRepositoryImpl implements JournalRepository {
         imageUrls: imageUrls,
         attachments: attachments?.map(JournalEntryMapper.toAttachmentDto).toList(),
         relatedTradeIds: relatedTradeIds,
+        tagIds: tagIds,
       );
 
       final dto = await _remoteDataSource.updateJournalEntry(entryId, request);

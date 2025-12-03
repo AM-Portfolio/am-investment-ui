@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../core/utils/logger.dart';
 
 import '../../../internal/domain/entities/journal_entry.dart';
 import '../../../internal/domain/usecases/create_journal_entry_usecase.dart';
@@ -21,11 +22,14 @@ class JournalCubit extends Cubit<JournalState> {
   final DeleteJournalEntryUseCase deleteJournalEntry;
 
   Future<void> loadJournalEntries(String userId) async {
+    AppLogger.methodEntry('loadJournalEntries', tag: 'JournalCubit', params: {'userId': userId});
     emit(const JournalState.loading());
     try {
       final entries = await getJournalEntries.getByUser(userId);
+      AppLogger.info('Loaded ${entries.length} journal entries', tag: 'JournalCubit');
       emit(JournalState.loaded(entries));
     } catch (e) {
+      AppLogger.error('Failed to load journal entries', tag: 'JournalCubit', error: e);
       emit(JournalState.error(e.toString()));
     }
   }
@@ -41,7 +45,9 @@ class JournalCubit extends Cubit<JournalState> {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) async {
+    AppLogger.methodEntry('addJournalEntry', tag: 'JournalCubit', params: {'userId': userId, 'title': title});
     emit(const JournalState.loading());
     try {
       await createJournalEntry(
@@ -55,10 +61,13 @@ class JournalCubit extends Cubit<JournalState> {
         imageUrls: imageUrls,
         attachments: attachments,
         relatedTradeIds: relatedTradeIds,
+        tagIds: tagIds,
       );
+      AppLogger.info('Journal entry added successfully', tag: 'JournalCubit');
       emit(const JournalState.success('Journal entry created successfully'));
       await loadJournalEntries(userId);
     } catch (e) {
+      AppLogger.error('Failed to add journal entry', tag: 'JournalCubit', error: e);
       emit(JournalState.error(e.toString()));
     }
   }
@@ -75,7 +84,9 @@ class JournalCubit extends Cubit<JournalState> {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) async {
+    AppLogger.methodEntry('editJournalEntry', tag: 'JournalCubit', params: {'entryId': entryId});
     emit(const JournalState.loading());
     try {
       await updateJournalEntry(
@@ -90,21 +101,27 @@ class JournalCubit extends Cubit<JournalState> {
         imageUrls: imageUrls,
         attachments: attachments,
         relatedTradeIds: relatedTradeIds,
+        tagIds: tagIds,
       );
+      AppLogger.info('Journal entry edited successfully', tag: 'JournalCubit');
       emit(const JournalState.success('Journal entry updated successfully'));
       await loadJournalEntries(userId);
     } catch (e) {
+      AppLogger.error('Failed to edit journal entry', tag: 'JournalCubit', error: e);
       emit(JournalState.error(e.toString()));
     }
   }
 
   Future<void> removeJournalEntry(String userId, String entryId) async {
+    AppLogger.methodEntry('removeJournalEntry', tag: 'JournalCubit', params: {'entryId': entryId});
     emit(const JournalState.loading());
     try {
       await deleteJournalEntry(entryId);
+      AppLogger.info('Journal entry removed successfully', tag: 'JournalCubit');
       emit(const JournalState.success('Journal entry deleted successfully'));
       await loadJournalEntries(userId);
     } catch (e) {
+      AppLogger.error('Failed to remove journal entry', tag: 'JournalCubit', error: e);
       emit(JournalState.error(e.toString()));
     }
   }

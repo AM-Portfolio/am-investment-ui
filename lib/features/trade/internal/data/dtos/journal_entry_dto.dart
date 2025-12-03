@@ -53,6 +53,7 @@ class TradeJournalEntryRequestDto {
     this.imageUrls,
     this.attachments,
     this.relatedTradeIds,
+    this.tagIds,
   });
 
   factory TradeJournalEntryRequestDto.fromJson(Map<String, dynamic> json) =>
@@ -69,6 +70,7 @@ class TradeJournalEntryRequestDto {
   final List<String>? imageUrls;
   final List<JournalAttachmentDto>? attachments;
   final List<String>? relatedTradeIds;
+  final List<String>? tagIds;
 
   Map<String, dynamic> toJson() => _$TradeJournalEntryRequestDtoToJson(this);
 }
@@ -90,6 +92,7 @@ class TradeJournalEntryResponseDto {
     this.imageUrls,
     this.attachments,
     this.relatedTradeIds,
+    this.tagIds,
   });
 
   factory TradeJournalEntryResponseDto.fromJson(Map<String, dynamic> json) =>
@@ -107,6 +110,7 @@ class TradeJournalEntryResponseDto {
   final List<String>? imageUrls;
   final List<JournalAttachmentDto>? attachments;
   final List<String>? relatedTradeIds;
+  final List<String>? tagIds;
   final String createdAt;
   final String updatedAt;
 

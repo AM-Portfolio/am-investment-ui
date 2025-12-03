@@ -201,16 +201,28 @@ class _JournalEntryItemState extends State<JournalEntryItem> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: widget.isSelected
                 ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-                : _isHovered
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                    : null,
-            border: Border(
-              bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+                : Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: widget.isSelected
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                  : _isHovered
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                      : Theme.of(context).dividerColor.withOpacity(0.1),
             ),
+            boxShadow: [
+              if (_isHovered)
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

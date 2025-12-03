@@ -71,7 +71,7 @@ class EnvironmentConfig {
           'appTitle': '[DEV] AM Investment',
           'analyticsEnabled': false,
           'refreshInterval': 30, // seconds
-          'useMockData': true,
+          'useMockData': false,
         };
       case Environment.preprod:
         return {

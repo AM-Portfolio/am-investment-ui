@@ -50,6 +50,7 @@ class JournalEntryMapper {
     imageUrls: dto.imageUrls ?? [],
     attachments: dto.attachments?.map(fromAttachmentDto).toList() ?? [],
     relatedTradeIds: dto.relatedTradeIds ?? [],
+    tagIds: dto.tagIds ?? [],
     createdAt: DateTime.parse(dto.createdAt),
     updatedAt: DateTime.parse(dto.updatedAt),
   );
@@ -68,5 +69,6 @@ class JournalEntryMapper {
     imageUrls: entry.imageUrls,
     attachments: entry.attachments.map(toAttachmentDto).toList(),
     relatedTradeIds: entry.relatedTradeIds,
+    tagIds: entry.tagIds,
   );
 }
