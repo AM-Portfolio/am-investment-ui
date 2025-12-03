@@ -278,7 +278,9 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
   void _navigateToHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => TradeDetailViewPage(trade: holding, userId: widget.userId, portfolioId: widget.portfolioId),
+        builder: (_) => Scaffold(
+          body: TradeDetailViewPage(trade: holding, userId: widget.userId, portfolioId: widget.portfolioId),
+        ),
       ),
     );
   }

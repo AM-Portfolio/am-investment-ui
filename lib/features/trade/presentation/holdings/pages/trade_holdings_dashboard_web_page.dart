@@ -22,6 +22,7 @@ class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
 class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDashboardWebPage> {
   // Current active filter configuration
   MetricsFilterConfig _currentFilter = MetricsFilterConfig.empty();
+  TradeHoldingViewModel? _selectedTrade;
 
   @override
   void initState() {
@@ -36,7 +37,8 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(body: _buildHoldingsTab());
+  Widget build(BuildContext context) =>
+      Scaffold(body: _selectedTrade != null ? _buildDetailView() : _buildHoldingsTab());
 
   Widget _buildHoldingsTab() {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
@@ -239,10 +241,55 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   }
 
   void _showHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TradeDetailViewPage(trade: holding, userId: widget.userId, portfolioId: widget.portfolioId),
-      ),
+    setState(() {
+      _selectedTrade = holding;
+    });
+  }
+
+  Widget _buildDetailView() {
+    if (_selectedTrade == null) return const SizedBox.shrink();
+
+    return Row(
+      children: [
+        // Back button sidebar
+        Container(
+          width: 60,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 60,
+                child: Center(
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      setState(() {
+                        _selectedTrade = null;
+                      });
+                    },
+                    tooltip: 'Back to Holdings',
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(child: Container()),
+            ],
+          ),
+        ),
+        // Detail view content
+        Expanded(
+          child: TradeDetailViewPage(
+            trade: _selectedTrade!,
+            userId: widget.userId,
+            portfolioId: widget.portfolioId,
+            onClose: () {
+              setState(() {
+                _selectedTrade = null;
+              });
+            },
+          ),
+        ),
+      ],
     );
   }
 }
