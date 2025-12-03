@@ -612,60 +612,169 @@ class _ExpandableFolderItemState extends State<ExpandableFolderItem> {
   }
 
   Widget _buildEntryCard(BuildContext context, NotebookItem entry, Color folderColor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: folderColor.withOpacity(0.2),
-          width: 1,
+    // Parse entry date from metadata
+    DateTime? entryDate;
+    if (entry.metadata != null && entry.metadata!['entryDate'] != null) {
+      try {
+        entryDate = DateTime.parse(entry.metadata!['entryDate'] as String);
+      } catch (e) {
+        entryDate = null;
+      }
+    }
+
+    return _EntryCard(
+      entry: entry,
+      entryDate: entryDate,
+      folderColor: folderColor,
+    );
+  }
+}
+
+// Stateful Entry Card Widget with hover effects
+class _EntryCard extends StatefulWidget {
+  const _EntryCard({
+    required this.entry,
+    required this.entryDate,
+    required this.folderColor,
+  });
+
+  final NotebookItem entry;
+  final DateTime? entryDate;
+  final Color folderColor;
+
+  @override
+  State<_EntryCard> createState() => _EntryCardState();
+}
+
+class _EntryCardState extends State<_EntryCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = widget.entryDate != null
+        ? DateFormat('EEE, MMM dd, yyyy').format(widget.entryDate!)
+        : widget.entry.title;
+    final subDateStr = widget.entryDate != null
+        ? DateFormat('MM/dd/yyyy').format(widget.entryDate!)
+        : '';
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: _isHovered
+              ? widget.folderColor.withOpacity(0.08)
+              : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: _isHovered
+                ? widget.folderColor.withOpacity(0.4)
+                : widget.folderColor.withOpacity(0.15),
+            width: _isHovered ? 1.5 : 1,
+          ),
+          boxShadow: _isHovered
+              ? [
+                  BoxShadow(
+                    color: widget.folderColor.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        transform: _isHovered ? (Matrix4.identity()..scale(1.01)) : Matrix4.identity(),
+        child: Row(
+          children: [
+            // Drag indicator
+            Icon(
+              Icons.drag_indicator,
+              size: 16,
+              color: _isHovered
+                  ? widget.folderColor
+                  : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          dateStr,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: _isHovered
+                                    ? widget.folderColor
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // PNL Placeholder
+                      Text(
+                        '+\$1,330',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Sub date and stats
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (subDateStr.isNotEmpty)
+                        Text(
+                          subDateStr,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      // Stats
+                      Row(
+                        children: [
+                          _buildMiniStat(context, '54% Win'),
+                          const SizedBox(width: 6),
+                          _buildMiniStat(context, '11 Trades'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 3,
-            height: 24,
-            decoration: BoxDecoration(
-              color: folderColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (entry.metadata != null && entry.metadata!['entryDate'] != null)
-                  Text(
-                    DateFormat('MMM dd, yyyy').format(
-                      DateTime.parse(entry.metadata!['entryDate'] as String),
-                    ),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.article_outlined,
-            size: 16,
-            color: folderColor.withOpacity(0.6),
-          ),
-        ],
-      ),
     ).animate().fadeIn(delay: 50.ms);
+  }
+
+  Widget _buildMiniStat(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: 9,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
   }
 }
