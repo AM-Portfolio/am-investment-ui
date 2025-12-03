@@ -192,7 +192,143 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     });
   }
 
-  @override
+  Widget _buildHierarchicalList(List<JournalEntry> entries) {
+    final groupedByDate = <String, List<JournalEntry>>{};
+    
+    for (final entry in entries) {
+      final dateKey = entry.entryDate.toString().split(' ')[0];
+      if (!groupedByDate.containsKey(dateKey)) {
+        groupedByDate[dateKey] = [];
+      }
+      groupedByDate[dateKey]!.add(entry);
+    }
+
+    final sortedDates = groupedByDate.keys.toList()..sort((a, b) => b.compareTo(a));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...sortedDates.map((date) {
+          final dayEntries = groupedByDate[date] ?? [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        date,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).dividerColor.withOpacity(0.3),
+                        thickness: 1.5,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${dayEntries.length} entry${dayEntries.length == 1 ? '' : 'ies'}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  ...dayEntries.asMap().entries.map((entryData) {
+                    final entryIndex = entryData.key;
+                    final entry = entryData.value;
+                    final isLast = entryIndex == dayEntries.length - 1;
+
+                    return Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Timeline indicator
+                            Column(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (!isLast)
+                                  Container(
+                                    width: 2,
+                                    height: 60,
+                                    color: Theme.of(context).dividerColor.withOpacity(0.3),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            // Journal card
+                            Expanded(
+                              child: SizedBox(
+                                width: 600,
+                                child: JournalCard(
+                                  entry: entry,
+                                  onTap: () => _showEditEntryForm(entry),
+                                  onDelete: () => _cubit.removeJournalEntry(widget.userId, entry.id),
+                                  extractPlainText: web_helpers.JournalHelpers.extractPlainText,
+                                  limitToWords: web_helpers.JournalHelpers.limitToWords,
+                                ).animate().fadeIn(delay: (100 * entryIndex).ms).slideX(begin: -0.1, end: 0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!isLast) const SizedBox(height: 12),
+                      ],
+                    );
+                  }).toList(),
+                ],
+              ),
+            ],
+          );
+        }).toList(),
+        const SizedBox(height: 32),
+      ],
+    );
+  }  @override
   Widget build(BuildContext context) => BlocProvider.value(
     value: _cubit,
     child: BlocListener<JournalCubit, JournalState>(
@@ -408,31 +544,11 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
 
                 return Column(
                   children: [
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 380,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.6,
-                        ),
-                        itemCount: paginatedEntries.length,
-                        itemBuilder: (context, index) {
-                          final entry = paginatedEntries[index];
-                          return JournalCard(
-                            entry: entry,
-                            onTap: () => _showEditEntryForm(entry),
-                            onDelete: () => _cubit.removeJournalEntry(widget.userId, entry.id),
-                            extractPlainText: web_helpers.JournalHelpers.extractPlainText,
-                            limitToWords: web_helpers.JournalHelpers.limitToWords,
-                          ).animate().fadeIn(delay: (50 * index).ms).slideY(begin: 0.1, end: 0);
-                        },
-                      ),
-                    ),
+                    Expanded(child: SingleChildScrollView(child: _buildHierarchicalList(paginatedEntries))),
                     // Pagination controls
                     if (totalPages > 1)
                       Padding(
-                        padding: const EdgeInsets.only(top: 12, bottom: 8),
+                        padding: const EdgeInsets.only(top: 16, bottom: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -463,4 +579,3 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     ),
   );
 }
-
