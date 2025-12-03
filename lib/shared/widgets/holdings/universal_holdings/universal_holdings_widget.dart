@@ -126,10 +126,23 @@ class _UniversalHoldingsWidgetState
           tag: 'UniversalHoldings',
         );
 
-        return HoldingsTemplateFactory.createDisplayTemplate(
+        final displayWidget = HoldingsTemplateFactory.createDisplayTemplate(
           holdings: const [],
           core: _core,
           isLoading: true,
+        );
+
+        // Create layout template even for loading state to maintain structure
+        return HoldingsTemplateFactory.createLayoutTemplate(
+          context: context,
+          templateType: widget.templateType,
+          config: _config,
+          holdings: const [],
+          core: _core,
+          displayWidget: displayWidget,
+          // We can optionally pass selector widget here if we want selectors to be visible during loading
+          // For now, let's keep it simple and just show the structure
+          title: widget.title,
         );
       },
       error: (error, stackTrace) {

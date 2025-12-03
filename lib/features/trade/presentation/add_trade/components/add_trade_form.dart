@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../../core/utils/logger.dart';
+import '../../../../authentication/presentation/cubit/auth_cubit.dart';
+import '../../../../authentication/presentation/cubit/auth_state.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';
@@ -200,6 +204,7 @@ class _AddTradeFormState extends State<AddTradeForm> {
         strategy: _strategyController.text.isNotEmpty ? _strategyController.text : null,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         portfolioId: widget.initialData?.portfolioId,
+        attachments: _attachments,
       );
 
       AppLogger.info(
@@ -274,6 +279,9 @@ class _AddTradeFormState extends State<AddTradeForm> {
                 onExpiryDateSelected: (date) => setState(() => _expiryDate = date),
                 attachments: _attachments,
                 onAttachmentsChanged: (files) => setState(() => _attachments = files),
+                userId: context.read<AuthCubit>().state is Authenticated
+                    ? (context.read<AuthCubit>().state as Authenticated).user.id
+                    : null,
               ),
 
               // Step 2: Optional Details (modular component)

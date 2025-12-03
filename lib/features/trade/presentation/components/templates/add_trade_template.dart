@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/logger.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';
@@ -13,6 +14,7 @@ import '../../../internal/domain/enums/series_types.dart';
 import '../../../internal/domain/enums/technical_reasons.dart';
 import '../../../internal/domain/enums/trade_directions.dart';
 import '../../../internal/domain/enums/trade_statuses.dart';
+import '../../add_trade/widgets/trade_attachment_section.dart';
 
 /// Modern, responsive template for adding new trades
 /// Features:
@@ -25,6 +27,7 @@ class AddTradeTemplate extends StatefulWidget {
   const AddTradeTemplate({
     required this.portfolioId,
     required this.onSave,
+    required this.userId,
     super.key,
     this.onCancel,
     this.initialData,
@@ -32,6 +35,7 @@ class AddTradeTemplate extends StatefulWidget {
   });
 
   final String portfolioId;
+  final String userId;
   final Function(TradeDetails) onSave;
   final VoidCallback? onCancel;
   final TradeDetails? initialData;
@@ -86,9 +90,16 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
   // Tags
   final List<String> _tags = [];
 
+  // Attachments
+  final List<String> _attachmentUrls = [];
+
   @override
   void initState() {
     super.initState();
+    AppLogger.info(
+      '[AddTradeTemplate] Template initialized - portfolioId: ${widget.portfolioId}, userId: ${widget.userId}, hasInitialData: ${widget.initialData != null}',
+      tag: 'AddTradeTemplate',
+    );
     _initControllers();
     if (widget.initialData != null) {
       _loadInitialData();
@@ -268,46 +279,57 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, bool isDesktop) => Container(
-    padding: EdgeInsets.all(isDesktop ? 24 : 16),
-    decoration: BoxDecoration(
-      color: theme.colorScheme.primaryContainer,
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
-    ),
-    child: Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(12)),
-          child: Icon(Icons.add_chart, color: theme.colorScheme.onPrimary, size: isDesktop ? 32 : 24),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Add New Trade',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimaryContainer,
+  Widget _buildHeader(ThemeData theme, bool isDesktop) {
+    AppLogger.debug(
+      '[AddTradeTemplate] Building header - isDesktop: $isDesktop, currentStep: $_currentStep/$_totalSteps',
+      tag: 'AddTradeTemplate',
+    );
+    return Container(
+      padding: EdgeInsets.all(isDesktop ? 24 : 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+      ),
+      child: Row(
+        children: [
+          // Back button only
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onCancel,
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.arrow_back_rounded, size: 18, color: theme.colorScheme.onSurface),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Back',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Step ${_currentStep + 1} of $_totalSteps',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-        if (widget.onCancel != null)
-          IconButton(onPressed: widget.onCancel, icon: const Icon(Icons.close), tooltip: 'Cancel'),
-      ],
-    ),
-  );
+          const SizedBox(width: 16),
+          Text(
+            'Step ${_currentStep + 1} of $_totalSteps',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildProgressStepper(ThemeData theme, bool isDesktop) => Container(
     padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 16, vertical: 16),
@@ -500,6 +522,30 @@ class _AddTradeTemplateState extends State<AddTradeTemplate> {
             hint: 'Additional details about the instrument',
             icon: Icons.description,
             maxLines: 3,
+          ),
+          const SizedBox(height: 24),
+          Builder(
+            builder: (context) {
+              AppLogger.debug(
+                '[AddTradeTemplate] Building TradeAttachmentSection - current attachments: ${_attachmentUrls.length}',
+                tag: 'AddTradeTemplate',
+              );
+              return TradeAttachmentSection(
+                imageUrls: _attachmentUrls,
+                onAttachmentsChanged: (urls) {
+                  AppLogger.info(
+                    '[AddTradeTemplate] Attachments changed - previous: ${_attachmentUrls.length}, new: ${urls.length}',
+                    tag: 'AddTradeTemplate',
+                  );
+                  setState(() {
+                    _attachmentUrls.clear();
+                    _attachmentUrls.addAll(urls);
+                  });
+                },
+                userId: widget.userId,
+                isEditMode: true,
+              );
+            },
           ),
         ],
       ),

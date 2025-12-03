@@ -1,5 +1,5 @@
 import '../../domain/entities/trade_metrics.dart';
-import '../dtos/trade_metrics_dto.dart';
+import '../dtos/trade_controller_dtos.dart';
 
 class TradeMetricsMapper {
   static TradeMetrics? fromDto(TradeMetricsDto? dto) {

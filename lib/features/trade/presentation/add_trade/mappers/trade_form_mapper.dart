@@ -39,6 +39,7 @@ class TradeFormMapper {
     required String? strategy,
     required String? notes,
     required String? portfolioId,
+    required List<String> attachments,
   }) {
     // Construct InstrumentInfo
     final instrumentInfo = InstrumentInfo(
@@ -91,6 +92,7 @@ class TradeFormMapper {
       entryReasoning: entryReasoning,
       notes: notes,
       strategy: strategy,
+      attachments: attachments.isNotEmpty ? attachments.map((url) => Attachment(fileUrl: url)).toList() : null,
     );
   }
 }

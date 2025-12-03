@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../authentication/presentation/cubit/auth_cubit.dart';
 import '../../providers/trade_internal_providers.dart';
+import '../calendar/pages/trade_calendar_analytics_web_page.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
+import '../holdings/pages/trade_holdings_dashboard_web_page.dart';
+import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
-import '../widgets/trade_sidebar.dart';
-import 'pages/journal_web_page.dart';
-import 'pages/trade_calendar_analytics_web_page.dart';
-import 'pages/trade_holdings_dashboard_web_page.dart';
-import 'pages/trade_list_web_page.dart';
+import '../trades/pages/trade_list_web_page.dart';
+import 'widgets/trade_sidebar.dart';
 
 /// Trade view types for navigation
 enum TradeViewType { portfolios, holdings, calendar, trades, journal }
@@ -24,12 +24,16 @@ class TradeWebScreen extends ConsumerStatefulWidget {
     this.selectedPortfolioId,
     this.selectedPortfolioName,
     this.initialView = TradeViewType.portfolios,
+    this.isSidebarVisible = true,
+    this.onToggleSidebar,
   });
 
   final String userId;
   final String? selectedPortfolioId;
   final String? selectedPortfolioName;
   final TradeViewType initialView;
+  final bool isSidebarVisible;
+  final VoidCallback? onToggleSidebar;
 
   @override
   ConsumerState<TradeWebScreen> createState() => _TradeWebScreenState();
@@ -164,32 +168,42 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                   sidebarWidth = 280; // Full mode
                 }
 
-                return Container(
-                  width: sidebarWidth,
-                  decoration: BoxDecoration(
-                    border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
-                    color: Theme.of(context).cardColor,
-                  ),
-                  child: portfoliosAsyncValue.when(
-                    data: (portfolios) => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
-                      portfolios: portfolios,
-                      onPortfolioSelected: _onPortfolioSelected,
-                    ),
-                    loading: () => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
-                    ),
-                    error: (_, __) => TradeSidebar(
-                      selectedView: _selectedView,
-                      onViewChanged: _onViewChanged,
-                      currentPortfolioId: _currentPortfolioId,
-                      currentPortfolioName: _currentPortfolioName,
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: widget.isSidebarVisible ? sidebarWidth : 0,
+                  curve: Curves.easeInOut,
+                  child: OverflowBox(
+                    minWidth: sidebarWidth,
+                    maxWidth: sidebarWidth,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: sidebarWidth,
+                      decoration: BoxDecoration(
+                        border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
+                        color: Theme.of(context).cardColor,
+                      ),
+                      child: portfoliosAsyncValue.when(
+                        data: (portfolios) => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                          portfolios: portfolios,
+                          onPortfolioSelected: _onPortfolioSelected,
+                        ),
+                        loading: () => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                        ),
+                        error: (_, __) => TradeSidebar(
+                          selectedView: _selectedView,
+                          onViewChanged: _onViewChanged,
+                          currentPortfolioId: _currentPortfolioId,
+                          currentPortfolioName: _currentPortfolioName,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -415,21 +429,34 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
 
         return portfoliosAsync.when(
-          data: (portfolios) => TradePortfolioDiscoveryTemplate(
-            portfolios: portfolios,
-            isLoading: false,
-            onPortfolioSelected: (portfolio) {
-              // When clicking a portfolio card, select it and go to holdings
-              setState(() {
-                _currentPortfolioId = portfolio.id;
-                _currentPortfolioName = portfolio.name;
-                _selectedView = TradeViewType.holdings;
+          data: (portfolios) {
+            // Auto-select first portfolio if none selected and portfolios exist
+            // But only if we are in the portfolios view (initial load)
+            if (_currentPortfolioId == null && portfolios.isNotEmpty && _selectedView == TradeViewType.portfolios) {
+              // Schedule the state update to avoid build-phase errors
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _onPortfolioSelected(portfolios.first.id, portfolios.first.name);
+                }
               });
-            },
-            onRefresh: () {
-              ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
-            },
-          ),
+            }
+
+            return TradePortfolioDiscoveryTemplate(
+              portfolios: portfolios,
+              isLoading: false,
+              onPortfolioSelected: (portfolio) {
+                // When clicking a portfolio card, select it and go to holdings
+                setState(() {
+                  _currentPortfolioId = portfolio.id;
+                  _currentPortfolioName = portfolio.name;
+                  _selectedView = TradeViewType.holdings;
+                });
+              },
+              onRefresh: () {
+                ref.invalidate(tradePortfoliosStreamProvider(widget.userId));
+              },
+            );
+          },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => TradePortfolioDiscoveryTemplate(
             portfolios: const <TradePortfolioViewModel>[],

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../internal/domain/entities/journal_entry.dart';
-import '../../widgets/journal/models/journal_mood_options.dart';
-import '../../widgets/journal/utils/journal_helpers.dart';
+import 'journal/models/journal_mood_options.dart';
+import 'journal/utils/journal_helpers.dart';
 
-class JournalCard extends StatelessWidget {
+class JournalCard extends StatefulWidget {
   const JournalCard({
     required this.entry,
     required this.onTap,
@@ -21,40 +21,98 @@ class JournalCard extends StatelessWidget {
   final String Function(String, int) limitToWords;
 
   @override
+  State<JournalCard> createState() => _JournalCardState();
+}
+
+class _JournalCardState extends State<JournalCard> with SingleTickerProviderStateMixin {
+  late AnimationController _hoverController;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hoverController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _hoverController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final entry = widget.entry;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.dividerColor.withOpacity(0.5)),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [theme.colorScheme.surface, theme.colorScheme.surfaceContainerHighest.withOpacity(0.3)],
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() => _isHovered = true);
+        _hoverController.forward();
+      },
+      onExit: (_) {
+        setState(() => _isHovered = false);
+        _hoverController.reverse();
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _hoverController,
+          builder: (context, child) => Transform.scale(
+            scale: 1.0 + (0.02 * _hoverController.value),
+            child: Card(
+              elevation: 2 + (6 * _hoverController.value),
+              shadowColor: theme.colorScheme.primary.withOpacity(0.3 * _hoverController.value),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.1 + (0.3 * _hoverController.value)),
+                  width: 1.5,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.colorScheme.surface,
+                      theme.colorScheme.surfaceContainerHighest.withOpacity(0.2 + (0.3 * _hoverController.value)),
+                    ],
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header with date and metadata
+                      Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), child: _buildHeader(theme)),
+                      Divider(height: 1, color: theme.dividerColor.withOpacity(0.2)),
+
+                      // Main content
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTitle(theme),
+                            const SizedBox(height: 12),
+                            _buildContent(theme),
+                            if (_hasMoodOrSentiment()) ...[const SizedBox(height: 12), _buildMoodAndSentiment(theme)],
+                            if (_hasWatchlistItems()) ...[const SizedBox(height: 12), _buildWatchlistSection(theme)],
+                            if (_hasReflectionItems()) ...[const SizedBox(height: 12), _buildReflectionSection(theme)],
+                            if (_hasTags()) ...[const SizedBox(height: 12), _buildTags(theme)],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(theme),
-              const SizedBox(height: 10),
-              _buildTitle(theme),
-              const SizedBox(height: 8),
-              _buildContent(theme),
-              if (_hasMoodOrSentiment()) ...[const SizedBox(height: 8), _buildMoodAndSentiment()],
-              if (_hasTags()) ...[const SizedBox(height: 8), _buildTags()],
-            ],
           ),
         ),
       ),
@@ -62,17 +120,26 @@ class JournalCard extends StatelessWidget {
   }
 
   bool _hasMoodOrSentiment() {
-    if (entry.behaviorPatternSummaries.isEmpty) return false;
-    final firstPattern = entry.behaviorPatternSummaries.first;
+    if (widget.entry.behaviorPatternSummaries.isEmpty) return false;
+    final firstPattern = widget.entry.behaviorPatternSummaries.first;
     return firstPattern.mood != null || firstPattern.marketSentiment != null;
   }
 
   bool _hasTags() {
-    if (entry.behaviorPatternSummaries.isEmpty) return false;
-    return entry.behaviorPatternSummaries.any((pattern) => pattern.tags.isNotEmpty);
+    if (widget.entry.behaviorPatternSummaries.isEmpty) return false;
+    return widget.entry.behaviorPatternSummaries.any((pattern) => pattern.tags.isNotEmpty);
   }
 
+  bool _hasWatchlistItems() =>
+      widget.entry.customFields.containsKey('watchlist') &&
+      (widget.entry.customFields['watchlist'] as List?)?.isNotEmpty == true;
+
+  bool _hasReflectionItems() =>
+      widget.entry.customFields.containsKey('reflection') &&
+      (widget.entry.customFields['reflection'] as String?)?.isNotEmpty == true;
+
   Widget _buildHeader(ThemeData theme) {
+    final entry = widget.entry;
     final attachmentCount = entry.attachments.isNotEmpty ? entry.attachments.length : entry.imageUrls.length;
     final hasBehaviorTracking =
         entry.customFields.containsKey('startBehavior') ||
@@ -82,9 +149,9 @@ class JournalCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -97,7 +164,7 @@ class JournalCard extends StatelessWidget {
           _buildMetadataChip(
             theme,
             icon: Icons.analytics_outlined,
-            label: '${entry.relatedTradeIds.length}',
+            label: '${entry.relatedTradeIds.length} Trades',
             color: theme.colorScheme.secondary,
           ),
           const SizedBox(width: 6),
@@ -112,36 +179,40 @@ class JournalCard extends StatelessWidget {
           const SizedBox(width: 6),
         ],
         if (hasBehaviorTracking) ...[
-          _buildMetadataChip(theme, icon: Icons.psychology, label: '', color: theme.colorScheme.primary),
+          _buildMetadataChip(theme, icon: Icons.psychology, label: 'Behavior', color: theme.colorScheme.primary),
         ],
         const Spacer(),
         IconButton(
-          icon: Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error.withOpacity(0.7)),
+          icon: Icon(
+            Icons.delete_outline,
+            size: 18,
+            color: _isHovered ? theme.colorScheme.error : theme.colorScheme.error.withOpacity(0.5),
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          onPressed: onDelete,
+          onPressed: widget.onDelete,
         ),
       ],
     );
   }
 
   Widget _buildTitle(ThemeData theme) => Text(
-    entry.title,
-    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.2),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-  );
-
-  Widget _buildContent(ThemeData theme) => Text(
-    limitToWords(extractPlainText(entry.content), 20),
-    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.65), height: 1.4),
+    widget.entry.title,
+    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
     maxLines: 2,
     overflow: TextOverflow.ellipsis,
   );
 
-  Widget _buildMoodAndSentiment() {
-    if (entry.behaviorPatternSummaries.isEmpty) return const SizedBox.shrink();
-    final firstPattern = entry.behaviorPatternSummaries.first;
+  Widget _buildContent(ThemeData theme) => Text(
+    widget.limitToWords(widget.extractPlainText(widget.entry.content), 25),
+    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7), height: 1.5),
+    maxLines: 3,
+    overflow: TextOverflow.ellipsis,
+  );
+
+  Widget _buildMoodAndSentiment(ThemeData theme) {
+    if (widget.entry.behaviorPatternSummaries.isEmpty) return const SizedBox.shrink();
+    final firstPattern = widget.entry.behaviorPatternSummaries.first;
 
     return Row(
       children: [
@@ -150,6 +221,86 @@ class JournalCard extends StatelessWidget {
         if (firstPattern.marketSentiment != null)
           _buildSentimentChip(JournalHelpers.mapSentimentFromValue(firstPattern.marketSentiment) ?? 'neutral'),
       ],
+    );
+  }
+
+  Widget _buildWatchlistSection(ThemeData theme) {
+    final watchlist = widget.entry.customFields['watchlist'] as List? ?? [];
+    if (watchlist.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.secondary.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.visibility, size: 14, color: theme.colorScheme.secondary),
+              const SizedBox(width: 6),
+              Text(
+                'Pre-Market Watchlist',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...watchlist
+              .take(2)
+              .map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '• ${item.toString()}',
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReflectionSection(ThemeData theme) {
+    final reflection = widget.entry.customFields['reflection'] as String? ?? '';
+    if (reflection.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.tertiary.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lightbulb, size: 14, color: theme.colorScheme.tertiary),
+              const SizedBox(width: 6),
+              Text(
+                'Post-Session Thoughts',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(reflection, style: theme.textTheme.bodySmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+        ],
+      ),
     );
   }
 
@@ -166,7 +317,7 @@ class JournalCard extends StatelessWidget {
     if (moodData == null) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: (moodData['color'] as Color).withOpacity(0.15),
         border: Border.all(color: moodData['color'] as Color, width: 1.5),
@@ -174,7 +325,7 @@ class JournalCard extends StatelessWidget {
       ),
       child: Text(
         '${moodData['emoji']} ${moodData['label']}',
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: moodData['color'] as Color),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: moodData['color'] as Color),
       ),
     );
   }
@@ -184,7 +335,7 @@ class JournalCard extends StatelessWidget {
     if (sentimentData == null) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: (sentimentData['color'] as Color).withOpacity(0.15),
         border: Border.all(color: sentimentData['color'] as Color, width: 1.5),
@@ -197,16 +348,18 @@ class JournalCard extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             sentimentData['label'] as String,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: sentimentData['color'] as Color),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: sentimentData['color'] as Color),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTags() {
-    final allTags = entry.behaviorPatternSummaries.expand((pattern) => pattern.tags).toSet().toList();
-    return Wrap(spacing: 4, runSpacing: 4, children: allTags.take(3).map(_buildTagChip).toList());
+  Widget _buildTags(ThemeData theme) {
+    final allTags = widget.entry.behaviorPatternSummaries.expand((pattern) => pattern.tags).toSet().toList();
+    if (allTags.isEmpty) return const SizedBox.shrink();
+
+    return Wrap(spacing: 6, runSpacing: 6, children: allTags.take(3).map(_buildTagChip).toList());
   }
 
   Widget _buildTagChip(String tag) {
@@ -216,7 +369,7 @@ class JournalCard extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: (tagData['color'] as Color).withOpacity(0.15),
         border: Border.all(color: tagData['color'] as Color, width: 1.5),
@@ -224,14 +377,14 @@ class JournalCard extends StatelessWidget {
       ),
       child: Text(
         tag,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: tagData['color'] as Color),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: tagData['color'] as Color),
       ),
     );
   }
 
   Widget _buildMetadataChip(ThemeData theme, {required IconData icon, required String label, required Color color}) =>
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
@@ -240,11 +393,11 @@ class JournalCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 12, color: color),
+            Icon(icon, size: 13, color: color),
             const SizedBox(width: 4),
             Text(
               label,
-              style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600, color: color, fontSize: 10),
+              style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600, color: color, fontSize: 11),
             ),
           ],
         ),

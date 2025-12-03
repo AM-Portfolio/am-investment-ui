@@ -5,6 +5,7 @@ import '../../../../../shared/core/ui/components/trade/direction_status_selector
 import '../../../../../shared/core/ui/components/trade/entry_exit_card.dart';
 import '../../../../../shared/core/ui/components/trade/instrument_card.dart';
 import '../../../../../shared/core/ui/components/trade/trade_settings_card.dart';
+import '../widgets/trade_attachment_section.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';
 import '../../../internal/domain/enums/exchange_types.dart';
@@ -13,7 +14,6 @@ import '../../../internal/domain/enums/option_types.dart';
 import '../../../internal/domain/enums/order_types.dart';
 import '../../../internal/domain/enums/trade_directions.dart';
 import '../../../internal/domain/enums/trade_statuses.dart';
-import '../widgets/attachment_picker.dart';
 
 /// Trade Details Step - Combined Instrument + Entry/Exit
 class TradeDetailsStep extends StatelessWidget {
@@ -48,6 +48,7 @@ class TradeDetailsStep extends StatelessWidget {
     required this.onOptionTypeChanged,
     required this.onExpiryDateSelected,
     required this.onAttachmentsChanged,
+    this.userId,
     super.key,
   });
 
@@ -69,6 +70,7 @@ class TradeDetailsStep extends StatelessWidget {
   final TextEditingController strikePriceController;
   final DateTime? expiryDate;
   final List<String> attachments;
+  final String? userId;
 
   final ValueChanged<ExchangeTypes?> onExchangeChanged;
   final ValueChanged<MarketSegments?> onSegmentChanged;
@@ -209,7 +211,12 @@ class TradeDetailsStep extends StatelessWidget {
 
           // Attachments
           const SizedBox(height: 16),
-          AttachmentPicker(attachments: attachments, onAttachmentsChanged: onAttachmentsChanged),
+          TradeAttachmentSection(
+            imageUrls: attachments,
+            onAttachmentsChanged: onAttachmentsChanged,
+            userId: userId ?? '',
+            isEditMode: true,
+          ),
         ],
       ),
     );

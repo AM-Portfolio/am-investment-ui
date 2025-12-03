@@ -1,5 +1,5 @@
 import '../../domain/entities/trade_entry_exit_info.dart';
-import '../dtos/entry_exit_info_dto.dart';
+import '../dtos/trade_controller_dtos.dart';
 
 class TradeEntryExitInfoMapper {
   static TradeEntryExitInfo? fromDto(EntryExitInfoDto? dto) {

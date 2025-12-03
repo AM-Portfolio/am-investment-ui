@@ -6,6 +6,7 @@ import 'core/holdings_selector_core.dart';
 import 'layouts/card_layout_builder.dart';
 import 'layouts/holdings_layout_builder.dart';
 import 'layouts/table_layout_builder.dart';
+import 'loaders/holdings_skeleton_loader.dart';
 
 /// Pure holdings display template - coordinates layout builders for different display styles
 /// Follows the pattern from HeatmapDisplayTemplate
@@ -43,15 +44,8 @@ class HoldingsDisplayTemplate extends StatelessWidget {
     );
 
     if (isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading holdings...'),
-          ],
-        ),
+      return HoldingsSkeletonLoader(
+        isCardView: viewMode == HoldingsViewMode.card,
       );
     }
 
