@@ -1,5 +1,5 @@
 import '../../domain/entities/instrument_info.dart';
-import '../dtos/instrument_info_dto.dart';
+import '../dtos/trade_controller_dtos.dart';
 
 class InstrumentInfoMapper {
   static InstrumentInfo? fromDto(InstrumentInfoDto? dto) {

@@ -1,34 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'instrument_info_dto.dart';
-import 'entry_exit_info_dto.dart';
-import 'trade_metrics_dto.dart';
-import 'trade_execution_dto.dart';
+
+import 'trade_controller_dtos.dart';
 
 part 'trade_holding_dto.freezed.dart';
 part 'trade_holding_dto.g.dart';
 
-@freezed
-class TradeHoldingDto with _$TradeHoldingDto {
-  const factory TradeHoldingDto({
-    required String tradeId,
-    required String portfolioId,
-    InstrumentInfoDto? instrumentInfo,
-    String? status,
-    String? tradePositionType,
-    @JsonKey(name: 'entryInfo') EntryExitInfoDto? entryInfo,
-    @JsonKey(name: 'exitInfo') EntryExitInfoDto? exitInfo,
-    TradeMetricsDto? metrics,
-    @Default([]) List<TradeExecutionDto> tradeExecutions,
-    @Default({}) Map<String, dynamic> psychologyData,
-    @Default({}) Map<String, dynamic> entryReasoning,
-    @Default({}) Map<String, dynamic> exitReasoning,
-    String? tradeEndDate,
-    String? tradeDate,
-  }) = _TradeHoldingDto;
-
-  factory TradeHoldingDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeHoldingDtoFromJson(json);
-}
+/// TradeHoldingDto is an alias for TradeDetailsDto - single source of truth
+typedef TradeHoldingDto = TradeDetailsDto;
 
 @freezed
 class PageableDto with _$PageableDto {
@@ -40,14 +18,13 @@ class PageableDto with _$PageableDto {
     @Default(false) bool unpaged,
   }) = _PageableDto;
 
-  factory PageableDto.fromJson(Map<String, dynamic> json) =>
-      _$PageableDtoFromJson(json);
+  factory PageableDto.fromJson(Map<String, dynamic> json) => _$PageableDtoFromJson(json);
 }
 
 @freezed
 class TradeHoldingsDto with _$TradeHoldingsDto {
   const factory TradeHoldingsDto({
-    @Default([]) List<TradeHoldingDto> content,
+    @Default([]) List<TradeDetailsDto> content,
     PageableDto? pageable,
     @Default(0) int totalPages,
     @Default(true) bool last,
@@ -59,6 +36,5 @@ class TradeHoldingsDto with _$TradeHoldingsDto {
     @Default(false) bool empty,
   }) = _TradeHoldingsDto;
 
-  factory TradeHoldingsDto.fromJson(Map<String, dynamic> json) =>
-      _$TradeHoldingsDtoFromJson(json);
+  factory TradeHoldingsDto.fromJson(Map<String, dynamic> json) => _$TradeHoldingsDtoFromJson(json);
 }

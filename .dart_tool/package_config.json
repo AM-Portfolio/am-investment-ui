@@ -69,9 +69,9 @@
     },
     {
       "name": "build_daemon",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/build_daemon-4.0.4",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/build_daemon-4.1.1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.7"
     },
     {
       "name": "build_resolvers",
@@ -99,7 +99,7 @@
     },
     {
       "name": "built_value",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/built_value-8.10.1",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/built_value-8.12.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -171,13 +171,13 @@
     },
     {
       "name": "cross_file",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/cross_file-0.3.5+1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "crypto",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -393,7 +393,7 @@
     },
     {
       "name": "flutter_plugin_android_lifecycle",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.30",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.31",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -561,7 +561,7 @@
     },
     {
       "name": "http",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.5.0",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -627,9 +627,9 @@
     },
     {
       "name": "injectable",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/injectable-2.5.1",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/injectable-2.6.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "intl",
@@ -903,7 +903,7 @@
     },
     {
       "name": "retrofit",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/retrofit-4.7.2",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/retrofit-4.9.1",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },
@@ -957,7 +957,7 @@
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.12",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.13",
       "packageUri": "lib/",
       "languageVersion": "3.7"
     },
@@ -1050,12 +1050,6 @@
       "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
       "languageVersion": "3.1"
-    },
-    {
-      "name": "sprintf",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "stack_trace",
@@ -1179,7 +1173,7 @@
     },
     {
       "name": "uuid",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -1197,7 +1191,7 @@
     },
     {
       "name": "watcher",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.3",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.4",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -1227,7 +1221,7 @@
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0",
+      "rootUri": "file:///C:/Users/ssd26/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.15.0",
       "packageUri": "lib/",
       "languageVersion": "3.8"
     },

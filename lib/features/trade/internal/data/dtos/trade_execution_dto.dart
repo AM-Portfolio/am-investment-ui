@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'instrument_info_dto.dart';
+import 'trade_controller_dtos.dart';
 
 part 'trade_execution_dto.freezed.dart';
 part 'trade_execution_dto.g.dart';
