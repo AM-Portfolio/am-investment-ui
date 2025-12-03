@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
-import '../../web/utils/journal_helpers.dart' as web_helpers;
+
 
 class JournalEntryListView extends StatelessWidget {
   const JournalEntryListView({
@@ -23,7 +23,7 @@ class JournalEntryListView extends StatelessWidget {
     return Container(
       width: 300,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).cardColor.withOpacity(0.9), // Glassmorphism base
         border: Border(
           right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5)),
           left: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5)),
@@ -33,7 +33,7 @@ class JournalEntryListView extends StatelessWidget {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,15 +49,45 @@ class JournalEntryListView extends StatelessWidget {
                     ),
                   ],
                 ),
-                Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                // Delete Option
+                IconButton(
+                  onPressed: () {
+                    // TODO: Implement delete action
+                  },
+                  icon: Icon(Icons.delete_outline, size: 20, color: Theme.of(context).colorScheme.error),
+                  tooltip: 'Delete selected',
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
               ],
             ),
           ),
           const Divider(height: 1),
           
+          const Divider(height: 1),
+          
+          // Log Day Button (Prominent)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Implement Log Day action
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Log Day'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ),
+
           // Select All / Checkbox placeholder
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
                 SizedBox(
@@ -76,6 +106,8 @@ class JournalEntryListView extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
+                const Spacer(),
+                Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ],
             ),
           ),
@@ -97,7 +129,7 @@ class JournalEntryListView extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: dayEntries.map((entry) => _buildEntryItem(context, entry)).toList(),
-                );
+                ).animate().slideX(begin: -0.1, end: 0, delay: (index * 50).ms, duration: 300.ms).fadeIn();
               },
             ),
           ),
@@ -126,85 +158,129 @@ class JournalEntryListView extends StatelessWidget {
 
   Widget _buildEntryItem(BuildContext context, JournalEntry entry) {
     final isSelected = entry.id == selectedEntryId;
-    final dateStr = DateFormat('EEE, MMM dd, yyyy').format(entry.entryDate);
-    final subDateStr = DateFormat('MM/dd/yyyy').format(entry.entryDate); // Mocking the second date line
 
-    return InkWell(
+    return JournalEntryItem(
+      entry: entry,
+      isSelected: isSelected,
       onTap: () => onEntrySelected(entry),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3) : null,
-          border: Border(
-            bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+    );
+  }
+
+
+}
+
+class JournalEntryItem extends StatefulWidget {
+  const JournalEntryItem({
+    required this.entry,
+    required this.isSelected,
+    required this.onTap,
+    super.key,
+  });
+
+  final JournalEntry entry;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  State<JournalEntryItem> createState() => _JournalEntryItemState();
+}
+
+class _JournalEntryItemState extends State<JournalEntryItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = DateFormat('EEE, MMM dd, yyyy').format(widget.entry.entryDate);
+    final subDateStr = DateFormat('MM/dd/yyyy').format(widget.entry.entryDate);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+                : _isHovered
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                    : null,
+            border: Border(
+              bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Selection indicator or checkbox
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: Checkbox(
+                  value: false,
+                  onChanged: (v) {},
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  side: BorderSide(color: Theme.of(context).disabledColor),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          dateStr,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: widget.isSelected || _isHovered
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                        // PNL Placeholder
+                        Text(
+                          '+\$1,330', // Placeholder
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          subDateStr,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        // Stats Placeholder
+                        Row(
+                          children: [
+                            _buildMiniStat(context, '54% Win'),
+                            const SizedBox(width: 8),
+                            _buildMiniStat(context, '11 Trades'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Selection indicator or checkbox
-             SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: Checkbox(
-                    value: false, 
-                    onChanged: (v) {},
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                    side: BorderSide(color: Theme.of(context).disabledColor),
-                  ),
-                ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        dateStr,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      // PNL Placeholder
-                      Text(
-                        '+\$1,330', // Placeholder
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        subDateStr,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      // Stats Placeholder
-                      Row(
-                        children: [
-                          _buildMiniStat(context, '54% Win'),
-                          const SizedBox(width: 8),
-                          _buildMiniStat(context, '11 Trades'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
-    ).animate().fadeIn(duration: 300.ms);
+    );
   }
 
   Widget _buildMiniStat(BuildContext context, String text) {
@@ -224,3 +300,4 @@ class JournalEntryListView extends StatelessWidget {
     );
   }
 }
+

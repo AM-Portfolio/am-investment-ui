@@ -24,6 +24,7 @@ class JournalThreeColumnLayout extends StatefulWidget {
 class _JournalThreeColumnLayoutState extends State<JournalThreeColumnLayout> {
   String _selectedFolder = 'Daily Journal';
   String? _selectedEntryId;
+  bool _isLeftSidebarCollapsed = false;
 
   @override
   void initState() {
@@ -47,34 +48,49 @@ class _JournalThreeColumnLayoutState extends State<JournalThreeColumnLayout> {
   Widget build(BuildContext context) {
     final selectedEntry = widget.entries.where((e) => e.id == _selectedEntryId).firstOrNull;
 
-    return Row(
-      children: [
-        // Left Column: Navigation
-        JournalNavigationSidebar(
-          selectedFolder: _selectedFolder,
-          onFolderSelected: (folder) => setState(() => _selectedFolder = folder),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+          ],
         ),
-        
-        VerticalDivider(width: 1, color: Theme.of(context).dividerColor),
-
-        // Middle Column: Entry List
-        JournalEntryListView(
-          entries: widget.entries,
-          selectedEntryId: _selectedEntryId,
-          onEntrySelected: (entry) => setState(() => _selectedEntryId = entry.id),
-        ),
-
-        VerticalDivider(width: 1, color: Theme.of(context).dividerColor),
-
-        // Right Column: Detail View
-        Expanded(
-          child: JournalEntryDetailView(
-            entry: selectedEntry,
-            userId: widget.userId,
-            cubit: widget.cubit,
+      ),
+      child: Row(
+        children: [
+          // Left Column: Navigation
+          JournalNavigationSidebar(
+            selectedFolder: _selectedFolder,
+            onFolderSelected: (folder) => setState(() => _selectedFolder = folder),
+            isCollapsed: _isLeftSidebarCollapsed,
+            onToggleCollapse: () => setState(() => _isLeftSidebarCollapsed = !_isLeftSidebarCollapsed),
           ),
-        ),
-      ],
+          
+          VerticalDivider(width: 1, color: Theme.of(context).dividerColor.withOpacity(0.2)),
+
+          // Middle Column: Entry List
+          JournalEntryListView(
+            entries: widget.entries,
+            selectedEntryId: _selectedEntryId,
+            onEntrySelected: (entry) => setState(() => _selectedEntryId = entry.id),
+          ),
+
+          VerticalDivider(width: 1, color: Theme.of(context).dividerColor.withOpacity(0.2)),
+
+          // Right Column: Detail View
+          Expanded(
+            child: JournalEntryDetailView(
+              entry: selectedEntry,
+              userId: widget.userId,
+              cubit: widget.cubit,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

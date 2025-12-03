@@ -43,7 +43,10 @@ class JournalEntryDetailView extends StatelessWidget {
     final updatedStr = DateFormat('MMM dd, yyyy h:mm a').format(entry!.updatedAt);
 
     return Container(
-      color: Theme.of(context).cardColor,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor.withOpacity(0.8), // Glassmorphism
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(16)), // Rounded corner for sheet effect
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

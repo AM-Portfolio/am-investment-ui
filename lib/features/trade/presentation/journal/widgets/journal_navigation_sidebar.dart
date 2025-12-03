@@ -4,70 +4,96 @@ import 'package:flutter_animate/flutter_animate.dart';
 class JournalNavigationSidebar extends StatelessWidget {
   const JournalNavigationSidebar({
     required this.onFolderSelected,
+    required this.onToggleCollapse,
     this.selectedFolder = 'Daily Journal',
+    this.isCollapsed = false,
     super.key,
   });
 
   final ValueChanged<String> onFolderSelected;
+  final VoidCallback onToggleCollapse;
   final String selectedFolder;
+  final bool isCollapsed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Theme.of(context).cardColor,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: isCollapsed ? 70 : 250,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor.withOpacity(0.8), // Glassmorphism base
+        border: Border(right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header & Toggle
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Notebook',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
+              children: [
+                if (!isCollapsed)
+                  Expanded(
+                    child: Text(
+                      'Notebook',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-            ),
-          ),
-
-          // Search
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: const Icon(Icons.search, size: 18),
-                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                isDense: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                IconButton(
+                  onPressed: onToggleCollapse,
+                  icon: Icon(isCollapsed ? Icons.keyboard_double_arrow_right : Icons.keyboard_double_arrow_left, size: 20),
+                  tooltip: isCollapsed ? 'Expand' : 'Collapse',
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-              ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 24),
-
-          // Add Folder Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-              label: const Text('Add folder'),
-              style: OutlinedButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                side: BorderSide(color: Theme.of(context).dividerColor),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          if (!isCollapsed) ...[
+            // Search
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 24),
 
-          const SizedBox(height: 24),
+            // Add Folder Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.create_new_folder_outlined, size: 18),
+                label: const Text('Add folder'),
+                style: OutlinedButton.styleFrom(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
 
           // Folders List
           Expanded(
@@ -76,31 +102,75 @@ class JournalNavigationSidebar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader(context, 'Folders'),
-                  _buildFolderItem(context, 'All notes', Icons.notes),
-                  _buildFolderItem(context, 'Trade Notes', Icons.candlestick_chart_outlined),
-                  _buildFolderItem(context, 'Daily Journal', Icons.book_outlined),
-                  _buildFolderItem(context, 'Sessions Recap', Icons.timelapse),
-                  const Divider(height: 32),
-                  _buildFolderItem(context, 'Quarterly Goals 📅', null),
-                  _buildFolderItem(context, 'Trading Goals 🚀', null),
-                  _buildFolderItem(context, 'Trading Plan 📝', null),
-                  _buildFolderItem(context, '2023 Goals + Plan 🗺️', null),
-                  _buildFolderItem(context, 'Notes 🍂', null),
-                  _buildFolderItem(context, 'Plan of Action ✍️', null),
-                  _buildFolderItem(context, 'Mistakes Reflection', null),
-                  
-                  const SizedBox(height: 24),
-                  _buildSectionHeader(context, 'Tags'),
-                  _buildTagItem(context, 'FOMC', 1),
-                  _buildTagItem(context, 'Goals', 1),
-                  _buildTagItem(context, 'Market News', 1),
-                  _buildTagItem(context, 'Mistakes', 1),
-                  _buildTagItem(context, 'Plan of Action', 1),
-                  _buildTagItem(context, 'Trading Rules', 1),
-                  
-                  const SizedBox(height: 16),
-                  _buildFolderItem(context, 'Recently Deleted', Icons.delete_outline),
+                  if (!isCollapsed) _buildSectionHeader(context, 'Folders'),
+                  JournalFolderItem(
+                    title: 'All notes',
+                    icon: Icons.notes,
+                    isSelected: selectedFolder == 'All notes',
+                    isCollapsed: isCollapsed,
+                    onTap: () => onFolderSelected('All notes'),
+                  ),
+                  JournalFolderItem(
+                    title: 'Trade Notes',
+                    icon: Icons.candlestick_chart_outlined,
+                    isSelected: selectedFolder == 'Trade Notes',
+                    isCollapsed: isCollapsed,
+                    onTap: () => onFolderSelected('Trade Notes'),
+                  ),
+                  JournalFolderItem(
+                    title: 'Daily Journal',
+                    icon: Icons.book_outlined,
+                    isSelected: selectedFolder == 'Daily Journal',
+                    isCollapsed: isCollapsed,
+                    onTap: () => onFolderSelected('Daily Journal'),
+                  ),
+                  JournalFolderItem(
+                    title: 'Sessions Recap',
+                    icon: Icons.timelapse,
+                    isSelected: selectedFolder == 'Sessions Recap',
+                    isCollapsed: isCollapsed,
+                    onTap: () => onFolderSelected('Sessions Recap'),
+                  ),
+                  if (!isCollapsed) ...[
+                    const Divider(height: 32),
+                    JournalFolderItem(title: 'Quarterly Goals 📅', isSelected: selectedFolder == 'Quarterly Goals 📅', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Quarterly Goals 📅')),
+                    JournalFolderItem(title: 'Trading Goals 🚀', isSelected: selectedFolder == 'Trading Goals 🚀', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Trading Goals 🚀')),
+                    JournalFolderItem(title: 'Trading Plan 📝', isSelected: selectedFolder == 'Trading Plan 📝', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Trading Plan 📝')),
+                    JournalFolderItem(title: '2023 Goals + Plan 🗺️', isSelected: selectedFolder == '2023 Goals + Plan 🗺️', isCollapsed: isCollapsed, onTap: () => onFolderSelected('2023 Goals + Plan 🗺️')),
+                    JournalFolderItem(title: 'Notes 🍂', isSelected: selectedFolder == 'Notes 🍂', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Notes 🍂')),
+                    JournalFolderItem(title: 'Plan of Action ✍️', isSelected: selectedFolder == 'Plan of Action ✍️', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Plan of Action ✍️')),
+                    JournalFolderItem(title: 'Mistakes Reflection', isSelected: selectedFolder == 'Mistakes Reflection', isCollapsed: isCollapsed, onTap: () => onFolderSelected('Mistakes Reflection')),
+                    
+                    const SizedBox(height: 24),
+                    _buildSectionHeader(context, 'Tags'),
+                    _buildTagItem(context, 'FOMC', 1),
+                    _buildTagItem(context, 'Goals', 1),
+                    _buildTagItem(context, 'Market News', 1),
+                    _buildTagItem(context, 'Mistakes', 1),
+                    _buildTagItem(context, 'Plan of Action', 1),
+                    _buildTagItem(context, 'Trading Rules', 1),
+                    
+                    const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    JournalFolderItem(
+                      title: 'Recently Deleted',
+                      icon: Icons.delete_outline,
+                      isSelected: selectedFolder == 'Recently Deleted',
+                      isCollapsed: isCollapsed,
+                      onTap: () => onFolderSelected('Recently Deleted'),
+                    ),
+                  ] else ...[
+                     const SizedBox(height: 16),
+                     const Divider(),
+                     const SizedBox(height: 16),
+                     JournalFolderItem(
+                       title: 'Recently Deleted',
+                       icon: Icons.delete_outline,
+                       isSelected: selectedFolder == 'Recently Deleted',
+                       isCollapsed: isCollapsed,
+                       onTap: () => onFolderSelected('Recently Deleted'),
+                     ),
+                  ],
                 ],
               ),
             ),
@@ -126,71 +196,6 @@ class JournalNavigationSidebar extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _buildFolderItem(BuildContext context, String title, IconData? icon) {
-    final isSelected = title == selectedFolder;
-    return InkWell(
-      onTap: () => onFolderSelected(title),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5) : null,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 18,
-                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-            ] else ...[
-               // Indent for items without icon to align text if mixed, or just keep as is for "folder" look
-               // The design shows colored tabs for some, let's keep it simple for now
-               Container(
-                 width: 4,
-                 height: 18,
-                 decoration: BoxDecoration(
-                   color: _getColorForFolder(title),
-                   borderRadius: BorderRadius.circular(2),
-                 ),
-               ),
-               const SizedBox(width: 14), // 18 (icon) + 12 (gap) - 4 (bar) = 26. Let's do 14 + 12 = 26 approx
-            ],
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isSelected)
-               Icon(Icons.more_horiz, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ],
-        ),
-      ),
-    ).animate().fadeIn();
-  }
-  
-  Color _getColorForFolder(String title) {
-    // Mock colors based on title hash or predefined
-    final colors = [
-      Colors.orange,
-      Colors.blue,
-      Colors.purple,
-      Colors.green,
-      Colors.red,
-      Colors.teal,
-    ];
-    return colors[title.hashCode % colors.length];
   }
 
   Widget _buildTagItem(BuildContext context, String tag, int count) {
@@ -219,5 +224,133 @@ class JournalNavigationSidebar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class JournalFolderItem extends StatefulWidget {
+  const JournalFolderItem({
+    required this.title,
+    required this.isSelected,
+    required this.isCollapsed,
+    required this.onTap,
+    this.icon,
+    super.key,
+  });
+
+  final String title;
+  final IconData? icon;
+  final bool isSelected;
+  final bool isCollapsed;
+  final VoidCallback onTap;
+
+  @override
+  State<JournalFolderItem> createState() => _JournalFolderItemState();
+}
+
+class _JournalFolderItemState extends State<JournalFolderItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content;
+    if (widget.isCollapsed) {
+      content = Center(
+        child: widget.icon != null
+            ? Icon(
+                widget.icon,
+                size: 20,
+                color: widget.isSelected || _isHovered
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              )
+            : Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _getColorForFolder(widget.title),
+                  shape: BoxShape.circle,
+                ),
+              ),
+      );
+    } else {
+      content = Row(
+        children: [
+          if (widget.icon != null) ...[
+            Icon(
+              widget.icon,
+              size: 18,
+              color: widget.isSelected || _isHovered
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+          ] else ...[
+            Container(
+              width: 4,
+              height: 18,
+              decoration: BoxDecoration(
+                color: _getColorForFolder(widget.title),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 14),
+          ],
+          Expanded(
+            child: Text(
+              widget.title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: widget.isSelected || _isHovered
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                    fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (widget.isSelected)
+            Icon(Icons.more_horiz, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ],
+      );
+    }
+
+    return Tooltip(
+      message: widget.title,
+      waitDuration: const Duration(milliseconds: 500),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: widget.isSelected
+                  ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+                  : _isHovered
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                      : null,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: content,
+          ),
+        ),
+      ).animate().fadeIn(),
+    );
+  }
+
+  Color _getColorForFolder(String title) {
+    // Mock colors based on title hash or predefined
+    final colors = [
+      Colors.orange,
+      Colors.blue,
+      Colors.purple,
+      Colors.green,
+      Colors.red,
+      Colors.teal,
+    ];
+    return colors[title.hashCode % colors.length];
   }
 }
