@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../favorite_filter_providers.dart';
 import '../../../internal/domain/entities/metrics_filter_config.dart';
 import '../../../providers/trade_internal_providers.dart';
-import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../models/trade_holding_view_model.dart';
+import '../../trades/pages/trade_detail_view_page.dart';
 import '../../widgets/filter_panel.dart';
 import '../components/trade_holdings_advanced_template.dart';
 
@@ -239,6 +239,10 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   }
 
   void _showHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
-    TradeDetailDialog.show(context, holding);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TradeDetailViewPage(trade: holding, userId: widget.userId, portfolioId: widget.portfolioId),
+      ),
+    );
   }
 }

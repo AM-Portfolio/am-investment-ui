@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../favorite_filter_providers.dart';
 import '../../../internal/domain/entities/metrics_filter_config.dart';
 import '../../../providers/trade_internal_providers.dart';
-import '../../components/dialogs/trade_detail_dialog.dart';
 import '../../holdings/components/trade_holdings_template.dart';
 import '../../models/trade_holding_view_model.dart';
+import '../../trades/pages/trade_detail_view_page.dart';
 import '../widgets/mobile_filter_panel.dart';
 
 class TradeHoldingsDashboardMobilePage extends ConsumerStatefulWidget {
@@ -276,6 +276,10 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
   }
 
   void _navigateToHoldingDetails(BuildContext context, TradeHoldingViewModel holding) {
-    TradeDetailDialog.show(context, holding);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TradeDetailViewPage(trade: holding, userId: widget.userId, portfolioId: widget.portfolioId),
+      ),
+    );
   }
 }

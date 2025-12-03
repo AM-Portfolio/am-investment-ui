@@ -38,7 +38,7 @@ class _TradeDetailViewPageState extends ConsumerState<TradeDetailViewPage> {
     AppLogger.debug('📎 Has Attachments: ${widget.trade.hasAttachments}', tag: 'TradeDetail');
     AppLogger.debug('📸 Attachment Count: ${widget.trade.attachmentCount}', tag: 'TradeDetail');
 
-    return Container(
+    return Material(
       color: Theme.of(context).colorScheme.surfaceContainerLowest,
       child: Column(
         children: [
