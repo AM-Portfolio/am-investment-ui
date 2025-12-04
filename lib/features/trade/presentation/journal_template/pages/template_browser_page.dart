@@ -5,7 +5,7 @@ import '../../../../internal/domain/entities/journal_template.dart';
 import '../../../../internal/domain/enums/journal_template_category.dart';
 import '../../../cubit/journal_template/journal_template_cubit.dart';
 import '../../../cubit/journal_template/journal_template_state.dart';
-import '../../../../journal_template_providers.dart';
+import '../../../journal_template_providers.dart';
 import '../widgets/template_card.dart';
 import '../widgets/template_category_filter.dart';
 import '../widgets/template_detail_dialog.dart';

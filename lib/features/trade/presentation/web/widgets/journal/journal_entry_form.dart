@@ -463,11 +463,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
   Widget _buildTitleField() {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return _HoverInputField(
       child: TextFormField(
         controller: _titleController,
         enabled: _isEditMode,
@@ -584,3 +580,38 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
   }
 }
 
+/// Hover input field with purple border effect
+class _HoverInputField extends StatefulWidget {
+  const _HoverInputField({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HoverInputField> createState() => _HoverInputFieldState();
+}
+
+class _HoverInputFieldState extends State<_HoverInputField> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: _isHovered
+                ? const Color(0xFF9C27B0) // Purple color
+                : theme.dividerColor.withOpacity(0.5),
+            width: _isHovered ? 2.0 : 1.0,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}

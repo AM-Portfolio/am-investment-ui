@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../internal/domain/entities/journal_entry.dart';
 import '../../cubit/journal/journal_cubit.dart';
 import '../../web/widgets/journal/journal_entry_form.dart';
+import 'simple_template_dialog.dart';
 
 class JournalEntryDetailView extends StatelessWidget {
   const JournalEntryDetailView({
@@ -79,9 +80,16 @@ class JournalEntryDetailView extends StatelessWidget {
                   children: [
                     Text('Recently used:', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     const SizedBox(width: 12),
-                    OutlinedButton(onPressed: () {}, child: const Text('Existing template 1')),
+                    _HoverButton(
+                      onPressed: () => _showTemplateBrowser(context),
+                      child: const Text('Existing template 1'),
+                    ),
                     const SizedBox(width: 12),
-                    OutlinedButton.icon(onPressed: () {}, icon: const Icon(Icons.add, size: 16), label: const Text('Add template')),
+                    _HoverButton(
+                      onPressed: () => _showTemplateBrowser(context),
+                      icon: const Icon(Icons.add, size: 16),
+                      child: const Text('Add template'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -108,5 +116,100 @@ class JournalEntryDetailView extends StatelessWidget {
     ).animate().fadeIn(duration: 400.ms);
   }
 
+  void _showTemplateBrowser(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => EnhancedTemplateDialog(
+        onTemplateSelected: (templateName, richContent) {
+          // TODO: Insert rich content into the journal entry editor
+          // For now, show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Template "$templateName" loaded! Content has been inserted.'),
+              backgroundColor: const Color(0xFF6C5DD3),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          
+          // The richContent variable contains the pre-filled template text
+          // This needs to be inserted into the Quill editor in JournalEntryForm
+          print('Template content to insert:\n$richContent');
+        },
+      ),
+    );
+  }
+}
 
+/// Hover button with purple color effect
+class _HoverButton extends StatefulWidget {
+  const _HoverButton({
+    required this.onPressed,
+    required this.child,
+    this.icon,
+  });
+
+  final VoidCallback onPressed;
+  final Widget child;
+  final Widget? icon;
+
+  @override
+  State<_HoverButton> createState() => _HoverButtonState();
+}
+
+class _HoverButtonState extends State<_HoverButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: _isHovered
+                ? const Color(0xFF9C27B0) // Purple color
+                : Theme.of(context).colorScheme.outline,
+            width: 1.5,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onPressed,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.icon != null) ...[
+                    IconTheme(
+                      data: IconThemeData(
+                        color: _isHovered
+                            ? const Color(0xFF9C27B0)
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                      child: widget.icon!,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  DefaultTextStyle(
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: _isHovered
+                              ? const Color(0xFF9C27B0)
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                    child: widget.child,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

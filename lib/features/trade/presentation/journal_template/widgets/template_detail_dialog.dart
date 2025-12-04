@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../internal/domain/entities/journal_template.dart';
-import '../../../../journal_template_providers.dart';
+import '../../../journal_template_providers.dart';
 import 'template_form_builder.dart';
 
 /// Dialog showing template details with use template action
