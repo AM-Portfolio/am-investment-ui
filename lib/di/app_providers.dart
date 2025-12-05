@@ -9,7 +9,7 @@ part 'app_providers.g.dart';
 
 // Configuration Providers - Keep alive (singleton instances)
 @riverpod
-Future<AppConfig> appConfig(AppConfigRef ref) async {
+Future<AppConfig> appConfig(Ref ref) async {
   // Initialize ConfigService if not already done
   await ConfigService.initialize();
 
@@ -18,25 +18,25 @@ Future<AppConfig> appConfig(AppConfigRef ref) async {
 }
 
 @riverpod
-Future<String> apiBaseUrl(ApiBaseUrlRef ref) async {
+Future<String> apiBaseUrl(Ref ref) async {
   final config = await ref.watch(appConfigProvider.future);
   return config.api.baseUrl;
 }
 
 @Riverpod(keepAlive: true)
-env_config.Environment environmentConfig(EnvironmentConfigRef ref) {
+env_config.Environment environmentConfig(Ref ref) {
   return env_config.EnvironmentConfig.current; // Get current environment
 }
 
 @riverpod
-Future<ApiClient> apiClient(ApiClientRef ref) async {
+Future<ApiClient> apiClient(Ref ref) async {
   // Keep HTTP client alive to maintain connections
   final config = await ref.watch(appConfigProvider.future);
   return ApiClient(baseUrl: config.api.baseUrl);
 }
 
 @riverpod
-Future<PortfolioApiConfig> portfolioApiConfig(PortfolioApiConfigRef ref) async {
+Future<PortfolioApiConfig> portfolioApiConfig(Ref ref) async {
   final config = await ref.watch(appConfigProvider.future);
   return config.api.portfolio;
 }
