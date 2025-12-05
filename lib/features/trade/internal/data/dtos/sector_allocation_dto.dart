@@ -4,7 +4,7 @@ part 'sector_allocation_dto.freezed.dart';
 part 'sector_allocation_dto.g.dart';
 
 @freezed
-class SectorAllocationDto with _$SectorAllocationDto {
+sealed class SectorAllocationDto with _$SectorAllocationDto {
   const factory SectorAllocationDto({
     required String sector,
     required double value,
@@ -17,7 +17,7 @@ class SectorAllocationDto with _$SectorAllocationDto {
 }
 
 @freezed
-class TopPerformerDto with _$TopPerformerDto {
+sealed class TopPerformerDto with _$TopPerformerDto {
   const factory TopPerformerDto({
     required String symbol,
     required String name,

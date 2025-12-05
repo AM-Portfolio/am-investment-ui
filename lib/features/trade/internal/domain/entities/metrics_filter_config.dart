@@ -8,7 +8,7 @@ part 'metrics_filter_config.freezed.dart';
 
 /// Domain entity for metrics filter configuration
 @freezed
-class MetricsFilterConfig with _$MetricsFilterConfig {
+sealed class MetricsFilterConfig with _$MetricsFilterConfig {
   const factory MetricsFilterConfig({
     @Default([]) List<String> portfolioIds,
     DateRangeFilter? dateRange,

@@ -5,7 +5,7 @@ part 'portfolio_list.g.dart';
 
 /// Domain entity representing a single portfolio item
 @freezed
-class PortfolioItem with _$PortfolioItem {
+sealed class PortfolioItem with _$PortfolioItem {
   const factory PortfolioItem({
     required String portfolioId,
     required String portfolioName,
@@ -28,7 +28,7 @@ class PortfolioItem with _$PortfolioItem {
 
 /// Domain entity representing a list of portfolios
 @freezed
-class PortfolioList with _$PortfolioList {
+sealed class PortfolioList with _$PortfolioList {
   const factory PortfolioList({
     required String userId,
     required DateTime lastUpdated,

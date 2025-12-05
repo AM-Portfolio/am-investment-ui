@@ -5,7 +5,7 @@ part 'cloudinary_dto.g.dart';
 
 /// DTO for upload request to backend API
 @freezed
-class UploadRequestDto with _$UploadRequestDto {
+sealed class UploadRequestDto with _$UploadRequestDto {
   const factory UploadRequestDto({
     required String fileContent,
     required String filename,
@@ -19,7 +19,7 @@ class UploadRequestDto with _$UploadRequestDto {
 
 /// DTO for upload response from backend API
 @freezed
-class UploadResponseDto with _$UploadResponseDto {
+sealed class UploadResponseDto with _$UploadResponseDto {
   const factory UploadResponseDto({
     required String publicId,
     required String url,
@@ -37,7 +37,7 @@ class UploadResponseDto with _$UploadResponseDto {
 
 /// DTO for signature request
 @freezed
-class SignatureRequestDto with _$SignatureRequestDto {
+sealed class SignatureRequestDto with _$SignatureRequestDto {
   const factory SignatureRequestDto({
     String? publicId,
     String? folder,
@@ -51,7 +51,7 @@ class SignatureRequestDto with _$SignatureRequestDto {
 
 /// DTO for signature response
 @freezed
-class SignatureResponseDto with _$SignatureResponseDto {
+sealed class SignatureResponseDto with _$SignatureResponseDto {
   const factory SignatureResponseDto({
     required String apiKey,
     required int timestamp,
@@ -69,7 +69,7 @@ class SignatureResponseDto with _$SignatureResponseDto {
 
 /// DTO for Cloudinary resource details
 @freezed
-class CloudinaryResourceDto with _$CloudinaryResourceDto {
+sealed class CloudinaryResourceDto with _$CloudinaryResourceDto {
   const factory CloudinaryResourceDto({
     required String publicId,
     required String url,
@@ -89,7 +89,7 @@ class CloudinaryResourceDto with _$CloudinaryResourceDto {
 
 /// DTO for delete response
 @freezed
-class DeleteResponseDto with _$DeleteResponseDto {
+sealed class DeleteResponseDto with _$DeleteResponseDto {
   const factory DeleteResponseDto({required String result, String? publicId}) = _DeleteResponseDto;
 
   factory DeleteResponseDto.fromJson(Map<String, dynamic> json) => _$DeleteResponseDtoFromJson(json);

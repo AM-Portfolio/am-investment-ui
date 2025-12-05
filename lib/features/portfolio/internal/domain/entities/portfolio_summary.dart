@@ -5,7 +5,7 @@ part 'portfolio_summary.g.dart';
 
 /// Domain entity representing portfolio summary
 @freezed
-class PortfolioSummary with _$PortfolioSummary {
+sealed class PortfolioSummary with _$PortfolioSummary {
   const factory PortfolioSummary({
     required String userId,
     required double totalValue,
@@ -81,7 +81,7 @@ class PortfolioSummary with _$PortfolioSummary {
 
 /// Domain entity representing sector allocation
 @freezed
-class SectorAllocation with _$SectorAllocation {
+sealed class SectorAllocation with _$SectorAllocation {
   const factory SectorAllocation({
     required String sector,
     required double value,
@@ -95,7 +95,7 @@ class SectorAllocation with _$SectorAllocation {
 
 /// Domain entity representing top/worst performers
 @freezed
-class TopPerformer with _$TopPerformer {
+sealed class TopPerformer with _$TopPerformer {
   const factory TopPerformer({
     required String symbol,
     required String companyName,

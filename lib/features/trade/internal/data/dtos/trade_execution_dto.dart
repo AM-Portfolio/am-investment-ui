@@ -5,7 +5,7 @@ part 'trade_execution_dto.freezed.dart';
 part 'trade_execution_dto.g.dart';
 
 @freezed
-class TradeExecutionBasicInfoDto with _$TradeExecutionBasicInfoDto {
+sealed class TradeExecutionBasicInfoDto with _$TradeExecutionBasicInfoDto {
   const factory TradeExecutionBasicInfoDto({
     String? tradeId,
     String? orderId,
@@ -20,7 +20,7 @@ class TradeExecutionBasicInfoDto with _$TradeExecutionBasicInfoDto {
 }
 
 @freezed
-class TradeExecutionInfoDto with _$TradeExecutionInfoDto {
+sealed class TradeExecutionInfoDto with _$TradeExecutionInfoDto {
   const factory TradeExecutionInfoDto({
     String? tradeType,
     String? auction,
@@ -33,7 +33,7 @@ class TradeExecutionInfoDto with _$TradeExecutionInfoDto {
 }
 
 @freezed
-class TradeExecutionDto with _$TradeExecutionDto {
+sealed class TradeExecutionDto with _$TradeExecutionDto {
   const factory TradeExecutionDto({
     TradeExecutionBasicInfoDto? basicInfo,
     InstrumentInfoDto? instrumentInfo,

@@ -4,7 +4,7 @@ part 'journal_entry.freezed.dart';
 part 'journal_entry.g.dart';
 
 @freezed
-class BehaviorPatternSummary with _$BehaviorPatternSummary {
+sealed class BehaviorPatternSummary with _$BehaviorPatternSummary {
   const factory BehaviorPatternSummary({
     required String summary,
     String? mood,
@@ -16,7 +16,7 @@ class BehaviorPatternSummary with _$BehaviorPatternSummary {
 }
 
 @freezed
-class JournalAttachment with _$JournalAttachment {
+sealed class JournalAttachment with _$JournalAttachment {
   const factory JournalAttachment({
     required String fileName,
     required String fileUrl,
@@ -29,7 +29,7 @@ class JournalAttachment with _$JournalAttachment {
 }
 
 @freezed
-class JournalEntry with _$JournalEntry {
+sealed class JournalEntry with _$JournalEntry {
   const factory JournalEntry({
     required String id,
     required String userId,

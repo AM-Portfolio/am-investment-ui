@@ -5,7 +5,7 @@ import '../../../internal/domain/entities/journal_entry.dart';
 part 'journal_state.freezed.dart';
 
 @freezed
-class JournalState with _$JournalState {
+sealed class JournalState with _$JournalState {
   const factory JournalState.initial() = _Initial;
   const factory JournalState.loading() = _Loading;
   const factory JournalState.loaded(List<JournalEntry> entries) = _Loaded;

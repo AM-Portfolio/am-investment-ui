@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'trade_entry_exit_info.freezed.dart';
 
 @freezed
-class TradeEntryExitInfo with _$TradeEntryExitInfo {
+sealed class TradeEntryExitInfo with _$TradeEntryExitInfo {
   const factory TradeEntryExitInfo({
     DateTime? timestamp,
     double? price,

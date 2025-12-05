@@ -5,7 +5,7 @@ import '../../../presentation/models/pending_attachment.dart';
 part 'attachment_state.freezed.dart';
 
 @freezed
-class AttachmentState with _$AttachmentState {
+sealed class AttachmentState with _$AttachmentState {
   const factory AttachmentState.initial() = _Initial;
 
   const factory AttachmentState.loading() = _Loading;

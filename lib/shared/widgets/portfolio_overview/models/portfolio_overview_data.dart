@@ -5,7 +5,7 @@ part 'portfolio_overview_data.g.dart';
 
 /// Complete portfolio overview data model
 @freezed
-class PortfolioOverviewData with _$PortfolioOverviewData {
+sealed class PortfolioOverviewData with _$PortfolioOverviewData {
   const factory PortfolioOverviewData({
     required OverviewSummaryData summary,
     required List<OverviewMoversData> topGainers,
@@ -21,7 +21,7 @@ class PortfolioOverviewData with _$PortfolioOverviewData {
 
 /// Summary data for overview
 @freezed
-class OverviewSummaryData with _$OverviewSummaryData {
+sealed class OverviewSummaryData with _$OverviewSummaryData {
   const factory OverviewSummaryData({
     required double totalValue,
     required double todayChange,
@@ -39,7 +39,7 @@ class OverviewSummaryData with _$OverviewSummaryData {
 
 /// Movers data (top gainers/losers)
 @freezed
-class OverviewMoversData with _$OverviewMoversData {
+sealed class OverviewMoversData with _$OverviewMoversData {
   const factory OverviewMoversData({
     required String symbol,
     required String name,
@@ -55,7 +55,7 @@ class OverviewMoversData with _$OverviewMoversData {
 
 /// Allocation item for sector/market cap
 @freezed
-class AllocationItem with _$AllocationItem {
+sealed class AllocationItem with _$AllocationItem {
   const factory AllocationItem({
     required String label,
     required double value,

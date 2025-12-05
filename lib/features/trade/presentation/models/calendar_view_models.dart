@@ -22,7 +22,7 @@ abstract class CalendarPeriodData {
 
 /// Yearly calendar data model
 @freezed
-class YearlyCalendarData with _$YearlyCalendarData implements CalendarPeriodData {
+sealed class YearlyCalendarData with _$YearlyCalendarData implements CalendarPeriodData {
   const factory YearlyCalendarData({
     required int year,
     required List<MonthSummary> months,
@@ -67,7 +67,7 @@ class YearlyCalendarData with _$YearlyCalendarData implements CalendarPeriodData
 
 /// Monthly calendar data model
 @freezed
-class MonthlyCalendarData with _$MonthlyCalendarData implements CalendarPeriodData {
+sealed class MonthlyCalendarData with _$MonthlyCalendarData implements CalendarPeriodData {
   const factory MonthlyCalendarData({
     required int year,
     required int month,
@@ -117,7 +117,7 @@ class MonthlyCalendarData with _$MonthlyCalendarData implements CalendarPeriodDa
 
 /// Daily calendar data model
 @freezed
-class DailyCalendarData with _$DailyCalendarData implements CalendarPeriodData {
+sealed class DailyCalendarData with _$DailyCalendarData implements CalendarPeriodData {
   const factory DailyCalendarData({
     required DateTime date,
     required List<TradeDetails> trades,
@@ -161,7 +161,7 @@ class DailyCalendarData with _$DailyCalendarData implements CalendarPeriodData {
 
 /// Month summary for yearly view
 @freezed
-class MonthSummary with _$MonthSummary {
+sealed class MonthSummary with _$MonthSummary {
   const factory MonthSummary({
     required int month,
     required int year,
@@ -186,7 +186,7 @@ class MonthSummary with _$MonthSummary {
 
 /// Day summary for monthly view
 @freezed
-class DaySummary with _$DaySummary {
+sealed class DaySummary with _$DaySummary {
   const factory DaySummary({
     required int day,
     required int month,
@@ -212,7 +212,7 @@ class DaySummary with _$DaySummary {
 
 /// Calendar navigation state
 @freezed
-class CalendarNavigationState with _$CalendarNavigationState {
+sealed class CalendarNavigationState with _$CalendarNavigationState {
   const factory CalendarNavigationState({
     required CalendarViewType viewType,
     required int year,
@@ -297,7 +297,7 @@ class CalendarNavigationState with _$CalendarNavigationState {
 
 /// Breadcrumb for navigation
 @freezed
-class CalendarBreadcrumb with _$CalendarBreadcrumb {
+sealed class CalendarBreadcrumb with _$CalendarBreadcrumb {
   const factory CalendarBreadcrumb({required String label, required int year, int? month, int? day}) =
       _CalendarBreadcrumb;
 }

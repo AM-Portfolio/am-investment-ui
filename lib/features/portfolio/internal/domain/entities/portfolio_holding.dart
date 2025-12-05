@@ -5,7 +5,7 @@ part 'portfolio_holding.g.dart';
 
 /// Domain entity representing a portfolio holding
 @freezed
-class PortfolioHolding with _$PortfolioHolding {
+sealed class PortfolioHolding with _$PortfolioHolding {
   const factory PortfolioHolding({
     required String id,
     required String symbol,
@@ -44,7 +44,7 @@ class PortfolioHolding with _$PortfolioHolding {
 
 /// Domain entity representing a broker holding
 @freezed
-class BrokerHolding with _$BrokerHolding {
+sealed class BrokerHolding with _$BrokerHolding {
   const factory BrokerHolding({
     required String brokerId,
     required String brokerName,
@@ -60,7 +60,7 @@ class BrokerHolding with _$BrokerHolding {
 
 /// Domain entity representing portfolio holdings collection
 @freezed
-class PortfolioHoldings with _$PortfolioHoldings {
+sealed class PortfolioHoldings with _$PortfolioHoldings {
   const factory PortfolioHoldings({
     required String userId,
     required List<PortfolioHolding> holdings,

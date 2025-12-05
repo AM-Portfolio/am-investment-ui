@@ -5,7 +5,7 @@ part 'trade_summary.g.dart';
 
 /// Domain entity for trade performance metrics
 @freezed
-class TradeMetrics with _$TradeMetrics {
+sealed class TradeMetrics with _$TradeMetrics {
   const factory TradeMetrics({
     // Trade Statistics
     @Default(0) int totalTrades,
@@ -46,7 +46,7 @@ class TradeMetrics with _$TradeMetrics {
 
 /// Domain entity for asset allocation in trade portfolio
 @freezed
-class TradeAssetAllocation with _$TradeAssetAllocation {
+sealed class TradeAssetAllocation with _$TradeAssetAllocation {
   const factory TradeAssetAllocation({
     required String assetType,
     required double value,
@@ -59,7 +59,7 @@ class TradeAssetAllocation with _$TradeAssetAllocation {
 
 /// Domain entity for top movers in trade (To be calculated later)
 @freezed
-class TradeTopMover with _$TradeTopMover {
+sealed class TradeTopMover with _$TradeTopMover {
   const factory TradeTopMover({
     required String symbol,
     required String name,
@@ -74,7 +74,7 @@ class TradeTopMover with _$TradeTopMover {
 /// Domain entity for trade portfolio summary
 /// Represents the complete portfolio information with trade metrics
 @freezed
-class TradeSummary with _$TradeSummary {
+sealed class TradeSummary with _$TradeSummary {
   const factory TradeSummary({
     // Portfolio Identity
     required String portfolioId,

@@ -4,7 +4,7 @@ part 'portfolio_metrics_dto.freezed.dart';
 part 'portfolio_metrics_dto.g.dart';
 
 @freezed
-class PortfolioMetricsDto with _$PortfolioMetricsDto {
+sealed class PortfolioMetricsDto with _$PortfolioMetricsDto {
   const factory PortfolioMetricsDto({
     @Default(0) int totalTrades,
     @Default(0) int winningTrades,

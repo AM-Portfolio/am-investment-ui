@@ -6,7 +6,7 @@ part 'trade_portfolio.freezed.dart';
 
 /// Domain entity for trade portfolio discovery
 @freezed
-class TradePortfolio with _$TradePortfolio {
+sealed class TradePortfolio with _$TradePortfolio {
   const factory TradePortfolio({
     required String id,
     required String name,
@@ -31,7 +31,7 @@ class TradePortfolio with _$TradePortfolio {
 
 /// Domain entity for comprehensive portfolio summary with advanced metrics
 @freezed
-class TradePortfolioSummary with _$TradePortfolioSummary {
+sealed class TradePortfolioSummary with _$TradePortfolioSummary {
   const factory TradePortfolioSummary({
     required String portfolioId,
     required String name,
@@ -53,7 +53,7 @@ class TradePortfolioSummary with _$TradePortfolioSummary {
 
 /// Domain entity for trade portfolio list
 @freezed
-class TradePortfolioList with _$TradePortfolioList {
+sealed class TradePortfolioList with _$TradePortfolioList {
   const factory TradePortfolioList({
     required String userId,
     required List<TradePortfolio> portfolios,

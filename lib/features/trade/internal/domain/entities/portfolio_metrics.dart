@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'portfolio_metrics.freezed.dart';
 
 @freezed
-class PortfolioMetrics with _$PortfolioMetrics {
+sealed class PortfolioMetrics with _$PortfolioMetrics {
   const factory PortfolioMetrics({
     @Default(0) int totalTrades,
     @Default(0) int winningTrades,
