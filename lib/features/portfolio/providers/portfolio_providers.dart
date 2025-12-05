@@ -1,25 +1,22 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../internal/domain/entities/portfolio_holding.dart';
-import '../internal/domain/entities/portfolio_summary.dart';
+import '../../../core/utils/logger.dart';
+import '../../../di/app_providers.dart';
+import '../internal/data/datasources/portfolio_remote_data_source.dart';
+import '../internal/data/repositories/portfolio_analytics_repository_impl.dart';
+import '../internal/data/repositories/portfolio_repository_impl.dart';
 import '../internal/domain/entities/portfolio_analytics.dart';
 import '../internal/domain/entities/portfolio_analytics_request.dart';
-import '../internal/domain/repositories/portfolio_repository.dart';
+import '../internal/domain/entities/portfolio_holding.dart';
+import '../internal/domain/entities/portfolio_summary.dart';
 import '../internal/domain/repositories/portfolio_analytics_repository.dart';
+import '../internal/domain/repositories/portfolio_repository.dart';
+import '../internal/domain/usecases/get_portfolio_analytics.dart';
 import '../internal/domain/usecases/get_portfolio_holdings.dart';
 import '../internal/domain/usecases/get_portfolio_summary.dart';
-import '../internal/domain/usecases/get_portfolio_analytics.dart';
 import '../internal/domain/usecases/get_portfolios_list.dart';
-
-import '../internal/data/repositories/portfolio_repository_impl.dart';
-import '../internal/data/repositories/portfolio_analytics_repository_impl.dart';
-import '../internal/data/datasources/portfolio_remote_data_source.dart';
-import '../internal/services/portfolio_service.dart';
 import '../internal/services/portfolio_analytics_service.dart';
-import '../../../di/app_providers.dart';
-import '../../../core/utils/logger.dart';
+import '../internal/services/portfolio_service.dart';
 
 part 'portfolio_providers.g.dart';
 
@@ -29,9 +26,7 @@ part 'portfolio_providers.g.dart';
 
 /// Data layer providers
 @riverpod
-Future<PortfolioRemoteDataSource> portfolioRemoteDataSource(
-  Ref ref,
-) async {
+Future<PortfolioRemoteDataSource> portfolioRemoteDataSource(Ref ref) async {
   final apiClient = await ref.watch(apiClientProvider.future);
   final portfolioConfig = await ref.watch(portfolioApiConfigProvider.future);
   return PortfolioRemoteDataSourceImpl(
@@ -41,9 +36,7 @@ Future<PortfolioRemoteDataSource> portfolioRemoteDataSource(
 }
 
 @riverpod
-Future<PortfolioRepository> portfolioRepository(
-  Ref ref,
-) async {
+Future<PortfolioRepository> portfolioRepository(Ref ref) async {
   AppLogger.debug(
     'Creating PortfolioRepository instance',
     tag: 'PortfolioProviders',
@@ -56,9 +49,7 @@ Future<PortfolioRepository> portfolioRepository(
 
 /// Use case providers
 @riverpod
-Future<GetPortfolioHoldings> getPortfolioHoldings(
-  Ref ref,
-) async {
+Future<GetPortfolioHoldings> getPortfolioHoldings(Ref ref) async {
   AppLogger.debug(
     'Creating GetPortfolioHoldings use case',
     tag: 'PortfolioProviders',
@@ -68,9 +59,7 @@ Future<GetPortfolioHoldings> getPortfolioHoldings(
 }
 
 @riverpod
-Future<GetPortfolioSummary> getPortfolioSummary(
-  Ref ref,
-) async {
+Future<GetPortfolioSummary> getPortfolioSummary(Ref ref) async {
   AppLogger.debug(
     'Creating GetPortfolioSummary use case',
     tag: 'PortfolioProviders',
@@ -105,9 +94,7 @@ Future<PortfolioAnalyticsRepository> portfolioAnalyticsRepository(
 }
 
 @riverpod
-Future<GetPortfolioAnalytics> getPortfolioAnalytics(
-  Ref ref,
-) async {
+Future<GetPortfolioAnalytics> getPortfolioAnalytics(Ref ref) async {
   AppLogger.debug(
     'Creating GetPortfolioAnalytics use case',
     tag: 'PortfolioProviders',
@@ -133,9 +120,7 @@ Future<PortfolioService> portfolioService(Ref ref) async {
 }
 
 @riverpod
-Future<PortfolioAnalyticsService> portfolioAnalyticsService(
-  Ref ref,
-) async {
+Future<PortfolioAnalyticsService> portfolioAnalyticsService(Ref ref) async {
   AppLogger.debug(
     'Creating PortfolioAnalyticsService instance',
     tag: 'PortfolioProviders',
@@ -147,10 +132,7 @@ Future<PortfolioAnalyticsService> portfolioAnalyticsService(
 
 /// Data providers - Auto-dispose (can be recreated when needed)
 @riverpod
-Future<PortfolioHoldings> portfolioHoldings(
-  Ref ref,
-  String userId,
-) async {
+Future<PortfolioHoldings> portfolioHoldings(Ref ref, String userId) async {
   final useCase = await ref.watch(getPortfolioHoldingsProvider.future);
   return useCase.call(userId);
 }
@@ -166,10 +148,7 @@ Future<PortfolioHoldings> portfolioHoldingsById(
 }
 
 @riverpod
-Future<PortfolioSummary> portfolioSummary(
-  Ref ref,
-  String userId,
-) async {
+Future<PortfolioSummary> portfolioSummary(Ref ref, String userId) async {
   final useCase = await ref.watch(getPortfolioSummaryProvider.future);
   return useCase.call(userId);
 }
@@ -184,10 +163,7 @@ Stream<PortfolioHoldings> portfolioHoldingsStream(
 }
 
 @riverpod
-Stream<PortfolioSummary> portfolioSummaryStream(
-  Ref ref,
-  String userId,
-) async* {
+Stream<PortfolioSummary> portfolioSummaryStream(Ref ref, String userId) async* {
   final useCase = await ref.watch(getPortfolioSummaryProvider.future);
   yield* useCase.watchSummary(userId);
 }
@@ -212,10 +188,7 @@ Future<PortfolioAnalytics> portfolioAnalyticsWithDefaults(
 }
 
 @riverpod
-Future<Heatmap?> portfolioHeatmap(
-  Ref ref,
-  String portfolioId,
-) async {
+Future<Heatmap?> portfolioHeatmap(Ref ref, String portfolioId) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
   return service.getPortfolioHeatmap(portfolioId);
 }
@@ -231,10 +204,7 @@ Future<Movers?> portfolioMovers(
 }
 
 @riverpod
-Future<AllocationData> portfolioAllocations(
-  Ref ref,
-  String portfolioId,
-) async {
+Future<AllocationData> portfolioAllocations(Ref ref, String portfolioId) async {
   final service = await ref.watch(portfolioAnalyticsServiceProvider.future);
   return service.getPortfolioAllocations(portfolioId);
 }
