@@ -27,8 +27,9 @@ class _BackgroundAudioControlState extends State<BackgroundAudioControl> {
       try {
          await _player.play(AssetSource('sounds/theme_song.mp3'));
       } catch (e) {
-         debugPrint('Asset not found, falling back to demo URL');
-         // Fallback to URL if asset fails
+         // Silently fall back to demo URL if asset missing.
+         // 'e' here might be the "Asset not found" PlatformException.
+         // We don't need to log heavily.
          await _player.play(UrlSource(_demoAudioUrl));
       }
       
@@ -36,7 +37,11 @@ class _BackgroundAudioControlState extends State<BackgroundAudioControl> {
         _isPlaying = true;
       });
     } catch (e) {
-      debugPrint('Error playing audio: $e');
+      // General playback error (network etc)
+      debugPrint('Warning: Audio playback failed. (${e.toString().substring(0, 50)}...)');
+      setState(() {
+        _isPlaying = false; // Reset state if failed
+      });
     }
   }
 

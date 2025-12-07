@@ -3,15 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/utils/validators.dart';
-import '../widgets/auth_layout.dart';
 
-/// Forgot password page for password reset initiation
-class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({super.key});
+/// Forgot password form for use inside persistent shell
+class ForgotPasswordForm extends StatelessWidget {
+  const ForgotPasswordForm({
+    super.key, 
+    required this.onLogin,
+  });
+
+  final VoidCallback onLogin;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: BlocConsumer<AuthCubit, AuthState>(
+  Widget build(BuildContext context) => BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is PasswordResetEmailSent) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -20,7 +23,7 @@ class ForgotPasswordPage extends StatelessWidget {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop();
+          onLogin(); // Go back to login after success
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -30,64 +33,59 @@ class ForgotPasswordPage extends StatelessWidget {
           );
         }
       },
-      builder: (context, state) => AuthLayout(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Forgot Password? 🔑',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+      builder: (context, state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Forgot Password? 🔑',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Enter your email address and we\'ll send you instructions to reset your password.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 32),
+
+          // Forgot password form
+          if (state is AuthLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            const _ForgotPasswordFormContent(),
+
+          const SizedBox(height: 24),
+
+          // Back to login link
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Remember your password? '),
+              TextButton(
+                onPressed: onLogin,
+                child: const Text('Sign In'),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Enter your email address and we\'ll send you instructions to reset your password.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54),
-            ),
-            const SizedBox(height: 32),
-
-            // Forgot password form
-            if (state is AuthLoading)
-              const Center(child: CircularProgressIndicator())
-            else
-              const ForgotPasswordForm(),
-
-            const SizedBox(height: 24),
-
-            // Back to login link
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Remember your password? '),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Sign In'),
-                ),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
-    ),
-  );
+    );
 }
 
-/// Forgot password form widget
-class ForgotPasswordForm extends StatefulWidget {
-  const ForgotPasswordForm({super.key});
+/// Internal form state
+class _ForgotPasswordFormContent extends StatefulWidget {
+  const _ForgotPasswordFormContent();
 
   @override
-  State<ForgotPasswordForm> createState() => _ForgotPasswordFormState();
+  State<_ForgotPasswordFormContent> createState() => _ForgotPasswordFormContentState();
 }
 
-class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
+class _ForgotPasswordFormContentState extends State<_ForgotPasswordFormContent> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
