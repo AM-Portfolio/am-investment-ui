@@ -18,7 +18,7 @@ final journalTemplateRemoteDataSourceProvider =
   final config = ref.watch(appConfigProvider);
   return JournalTemplateRemoteDataSourceImpl(
     apiClient: apiClient,
-    config: config,
+    tradeConfig: config.api.trade,
   );
 });
 

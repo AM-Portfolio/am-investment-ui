@@ -38,17 +38,27 @@ abstract class JournalTemplateRemoteDataSource {
 }
 
 /// Implementation of journal template remote data source
+/// Implementation of journal template remote data source
 class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSource {
   JournalTemplateRemoteDataSourceImpl({
     required ApiClient apiClient,
-    required AppConfig config,
+    required TradeApiConfig tradeConfig,
   })  : _apiClient = apiClient,
-        _config = config;
+        _tradeConfig = tradeConfig;
 
   final ApiClient _apiClient;
-  final AppConfig _config;
+  final TradeApiConfig _tradeConfig;
 
-  String get _baseUrl => '${_config.baseUrl}/api/v1/journal-templates';
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+    return '$cleanBase$cleanResource';
+  }
 
   @override
   Future<JournalTemplateResponseDto> createTemplate(
@@ -61,9 +71,12 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.post(
-        _baseUrl,
-        data: request.toJson(),
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+
+      final response = await _apiClient.post<JournalTemplateResponseDto>(
+        fullUri,
+        body: request.toJson(),
+        parser: (data) => JournalTemplateResponseDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -76,9 +89,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      return JournalTemplateResponseDto.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to create template',
@@ -109,9 +120,17 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         if (search != null) 'search': search,
       };
 
-      final response = await _apiClient.get(
-        _baseUrl,
-        queryParameters: queryParams,
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+
+      final response = await _apiClient.get<List<JournalTemplateResponseDto>>(
+        fullUri,
+        queryParams: queryParams,
+        parser: (data) {
+          if (data is List) {
+            return data.map((item) => JournalTemplateResponseDto.fromJson(item as Map<String, dynamic>)).toList();
+          }
+          return [];
+        },
       );
 
       AppLogger.info(
@@ -124,12 +143,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((item) => JournalTemplateResponseDto.fromJson(
-                item as Map<String, dynamic>,
-              ))
-          .toList();
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to fetch templates',
@@ -153,9 +167,13 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.get(
-        '$_baseUrl/$templateId',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/$templateId';
+
+      final response = await _apiClient.get<JournalTemplateResponseDto>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (data) => JournalTemplateResponseDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -168,9 +186,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      return JournalTemplateResponseDto.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to fetch template',
@@ -194,9 +210,13 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.put(
-        '$_baseUrl/$templateId',
-        data: request.toJson(),
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/$templateId';
+
+      final response = await _apiClient.put<JournalTemplateResponseDto>(
+        fullUri,
+        body: request.toJson(),
+        parser: (data) => JournalTemplateResponseDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -209,9 +229,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      return JournalTemplateResponseDto.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to update template',
@@ -232,9 +250,13 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      await _apiClient.delete(
-        '$_baseUrl/$templateId',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/$templateId';
+
+      await _apiClient.delete<void>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (_) {},
       );
 
       AppLogger.info(
@@ -268,9 +290,18 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.get(
-        '$_baseUrl/favorites',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/favorites';
+
+      final response = await _apiClient.get<List<JournalTemplateResponseDto>>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (data) {
+          if (data is List) {
+            return data.map((item) => JournalTemplateResponseDto.fromJson(item as Map<String, dynamic>)).toList();
+          }
+          return [];
+        },
       );
 
       AppLogger.info(
@@ -283,12 +314,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((item) => JournalTemplateResponseDto.fromJson(
-                item as Map<String, dynamic>,
-              ))
-          .toList();
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to fetch favorite templates',
@@ -311,9 +337,18 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.get(
-        '$_baseUrl/recommended',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/recommended';
+
+      final response = await _apiClient.get<List<JournalTemplateResponseDto>>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (data) {
+          if (data is List) {
+            return data.map((item) => JournalTemplateResponseDto.fromJson(item as Map<String, dynamic>)).toList();
+          }
+          return [];
+        },
       );
 
       AppLogger.info(
@@ -326,12 +361,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((item) => JournalTemplateResponseDto.fromJson(
-                item as Map<String, dynamic>,
-              ))
-          .toList();
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to fetch recommended templates',
@@ -352,9 +382,18 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.get(
-        '$_baseUrl/my-templates',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/my-templates';
+
+      final response = await _apiClient.get<List<JournalTemplateResponseDto>>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (data) {
+          if (data is List) {
+            return data.map((item) => JournalTemplateResponseDto.fromJson(item as Map<String, dynamic>)).toList();
+          }
+          return [];
+        },
       );
 
       AppLogger.info(
@@ -367,12 +406,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((item) => JournalTemplateResponseDto.fromJson(
-                item as Map<String, dynamic>,
-              ))
-          .toList();
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to fetch my templates',
@@ -396,9 +430,13 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.post(
-        '$_baseUrl/$templateId/favorite',
-        queryParameters: {'userId': userId},
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/$templateId/favorite';
+
+      final response = await _apiClient.post<JournalTemplateResponseDto>(
+        fullUri,
+        queryParams: {'userId': userId},
+        parser: (data) => JournalTemplateResponseDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -411,9 +449,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      return JournalTemplateResponseDto.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to toggle template favorite',
@@ -437,9 +473,13 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
     );
 
     try {
-      final response = await _apiClient.post(
-        '$_baseUrl/$templateId/use',
-        data: request.toJson(),
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/journal-templates');
+      final fullUri = '$baseUri/$templateId/use';
+
+      final response = await _apiClient.post<TradeJournalEntryResponseDto>(
+        fullUri,
+        body: request.toJson(),
+        parser: (data) => TradeJournalEntryResponseDto.fromJson(data! as Map<String, dynamic>),
       );
 
       AppLogger.info(
@@ -452,9 +492,7 @@ class JournalTemplateRemoteDataSourceImpl implements JournalTemplateRemoteDataSo
         result: 'success',
       );
 
-      return TradeJournalEntryResponseDto.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return response;
     } catch (e) {
       AppLogger.error(
         'Failed to use template',

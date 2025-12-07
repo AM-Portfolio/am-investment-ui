@@ -31,7 +31,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Save tokens to secure storage
       await _storageService.saveAccessToken(result.tokens.accessToken);
-      await _storageService.saveRefreshToken(result.tokens.refreshToken);
+      if (result.tokens.refreshToken != null) {
+        await _storageService.saveRefreshToken(result.tokens.refreshToken!);
+      }
       await _storageService.saveUserId(result.user.id);
       await _storageService.saveUserEmail(result.user.email);
       await _storageService.saveTokenExpiry(result.tokens.expiresAt);
@@ -55,7 +57,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Save tokens to secure storage
       await _storageService.saveAccessToken(result.tokens.accessToken);
-      await _storageService.saveRefreshToken(result.tokens.refreshToken);
+      if (result.tokens.refreshToken != null) {
+        await _storageService.saveRefreshToken(result.tokens.refreshToken!);
+      }
       await _storageService.saveUserId(result.user.id);
       await _storageService.saveUserEmail(result.user.email);
       await _storageService.saveTokenExpiry(result.tokens.expiresAt);
@@ -79,7 +83,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Save tokens to secure storage
       await _storageService.saveAccessToken(result.tokens.accessToken);
-      await _storageService.saveRefreshToken(result.tokens.refreshToken);
+      if (result.tokens.refreshToken != null) {
+        await _storageService.saveRefreshToken(result.tokens.refreshToken!);
+      }
       await _storageService.saveUserId(result.user.id);
       await _storageService.saveUserEmail(result.user.email);
       await _storageService.saveTokenExpiry(result.tokens.expiresAt);
@@ -112,7 +118,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Save new tokens
       await _storageService.saveAccessToken(result.accessToken);
-      await _storageService.saveRefreshToken(result.refreshToken);
+      if (result.refreshToken != null) {
+        await _storageService.saveRefreshToken(result.refreshToken!);
+      }
       await _storageService.saveTokenExpiry(result.expiresAt);
 
       return Right(result.toEntity());
@@ -172,7 +180,7 @@ class AuthRepositoryImpl implements AuthRepository {
           email.isEmpty ||
           accessToken == null ||
           accessToken.isEmpty ||
-          refreshToken == null ||
+          accessToken.isEmpty ||
           expiry == null) {
         AppLogger.warning(
           '⚠️ Validation failed - userId: ${userId == null

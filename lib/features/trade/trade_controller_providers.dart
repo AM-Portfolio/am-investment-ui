@@ -24,7 +24,7 @@ final _tradeControllerRemoteDataSourceProvider = Provider<TradeControllerRemoteD
   final apiClient = ref.watch(_apiClientProvider);
   final apiConfig = ref.watch(_apiConfigProvider);
 
-  return TradeControllerRemoteDataSourceImpl(apiClient: apiClient, apiConfig: apiConfig);
+  return TradeControllerRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.trade);
 });
 
 /// Provider for TradeControllerRepository

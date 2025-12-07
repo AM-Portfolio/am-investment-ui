@@ -26,12 +26,23 @@ abstract class NotebookRemoteDataSource {
 class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
   const NotebookRemoteDataSourceImpl({
     required ApiClient apiClient,
-    required ApiConfig apiConfig,
+    required TradeApiConfig tradeConfig,
   }) : _apiClient = apiClient,
-       _apiConfig = apiConfig;
+       _tradeConfig = tradeConfig;
 
   final ApiClient _apiClient;
-  final ApiConfig _apiConfig;
+  final TradeApiConfig _tradeConfig;
+
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+    return '$cleanBase$cleanResource';
+  }
 
   // --- Notebook Items ---
 
@@ -44,7 +55,7 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     );
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/items';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/items');
       final response = await _apiClient.post<NotebookItemDto>(
         fullUri,
         body: request.toJson(),
@@ -81,7 +92,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
       if (parentId != null) queryParams += '&parentId=$parentId';
       if (type != null) queryParams += '&type=${type.toString().split('.').last}';
 
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/items?$queryParams';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/items');
+      final fullUri = '$baseUri?$queryParams';
+
       final response = await _apiClient.get<List<NotebookItemDto>>(
         fullUri,
         parser: (data) {
@@ -110,7 +123,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('getNotebookItem', tag: 'NotebookRemoteDataSource', params: {'itemId': itemId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/items/$itemId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/items');
+      final fullUri = '$baseUri/$itemId';
+
       final response = await _apiClient.get<NotebookItemDto>(
         fullUri,
         parser: (data) => NotebookItemDto.fromJson(data! as Map<String, dynamic>),
@@ -134,7 +149,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('updateNotebookItem', tag: 'NotebookRemoteDataSource', params: {'itemId': itemId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/items/$itemId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/items');
+      final fullUri = '$baseUri/$itemId';
+
       final response = await _apiClient.put<NotebookItemDto>(
         fullUri,
         body: request.toJson(),
@@ -159,7 +176,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('deleteNotebookItem', tag: 'NotebookRemoteDataSource', params: {'itemId': itemId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/items/$itemId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/items');
+      final fullUri = '$baseUri/$itemId';
+
       await _apiClient.delete<void>(fullUri, parser: (_) {});
       AppLogger.info('Notebook item deleted successfully', tag: 'NotebookRemoteDataSource');
       AppLogger.methodExit('deleteNotebookItem', tag: 'NotebookRemoteDataSource', result: 'success');
@@ -185,7 +204,7 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     );
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/tags';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/tags');
       final response = await _apiClient.post<NotebookTagDto>(
         fullUri,
         body: request.toJson(),
@@ -210,7 +229,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('getNotebookTags', tag: 'NotebookRemoteDataSource', params: {'userId': userId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/tags?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/tags');
+      final fullUri = '$baseUri?userId=$userId';
+
       final response = await _apiClient.get<List<NotebookTagDto>>(
         fullUri,
         parser: (data) {
@@ -239,7 +260,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('updateNotebookTag', tag: 'NotebookRemoteDataSource', params: {'tagId': tagId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/tags/$tagId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/tags');
+      final fullUri = '$baseUri/$tagId';
+
       final response = await _apiClient.put<NotebookTagDto>(
         fullUri,
         body: request.toJson(),
@@ -264,7 +287,9 @@ class NotebookRemoteDataSourceImpl implements NotebookRemoteDataSource {
     AppLogger.methodEntry('deleteNotebookTag', tag: 'NotebookRemoteDataSource', params: {'tagId': tagId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/notebook/tags/$tagId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/notebook/tags');
+      final fullUri = '$baseUri/$tagId';
+
       await _apiClient.delete<void>(fullUri, parser: (_) {});
       AppLogger.info('Notebook tag deleted successfully', tag: 'NotebookRemoteDataSource');
       AppLogger.methodExit('deleteNotebookTag', tag: 'NotebookRemoteDataSource', result: 'success');

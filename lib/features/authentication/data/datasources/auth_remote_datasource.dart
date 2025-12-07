@@ -5,6 +5,8 @@ import '../../../../core/constants/auth_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/auth_result_model.dart';
 import '../models/auth_tokens_model.dart';
+
+import '../models/user_model.dart';
 import 'auth_data_source.dart';
 
 /// Real API implementation of authentication data source
@@ -19,14 +21,29 @@ class AuthRemoteDataSource implements AuthDataSource {
           '${EnvironmentConfig.apiBaseUrl}${AuthConstants.loginEndpoint}';
       final response = await _dio.post(
         fullUrl,
-        data: {'email': email, 'password': password},
+        data: {'username': email, 'password': password},
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200) {
         // Log the response for debugging
         print('Login API Response: ${response.data}');
-        return AuthResultModel.fromJson(response.data);
+        final data = response.data;
+        
+        final user = UserModel(
+          id: data['user_id'],
+          email: data['email'],
+          displayName: data['username'],
+          authMethod: AuthConstants.authMethodEmail,
+        );
+
+        final tokens = AuthTokensModel(
+          accessToken: data['access_token'],
+          refreshToken: null,
+          expiresAt: DateTime.now().add(Duration(seconds: data['expires_in'] ?? 3600)),
+        );
+
+        return AuthResultModel(user: user, tokens: tokens);
       } else {
         throw ServerException(
           'Login failed',

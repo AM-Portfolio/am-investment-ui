@@ -8,7 +8,7 @@ part 'auth_tokens_model.g.dart';
 class AuthTokensModel {
   AuthTokensModel({
     required this.accessToken,
-    required this.refreshToken,
+    this.refreshToken,
     required this.expiresAt,
   });
 
@@ -22,7 +22,7 @@ class AuthTokensModel {
         expiresAt: entity.expiresAt,
       );
   final String accessToken;
-  final String refreshToken;
+  final String? refreshToken;
   @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime expiresAt;
   Map<String, dynamic> toJson() => _$AuthTokensModelToJson(this);

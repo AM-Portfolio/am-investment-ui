@@ -24,7 +24,7 @@ class AuthConstants {
   static const Duration refreshTokenExpiryDuration = Duration(days: 30);
 
   // API endpoints (relative paths - base URL comes from environment config)
-  static const String loginEndpoint = '/user/api/v1/auth/login';
+  static const String loginEndpoint = '/auth/api/v1/tokens';
   static const String registerEndpoint = '/user/api/v1/auth/register';
   static const String googleLoginEndpoint = '/user/api/v1/auth/google';
   static const String forgotPasswordEndpoint =

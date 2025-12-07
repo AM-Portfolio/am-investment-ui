@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/network/auth_interceptor.dart';
 import '../core/services/secure_storage_service.dart';
 import '../features/authentication/data/datasources/auth_remote_datasource.dart';
 import '../features/authentication/data/datasources/mock_auth_datasource.dart';
@@ -40,6 +41,7 @@ class AuthProviders {
         receiveTimeout: const Duration(seconds: 30),
       ),
     );
+    _dio!.interceptors.add(AuthInterceptor(secureStorageService));
     return _dio!;
   }
 

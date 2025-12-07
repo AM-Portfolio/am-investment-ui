@@ -17,7 +17,7 @@ final _apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 final _notebookRemoteDataSourceProvider = Provider<NotebookRemoteDataSource>((ref) {
   final apiClient = ref.watch(_apiClientProvider);
   final apiConfig = ConfigService.config.api;
-  return NotebookRemoteDataSourceImpl(apiClient: apiClient, apiConfig: apiConfig);
+  return NotebookRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.trade);
 });
 
 /// Provider for NotebookRepository
