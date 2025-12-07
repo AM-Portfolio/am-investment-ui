@@ -7,7 +7,7 @@ part 'trade_calendar.freezed.dart';
 
 /// Trade calendar entity representing calendar data from the domain perspective
 @freezed
-class TradeCalendar with _$TradeCalendar {
+abstract class TradeCalendar with _$TradeCalendar {
   const factory TradeCalendar({required Map<String, List<TradeDetails>> portfolioTrades}) = _TradeCalendar;
 
   /// Factory for creating empty trade calendar
@@ -74,7 +74,7 @@ class TradeCalendar with _$TradeCalendar {
 
 /// Trade calendar event entity for individual trade events
 @freezed
-class TradeCalendarEvent with _$TradeCalendarEvent {
+abstract class TradeCalendarEvent with _$TradeCalendarEvent {
   const factory TradeCalendarEvent({
     required String id,
     required DateTime date,

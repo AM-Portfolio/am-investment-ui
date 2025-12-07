@@ -4,7 +4,7 @@ part 'cloudinary_resource.freezed.dart';
 
 /// Domain entity representing a Cloudinary resource
 @freezed
-class CloudinaryResource with _$CloudinaryResource {
+abstract class CloudinaryResource with _$CloudinaryResource {
   const factory CloudinaryResource({
     required String publicId,
     required String url,
@@ -22,7 +22,7 @@ class CloudinaryResource with _$CloudinaryResource {
 
 /// Domain entity for upload result
 @freezed
-class UploadResult with _$UploadResult {
+abstract class UploadResult with _$UploadResult {
   const factory UploadResult({
     required String url,
     required String secureUrl,
@@ -34,7 +34,7 @@ class UploadResult with _$UploadResult {
 
 /// Domain entity for signature details
 @freezed
-class SignatureDetails with _$SignatureDetails {
+abstract class SignatureDetails with _$SignatureDetails {
   const factory SignatureDetails({
     required String signature,
     required int timestamp,

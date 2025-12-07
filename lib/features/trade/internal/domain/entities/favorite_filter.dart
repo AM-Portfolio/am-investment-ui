@@ -6,7 +6,7 @@ part 'favorite_filter.freezed.dart';
 
 /// Domain entity for favorite filter
 @freezed
-class FavoriteFilter with _$FavoriteFilter {
+abstract class FavoriteFilter with _$FavoriteFilter {
   const factory FavoriteFilter({
     required String id,
     required String name,
@@ -20,7 +20,7 @@ class FavoriteFilter with _$FavoriteFilter {
 
 /// Domain entity for favorite filter list
 @freezed
-class FavoriteFilterList with _$FavoriteFilterList {
+abstract class FavoriteFilterList with _$FavoriteFilterList {
   const factory FavoriteFilterList({
     required String userId,
     required List<FavoriteFilter> filters,
@@ -33,7 +33,7 @@ class FavoriteFilterList with _$FavoriteFilterList {
 
 /// Domain entity for bulk delete result
 @freezed
-class BulkDeleteResult with _$BulkDeleteResult {
+abstract class BulkDeleteResult with _$BulkDeleteResult {
   const factory BulkDeleteResult({required int deletedCount, required int totalRequested, String? message}) =
       _BulkDeleteResult;
 }
