@@ -6,7 +6,7 @@ part 'trade_controller_state.freezed.dart';
 
 /// States for Trade Controller operations
 @freezed
-class TradeControllerState with _$TradeControllerState {
+abstract class TradeControllerState with _$TradeControllerState {
   /// Initial state
   const factory TradeControllerState.initial() = _Initial;
 

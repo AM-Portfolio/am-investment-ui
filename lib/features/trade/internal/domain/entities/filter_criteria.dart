@@ -10,13 +10,13 @@ part 'filter_criteria.freezed.dart';
 
 /// Domain entity for date range filter
 @freezed
-class DateRangeFilter with _$DateRangeFilter {
+abstract class DateRangeFilter with _$DateRangeFilter {
   const factory DateRangeFilter({required DateTime startDate, required DateTime endDate}) = _DateRangeFilter;
 }
 
 /// Domain entity for instrument filter criteria
 @freezed
-class InstrumentFilterCriteria with _$InstrumentFilterCriteria {
+abstract class InstrumentFilterCriteria with _$InstrumentFilterCriteria {
   const factory InstrumentFilterCriteria({
     @Default([]) List<MarketSegments> marketSegments,
     @Default([]) List<String> baseSymbols,
@@ -27,7 +27,7 @@ class InstrumentFilterCriteria with _$InstrumentFilterCriteria {
 
 /// Domain entity for trade characteristics filter
 @freezed
-class TradeCharacteristicsFilter with _$TradeCharacteristicsFilter {
+abstract class TradeCharacteristicsFilter with _$TradeCharacteristicsFilter {
   const factory TradeCharacteristicsFilter({
     @Default([]) List<String> strategies,
     @Default([]) List<String> tags,
@@ -40,7 +40,7 @@ class TradeCharacteristicsFilter with _$TradeCharacteristicsFilter {
 
 /// Domain entity for profit/loss filter
 @freezed
-class ProfitLossFilter with _$ProfitLossFilter {
+abstract class ProfitLossFilter with _$ProfitLossFilter {
   const factory ProfitLossFilter({
     double? minProfitLoss,
     double? maxProfitLoss,

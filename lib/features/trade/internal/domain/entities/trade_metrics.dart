@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'trade_metrics.freezed.dart';
 
 @freezed
-class TradeMetrics with _$TradeMetrics {
+abstract class TradeMetrics with _$TradeMetrics {
   const factory TradeMetrics({
     double? profitLoss,
     double? profitLossPercentage,
