@@ -30,7 +30,7 @@ class DragDropArea extends StatelessWidget {
 
       return DragTarget<List<String>>(
         onWillAcceptWithDetails: (data) => true,
-        onAcceptWithDetails: (data) => callbacks.onDropFiles?.call(data),
+        onAcceptWithDetails: (details) => callbacks.onDropFiles?.call(details.data),
         builder: (context, candidateData, rejectedData) => GestureDetector(
           onTap: callbacks.onPickFiles,
           child: Container(

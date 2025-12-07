@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../cubit/feature_flag_cubit.dart';
 import '../cubit/feature_flag_state.dart';
-import '../widgets/email_login_form_widget.dart';
-import '../widgets/google_login_button_widget.dart';
 import '../widgets/demo_login_button_widget.dart';
+import '../widgets/email_login_form_widget.dart';
 import '../widgets/feature_flag_panel_widget.dart';
+import '../widgets/google_login_button_widget.dart';
+import '../widgets/interactive_particle_background.dart';
 
 /// Main login page with all authentication options
 class LoginPage extends StatelessWidget {
@@ -22,27 +24,25 @@ class LoginPage extends StatelessWidget {
             // Navigate to home page
             Navigator.of(context).pushReplacementNamed('/home');
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
           }
         },
         builder: (context, state) => Stack(
           children: [
-            // Background
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.blue.shade900,
-                    Colors.blue.shade600,
-                    Colors.cyan.shade400,
-                  ],
+            // Interactive particle background with cursor effects
+            InteractiveParticleBackground(
+              particleCount: 100,
+              highlightRadius: 180.0,
+              particleSize: 3.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.deepPurple.shade900, Colors.deepPurple.shade700, Colors.blue.shade600],
+                  ),
                 ),
               ),
             ),
@@ -57,20 +57,14 @@ class LoginPage extends StatelessWidget {
                     // App title
                     const Text(
                       '🌟 AM Investment UI',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 48),
 
                     // Login card
                     Card(
                       elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(
@@ -78,10 +72,7 @@ class LoginPage extends StatelessWidget {
                           children: [
                             const Text(
                               'Welcome Back! 👋',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 32),
@@ -98,10 +89,7 @@ class LoginPage extends StatelessWidget {
                             const Row(
                               children: [
                                 Expanded(child: Divider()),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text('OR'),
-                                ),
+                                Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('OR')),
                                 Expanded(child: Divider()),
                               ],
                             ),
@@ -123,13 +111,7 @@ class LoginPage extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).pushNamed('/forgot-password');
                               },
-                              child: const Text(
-                                'Forgot Password?',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blue,
-                                ),
-                              ),
+                              child: const Text('Forgot Password?', style: TextStyle(fontSize: 14, color: Colors.blue)),
                             ),
 
                             const SizedBox(height: 8),
@@ -138,21 +120,14 @@ class LoginPage extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  "Don't have an account?",
-                                  style: TextStyle(fontSize: 14),
-                                ),
+                                const Text("Don't have an account?", style: TextStyle(fontSize: 14)),
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pushNamed('/register');
                                   },
                                   child: const Text(
                                     'Create Account',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
-                                    ),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue),
                                   ),
                                 ),
                               ],
@@ -170,12 +145,7 @@ class LoginPage extends StatelessWidget {
             BlocBuilder<FeatureFlagCubit, FeatureFlagState>(
               builder: (context, flagState) {
                 if (flagState.flags.showDeveloperPanel) {
-                  return const Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: FeatureFlagPanelWidget(),
-                  );
+                  return const Positioned(bottom: 0, left: 0, right: 0, child: FeatureFlagPanelWidget());
                 }
                 return const SizedBox.shrink();
               },
