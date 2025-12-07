@@ -1,52 +1,33 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-
 import '../../../../shared/widgets/backgrounds/interactive_background.dart';
 import '../../../../shared/widgets/media/background_audio_control.dart';
 import '../../../../shared/widgets/media/theme_selector.dart';
-import '../widgets/login_form.dart';
-import 'forgot_password_page.dart'; // Actually ForgotPasswordForm
-import 'register_page.dart'; // Actually RegisterForm
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({
-    super.key, 
-    this.onLogin,
-    this.initialView = AuthView.login,
+class AuthLayout extends StatefulWidget {
+  final Widget child;
+  final bool showBranding;
+
+  const AuthLayout({
+    super.key,
+    required this.child,
+    this.showBranding = true,
   });
-  
-  final Function(String userId)? onLogin;
-  final AuthView initialView;
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<AuthLayout> createState() => _AuthLayoutState();
 }
 
-enum AuthView { login, register, forgotPassword }
-
-class _LoginScreenState extends State<LoginScreen> {
+class _AuthLayoutState extends State<AuthLayout> {
   BackgroundTheme _currentTheme = BackgroundTheme.nebula;
-  late AuthView _currentView;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentView = widget.initialView;
-  }
-
-  void _switchView(AuthView view) {
-    setState(() {
-      _currentView = view;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient (Persistent)
+          // Background Gradient (Dark Navy)
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -63,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           
-          // Full Screen Background Animation (Persistent)
+          // Full Screen Background Animation
           Positioned.fill(
             child: InteractiveBackground(
               baseColor: Theme.of(context).primaryColor,
@@ -74,14 +55,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Content Layer (Swappable)
+          // Content Layer
           Positioned.fill(
-            child: kIsWeb
+            child: widget.showBranding && kIsWeb
                 ? _buildWebLayout()
                 : _buildCenteredLayout(),
           ),
 
-          // Controls Layer (Persistent)
+          // Controls Layer (Top Right)
           Positioned(
             top: 24,
             right: 24,
@@ -107,18 +88,18 @@ class _LoginScreenState extends State<LoginScreen> {
         constraints: const BoxConstraints(maxWidth: 1200),
         child: Row(
           children: [
-            // Left side - Branding (Fixed)
+            // Left side - Branding
             Expanded(
               flex: 5,
               child: _buildBranding(),
             ),
-            // Right side - Swappable Form
+            // Right side - Form
             Expanded(
               flex: 4,
               child: Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(48),
-                  child: _buildGlassContainer(_buildCurrentForm()),
+                  child: _buildGlassContainer(widget.child),
                 ),
               ),
             ),
@@ -135,47 +116,18 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             _buildMobileBranding(),
-             const SizedBox(height: 48),
-            _buildGlassContainer(_buildCurrentForm()),
+            if (widget.showBranding) ...[
+              _buildMobileBranding(),
+              const SizedBox(height: 48),
+            ],
+            _buildGlassContainer(widget.child),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCurrentForm() {
-    // Use AnimatedSwitcher for smooth transitions between forms
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      child: KeyedSubtree(
-        key: ValueKey<AuthView>(_currentView),
-        child: _getFormWidget(),
-      ),
-    );
-  }
-
-  Widget _getFormWidget() {
-    switch (_currentView) {
-      case AuthView.login:
-        return LoginForm(
-          onRegister: () => _switchView(AuthView.register),
-          onForgotPassword: () => _switchView(AuthView.forgotPassword),
-        );
-      case AuthView.register:
-        return RegisterForm(
-          onLogin: () => _switchView(AuthView.login),
-        );
-      case AuthView.forgotPassword:
-        return ForgotPasswordForm(
-          onLogin: () => _switchView(AuthView.login),
-        );
-    }
-  }
-
+  /// Glassmorphic container for the form
   Widget _buildGlassContainer(Widget child) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),

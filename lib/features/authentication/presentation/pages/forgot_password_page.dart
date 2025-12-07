@@ -1,136 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../shared/widgets/inputs/glass_text_field.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/utils/validators.dart';
 
-/// Forgot password page for password reset initiation
-class ForgotPasswordPage extends StatelessWidget {
-  const ForgotPasswordPage({super.key});
+/// Forgot password form for use inside persistent shell
+class ForgotPasswordForm extends StatelessWidget {
+  const ForgotPasswordForm({
+    super.key, 
+    required this.onLogin,
+  });
+
+  final VoidCallback onLogin;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is PasswordResetEmailSent) {
-            // Show success message and navigate back
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password reset instructions sent to your email'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.of(context).pop();
-          } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) => Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade600,
-                Colors.cyan.shade400,
-              ],
+  Widget build(BuildContext context) => BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is PasswordResetEmailSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Password reset instructions sent to your email'),
+              backgroundColor: Colors.green,
             ),
-          ),
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App title
-                  const Text(
-                    '🌟 AM Investment UI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // Forgot password card
-                  Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Forgot Password? 🔑',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Enter your email address and we\'ll send you instructions to reset your password.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Forgot password form
-                          if (state is AuthLoading)
-                            const Center(child: CircularProgressIndicator())
-                          else
-                            const ForgotPasswordForm(),
-
-                          const SizedBox(height: 24),
-
-                          // Back to login link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('Remember your password? '),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Sign In'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          );
+          onLogin(); // Go back to login after success
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
             ),
+          );
+        }
+      },
+      builder: (context, state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Forgot Password? 🔑',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
+          const SizedBox(height: 16),
+          const Text(
+            'Enter your email address and we\'ll send you instructions to reset your password.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 32),
+
+          // Forgot password form
+          if (state is AuthLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            const _ForgotPasswordFormContent(),
+
+          const SizedBox(height: 24),
+
+          // Back to login link
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Remember your password? '),
+              TextButton(
+                onPressed: onLogin,
+                child: const Text('Sign In'),
+              ),
+            ],
+          ),
+        ],
       ),
-    ),
-  );
+    );
 }
 
-/// Forgot password form widget
-class ForgotPasswordForm extends StatefulWidget {
-  const ForgotPasswordForm({super.key});
+/// Internal form state
+class _ForgotPasswordFormContent extends StatefulWidget {
+  const _ForgotPasswordFormContent();
 
   @override
-  State<ForgotPasswordForm> createState() => _ForgotPasswordFormState();
+  State<_ForgotPasswordFormContent> createState() => _ForgotPasswordFormContentState();
 }
 
-class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
+class _ForgotPasswordFormContentState extends State<_ForgotPasswordFormContent> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
@@ -153,14 +109,11 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Email
-        TextFormField(
+        GlassTextField(
           controller: _emailController,
+          hintText: 'Email',
+          prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            prefixIcon: Icon(Icons.email),
-            border: OutlineInputBorder(),
-          ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Please enter your email';
@@ -178,8 +131,12 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           onPressed: _handleSubmit,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            elevation: 5,
+            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.4),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
           child: const Text(
