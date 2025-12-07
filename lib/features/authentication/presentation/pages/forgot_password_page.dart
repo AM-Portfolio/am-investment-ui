@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/utils/validators.dart';
+import '../widgets/auth_layout.dart';
 
 /// Forgot password page for password reset initiation
 class ForgotPasswordPage extends StatelessWidget {
@@ -10,112 +11,68 @@ class ForgotPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is PasswordResetEmailSent) {
-            // Show success message and navigate back
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password reset instructions sent to your email'),
-                backgroundColor: Colors.green,
+    body: BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is PasswordResetEmailSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Password reset instructions sent to your email'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.of(context).pop();
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) => AuthLayout(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Forgot Password? 🔑',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-            );
-            Navigator.of(context).pop();
-          } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) => Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade600,
-                Colors.cyan.shade400,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Enter your email address and we\'ll send you instructions to reset your password.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54),
+            ),
+            const SizedBox(height: 32),
+
+            // Forgot password form
+            if (state is AuthLoading)
+              const Center(child: CircularProgressIndicator())
+            else
+              const ForgotPasswordForm(),
+
+            const SizedBox(height: 24),
+
+            // Back to login link
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Remember your password? '),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Sign In'),
+                ),
               ],
             ),
-          ),
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App title
-                  const Text(
-                    '🌟 AM Investment UI',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // Forgot password card
-                  Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Forgot Password? 🔑',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Enter your email address and we\'ll send you instructions to reset your password.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Forgot password form
-                          if (state is AuthLoading)
-                            const Center(child: CircularProgressIndicator())
-                          else
-                            const ForgotPasswordForm(),
-
-                          const SizedBox(height: 24),
-
-                          // Back to login link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('Remember your password? '),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Sign In'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          ],
         ),
       ),
     ),
@@ -156,10 +113,15 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Email',
-            prefixIcon: Icon(Icons.email),
-            border: OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.email),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.8),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -178,8 +140,10 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           onPressed: _handleSubmit,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: const Text(

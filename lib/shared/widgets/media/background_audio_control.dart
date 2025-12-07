@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 class BackgroundAudioControl extends StatefulWidget {
@@ -8,51 +9,96 @@ class BackgroundAudioControl extends StatefulWidget {
 }
 
 class _BackgroundAudioControlState extends State<BackgroundAudioControl> {
+  late AudioPlayer _player;
   bool _isPlaying = false;
-  // Placeholder audio player controller would go here
+  bool _isMuted = false;
+  final String _demoAudioUrl = 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3';
 
-  void _toggleAudio() {
+  @override
+  void initState() {
+    super.initState();
+    _player = AudioPlayer();
+    _player.setReleaseMode(ReleaseMode.loop);
+  }
+
+  Future<void> _playMusic() async {
+    try {
+      // First try to play from assets
+      try {
+         await _player.play(AssetSource('sounds/theme_song.mp3'));
+      } catch (e) {
+         debugPrint('Asset not found, falling back to demo URL');
+         // Fallback to URL if asset fails
+         await _player.play(UrlSource(_demoAudioUrl));
+      }
+      
+      setState(() {
+        _isPlaying = true;
+      });
+    } catch (e) {
+      debugPrint('Error playing audio: $e');
+    }
+  }
+
+  Future<void> _togglePlay() async {
+    if (_isPlaying) {
+      await _player.pause();
+    } else {
+      await _playMusic();
+    }
     setState(() {
       _isPlaying = !_isPlaying;
     });
-    // Trigger audio play/pause logic
-    if (_isPlaying) {
-      debugPrint('Playing background music...');
+  }
+
+  Future<void> _toggleMute() async {
+    if (_isMuted) {
+      await _player.setVolume(1.0);
     } else {
-      debugPrint('Paused background music.');
+      await _player.setVolume(0.0);
     }
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _toggleAudio,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(30),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              _isPlaying ? Icons.music_note : Icons.music_off,
+              color: _isPlaying ? Colors.greenAccent : Colors.white70,
+              size: 20,
+            ),
+            onPressed: _togglePlay,
+            tooltip: _isPlaying ? 'Pause Music' : 'Play Theme Song',
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _isPlaying ? Icons.music_note : Icons.music_off,
-                color: Colors.white,
+          if (_isPlaying)
+            IconButton(
+              icon: Icon(
+                _isMuted ? Icons.volume_off : Icons.volume_up,
+                color: Colors.white70,
                 size: 20,
               ),
-              const SizedBox(width: 8),
-              Text(
-                _isPlaying ? 'Theme On' : 'Theme Off',
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
-            ],
-          ),
-        ),
+              onPressed: _toggleMute,
+              tooltip: _isMuted ? 'Unmute' : 'Mute',
+            ),
+        ],
       ),
     );
   }

@@ -252,32 +252,51 @@ class ParticlePainter extends CustomPainter {
     final paint = Paint()..strokeCap = StrokeCap.round;
 
     for (var particle in particles) {
-      // Mouse repulsion (Anti-gravity effect)
+      // Mouse interaction
       final dx = particle.position.dx - mousePosition.dx;
       final dy = particle.position.dy - mousePosition.dy;
       final distance = sqrt(dx * dx + dy * dy);
-      final repulsionRadius = 200.0;
+      final repulsionRadius = 250.0; // Increased radius
 
       Offset drawPosition = particle.position;
+      double drawSize = particle.size;
+      Color drawColor = particle.color;
 
+      // Interaction Logic: Zoom and Color Shift
       if (distance < repulsionRadius) {
+        // Stronger repulsion
         final force = (repulsionRadius - distance) / repulsionRadius;
         final angle = atan2(dy, dx);
-        final pushX = cos(angle) * force * 100;
-        final pushY = sin(angle) * force * 100;
-        drawPosition += Offset(pushX, pushY);
+        final pushFactor = 120.0; // More dramatic push
+        
+        drawPosition += Offset(cos(angle) * force * pushFactor, sin(angle) * force * pushFactor);
+        
+        // Zoom Effect: Closer = Larger
+        drawSize = particle.size * (1 + force * 2.0); // Up to 3x size
+        
+        // Color Shift: Closer = Brighter/White
+        if (force > 0.5) {
+             drawColor = Color.lerp(particle.color, Colors.white, (force - 0.5) * 2)!;
+        } else {
+             drawColor = Color.lerp(particle.color, Colors.cyanAccent, force * 2)!;
+        }
       }
 
       // Draw Particle
-      paint.color = particle.color;
-      canvas.drawCircle(drawPosition, particle.size, paint);
+      paint.color = drawColor;
+      canvas.drawCircle(drawPosition, drawSize, paint);
 
+      // Draw Connections
       for (var other in particles) {
         if (particle == other) continue;
         final distToOther = (drawPosition - other.position).distance;
-        if (distToOther < 120) {
-           paint.color = particle.color.withValues(alpha: (1 - distToOther / 120) * 0.2);
-           paint.strokeWidth = 1;
+        final connectionDist = 120.0;
+        
+        if (distToOther < connectionDist) {
+           // Connections also brighten if the particle is highlighted
+           final alpha = (1 - distToOther / connectionDist) * 0.2;
+           paint.color = drawColor.withValues(alpha: alpha);
+           paint.strokeWidth = 1 + (drawSize - particle.size) * 0.5; // Thicker lines when zoomed
            canvas.drawLine(drawPosition, other.position, paint);
         }
       }
