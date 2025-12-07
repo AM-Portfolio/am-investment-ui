@@ -83,32 +83,67 @@ class AuthRemoteDataSource implements AuthDataSource {
   }
 
   @override
-  Future<AuthResultModel> googleLogin() async {
+  Future<AuthResultModel> googleLogin(String idToken) async {
     try {
+      AppLogger.info('🔵 [BACKEND] Preparing Google OAuth request...');
+
       final authConfig = ConfigService.config.api.auth;
       if (authConfig == null) {
+        AppLogger.error('🔴 [BACKEND] Auth API not configured!');
         throw ServerException('Auth API not configured', statusCode: 500);
       }
 
       final fullUrl =
           '${authConfig.baseUrl}${AuthConstants.googleLoginEndpoint}';
-      final response = await _dio.post(fullUrl);
+
+      AppLogger.info('🔵 [BACKEND] POST $fullUrl');
+      AppLogger.debug('🔵 [BACKEND] ID Token length: ${idToken.length}');
+
+      final response = await _dio.post(
+        fullUrl,
+        data: {'id_token': idToken},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      AppLogger.info('🔵 [BACKEND] Response Status: ${response.statusCode}');
+      AppLogger.debug('🔵 [BACKEND] Response Data: ${response.data}');
 
       if (response.statusCode == 200) {
-        return AuthResultModel.fromJson(response.data);
+        AppLogger.info('🔵 [BACKEND] ✅ Success! Parsing response...');
+        final model = AuthResultModel.fromJson(response.data);
+        AppLogger.info('🔵 [BACKEND] Parsed user: ${model.user.email}');
+        return model;
       } else {
+        AppLogger.error(
+          '🔴 [BACKEND] Unexpected status: ${response.statusCode}',
+        );
         throw ServerException(
           'Google login failed',
           statusCode: response.statusCode ?? 500,
         );
       }
     } on DioException catch (e) {
+      AppLogger.error('🔴 [BACKEND] DioException occurred');
+      AppLogger.error('🔴 [BACKEND] Type: ${e.type}');
+      AppLogger.error('🔴 [BACKEND] Message: ${e.message}');
+      AppLogger.error('🔴 [BACKEND] Response: ${e.response?.data}');
+      AppLogger.error('🔴 [BACKEND] Status Code: ${e.response?.statusCode}');
+
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
         throw NetworkException(AuthConstants.networkError);
       }
+
+      var errorMessage = AuthConstants.serverError;
+      if (e.response?.data != null && e.response!.data is Map) {
+        final data = e.response!.data;
+        errorMessage =
+            data['message'] ?? data['detail'] ?? data['error'] ?? errorMessage;
+        AppLogger.error('🔴 [BACKEND] Error detail: $errorMessage');
+      }
+
       throw ServerException(
-        e.message ?? AuthConstants.serverError,
+        errorMessage,
         statusCode: e.response?.statusCode ?? 500,
       );
     }

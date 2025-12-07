@@ -6,8 +6,8 @@ abstract class AuthDataSource {
   /// Login with email and password
   Future<AuthResultModel> emailLogin(String email, String password);
 
-  /// Login with Google
-  Future<AuthResultModel> googleLogin();
+  /// Google login
+  Future<AuthResultModel> googleLogin(String idToken);
 
   /// Login with demo account
   Future<AuthResultModel> demoLogin();

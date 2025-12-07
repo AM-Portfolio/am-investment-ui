@@ -6,6 +6,7 @@ import '../core/services/secure_storage_service.dart';
 import '../features/authentication/data/datasources/auth_remote_datasource.dart';
 import '../features/authentication/data/datasources/mock_auth_datasource.dart';
 import '../features/authentication/data/repositories/auth_repository_impl.dart';
+import '../features/authentication/data/services/google_signin_service.dart';
 import '../features/authentication/data/services/mock_data_service.dart';
 import '../features/authentication/domain/repositories/auth_repository.dart';
 import '../features/authentication/domain/usecases/check_auth_status_usecase.dart';
@@ -61,6 +62,7 @@ class AuthProviders {
       mockAuthDataSource,
       authRemoteDataSource,
       secureStorageService,
+      GoogleSignInService(), // Added GoogleSignInService
     );
     return _authRepository!;
   }

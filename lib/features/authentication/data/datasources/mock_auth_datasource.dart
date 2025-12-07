@@ -31,7 +31,7 @@ class MockAuthDataSource implements AuthDataSource {
   }
 
   @override
-  Future<AuthResultModel> googleLogin() async {
+  Future<AuthResultModel> googleLogin(String idToken) async {
     try {
       return await _mockDataService.authenticateGoogle();
     } catch (e) {
