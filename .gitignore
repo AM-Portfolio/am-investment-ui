@@ -159,6 +159,7 @@ GoogleService-Info.plist
 !.vscode/launch.json
 !.vscode/tasks.json
 *.code-workspace
+.replit
 
 # IntelliJ IDEA / Android Studio
 .idea/
