@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../shared/widgets/inputs/glass_text_field.dart';
 import '../cubit/auth_cubit.dart';
 import '../../../../core/utils/validators.dart';
 
@@ -52,13 +53,10 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Full Name
-        TextFormField(
+        GlassTextField(
           controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: 'Full Name',
-            prefixIcon: Icon(Icons.person),
-            border: OutlineInputBorder(),
-          ),
+          hintText: 'Full Name',
+          prefixIcon: Icons.person_outline,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Please enter your full name';
@@ -69,14 +67,11 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         const SizedBox(height: 16),
 
         // Email
-        TextFormField(
+        GlassTextField(
           controller: _emailController,
+          hintText: 'Email',
+          prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            prefixIcon: Icon(Icons.email),
-            border: OutlineInputBorder(),
-          ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Please enter your email';
@@ -90,15 +85,11 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         const SizedBox(height: 16),
 
         // Phone Number (Optional)
-        TextFormField(
+        GlassTextField(
           controller: _phoneController,
+          hintText: 'Phone Number (Optional)',
+          prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Phone Number (Optional)',
-            prefixIcon: Icon(Icons.phone),
-            border: OutlineInputBorder(),
-            hintText: '+1234567890',
-          ),
           validator: (value) {
             if (value != null && value.trim().isNotEmpty) {
               if (!Validators.isValidPhone(value.trim())) {
@@ -111,23 +102,21 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         const SizedBox(height: 16),
 
         // Password
-        TextFormField(
+        GlassTextField(
           controller: _passwordController,
+          hintText: 'Password',
+          prefixIcon: Icons.lock_outline,
           obscureText: _obscurePassword,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            prefixIcon: const Icon(Icons.lock),
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              color: Colors.black54,
             ),
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -151,23 +140,21 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
         const SizedBox(height: 16),
 
         // Confirm Password
-        TextFormField(
+        GlassTextField(
           controller: _confirmPasswordController,
+          hintText: 'Confirm Password',
+          prefixIcon: Icons.lock_outline,
           obscureText: _obscureConfirmPassword,
-          decoration: InputDecoration(
-            labelText: 'Confirm Password',
-            prefixIcon: const Icon(Icons.lock_outline),
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-              ),
-              onPressed: () {
-                setState(() {
-                  _obscureConfirmPassword = !_obscureConfirmPassword;
-                });
-              },
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              color: Colors.black54,
             ),
+            onPressed: () {
+              setState(() {
+                _obscureConfirmPassword = !_obscureConfirmPassword;
+              });
+            },
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -186,8 +173,12 @@ class _RegistrationFormWidgetState extends State<RegistrationFormWidget> {
           onPressed: _handleRegister,
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            elevation: 5,
+            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.4),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
           child: const Text(

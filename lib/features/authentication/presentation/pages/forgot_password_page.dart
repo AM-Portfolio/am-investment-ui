@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../shared/widgets/inputs/glass_text_field.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/utils/validators.dart';
@@ -108,19 +109,11 @@ class _ForgotPasswordFormContentState extends State<_ForgotPasswordFormContent> 
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Email
-        TextFormField(
+        GlassTextField(
           controller: _emailController,
+          hintText: 'Email',
+          prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-            labelText: 'Email',
-            prefixIcon: const Icon(Icons.email),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.8),
-          ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Please enter your email';
@@ -140,8 +133,10 @@ class _ForgotPasswordFormContentState extends State<_ForgotPasswordFormContent> 
             padding: const EdgeInsets.all(16),
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
+            elevation: 5,
+            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.4),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
           child: const Text(
