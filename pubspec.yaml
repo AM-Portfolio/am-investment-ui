@@ -120,6 +120,7 @@ flutter:
     - assets/mock-data/google/
     - assets/mock-data/api_responses/
     - assets/sounds/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
