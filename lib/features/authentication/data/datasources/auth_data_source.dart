@@ -18,6 +18,14 @@ abstract class AuthDataSource {
   /// Refresh token
   Future<AuthTokensModel> refreshToken(String refreshToken);
 
+  /// Register with email and password
+  Future<AuthResultModel> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+  });
+
   /// Check if user is authenticated
   Future<bool> isAuthenticated();
 }

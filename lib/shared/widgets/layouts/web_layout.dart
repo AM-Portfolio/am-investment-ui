@@ -45,6 +45,8 @@ class WebLayout extends StatelessWidget {
         // Global Sidebar (Far Left)
         GlobalSidebar(
           activeNavItem: activeNavItem,
+          userName: userName,
+          userEmail: userEmail,
           onNavigate: (navItem) {
             if (onNavigate != null) {
               onNavigate!(navItem);
@@ -56,9 +58,7 @@ class WebLayout extends StatelessWidget {
         ),
 
         // Main Content Area (Includes Sub-sidebar if present in child)
-        Expanded(
-          child: child,
-        ),
+        Expanded(child: child),
       ],
     ),
   );

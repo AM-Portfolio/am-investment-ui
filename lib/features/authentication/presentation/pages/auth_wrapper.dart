@@ -22,7 +22,7 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
-  String _currentPage = 'Portfolio';
+  String _currentPage = 'Dashboard';
   bool _isSidebarExpanded = true;
 
   @override
@@ -37,7 +37,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _handleLogin(String userId) async {
     // Login is already handled by AuthCubit
     setState(() {
-      _currentPage = 'Portfolio';
+      _currentPage = 'Dashboard';
       _isSidebarExpanded = true;
     });
   }
@@ -47,13 +47,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     try {
       await context.read<AuthCubit>().logout();
-      AppLogger.info('AuthWrapper: Logout completed successfully', tag: 'AuthWrapper');
+      AppLogger.info(
+        'AuthWrapper: Logout completed successfully',
+        tag: 'AuthWrapper',
+      );
     } catch (error) {
-      AppLogger.error('AuthWrapper: Logout failed', tag: 'AuthWrapper', error: error);
+      AppLogger.error(
+        'AuthWrapper: Logout failed',
+        tag: 'AuthWrapper',
+        error: error,
+      );
     }
 
     setState(() {
-      _currentPage = 'Portfolio';
+      _currentPage = 'Dashboard';
       _isSidebarExpanded = true;
     });
   }
@@ -83,7 +90,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     switch (_currentPage) {
       case 'Portfolio':
-        AppLogger.debug('📊 Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
+        AppLogger.debug(
+          '📊 Creating PortfolioScreen with userId: "$userId"',
+          tag: 'AuthWrapper',
+        );
         return PortfolioScreen(
           userId: userId,
           isSidebarVisible: _isSidebarExpanded,
@@ -96,14 +106,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
           onToggleSidebar: _toggleSidebar,
         );
       case 'Trade':
-        AppLogger.debug('📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"', tag: 'AuthWrapper');
+        AppLogger.debug(
+          '📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"',
+          tag: 'AuthWrapper',
+        );
         return PlatformUtils.isWeb
             ? TradeWebScreen(
                 userId: userId,
                 isSidebarVisible: _isSidebarExpanded,
                 onToggleSidebar: _toggleSidebar,
               )
-            : TradeMobileScreen(userId: userId, onBack: () => _handleNavigation('Portfolio'));
+            : TradeMobileScreen(
+                userId: userId,
+                onBack: () => _handleNavigation('Portfolio'),
+              );
       case 'Market':
         return _buildPlaceholderScreen('Market');
       case 'News':
@@ -111,7 +127,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
       case 'Reports':
         return _buildPlaceholderScreen('Reports');
       default:
-        AppLogger.debug('📊 Default: Creating PortfolioScreen with userId: "$userId"', tag: 'AuthWrapper');
+        AppLogger.debug(
+          '📊 Default: Creating PortfolioScreen with userId: "$userId"',
+          tag: 'AuthWrapper',
+        );
         return PortfolioScreen(
           userId: userId,
           isSidebarVisible: _isSidebarExpanded,
@@ -124,11 +143,21 @@ class _AuthWrapperState extends State<AuthWrapper> {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.construction, size: 64, color: Theme.of(context).primaryColor.withOpacity(0.6)),
+        Icon(
+          Icons.construction,
+          size: 64,
+          color: Theme.of(context).primaryColor.withOpacity(0.6),
+        ),
         const SizedBox(height: 16),
-        Text('$title Coming Soon', style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          '$title Coming Soon',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         const SizedBox(height: 8),
-        Text('This feature is under development.', style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          'This feature is under development.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       ],
     ),
   );
@@ -136,7 +165,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) => BlocBuilder<AuthCubit, AuthState>(
     builder: (context, state) {
-      AppLogger.debug('🔄 AuthWrapper build - state: ${state.runtimeType}', tag: 'AuthWrapper');
+      AppLogger.debug(
+        '🔄 AuthWrapper build - state: ${state.runtimeType}',
+        tag: 'AuthWrapper',
+      );
 
       // Show loading while authentication is in progress
       if (state is AuthLoading || state is AuthInitial) {
@@ -146,12 +178,18 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       // Show error if authentication failed
       if (state is AuthError) {
-        AppLogger.error('❌ AuthWrapper: Authentication error - ${state.message}', tag: 'AuthWrapper');
+        AppLogger.error(
+          '❌ AuthWrapper: Authentication error - ${state.message}',
+          tag: 'AuthWrapper',
+        );
       }
 
       // Show login screen if not authenticated
       if (state is! Authenticated) {
-        AppLogger.info('🔓 Not authenticated - showing login screen', tag: 'AuthWrapper');
+        AppLogger.info(
+          '🔓 Not authenticated - showing login screen',
+          tag: 'AuthWrapper',
+        );
         return LoginScreen(onLogin: _handleLogin);
       }
 
@@ -170,7 +208,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
           '🚨 CRITICAL: Authenticated state but userId is EMPTY! Email: "$email", authMethod: ${state.user.authMethod}',
           tag: 'AuthWrapper',
         );
-        AppLogger.debug('🔄 Forcing logout due to empty userId...', tag: 'AuthWrapper');
+        AppLogger.debug(
+          '🔄 Forcing logout due to empty userId...',
+          tag: 'AuthWrapper',
+        );
         // Force logout and show login screen
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.read<AuthCubit>().logout();
@@ -183,7 +224,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
         tag: 'AuthWrapper',
       );
 
-      AppLogger.debug('🏗️ Building main app screen with userId: "$userId"', tag: 'AuthWrapper');
+      AppLogger.debug(
+        '🏗️ Building main app screen with userId: "$userId"',
+        tag: 'AuthWrapper',
+      );
 
       return PlatformUtils.isWeb
           ? WebLayout(
@@ -200,7 +244,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
               activeNavItem: _currentPage,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
-              hideBottomNav: _currentPage == 'Trade', // Hide bottom nav in Trade section
+              hideBottomNav:
+                  _currentPage == 'Trade', // Hide bottom nav in Trade section
               child: _getCurrentScreen(userId),
             );
     },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
@@ -17,12 +18,104 @@ class RegisterPage extends StatelessWidget {
             // Navigate to home page after successful registration
             Navigator.of(context).pushReplacementNamed('/home');
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            // Check if message contains User ID (UUID)
+            if (state.message.contains('User ID:')) {
+              // Extract UUID from message
+              final uuidMatch = RegExp(
+                r'User ID: ([a-f0-9-]+)',
+              ).firstMatch(state.message);
+              final userId = uuidMatch?.group(1) ?? '';
+
+              // Show dialog with copy button
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green[600]),
+                      const SizedBox(width: 8),
+                      const Text('Account Created!'),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Your account has been created successfully.',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Copy your User ID to activate:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SelectableText(
+                                userId,
+                                style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.copy, size: 18),
+                              tooltip: 'Copy to clipboard',
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: userId));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('UUID copied to clipboard!'),
+                                    duration: Duration(seconds: 2),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Open Developer Controls on the login screen to activate your account.',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close dialog
+                        Navigator.of(context).pop(); // Back to login
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              // Show regular error message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         },
         builder: (context, state) => Container(

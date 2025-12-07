@@ -15,17 +15,61 @@ import '../datasources/mock_auth_datasource.dart';
 
 /// Implementation of authentication repository
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._mockDataSource, this._remoteDataSource, this._storageService);
+  AuthRepositoryImpl(
+    this._mockDataSource,
+    this._remoteDataSource,
+    this._storageService,
+  );
   final MockAuthDataSource _mockDataSource;
   final AuthRemoteDataSource _remoteDataSource;
   final SecureStorageService _storageService;
   final FeatureFlags _featureFlags = FeatureFlags();
 
   /// Get the appropriate data source based on feature flags
-  AuthDataSource get _dataSource => _featureFlags.useRealBackendAPI ? _remoteDataSource : _mockDataSource;
+  AuthDataSource get _dataSource =>
+      _featureFlags.useRealBackendAPI ? _remoteDataSource : _mockDataSource;
 
   @override
-  Future<Either<Failure, AuthResultEntity>> emailLogin({required String email, required String password}) async {
+  Future<Either<Failure, AuthResultEntity>> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+  }) async {
+    try {
+      final result = await _dataSource.register(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
+
+      // Save tokens to secure storage
+      await _storageService.saveAccessToken(result.tokens.accessToken);
+      if (result.tokens.refreshToken != null) {
+        await _storageService.saveRefreshToken(result.tokens.refreshToken!);
+      }
+      await _storageService.saveUserId(result.user.id);
+      await _storageService.saveUserEmail(result.user.email);
+      await _storageService.saveTokenExpiry(result.tokens.expiresAt);
+
+      return Right(result.toEntity());
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message, code: e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.statusCode.toString()));
+    } catch (e) {
+      return Left(UnknownFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthResultEntity>> emailLogin({
+    required String email,
+    required String password,
+  }) async {
     try {
       final result = await _dataSource.emailLogin(email, password);
 
@@ -112,7 +156,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthTokensEntity>> refreshToken(String refreshToken) async {
+  Future<Either<Failure, AuthTokensEntity>> refreshToken(
+    String refreshToken,
+  ) async {
     try {
       final result = await _dataSource.refreshToken(refreshToken);
 
@@ -148,7 +194,10 @@ class AuthRepositoryImpl implements AuthRepository {
         if (refreshToken == null) return const Right(false);
 
         final result = await this.refreshToken(refreshToken);
-        return result.fold((failure) => const Right(false), (tokens) => const Right(true));
+        return result.fold(
+          (failure) => const Right(false),
+          (tokens) => const Right(true),
+        );
       }
 
       return const Right(true);
@@ -160,7 +209,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthResultEntity?>> getCurrentUser() async {
     try {
-      AppLogger.debug('📦 Retrieving stored credentials...', tag: 'AuthRepository');
+      AppLogger.debug(
+        '📦 Retrieving stored credentials...',
+        tag: 'AuthRepository',
+      );
 
       final userId = await _storageService.getUserId();
       final email = await _storageService.getUserEmail();
@@ -204,7 +256,10 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Right(null);
       }
 
-      AppLogger.info('✅ All stored credentials validated successfully', tag: 'AuthRepository');
+      AppLogger.info(
+        '✅ All stored credentials validated successfully',
+        tag: 'AuthRepository',
+      );
 
       // Reconstruct user and auth result from stored data
       final userEntity = UserEntity(
@@ -213,15 +268,29 @@ class AuthRepositoryImpl implements AuthRepository {
         authMethod: 'stored', // Could be tracked separately if needed
       );
 
-      final tokensEntity = AuthTokensEntity(accessToken: accessToken, refreshToken: refreshToken, expiresAt: expiry);
+      final tokensEntity = AuthTokensEntity(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresAt: expiry,
+      );
 
-      final authResult = AuthResultEntity(user: userEntity, tokens: tokensEntity);
+      final authResult = AuthResultEntity(
+        user: userEntity,
+        tokens: tokensEntity,
+      );
 
-      AppLogger.debug('✅ Returning AuthResultEntity with userId: "$userId"', tag: 'AuthRepository');
+      AppLogger.debug(
+        '✅ Returning AuthResultEntity with userId: "$userId"',
+        tag: 'AuthRepository',
+      );
 
       return Right(authResult);
     } catch (e) {
-      AppLogger.error('❌ Error in getCurrentUser', tag: 'AuthRepository', error: e);
+      AppLogger.error(
+        '❌ Error in getCurrentUser',
+        tag: 'AuthRepository',
+        error: e,
+      );
       return Left(UnknownFailure(e.toString()));
     }
   }

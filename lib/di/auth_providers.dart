@@ -14,6 +14,7 @@ import '../features/authentication/domain/usecases/email_login_usecase.dart';
 import '../features/authentication/domain/usecases/get_current_user_usecase.dart';
 import '../features/authentication/domain/usecases/google_login_usecase.dart';
 import '../features/authentication/domain/usecases/logout_usecase.dart';
+import '../features/authentication/domain/usecases/register_usecase.dart';
 import '../features/authentication/presentation/cubit/auth_cubit.dart';
 
 class AuthProviders {
@@ -81,18 +82,21 @@ class AuthProviders {
   static GetCurrentUserUseCase get getCurrentUserUseCase =>
       GetCurrentUserUseCase(authRepository);
 
+  static RegisterUseCase get registerUseCase => RegisterUseCase(authRepository);
+
   static AuthCubit createAuthCubit() => AuthCubit(
-        emailLoginUseCase: emailLoginUseCase,
-        googleLoginUseCase: googleLoginUseCase,
-        demoLoginUseCase: demoLoginUseCase,
-        logoutUseCase: logoutUseCase,
-        checkAuthStatusUseCase: checkAuthStatusUseCase,
-        getCurrentUserUseCase: getCurrentUserUseCase,
-      );
+    emailLoginUseCase: emailLoginUseCase,
+    googleLoginUseCase: googleLoginUseCase,
+    demoLoginUseCase: demoLoginUseCase,
+    logoutUseCase: logoutUseCase,
+    checkAuthStatusUseCase: checkAuthStatusUseCase,
+    getCurrentUserUseCase: getCurrentUserUseCase,
+    registerUseCase: registerUseCase,
+  );
 
   static List<BlocProvider> get providers => [
-        BlocProvider<AuthCubit>(
-          create: (context) => createAuthCubit()..checkAuthStatus(),
-        ),
-      ];
+    BlocProvider<AuthCubit>(
+      create: (context) => createAuthCubit()..checkAuthStatus(),
+    ),
+  ];
 }

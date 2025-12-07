@@ -2,6 +2,7 @@ import '../../../../core/constants/auth_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../models/auth_result_model.dart';
 import '../models/auth_tokens_model.dart';
+import '../models/user_model.dart';
 import '../services/mock_data_service.dart';
 import 'auth_data_source.dart';
 
@@ -48,7 +49,6 @@ class MockAuthDataSource implements AuthDataSource {
   }
 
   @override
-
   Future<void> logout() async {
     // Mock logout - just delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -67,6 +67,38 @@ class MockAuthDataSource implements AuthDataSource {
       refreshToken:
           'mock_refresh_token_refreshed_${now.millisecondsSinceEpoch}',
       expiresAt: expiresAt,
+    );
+  }
+
+  @override
+  Future<AuthResultModel> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+  }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    if (email.contains('fail')) {
+      throw ServerException('Mock registration failed', statusCode: 400);
+    }
+
+    // Return a new user and tokens
+    final user = UserModel(
+      id: 'mock_user_id',
+      email: email,
+      displayName: name,
+      authMethod: 'email',
+    );
+
+    return AuthResultModel(
+      user: user,
+      tokens: AuthTokensModel(
+        accessToken: 'mock_access_token',
+        refreshToken: 'mock_refresh_token',
+        expiresAt: DateTime.now().add(const Duration(hours: 1)),
+      ),
     );
   }
 
