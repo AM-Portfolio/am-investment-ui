@@ -19,9 +19,16 @@ import 'utils/journal_helpers.dart';
 import 'widgets/rich_text_editor.dart';
 import 'widgets/trade_overview_selector.dart';
 import 'widgets/trade_preview_dialog.dart';
+import 'hover_input_field.dart';
 
 class JournalEntryForm extends ConsumerStatefulWidget {
-  const JournalEntryForm({required this.userId, required this.cubit, required this.portfolioId, super.key, this.entry});
+  const JournalEntryForm({
+    required this.userId,
+    required this.cubit,
+    required this.portfolioId,
+    super.key,
+    this.entry,
+  });
 
   final String userId;
   final JournalCubit cubit;
@@ -98,6 +105,8 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     _midSentiment = widget.entry?.customFields['midSentiment'];
 
     // Initialize end phase from customFields (with legacy fallback)
+  
+
     _endBehaviorController = TextEditingController(text: widget.entry?.customFields['endBehavior'] ?? '');
     _endMood =
         widget.entry?.customFields['endMood'] ??
@@ -463,7 +472,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
   Widget _buildTitleField() {
     final theme = Theme.of(context);
-    return _HoverInputField(
+    return HoverInputField(
       child: TextFormField(
         controller: _titleController,
         enabled: _isEditMode,
@@ -577,41 +586,5 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
         _selectedTags.add(tag);
       }
     });
-  }
-}
-
-/// Hover input field with purple border effect
-class _HoverInputField extends StatefulWidget {
-  const _HoverInputField({required this.child});
-
-  final Widget child;
-
-  @override
-  State<_HoverInputField> createState() => _HoverInputFieldState();
-}
-
-class _HoverInputFieldState extends State<_HoverInputField> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: _isHovered
-                ? const Color(0xFF9C27B0) // Purple color
-                : theme.dividerColor.withOpacity(0.5),
-            width: _isHovered ? 2.0 : 1.0,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: widget.child,
-      ),
-    );
   }
 }

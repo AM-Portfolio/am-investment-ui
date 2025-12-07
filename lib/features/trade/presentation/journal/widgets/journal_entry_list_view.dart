@@ -199,6 +199,8 @@ class _JournalEntryItemState extends State<JournalEntryItem> {
       feedback: Material(
         elevation: 12,
         borderRadius: BorderRadius.circular(12),
+
+      
         child: Container(
           width: 260,
           padding: const EdgeInsets.all(16),

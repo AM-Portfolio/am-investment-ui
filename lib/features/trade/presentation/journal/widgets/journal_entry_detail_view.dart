@@ -7,7 +7,7 @@ import '../../cubit/journal/journal_cubit.dart';
 import '../../web/widgets/journal/journal_entry_form.dart';
 import 'simple_template_dialog.dart';
 
-class JournalEntryDetailView extends StatelessWidget {
+class JournalEntryDetailView extends StatefulWidget {
   const JournalEntryDetailView({
     required this.entry,
     required this.userId,
@@ -20,8 +20,13 @@ class JournalEntryDetailView extends StatelessWidget {
   final JournalCubit cubit;
 
   @override
+  State<JournalEntryDetailView> createState() => _JournalEntryDetailViewState();
+}
+
+class _JournalEntryDetailViewState extends State<JournalEntryDetailView> {
+  @override
   Widget build(BuildContext context) {
-    if (entry == null) {
+    if (widget.entry == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -39,9 +44,9 @@ class JournalEntryDetailView extends StatelessWidget {
       );
     }
 
-    final dateStr = DateFormat('EEE MMM dd, yyyy').format(entry!.entryDate);
-    final createdStr = DateFormat('MMM dd, yyyy h:mm a').format(entry!.createdAt);
-    final updatedStr = DateFormat('MMM dd, yyyy h:mm a').format(entry!.updatedAt);
+    final dateStr = DateFormat('EEE MMM dd, yyyy').format(widget.entry!.entryDate);
+    final createdStr = DateFormat('MMM dd, yyyy h:mm a').format(widget.entry!.createdAt);
+    final updatedStr = DateFormat('MMM dd, yyyy h:mm a').format(widget.entry!.updatedAt);
 
     return Container(
       decoration: BoxDecoration(
@@ -82,13 +87,14 @@ class JournalEntryDetailView extends StatelessWidget {
                     const SizedBox(width: 12),
                     _HoverButton(
                       onPressed: () => _showTemplateBrowser(context),
-                      child: const Text('Existing template 1'),
+                      icon: const Icon(Icons.description_outlined, size: 16),
+                      child: const Text('Daily Game Plan'),
                     ),
                     const SizedBox(width: 12),
                     _HoverButton(
                       onPressed: () => _showTemplateBrowser(context),
                       icon: const Icon(Icons.add, size: 16),
-                      child: const Text('Add template'),
+                      child: const Text('Browse Templates'),
                     ),
                   ],
                 ),
@@ -104,10 +110,10 @@ class JournalEntryDetailView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: JournalEntryForm(
-                userId: userId,
-                cubit: cubit,
+                userId: widget.userId,
+                cubit: widget.cubit,
                 portfolioId: '8a57024c-05c2-475b-a2c4-0545865efa4a', // TODO: Pass from parent
-                entry: entry,
+                entry: widget.entry,
               ),
             ),
           ),
@@ -121,19 +127,15 @@ class JournalEntryDetailView extends StatelessWidget {
       context: context,
       builder: (context) => EnhancedTemplateDialog(
         onTemplateSelected: (templateName, richContent) {
-          // TODO: Insert rich content into the journal entry editor
-          // For now, show success message
+          // Show template content in snackbar for now
+          // TODO: Implement actual insertion into Quill editor
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Template "$templateName" loaded! Content has been inserted.'),
+              content: Text('Template "$templateName" selected! (Content insertion coming soon)'),
               backgroundColor: const Color(0xFF6C5DD3),
               duration: const Duration(seconds: 3),
             ),
           );
-          
-          // The richContent variable contains the pre-filled template text
-          // This needs to be inserted into the Quill editor in JournalEntryForm
-          print('Template content to insert:\n$richContent');
         },
       ),
     );
