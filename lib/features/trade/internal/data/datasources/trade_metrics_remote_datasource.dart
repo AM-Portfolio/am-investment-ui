@@ -5,6 +5,7 @@ import '../dtos/metrics/metrics_dtos.dart';
 
 abstract class TradeMetricsRemoteDataSource {
   Future<TradeMetricsResponseDto> getMetrics(MetricsFilterRequestDto filter);
+  Future<List<String>> getMetricTypes();
 }
 
 class TradeMetricsRemoteDataSourceImpl implements TradeMetricsRemoteDataSource {
@@ -61,6 +62,35 @@ class TradeMetricsRemoteDataSourceImpl implements TradeMetricsRemoteDataSource {
         stackTrace: StackTrace.current,
       );
       rethrow;
+    }
+  }
+  @override
+  Future<List<String>> getMetricTypes() async {
+    AppLogger.methodEntry('getMetricTypes', tag: 'TradeMetricsRemoteDataSource');
+
+    try {
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/metrics/types');
+
+      final response = await _apiClient.get<List<String>>(
+        fullUri,
+        parser: (data) {
+           if (data == null) return [];
+           return (data as List).map((e) => e.toString()).toList();
+        },
+      );
+
+      AppLogger.info('Metric types fetched successfully', tag: 'TradeMetricsRemoteDataSource');
+      AppLogger.methodExit('getMetricTypes', tag: 'TradeMetricsRemoteDataSource', result: 'success');
+      return response;
+    } catch (e) {
+      AppLogger.error(
+        'Failed to fetch metric types',
+        tag: 'TradeMetricsRemoteDataSource',
+        error: e,
+        stackTrace: StackTrace.current,
+      );
+      // Fallback to default types if API fails
+      return ['PERFORMANCE', 'RISK', 'DISTRIBUTION'];
     }
   }
 }

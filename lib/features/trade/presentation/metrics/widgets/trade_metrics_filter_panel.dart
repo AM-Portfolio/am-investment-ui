@@ -6,10 +6,12 @@ import '../../widgets/filters/date_range_filter_group.dart';
 import '../../widgets/filters/filter_group.dart';
 import '../../widgets/filters/filter_group_card.dart';
 import '../../widgets/filters/instrument_filter_group.dart';
-import '../../widgets/filters/profit_loss_filter_group.dart';
 import '../../widgets/filters/trade_characteristics_filter_group.dart';
+import '../../widgets/filters/profit_loss_filter_group.dart';
+import '../../widgets/filters/metric_type_filter_group.dart';
+import '../../../internal/domain/enums/metric_types.dart';
 
-enum MetricsFilterGroupType { dateRange, instrument, tradeCharacteristics, profitLoss }
+enum MetricsFilterGroupType { dateRange, instrument, tradeCharacteristics, profitLoss, metricTypes }
 
 /// Customized Filter Panel for Trade Metrics
 class TradeMetricsFilterPanel extends ConsumerStatefulWidget {
@@ -19,12 +21,14 @@ class TradeMetricsFilterPanel extends ConsumerStatefulWidget {
     required this.onApplyFilter,
     super.key,
     this.onReset,
+    this.availableMetricTypes = const [],
   });
 
   final String userId;
   final MetricsFilterConfig initialConfig;
   final Function(MetricsFilterConfig) onApplyFilter;
   final VoidCallback? onReset;
+  final List<MetricTypes> availableMetricTypes;
 
   @override
   ConsumerState<TradeMetricsFilterPanel> createState() => _TradeMetricsFilterPanelState();
@@ -58,27 +62,10 @@ class _TradeMetricsFilterPanelState extends ConsumerState<TradeMetricsFilterPane
     _loadInstrumentFilter(config);
     _loadTradeCharacteristicsFilter(config);
     _loadProfitLossFilter(config);
+    _loadMetricTypesFilter(config);
   }
 
-  bool _hasInstrumentFilters(config) =>
-      config.marketSegments.isNotEmpty ||
-      config.indexTypes.isNotEmpty ||
-      config.derivativeTypes.isNotEmpty ||
-      config.baseSymbols.isNotEmpty;
-
-  bool _hasTradeCharacteristics(config) =>
-      config.directions.isNotEmpty ||
-      config.statuses.isNotEmpty ||
-      config.strategies.isNotEmpty ||
-      config.tags.isNotEmpty ||
-      config.minHoldingTimeHours != null ||
-      config.maxHoldingTimeHours != null;
-
-  bool _hasProfitLossFilters(config) =>
-      config.minProfitLoss != null ||
-      config.maxProfitLoss != null ||
-      config.minPositionSize != null ||
-      config.maxPositionSize != null;
+  bool _hasMetricTypeFilters(config) => config.metricTypes.isNotEmpty;
 
   @override
   void dispose() {
@@ -118,6 +105,14 @@ class _TradeMetricsFilterPanelState extends ConsumerState<TradeMetricsFilterPane
             _activeGroups.add(ProfitLossFilterGroup(onChanged: () => setState(() {})));
           }
           break;
+        case MetricsFilterGroupType.metricTypes:
+          if (!_activeGroups.any((g) => g is MetricTypeFilterGroup)) {
+            _activeGroups.add(MetricTypeFilterGroup(
+              onChanged: () => setState(() {}), 
+              availableTypes: widget.availableMetricTypes,
+            ));
+          }
+          break;
       }
 
       if (!_isExpanded) {
@@ -146,7 +141,9 @@ class _TradeMetricsFilterPanelState extends ConsumerState<TradeMetricsFilterPane
       dateRange: _activeGroups.whereType<DateRangeFilterGroup>().firstOrNull?.toFilterCriteria(),
       instrumentFilters: _activeGroups.whereType<InstrumentFilterGroup>().firstOrNull?.toFilterCriteria(),
       tradeCharacteristics: _activeGroups.whereType<TradeCharacteristicsFilterGroup>().firstOrNull?.toFilterCriteria(),
+
       profitLossFilters: _activeGroups.whereType<ProfitLossFilterGroup>().firstOrNull?.toFilterCriteria(),
+      metricTypes: _activeGroups.whereType<MetricTypeFilterGroup>().firstOrNull?.selectedTypes ?? [],
     );
 
     widget.onApplyFilter(config);
@@ -221,7 +218,44 @@ class _TradeMetricsFilterPanelState extends ConsumerState<TradeMetricsFilterPane
     }
   }
 
+  void _loadMetricTypesFilter(MetricsFilterConfig config) {
+    if (config.metricTypes.isNotEmpty) {
+      final group = MetricTypeFilterGroup(
+        onChanged: () => setState(() {}),
+        availableTypes: widget.availableMetricTypes,
+        initialSelection: List.from(config.metricTypes),
+      );
+      _activeGroups.add(group);
+    }
+  }
+
   int get _activeFilterCount => _activeGroups.where((g) => g.hasActiveFilters).length;
+
+  bool _hasInstrumentFilters(InstrumentFilterCriteria? filters) {
+    if (filters == null) return false;
+    return filters.marketSegments.isNotEmpty ||
+        filters.indexTypes.isNotEmpty ||
+        filters.derivativeTypes.isNotEmpty ||
+        filters.baseSymbols.isNotEmpty;
+  }
+
+  bool _hasTradeCharacteristics(TradeCharacteristicsFilter? filters) {
+    if (filters == null) return false;
+    return filters.directions.isNotEmpty ||
+        filters.statuses.isNotEmpty ||
+        filters.strategies.isNotEmpty ||
+        filters.tags.isNotEmpty ||
+        filters.minHoldingTimeHours != null ||
+        filters.maxHoldingTimeHours != null;
+  }
+
+  bool _hasProfitLossFilters(ProfitLossFilter? filters) {
+    if (filters == null) return false;
+    return filters.minProfitLoss != null ||
+        filters.maxProfitLoss != null ||
+        filters.minPositionSize != null ||
+        filters.maxPositionSize != null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -334,6 +368,16 @@ class _TradeMetricsFilterPanelState extends ConsumerState<TradeMetricsFilterPane
                               PopupMenuItem(
                                 value: MetricsFilterGroupType.profitLoss,
                                 child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
+                              ),
+                            if (!_activeGroups.any((g) => g is MetricTypeFilterGroup))
+                              PopupMenuItem(
+                                value: MetricsFilterGroupType.metricTypes,
+                                child: _buildMenuTile(Icons.category_rounded, 'Metric Types', theme),
+                              ),
+                            if (!_activeGroups.any((g) => g is MetricTypeFilterGroup))
+                              PopupMenuItem(
+                                value: MetricsFilterGroupType.metricTypes,
+                                child: _buildMenuTile(Icons.category_rounded, 'Metric Types', theme),
                               ),
                           ],
                           onSelected: _addFilterGroup,

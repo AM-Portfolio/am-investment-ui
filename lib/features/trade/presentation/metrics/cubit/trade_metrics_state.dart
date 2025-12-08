@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../internal/domain/entities/metrics/trade_metrics_response.dart';
 import '../../../internal/domain/entities/metrics/metrics_filter_request.dart';
+import '../../../internal/domain/enums/metric_types.dart';
 
 abstract class TradeMetricsState extends Equatable {
   const TradeMetricsState();
@@ -20,10 +21,13 @@ class TradeMetricsLoaded extends TradeMetricsState {
   const TradeMetricsLoaded({
     required this.metrics,
     required this.filter,
+    this.availableMetricTypes = const [],
   });
+  
+  final List<MetricTypes> availableMetricTypes;
 
   @override
-  List<Object?> get props => [metrics, filter];
+  List<Object?> get props => [metrics, filter, availableMetricTypes];
 }
 
 class TradeMetricsError extends TradeMetricsState {

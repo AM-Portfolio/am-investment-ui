@@ -1,9 +1,11 @@
+import '../../enums/metric_types.dart';
+
 class MetricsFilterRequest {
   final List<String> portfolioIds;
   final DateTime startDate;
   final DateTime endDate;
   final String? timePeriod;
-  final List<String>? metricTypes;
+  final List<MetricTypes>? metricTypes;
   final List<String>? instruments;
   final List<String>? groupBy;
   final bool includeTradeDetails;

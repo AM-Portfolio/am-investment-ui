@@ -8,6 +8,7 @@ import '../../../domain/entities/metrics/strategy_performance_metrics.dart';
 import '../../../domain/entities/metrics/trade_details.dart';
 import '../../../domain/entities/metrics/trade_metrics_response.dart';
 import '../../../domain/entities/metrics/metrics_filter_request.dart';
+import '../../../domain/enums/metric_types.dart';
 
 part 'metrics_dtos.g.dart';
 
@@ -303,12 +304,14 @@ class DateRangeDto {
   Map<String, dynamic> toJson() => _$DateRangeDtoToJson(this);
 }
 
+
+
 @JsonSerializable()
 class MetricsFilterRequestDto {
   final List<String> portfolioIds;
   final DateRangeDto dateRange;
   final String? timePeriod;
-  final List<String>? metricTypes;
+  final List<MetricTypes>? metricTypes;
   final List<String>? instruments;
   final List<String>? groupBy;
   final bool includeTradeDetails;

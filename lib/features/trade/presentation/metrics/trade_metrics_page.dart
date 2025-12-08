@@ -63,6 +63,7 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
       startDate: config.dateRange?.startDate ?? DateTime(1919, 1, 1),
       endDate: config.dateRange?.endDate ?? DateTime.now(),
       timePeriod: null,
+      metricTypes: config.metricTypes,
       // Map other config fields to request if needed
       instruments: config.instrumentFilters?.baseSymbols,
     );
@@ -86,6 +87,9 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
                 initialConfig: _currentConfig,
                 onApplyFilter: _applyFilter,
                 onReset: () => _applyFilter(MetricsFilterConfig.empty()),
+                availableMetricTypes: (context.watch<TradeMetricsCubit>().state is TradeMetricsLoaded) 
+                      ? (context.watch<TradeMetricsCubit>().state as TradeMetricsLoaded).availableMetricTypes 
+                      : [],
               ),
               
               const SizedBox(height: 16),

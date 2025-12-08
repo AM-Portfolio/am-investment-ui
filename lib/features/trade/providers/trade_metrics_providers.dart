@@ -6,6 +6,7 @@ import '../internal/data/datasources/trade_metrics_remote_datasource.dart';
 import '../internal/data/repositories/trade_metrics_repository_impl.dart';
 import '../internal/domain/repositories/trade_metrics_repository.dart';
 import '../internal/domain/usecases/get_trade_metrics.dart';
+import '../internal/domain/usecases/get_metric_types.dart';
 import '../presentation/metrics/cubit/trade_metrics_cubit.dart';
 
 // Infrastructure
@@ -36,8 +37,15 @@ final getTradeMetricsUseCaseProvider = Provider<GetTradeMetrics>((ref) {
 
 // Presentation
 
+/// Provider for GetMetricTypes UseCase
+final getMetricTypesUseCaseProvider = Provider<GetMetricTypes>((ref) {
+  final repository = ref.watch(_tradeMetricsRepositoryProvider);
+  return GetMetricTypes(repository);
+});
+
 /// Provider for TradeMetricsCubit
 final tradeMetricsCubitProvider = Provider<TradeMetricsCubit>((ref) {
   final getTradeMetrics = ref.watch(getTradeMetricsUseCaseProvider);
-  return TradeMetricsCubit(getTradeMetrics: getTradeMetrics);
+  final getMetricTypes = ref.watch(getMetricTypesUseCaseProvider);
+  return TradeMetricsCubit(getTradeMetrics: getTradeMetrics, getMetricTypes: getMetricTypes);
 });
