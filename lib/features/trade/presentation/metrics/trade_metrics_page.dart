@@ -12,6 +12,7 @@ import '../../internal/domain/entities/metrics/performance_metrics.dart';
 import '../../internal/domain/entities/metrics/risk_metrics.dart';
 import '../../internal/domain/entities/metrics/trade_distribution_metrics.dart';
 import '../../internal/domain/entities/metrics/trade_metrics_response.dart';
+import '../../internal/domain/enums/metric_types.dart';
 
 class TradeMetricsPage extends ConsumerStatefulWidget {
   final String userId;
@@ -49,7 +50,9 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
     _loadInitialMetrics();
   }
 
-  void _loadInitialMetrics() {
+  void _loadInitialMetrics() async {
+    // First, trigger the cubit to load metrics
+    // The cubit will fetch metric types internally and use them
     _applyFilter(_currentConfig);
   }
 
@@ -58,12 +61,18 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
       _currentConfig = config;
     });
 
+    // If no metric types are selected, use all available types
+    // This ensures we get all metrics by default
+    List<MetricTypes>? metricTypesToUse = config.metricTypes.isEmpty 
+        ? null  // null means "all types" to the backend
+        : config.metricTypes;
+
     final request = MetricsFilterRequest(
       portfolioIds: widget.portfolioId != null ? [widget.portfolioId!] : [],
       startDate: config.dateRange?.startDate ?? DateTime(1919, 1, 1),
       endDate: config.dateRange?.endDate ?? DateTime.now(),
       timePeriod: null,
-      metricTypes: config.metricTypes,
+      metricTypes: metricTypesToUse,
       // Map other config fields to request if needed
       instruments: config.instrumentFilters?.baseSymbols,
     );
