@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'widgets/glossy_card.dart';
+import 'widgets/metrics_charts.dart';
 import 'cubit/trade_metrics_cubit.dart';
 import 'cubit/trade_metrics_state.dart';
 import 'widgets/trade_metrics_filter_panel.dart';
@@ -10,6 +13,7 @@ import '../../internal/domain/entities/metrics/metrics_filter_request.dart';
 import '../../internal/domain/entities/metrics/performance_metrics.dart';
 import '../../internal/domain/entities/metrics/risk_metrics.dart';
 import '../../internal/domain/entities/metrics/trade_distribution_metrics.dart';
+import '../../internal/domain/entities/metrics/trade_pattern_metrics.dart';
 import '../../internal/domain/entities/metrics/trade_metrics_response.dart';
 import '../../internal/domain/enums/metric_types.dart';
 
@@ -159,208 +163,295 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Summary Cards Row
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 800;
-            return Flex(
-              direction: isWide ? Axis.horizontal : Axis.vertical,
+        // Top Level Summary Stats (Hero Cards)
+        _buildHeroStats(metrics),
+        const SizedBox(height: 16), // Reduced from 24
+
+        // Key Performance Indicators Grid
+        Text('Performance Overview', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)), // Bolder, slightly smaller
+        const SizedBox(height: 12), // Reduced from 16
+        _buildPerformanceGrid(metrics.performanceMetrics, metrics.riskMetrics),
+        const SizedBox(height: 16), // Reduced from 24
+        
+        // Distribution Analysis with Charts
+        Text('Distribution Analysis', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        _buildDistributionSection(metrics.distributionMetrics),
+        const SizedBox(height: 16),
+        
+        // Psychology & Patterns
+        if (metrics.patternMetrics != null)
+          _buildPatternSection(metrics.patternMetrics!),
+      ],
+    ).animate().fade(duration: 400.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _buildHeroStats(TradeMetricsResponse metrics) {
+    return Row(
+      children: [
+        Expanded(
+          child: GlossyCard(
+            color: Colors.blueAccent,
+            padding: const EdgeInsets.all(16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(flex: isWide ? 1 : 0, child: _buildPerformanceCard(metrics.performanceMetrics)),
-                if (isWide) const SizedBox(width: 16) else const SizedBox(height: 16),
-                Expanded(flex: isWide ? 1 : 0, child: _buildRiskCard(metrics.riskMetrics)),
+                const Text('Net P&L', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)), // Improved visibility
+                const SizedBox(height: 4),
+                Text(
+                  '\$${metrics.performanceMetrics.totalProfitLoss.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800), // Larger, bolder
+                ),
+                Text(
+                  '${metrics.totalTradesCount} Trades',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
               ],
-            );
-          },
+            ),
+          ),
         ),
-        
-        const SizedBox(height: 24),
-        
-        // Distribution Section
-        Text('Distribution Analysis', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        _buildDistributionPlaceholder(metrics.distributionMetrics),
-        
-        const SizedBox(height: 24),
-        
-        // Trades Count
-        _buildMetricTile(
-          title: 'Total Trades Analyzed',
-          value: metrics.totalTradesCount.toString(),
-          icon: Icons.receipt_long,
-          color: Colors.blueAccent,
+        const SizedBox(width: 12), // Reduced spacing
+        Expanded(
+          child: GlossyCard(
+            color: metrics.performanceMetrics.winRate >= 0.5 ? Colors.green : Colors.orange,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Win Rate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(
+                  '${(metrics.performanceMetrics.winRate * 100).toStringAsFixed(1)}%',
+                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800),
+                ),
+                Text(
+                  'Profit Factor: ${metrics.performanceMetrics.profitFactor.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPerformanceCard(PerformanceMetrics metrics) {
-    return _buildGlassCard(
-      title: 'Performance',
-      icon: Icons.trending_up,
-      color: Colors.green,
-      child: Column(
-        children: [
-          _buildMetricRow('Net P&L', metrics.totalProfitLoss.toStringAsFixed(2), isCurrency: true, 
-              valueColor: metrics.totalProfitLoss >= 0 ? Colors.green : Colors.red, isBold: true),
-          const Divider(height: 24),
-          Row(
-            children: [
-              Expanded(child: _buildCompactMetric('Win Rate', '${(metrics.winRate * 100).toStringAsFixed(1)}%')),
-              Expanded(child: _buildCompactMetric('Profit Factor', metrics.profitFactor.toStringAsFixed(2))),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildCompactMetric('Avg Win', '\$${metrics.averageWinningTrade.toStringAsFixed(0)}', color: Colors.green)),
-              Expanded(child: _buildCompactMetric('Avg Loss', '\$${metrics.averageLosingTrade.toStringAsFixed(0)}', color: Colors.red)),
-            ],
-          ),
-        ],
-      ),
+  Widget _buildPerformanceGrid(PerformanceMetrics perf, RiskMetrics risk) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+        final spacing = 12.0; // Reduced spacing
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            _buildStatCard('Expectancy', '\$${perf.expectancy?.toStringAsFixed(2) ?? '0'}', Icons.attach_money, Colors.blue, width: (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount),
+            _buildStatCard('Sharpe Ratio', risk.sharpeRatio.toStringAsFixed(2), Icons.shield, Colors.purple, width: (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount),
+            _buildStatCard('Max Drawdown', '\$${risk.maxDrawdown.toStringAsFixed(0)}', Icons.trending_down, Colors.red, width: (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount),
+            _buildStatCard('Avg Win', '\$${perf.averageWinningTrade.toStringAsFixed(0)}', Icons.arrow_upward, Colors.green, width: (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildRiskCard(RiskMetrics metrics) {
-    return _buildGlassCard(
-      title: 'Risk Profile',
-      icon: Icons.shield_outlined,
-      color: Colors.orange,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: _buildCompactMetric('Max Drawdown', '${metrics.maxDrawdown.toStringAsFixed(2)}%', color: Colors.red)),
-              Expanded(child: _buildCompactMetric('Sharpe Ratio', metrics.sharpeRatio.toStringAsFixed(2))),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(child: _buildCompactMetric('Sortino Ratio', metrics.sortinoRatio.toStringAsFixed(2))),
-              Expanded(child: _buildCompactMetric('Prob. Ruin', '${(metrics.probabilityOfRuin * 100).toStringAsFixed(2)}%')),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildMetricRow('Value At Risk (VaR)', metrics.valueAtRisk.toStringAsFixed(2), isCurrency: true),
-        ],
-      ),
+  Widget _buildDistributionSection(TradeDistributionMetrics dist) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // On wide screens, put bar chart and pie charts side by side
+        final isWide = constraints.maxWidth > 900;
+        
+        if (isWide) {
+          return SizedBox(
+            height: 240,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: GlossyCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Trades by Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        const SizedBox(height: 12),
+                        Expanded(child: TradesByDayBarChart(tradesByDay: dist.tradesByDay ?? {})),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GlossyCard(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              const Expanded(child: Text('By Asset Class', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
+                              SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: DistributionPieChart(data: dist.tradeCountByAssetClass ?? {}, animate: false),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: GlossyCard(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              const Expanded(child: Text('By Strategy', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
+                              SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: DistributionPieChart(data: dist.tradeCountByStrategy ?? {}, animate: false),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // On smaller screens, keep vertical but compact
+        return Column(
+          children: [
+            GlossyCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Trades by Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 160, // Reduced from 200/180
+                    child: TradesByDayBarChart(tradesByDay: dist.tradesByDay ?? {})
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: GlossyCard(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        const Text('By Asset Class', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 120, // Reduced
+                          child: DistributionPieChart(data: dist.tradeCountByAssetClass ?? {}),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GlossyCard(
+                     padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        const Text('By Strategy', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 120, // Reduced
+                          child: DistributionPieChart(data: dist.tradeCountByStrategy ?? {}),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      }
+    );
+  }
+  
+  Widget _buildPatternSection(TradePatternMetrics pattern) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Psychology & Patterns', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: GlossyCard(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    const Text('Pattern Consistency', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 110, // Reduced
+                      child: ConsistencyGauge(score: pattern.patternConsistencyScore),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+             Expanded(
+              child: GlossyCard(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    const Text('Discipline Score', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 110, // Reduced
+                      child: ConsistencyGauge(score: pattern.disciplineScore),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildGlassCard({required String title, required IconData icon, required Color color, required Widget child}) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+  Widget _buildStatCard(String label, String value, IconData icon, Color color, {double? width}) {
+    return GlossyCard(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16), // Thinner padding
+      // Use a subtle background for individual stat cards
+      color: Theme.of(context).cardColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).hintColor)),
+              Icon(icon, color: color, size: 20),
             ],
           ),
-          const SizedBox(height: 20),
-          child,
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: color)), // Bolder value
         ],
       ),
     );
   }
 
-  Widget _buildCompactMetric(String label, String value, {Color? color}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor)),
-        const SizedBox(height: 4),
-        Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color)),
-      ],
-    );
-  }
 
-  Widget _buildDistributionPlaceholder(dynamic distribution) {
-    return Container(
-      height: 250,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bar_chart_rounded, size: 64, color: Theme.of(context).disabledColor),
-            const SizedBox(height: 16),
-            Text(
-              'Interactive Charts Coming Soon',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).hintColor),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildMetricTile({required String title, required String value, required IconData icon, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.bodySmall),
-              Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricRow(String label, String value, {bool isCurrency = false, Color? valueColor, bool isBold = false}) {
-    final style = isBold 
-      ? Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: valueColor)
-      : Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: valueColor);
-      
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        Text(isCurrency ? '\$$value' : value, style: style),
-      ],
-    );
-  }
 }
