@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cubit/trade_metrics_cubit.dart';
 import 'cubit/trade_metrics_state.dart';
@@ -29,13 +28,11 @@ class TradeMetricsPage extends ConsumerStatefulWidget {
 }
 
 class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
-  late final TradeMetricsCubit _cubit;
   MetricsFilterConfig _currentConfig = MetricsFilterConfig.empty();
 
   @override
   void initState() {
     super.initState();
-    _cubit = ref.read(tradeMetricsCubitProvider);
 
     // Initialize with default date range (1919-01-01) for MetricsFilterConfig if needed,
     // but the initial load uses MetricsFilterRequest which sets it.
@@ -47,7 +44,10 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
       ),
     );
     
-    _loadInitialMetrics();
+    // Load initial metrics after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialMetrics();
+    });
   }
 
   void _loadInitialMetrics() async {
@@ -56,16 +56,25 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
     _applyFilter(_currentConfig);
   }
 
-  void _applyFilter(MetricsFilterConfig config) {
+  void _applyFilter(MetricsFilterConfig config) async {
     setState(() {
       _currentConfig = config;
     });
 
-    // If no metric types are selected, use all available types
-    // This ensures we get all metrics by default
-    List<MetricTypes>? metricTypesToUse = config.metricTypes.isEmpty 
-        ? null  // null means "all types" to the backend
-        : config.metricTypes;
+    // If no metric types are selected, fetch all available types and use them
+    List<MetricTypes>? metricTypesToUse = config.metricTypes;
+    
+    if (config.metricTypes.isEmpty) {
+      try {
+        // Fetch available metric types if not already loaded
+        final getMetricTypes = ref.read(getMetricTypesUseCaseProvider);
+        final availableTypes = await getMetricTypes();
+        metricTypesToUse = availableTypes;
+      } catch (e) {
+        // If fetching fails, pass null (backend will use defaults)
+        metricTypesToUse = null;
+      }
+    }
 
     final request = MetricsFilterRequest(
       portfolioIds: widget.portfolioId != null ? [widget.portfolioId!] : [],
@@ -77,36 +86,36 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
       instruments: config.instrumentFilters?.baseSymbols,
     );
     
-    _cubit.loadMetrics(request);
+    ref.read(tradeMetricsCubitProvider).loadMetrics(request);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Filter Panel
-              TradeMetricsFilterPanel(
-                userId: widget.userId,
-                initialConfig: _currentConfig,
-                onApplyFilter: _applyFilter,
-                onReset: () => _applyFilter(MetricsFilterConfig.empty()),
-                availableMetricTypes: (context.watch<TradeMetricsCubit>().state is TradeMetricsLoaded) 
-                      ? (context.watch<TradeMetricsCubit>().state as TradeMetricsLoaded).availableMetricTypes 
-                      : [],
-              ),
-              
-              const SizedBox(height: 16),
+    final cubit = ref.watch(tradeMetricsCubitProvider);
+    
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Filter Panel
+            TradeMetricsFilterPanel(
+              userId: widget.userId,
+              initialConfig: _currentConfig,
+              onApplyFilter: _applyFilter,
+              onReset: () => _applyFilter(MetricsFilterConfig.empty()),
+              availableMetricTypes: (cubit.state is TradeMetricsLoaded) 
+                    ? (cubit.state as TradeMetricsLoaded).availableMetricTypes 
+                    : [],
+            ),
+            
+            const SizedBox(height: 16),
 
-              // Content Area
-              Builder(
-                builder: (context) {
-                  final state = context.watch<TradeMetricsCubit>().state;
+            // Content Area
+            Builder(
+              builder: (context) {
+                final state = cubit.state;
                   
                   if (state is TradeMetricsLoading) {
                     return const SizedBox(
@@ -143,9 +152,8 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildDashboard(TradeMetricsResponse metrics) {
     return Column(
