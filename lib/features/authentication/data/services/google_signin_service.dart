@@ -69,6 +69,7 @@ class GoogleSignInService {
             'client_id':
                 '536930944518-v4406qrrj4o2pk594g2rc3sk6lfinlf6.apps.googleusercontent.com',
             'callback': js.allowInterop(_handleCredentialResponse),
+            'use_fedcm_for_prompt': false,
           }),
         ]);
 
