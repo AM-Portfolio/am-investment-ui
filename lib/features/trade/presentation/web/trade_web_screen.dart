@@ -11,10 +11,11 @@ import '../holdings/pages/trade_holdings_dashboard_web_page.dart';
 import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
 import '../trades/pages/trade_list_web_page.dart';
+import '../metrics/trade_metrics_page.dart';
 import 'widgets/trade_sidebar.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar, trades, journal }
+enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -247,6 +248,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         title = 'Trade Journal';
         showTitle = false; // Custom header in page
         break;
+      case TradeViewType.analysis:
+        title = 'Trade Analysis';
+        showTitle = false; // Hide title - page has its own app bar
+        break;
     }
 
     return AppBar(
@@ -337,6 +342,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         case TradeViewType.journal:
                           // Journal doesn't use providers, no refresh needed
                           break;
+                        case TradeViewType.analysis:
+                          // Analysis handles its own refresh via its internal app bar
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -393,6 +401,16 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
       case TradeViewType.journal:
         return JournalWebPage(userId: widget.userId, portfolioId: _currentPortfolioId);
+        
+      case TradeViewType.analysis:
+        if (_currentPortfolioId == null) {
+          return _buildSelectPortfolioPrompt();
+        }
+        return TradeMetricsPage(
+          key: ValueKey('metrics_$_currentPortfolioId'),
+          userId: widget.userId,
+          portfolioId: _currentPortfolioId!,
+        );
     }
   }
 
@@ -478,7 +496,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          _selectedView == TradeViewType.holdings ? Icons.dashboard_outlined : Icons.calendar_today_outlined,
+          _getPromptIcon(),
           size: 64,
           color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
@@ -491,9 +509,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          _selectedView == TradeViewType.holdings
-              ? 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views'
-              : 'Choose a portfolio to explore the interactive calendar analytics with trade event insights',
+          _getPromptDescription(),
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
@@ -513,4 +529,30 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       ],
     ),
   );
+
+  IconData _getPromptIcon() {
+    switch (_selectedView) {
+      case TradeViewType.holdings:
+        return Icons.dashboard_outlined;
+      case TradeViewType.calendar:
+        return Icons.calendar_today_outlined;
+      case TradeViewType.analysis:
+        return Icons.analytics_outlined;
+      default:
+        return Icons.folder_open_outlined;
+    }
+  }
+
+  String _getPromptDescription() {
+    switch (_selectedView) {
+      case TradeViewType.holdings:
+        return 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views';
+      case TradeViewType.calendar:
+        return 'Choose a portfolio to explore the interactive calendar analytics with trade event insights';
+      case TradeViewType.analysis:
+        return 'Choose a portfolio to view detailed performance metrics, risk analysis, and trade distribution charts';
+      default:
+        return 'Select a portfolio to view details';
+    }
+  }
 }
