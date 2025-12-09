@@ -16,9 +16,10 @@ import 'widgets/trade_sidebar.dart';
 import '../../../market_analysis/presentation/widgets/trading_view_chart_widget.dart';
 import '../../../market_analysis/providers/market_analysis_providers.dart';
 import '../pages/trade_market_page.dart';
+import '../pages/trade_unified_view_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal, marketAnalysis }
+enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal, marketAnalysis, unified }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -260,6 +261,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       case TradeViewType.marketAnalysis:
         title = 'Market Analysis';
         break;
+      case TradeViewType.unified:
+        title = 'Trade Dashboard';
+        showTitle = false; // Custom header in page
+        break;
     }
 
     return AppBar(
@@ -356,6 +361,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         case TradeViewType.marketAnalysis:
                           // Market analysis handles its own refresh and symbol updates internally
                           break;
+                        case TradeViewType.unified:
+                          // Unified view handles its own refresh internally
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -433,6 +441,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
       case TradeViewType.marketAnalysis:
         return const TradeMarketPage();
+
+      case TradeViewType.unified:
+        return TradeUnifiedViewPage(userId: widget.userId);
     }
   }
 
