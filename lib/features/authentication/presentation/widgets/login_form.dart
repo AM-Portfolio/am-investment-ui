@@ -54,13 +54,21 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
+        // Debug logging for state changes
+        print('🔵 LoginForm: State changed to ${state.runtimeType}');
+        
         if (state is AuthError) {
+          print('❌ LoginForm: AuthError received - ${state.message}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
               backgroundColor: Colors.red,
             ),
           );
+        }
+        
+        if (state is AuthLoading) {
+          print('⏳ LoginForm: AuthLoading state');
         }
       },
       builder: (context, state) {

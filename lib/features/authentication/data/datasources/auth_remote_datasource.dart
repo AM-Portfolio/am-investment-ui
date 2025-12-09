@@ -110,7 +110,29 @@ class AuthRemoteDataSource implements AuthDataSource {
 
       if (response.statusCode == 200) {
         AppLogger.info('🔵 [BACKEND] ✅ Success! Parsing response...');
-        final model = AuthResultModel.fromJson(response.data);
+        
+        // Backend returns flat structure, need to parse manually
+        final data = response.data as Map<String, dynamic>;
+        
+        final user = UserModel(
+          id: data['user']['id'] as String,
+          email: data['user']['email'] as String,
+          displayName: data['user']['name'] as String?,
+          photoUrl: data['user']['picture'] as String?,
+          authMethod: 'google',
+        );
+        
+        final tokens = AuthTokensModel(
+          accessToken: data['access_token'] as String,
+          refreshToken: data['refresh_token']  as String?,
+          expiresAt: DateTime.now().add(
+            Duration(seconds: data['expires_in'] as int? ?? 3600),
+          ),
+        );
+        
+        final model = AuthResultModel(user: user, tokens: tokens);
+        
+        print('✅ [BACKEND] Parsed user: ${model.user.email}, ID: ${model.user.id}');
         AppLogger.info('🔵 [BACKEND] Parsed user: ${model.user.email}');
         return model;
       } else {
@@ -123,6 +145,12 @@ class AuthRemoteDataSource implements AuthDataSource {
         );
       }
     } on DioException catch (e) {
+      print('🔴 [BACKEND] DioException occurred');
+      print('🔴 [BACKEND] Type: ${e.type}');
+      print('🔴 [BACKEND] Message: ${e.message}');
+      print('🔴 [BACKEND] Response: ${e.response?.data}');
+      print('🔴 [BACKEND] Status Code: ${e.response?.statusCode}');
+      
       AppLogger.error('🔴 [BACKEND] DioException occurred');
       AppLogger.error('🔴 [BACKEND] Type: ${e.type}');
       AppLogger.error('🔴 [BACKEND] Message: ${e.message}');
