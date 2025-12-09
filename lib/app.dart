@@ -14,6 +14,7 @@ import 'features/trade/presentation/calendar/pages/trade_calendar_analytics_web_
 import 'features/trade/presentation/cubit/trade_controller_cubit.dart';
 import 'features/trade/presentation/holdings/pages/trade_holdings_dashboard_web_page.dart';
 import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
+import 'features/market_analysis/presentation/pages/market_analysis_page.dart';
 import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
 import 'features/trade/providers/trade_controller_providers.dart';
 
@@ -75,6 +76,8 @@ class _MaterialApp extends StatelessWidget {
             builder: (context) =>
                 TradeCalendarAnalyticsWebPage(userId: args['userId']!, portfolioId: args['portfolioId']!),
           );
+        case '/market-analysis':
+          return MaterialPageRoute(builder: (context) => const MarketAnalysisPage());
         case '/trade/add':
           final args = settings.arguments! as Map<String, dynamic>;
           return MaterialPageRoute(

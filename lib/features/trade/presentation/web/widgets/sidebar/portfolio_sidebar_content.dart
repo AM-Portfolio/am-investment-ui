@@ -270,6 +270,18 @@ class PortfolioSidebarContent extends StatelessWidget {
         isCondensed: isCondensed,
       ),
 
+      SidebarNavItem<TradeViewType>(
+        icon: Icons.show_chart,
+        title: 'Market Analysis',
+        subtitle: 'TradingView Charts',
+        value: TradeViewType.marketAnalysis,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
       // Quick Actions - Always visible in full mode
       if (isFull) ...[
         // Other quick actions can go here

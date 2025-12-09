@@ -11,6 +11,7 @@ class TradeHoldingsAdvancedTemplate extends StatefulWidget {
     super.key,
     this.errorMessage,
     this.onHoldingSelected,
+    this.onSymbolTap,
     this.onRefresh,
     this.itemsPerPage = 20,
   });
@@ -19,6 +20,7 @@ class TradeHoldingsAdvancedTemplate extends StatefulWidget {
   final bool isLoading;
   final String? errorMessage;
   final Function(TradeHoldingViewModel)? onHoldingSelected;
+  final Function(String symbol)? onSymbolTap;
   final VoidCallback? onRefresh;
   final int itemsPerPage;
 
@@ -411,7 +413,7 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
                     ),
                   ),
                 ),
-                onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
+                onTap: widget.onSymbolTap != null ? () => widget.onSymbolTap!(holding.displaySymbol) : (widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null),
               ),
               DataCell(
                 MouseRegion(

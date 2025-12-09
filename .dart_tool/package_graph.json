@@ -38,7 +38,9 @@
         "retrofit",
         "riverpod_annotation",
         "shared_preferences",
-        "url_launcher"
+        "url_launcher",
+        "webview_flutter",
+        "webview_flutter_web"
       ],
       "devDependencies": [
         "analyzer",
@@ -269,6 +271,26 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "webview_flutter_web",
+      "version": "0.2.3+4",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "web",
+        "webview_flutter_platform_interface"
+      ]
+    },
+    {
+      "name": "webview_flutter",
+      "version": "4.13.0",
+      "dependencies": [
+        "flutter",
+        "webview_flutter_android",
+        "webview_flutter_platform_interface",
+        "webview_flutter_wkwebview"
       ]
     },
     {
@@ -1193,6 +1215,51 @@
       ]
     },
     {
+      "name": "webview_flutter_platform_interface",
+      "version": "2.14.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "flutter_web_plugins",
+      "version": "0.0.0",
+      "dependencies": [
+        "characters",
+        "collection",
+        "flutter",
+        "material_color_utilities",
+        "meta",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "webview_flutter_wkwebview",
+      "version": "3.23.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "path",
+        "webview_flutter_platform_interface"
+      ]
+    },
+    {
+      "name": "webview_flutter_android",
+      "version": "4.10.1",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "webview_flutter_platform_interface"
+      ]
+    },
+    {
       "name": "flutter_shaders",
       "version": "0.1.3",
       "dependencies": [
@@ -1650,11 +1717,6 @@
       ]
     },
     {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
-    },
-    {
       "name": "cross_file",
       "version": "0.3.5+1",
       "dependencies": [
@@ -1686,18 +1748,6 @@
       "version": "2.0.31",
       "dependencies": [
         "flutter"
-      ]
-    },
-    {
-      "name": "flutter_web_plugins",
-      "version": "0.0.0",
-      "dependencies": [
-        "characters",
-        "collection",
-        "flutter",
-        "material_color_utilities",
-        "meta",
-        "vector_math"
       ]
     },
     {

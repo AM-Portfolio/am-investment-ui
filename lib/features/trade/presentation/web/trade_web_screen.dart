@@ -13,9 +13,12 @@ import '../models/trade_portfolio_view_model.dart';
 import '../trades/pages/trade_list_web_page.dart';
 import '../metrics/trade_metrics_page.dart';
 import 'widgets/trade_sidebar.dart';
+import '../../../market_analysis/presentation/widgets/trading_view_chart_widget.dart';
+import '../../../market_analysis/providers/market_analysis_providers.dart';
+import '../pages/trade_market_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal }
+enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal, marketAnalysis }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -44,6 +47,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
   late TradeViewType _selectedView;
   String? _currentPortfolioId;
   String? _currentPortfolioName;
+  late TextEditingController _symbolController;
 
   @override
   void initState() {
@@ -51,6 +55,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     _selectedView = widget.initialView;
     _currentPortfolioId = widget.selectedPortfolioId;
     _currentPortfolioName = widget.selectedPortfolioName;
+    _symbolController = TextEditingController(text: 'NASDAQ:AAPL');
 
     // CRITICAL: Validate userId is not empty
     AppLogger.debug(
@@ -252,14 +257,17 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         title = 'Trade Analysis';
         showTitle = false; // Hide title - page has its own app bar
         break;
+      case TradeViewType.marketAnalysis:
+        title = 'Market Analysis';
+        break;
     }
 
     return AppBar(
       // Automatically shows menu button on mobile when drawer is present
-      toolbarHeight: showTitle && _selectedView != TradeViewType.calendar
+      toolbarHeight: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? kToolbarHeight
-          : 0, // Hide app bar completely when no title or in calendar view
-      title: showTitle && _selectedView != TradeViewType.calendar
+          : 0, // Hide app bar completely when no title, calendar, or market analysis view
+      title: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -269,7 +277,6 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                   child: Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: isMobile ? const TextStyle(fontSize: 16) : null,
                   ),
                 ),
               ],
@@ -278,7 +285,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
-      actions: showTitle && _selectedView != TradeViewType.calendar
+      actions: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? [
               // Back to portfolios button (when portfolio is selected)
               if (_currentPortfolioId != null && _selectedView != TradeViewType.portfolios)
@@ -345,6 +352,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         case TradeViewType.analysis:
                           // Analysis handles its own refresh via its internal app bar
                           break;
+                          break;
+                        case TradeViewType.marketAnalysis:
+                          // Market analysis handles its own refresh and symbol updates internally
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -377,6 +388,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           key: ValueKey('holdings_$_currentPortfolioId'),
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
+          onNavigateToChart: (symbol) {
+            ref.read(marketAnalysisSymbolProvider.notifier).updateSymbol(symbol);
+            _onViewChanged(TradeViewType.marketAnalysis);
+          },
         );
 
       case TradeViewType.calendar:
@@ -397,6 +412,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           key: ValueKey('trades_$_currentPortfolioId'),
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
+          onNavigateToChart: (symbol) {
+            ref.read(marketAnalysisSymbolProvider.notifier).updateSymbol(symbol);
+            _onViewChanged(TradeViewType.marketAnalysis);
+          },
         );
 
       case TradeViewType.journal:
@@ -411,6 +430,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
         );
+
+      case TradeViewType.marketAnalysis:
+        return const TradeMarketPage();
     }
   }
 
