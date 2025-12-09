@@ -4,11 +4,11 @@ import 'package:equatable/equatable.dart';
 class AuthTokensEntity extends Equatable {
   const AuthTokensEntity({
     required this.accessToken,
-    required this.refreshToken,
+    this.refreshToken,
     required this.expiresAt,
   });
   final String accessToken;
-  final String refreshToken;
+  final String? refreshToken;
   final DateTime expiresAt;
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+  import '../services/secure_storage_service.dart';
 
 import '../network/errors/exception.dart';
 import '../utils/logger.dart';
@@ -24,13 +24,10 @@ class ApiClient {
   /// HTTP client for making requests
   final http.Client _client;
 
-  /// Token key in shared preferences
-  static const String _tokenKey = 'auth_token';
-
-  /// Get authentication token from shared preferences
+  /// Get authentication token from secure storage
   Future<String?> _getAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    final secureStorage = SecureStorageService();
+    return secureStorage.getAccessToken();
   }
 
   /// Build URI from endpoint, handling both complete URLs and relative paths

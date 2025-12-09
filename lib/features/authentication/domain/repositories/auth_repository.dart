@@ -26,6 +26,14 @@ abstract class AuthRepository {
   /// Check authentication status
   Future<Either<Failure, bool>> checkAuthStatus();
 
+  /// Register new user
+  Future<Either<Failure, AuthResultEntity>> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+  });
+
   /// Get current user
   Future<Either<Failure, AuthResultEntity?>> getCurrentUser();
 }

@@ -13,6 +13,7 @@ class WebLayout extends StatelessWidget {
     this.activeNavItem = 'Dashboard',
     this.userName = 'User',
     this.userEmail,
+    this.userAvatarUrl,
     this.onLogout,
     this.onNavigate,
   });
@@ -32,6 +33,9 @@ class WebLayout extends StatelessWidget {
   /// User email
   final String? userEmail;
 
+  /// User avatar URL
+  final String? userAvatarUrl;
+
   /// Callback when logout is requested
   final VoidCallback? onLogout;
 
@@ -45,6 +49,9 @@ class WebLayout extends StatelessWidget {
         // Global Sidebar (Far Left)
         GlobalSidebar(
           activeNavItem: activeNavItem,
+          userName: userName,
+          userEmail: userEmail,
+          userAvatarUrl: userAvatarUrl,
           onNavigate: (navItem) {
             if (onNavigate != null) {
               onNavigate!(navItem);
@@ -56,9 +63,7 @@ class WebLayout extends StatelessWidget {
         ),
 
         // Main Content Area (Includes Sub-sidebar if present in child)
-        Expanded(
-          child: child,
-        ),
+        Expanded(child: child),
       ],
     ),
   );

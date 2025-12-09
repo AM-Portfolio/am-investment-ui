@@ -1,7 +1,7 @@
 part of 'favorite_filter_cubit.dart';
 
 @freezed
-class FavoriteFilterState with _$FavoriteFilterState {
+abstract class FavoriteFilterState with _$FavoriteFilterState {
   /// Initial state
   const factory FavoriteFilterState.initial() = _Initial;
 

@@ -14,6 +14,7 @@ abstract class JournalRepository {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   });
 
   /// Get a journal entry by ID
@@ -32,6 +33,7 @@ abstract class JournalRepository {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   });
 
   /// Delete a journal entry

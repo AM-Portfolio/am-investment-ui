@@ -4,11 +4,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../models/trade_holding_view_model.dart';
 
 class ModernTradeHeader extends StatefulWidget {
-  const ModernTradeHeader({required this.trade, required this.onClose, required this.onFilterChanged, super.key});
+  const ModernTradeHeader({required this.trade, required this.onClose, required this.onFilterChanged, this.onSymbolTap, super.key});
 
   final TradeHoldingViewModel trade;
   final VoidCallback? onClose;
   final ValueChanged<String?> onFilterChanged;
+  final Function(String symbol)? onSymbolTap;
 
   @override
   State<ModernTradeHeader> createState() => _ModernTradeHeaderState();
@@ -115,6 +116,24 @@ class _ModernTradeHeaderState extends State<ModernTradeHeader> with SingleTicker
                         Row(
                           children: [
                             // Symbol
+                            widget.onSymbolTap != null ?
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () => widget.onSymbolTap!(widget.trade.displaySymbol),
+                                child: Text(
+                                  widget.trade.displaySymbol,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor, // Highlight color
+                                    letterSpacing: 0.5,
+                                    decoration: TextDecoration.underline,
+                                    decorationStyle: TextDecorationStyle.dashed,
+                                  ),
+                                ),
+                              ),
+                            ) : 
                             Text(
                               widget.trade.displaySymbol,
                               style: TextStyle(

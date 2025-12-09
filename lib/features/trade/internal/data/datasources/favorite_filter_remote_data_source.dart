@@ -33,12 +33,25 @@ abstract class FavoriteFilterRemoteDataSource {
 
 /// Concrete implementation of favorite filter remote data source
 class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSource {
-  const FavoriteFilterRemoteDataSourceImpl({required ApiClient apiClient, required ApiConfig apiConfig})
-    : _apiClient = apiClient,
-      _apiConfig = apiConfig;
+  const FavoriteFilterRemoteDataSourceImpl({
+    required ApiClient apiClient,
+    required TradeApiConfig tradeConfig,
+  }) : _apiClient = apiClient,
+       _tradeConfig = tradeConfig;
 
   final ApiClient _apiClient;
-  final ApiConfig _apiConfig;
+  final TradeApiConfig _tradeConfig;
+
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+    return '$cleanBase$cleanResource';
+  }
 
   @override
   Future<List<FavoriteFilterResponseDto>> getFavoriteFilters(String userId) async {
@@ -46,7 +59,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: GET /api/v1/filters?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri?userId=$userId';
 
       final response = await _apiClient.get<List<FavoriteFilterResponseDto>>(
         fullUri,
@@ -83,7 +97,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: GET /api/v1/filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri/$filterId?userId=$userId';
 
       final response = await _apiClient.get<FavoriteFilterResponseDto>(
         fullUri,
@@ -115,7 +130,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: POST /api/v1/filters?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri?userId=$userId';
 
       final response = await _apiClient.post<FavoriteFilterResponseDto>(
         fullUri,
@@ -152,7 +168,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: PUT /api/v1/filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri/$filterId?userId=$userId';
 
       final response = await _apiClient.put<FavoriteFilterResponseDto>(
         fullUri,
@@ -185,7 +202,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: DELETE /api/v1/filters/{filterId}?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri/$filterId?userId=$userId';
 
       await _apiClient.delete<void>(fullUri, parser: (_) {});
 
@@ -212,7 +230,7 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: DELETE /api/v1/filters/bulk
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/bulk';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters/bulk');
 
       final response = await _apiClient.delete<BulkDeleteResponseDto>(
         fullUri,
@@ -245,7 +263,8 @@ class FavoriteFilterRemoteDataSourceImpl implements FavoriteFilterRemoteDataSour
 
     try {
       // API Spec: PUT /api/v1/filters/{filterId}/set-default?userId={userId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/filters/$filterId/set-default?userId=$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/filters');
+      final fullUri = '$baseUri/$filterId/set-default?userId=$userId';
 
       final response = await _apiClient.put<FavoriteFilterResponseDto>(
         fullUri,

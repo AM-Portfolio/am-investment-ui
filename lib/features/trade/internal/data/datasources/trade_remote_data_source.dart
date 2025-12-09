@@ -47,7 +47,9 @@ abstract class TradeRemoteDataSource {
   });
 
   /// Get trade calendar by financial year from remote API
-  Future<TradeCalendarDto> getTradeCalendarByFinancialYear(
+  Future<TradeCalendarDto>
+  
+   getTradeCalendarByFinancialYear(
     String userId,
     String portfolioId, {
     required int financialYear,
@@ -60,12 +62,25 @@ abstract class TradeRemoteDataSource {
 
 /// Concrete implementation of trade remote data source
 class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
-  const TradeRemoteDataSourceImpl({required ApiClient apiClient, required ApiConfig apiConfig})
-    : _apiClient = apiClient,
-      _apiConfig = apiConfig;
+  const TradeRemoteDataSourceImpl({
+    required ApiClient apiClient,
+    required TradeApiConfig tradeConfig,
+  }) : _apiClient = apiClient,
+       _tradeConfig = tradeConfig;
 
   final ApiClient _apiClient;
-  final ApiConfig _apiConfig;
+  final TradeApiConfig _tradeConfig;
+
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+    return '$cleanBase$cleanResource';
+  }
 
   @override
   Future<TradePortfolioListDto> getTradePortfolios(String userId) async {
@@ -73,20 +88,18 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/portfolio-summary/by-owner/{ownerId}
-      // Returns a plain array of portfolios
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/portfolio-summary/by-owner/$userId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, _tradeConfig.portfolioListResource);
+      final fullUri = '$baseUri/$userId';
 
       final response = await _apiClient.get<TradePortfolioListDto>(
         fullUri,
         parser: (data) {
-          // API returns array, wrap it in expected structure
           if (data is List) {
             return TradePortfolioListDto(
               portfolios: data.map((item) => TradePortfolioDto.fromJson(item as Map<String, dynamic>)).toList(),
               totalCount: data.length,
             );
           }
-          // Fallback if already wrapped
           return TradePortfolioListDto.fromJson(data! as Map<String, dynamic>);
         },
       );
@@ -103,7 +116,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade portfolios', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradePortfolios();
@@ -124,8 +136,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/trades/portfolio-details/{portfolioId}?page=0&size=50&sort=tradeDate,desc
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/portfolio-details/$portfolioId?page=0&size=50&sort=tradeDate%2Cdesc';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, _tradeConfig.holdingsResource);
+      final fullUri = '$baseUri/$portfolioId?page=0&size=50&sort=tradeDate%2Cdesc';
 
       final response = await _apiClient.get<TradeHoldingsDto>(
         fullUri,
@@ -144,7 +156,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade holdings', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeHoldings();
@@ -165,7 +176,8 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/portfolio-summary/{portfolioId}
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/portfolio-summary/$portfolioId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, _tradeConfig.portfolioSummaryResource);
+      final fullUri = '$baseUri/$portfolioId';
 
       final response = await _apiClient.get<TradePortfolioSummaryDto>(
         fullUri,
@@ -184,7 +196,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade summary', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeSummary();
@@ -210,46 +221,38 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/trades/calendar/month?portfolioId={id}&year={year}&month={month}
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/calendar/month?portfolioId=$portfolioId&year=$year&month=$month';
+      var resource = _tradeConfig.calendarMonthResource;
+      
+      String fullUri;
+      if (resource.contains('{portfolioId}')) {
+          fullUri = '${_buildUri(_tradeConfig.baseUrl, resource.replaceAll('{portfolioId}', portfolioId))}?year=$year&month=$month';
+      } else {
+          fullUri = '${_buildUri(_tradeConfig.baseUrl, resource)}?portfolioId=$portfolioId&year=$year&month=$month';
+      }
 
       AppLogger.info('Fetching calendar for year=$year, month=$month', tag: 'TradeRemoteDataSource');
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
         parser: (data) {
-          // Handle empty response
-          if (data == null) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (data == null) return const TradeCalendarDto(portfolioTrades: {});
 
-          // Handle array response from API
           if (data is List) {
-            if (data.isEmpty) {
-              return const TradeCalendarDto(portfolioTrades: {});
-            }
-
-            // Group trades by customPortfolioId
+            if (data.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
             final portfolioTrades = <String, List<TradeDetailsDto>>{};
-
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
-
               if (portfolioId != null) {
                 final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
-
             return TradeCalendarDto(portfolioTrades: portfolioTrades);
           }
 
-          // Handle map response (legacy format)
           final json = data as Map<String, dynamic>;
-          if (json.isEmpty) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (json.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
           return TradeCalendarDto.fromJson(json);
         },
       );
@@ -266,7 +269,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade calendar', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendar();
@@ -289,45 +291,38 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
       // Trade API Spec: GET /api/v1/trades/calendar/day?date={date}&portfolioId={id}
       final formattedDate =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/calendar/day?date=$formattedDate&portfolioId=$portfolioId';
+      
+      var resource = _tradeConfig.calendarDayResource;
+      String fullUri;
+      if (resource.contains('{portfolioId}')) {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource.replaceAll('{portfolioId}', portfolioId))}?date=$formattedDate';
+      } else {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource)}?date=$formattedDate&portfolioId=$portfolioId';
+      }
 
       AppLogger.info('Fetching calendar for date=$formattedDate', tag: 'TradeRemoteDataSource');
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
         parser: (data) {
-          // Handle empty response
-          if (data == null) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (data == null) return const TradeCalendarDto(portfolioTrades: {});
 
-          // Handle array response from API
           if (data is List) {
-            if (data.isEmpty) {
-              return const TradeCalendarDto(portfolioTrades: {});
-            }
-
-            // Group trades by customPortfolioId
+            if (data.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
             final portfolioTrades = <String, List<TradeDetailsDto>>{};
-
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
-
               if (portfolioId != null) {
                 final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
-
             return TradeCalendarDto(portfolioTrades: portfolioTrades);
           }
 
-          // Handle map response (legacy format)
           final json = data as Map<String, dynamic>;
-          if (json.isEmpty) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (json.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
           return TradeCalendarDto.fromJson(json);
         },
       );
@@ -344,7 +339,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade calendar by day', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendarByDay();
@@ -379,8 +373,10 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
           '${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
       final formattedEndDate =
           '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/calendar/custom?portfolioId=$portfolioId&startDate=$formattedStartDate&endDate=$formattedEndDate&page=0&size=50';
+      
+      // Using generic resource if available or hardcoded for now, but using _buildUri
+      // "api/v1/trades/calendar/custom"
+      final fullUri = '${_buildUri(_tradeConfig.baseUrl, 'api/v1/trades/calendar/custom')}?portfolioId=$portfolioId&startDate=$formattedStartDate&endDate=$formattedEndDate&page=0&size=50';
 
       AppLogger.info(
         'Fetching calendar for date range=$formattedStartDate to $formattedEndDate',
@@ -390,59 +386,30 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
         parser: (data) {
-          // Handle empty response
           if (data == null) {
             AppLogger.debug('[DateRange Parser] Received null data', tag: 'TradeRemoteDataSource');
             return const TradeCalendarDto(portfolioTrades: {});
           }
 
-          // Handle array response from API
           if (data is List) {
             AppLogger.info('[DateRange Parser] Received array with ${data.length} items', tag: 'TradeRemoteDataSource');
+            if (data.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
 
-            if (data.isEmpty) {
-              return const TradeCalendarDto(portfolioTrades: {});
-            }
-
-            // Group trades by customPortfolioId
             final portfolioTrades = <String, List<TradeDetailsDto>>{};
-
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
-              final tradeDate = tradeJson['tradeDate'] as String?;
-
-              AppLogger.debug(
-                '[DateRange Parser] Trade: portfolioId=$portfolioId, date=$tradeDate',
-                tag: 'TradeRemoteDataSource',
-              );
-
               if (portfolioId != null) {
                 final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
-
-            AppLogger.info(
-              '[DateRange Parser] Grouped ${data.length} trades into ${portfolioTrades.length} portfolios',
-              tag: 'TradeRemoteDataSource',
-            );
-            for (final entry in portfolioTrades.entries) {
-              AppLogger.info(
-                '[DateRange Parser] Portfolio ${entry.key}: ${entry.value.length} trades',
-                tag: 'TradeRemoteDataSource',
-              );
-            }
-
             return TradeCalendarDto(portfolioTrades: portfolioTrades);
           }
 
-          // Handle map response (legacy format)
           AppLogger.debug('[DateRange Parser] Received map data', tag: 'TradeRemoteDataSource');
           final json = data as Map<String, dynamic>;
-          if (json.isEmpty) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (json.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
           return TradeCalendarDto.fromJson(json);
         },
       );
@@ -459,7 +426,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade calendar by date range', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendarByDateRange();
@@ -485,46 +451,37 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/trades/calendar/quarter?portfolioId={id}&year={year}&quarter={quarter}
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/calendar/quarter?portfolioId=$portfolioId&year=$year&quarter=$quarter';
+      var resource = _tradeConfig.calendarQuarterResource;
+      String fullUri;
+      if (resource.contains('{portfolioId}')) {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource.replaceAll('{portfolioId}', portfolioId))}?year=$year&quarter=$quarter';
+      } else {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource)}?portfolioId=$portfolioId&year=$year&quarter=$quarter';
+      }
 
       AppLogger.info('Fetching calendar for year=$year, quarter=$quarter', tag: 'TradeRemoteDataSource');
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
         parser: (data) {
-          // Handle empty response
-          if (data == null) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (data == null) return const TradeCalendarDto(portfolioTrades: {});
 
-          // Handle array response from API
           if (data is List) {
-            if (data.isEmpty) {
-              return const TradeCalendarDto(portfolioTrades: {});
-            }
-
-            // Group trades by customPortfolioId
+            if (data.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
             final portfolioTrades = <String, List<TradeDetailsDto>>{};
-
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
-
               if (portfolioId != null) {
                 final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
-
             return TradeCalendarDto(portfolioTrades: portfolioTrades);
           }
 
-          // Handle map response (legacy format)
           final json = data as Map<String, dynamic>;
-          if (json.isEmpty) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (json.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
           return TradeCalendarDto.fromJson(json);
         },
       );
@@ -541,7 +498,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade calendar', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendar();
@@ -566,46 +522,37 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
 
     try {
       // Trade API Spec: GET /api/v1/trades/calendar/financial-year?portfolioId={id}&financialYear={year}
-      final fullUri =
-          '${_apiConfig.baseUrl}/api/v1/trades/calendar/financial-year?portfolioId=$portfolioId&financialYear=$financialYear';
+      var resource = _tradeConfig.calendarFinancialYearResource;
+      String fullUri;
+      if (resource.contains('{portfolioId}')) {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource.replaceAll('{portfolioId}', portfolioId))}?financialYear=$financialYear';
+      } else {
+           fullUri = '${_buildUri(_tradeConfig.baseUrl, resource)}?portfolioId=$portfolioId&financialYear=$financialYear';
+      }
 
       AppLogger.info('Fetching calendar for financial year=$financialYear', tag: 'TradeRemoteDataSource');
 
       final response = await _apiClient.get<TradeCalendarDto>(
         fullUri,
         parser: (data) {
-          // Handle empty response
-          if (data == null) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (data == null) return const TradeCalendarDto(portfolioTrades: {});
 
-          // Handle array response from API
           if (data is List) {
-            if (data.isEmpty) {
-              return const TradeCalendarDto(portfolioTrades: {});
-            }
-
-            // Group trades by customPortfolioId
+            if (data.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
             final portfolioTrades = <String, List<TradeDetailsDto>>{};
-
             for (final item in data) {
               final tradeJson = item as Map<String, dynamic>;
               final portfolioId = tradeJson['customPortfolioId'] as String?;
-
               if (portfolioId != null) {
                 final trade = TradeDetailsDto.fromJson(tradeJson);
                 portfolioTrades.putIfAbsent(portfolioId, () => []).add(trade);
               }
             }
-
             return TradeCalendarDto(portfolioTrades: portfolioTrades);
           }
 
-          // Handle map response (legacy format)
           final json = data as Map<String, dynamic>;
-          if (json.isEmpty) {
-            return const TradeCalendarDto(portfolioTrades: {});
-          }
+          if (json.isEmpty) return const TradeCalendarDto(portfolioTrades: {});
           return TradeCalendarDto.fromJson(json);
         },
       );
@@ -622,7 +569,6 @@ class TradeRemoteDataSourceImpl implements TradeRemoteDataSource {
         stackTrace: StackTrace.current,
       );
 
-      // Fallback to mock data
       try {
         AppLogger.info('Loading mock trade calendar', tag: 'TradeRemoteDataSource');
         return await TradeMockDataHelper.getMockTradeCalendar();

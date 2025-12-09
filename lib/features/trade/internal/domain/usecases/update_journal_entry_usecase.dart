@@ -18,6 +18,7 @@ class UpdateJournalEntryUseCase {
     List<String>? imageUrls,
     List<JournalAttachment>? attachments,
     List<String>? relatedTradeIds,
+    List<String>? tagIds,
   }) => _repository.updateJournalEntry(
     entryId: entryId,
     userId: userId,
@@ -30,5 +31,6 @@ class UpdateJournalEntryUseCase {
     imageUrls: imageUrls,
     attachments: attachments,
     relatedTradeIds: relatedTradeIds,
+    tagIds: tagIds,
   );
 }

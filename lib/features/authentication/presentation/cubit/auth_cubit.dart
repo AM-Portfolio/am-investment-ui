@@ -7,6 +7,7 @@ import '../../domain/usecases/email_login_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
 import 'auth_state.dart';
 
 /// Authentication Cubit
@@ -18,12 +19,14 @@ class AuthCubit extends Cubit<AuthState> {
     required LogoutUseCase logoutUseCase,
     required CheckAuthStatusUseCase checkAuthStatusUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
+    required RegisterUseCase registerUseCase,
   }) : _emailLoginUseCase = emailLoginUseCase,
        _googleLoginUseCase = googleLoginUseCase,
        _demoLoginUseCase = demoLoginUseCase,
        _logoutUseCase = logoutUseCase,
        _checkAuthStatusUseCase = checkAuthStatusUseCase,
        _getCurrentUserUseCase = getCurrentUserUseCase,
+       _registerUseCase = registerUseCase,
        super(const AuthInitial());
   final EmailLoginUseCase _emailLoginUseCase;
   final GoogleLoginUseCase _googleLoginUseCase;
@@ -31,6 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
   final LogoutUseCase _logoutUseCase;
   final CheckAuthStatusUseCase _checkAuthStatusUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
+  final RegisterUseCase _registerUseCase;
 
   /// Login with email and password
   Future<void> loginWithEmail(String email, String password) async {
@@ -38,7 +42,10 @@ class AuthCubit extends Cubit<AuthState> {
 
     final result = await _emailLoginUseCase(email: email, password: password);
 
-    result.fold((failure) => emit(AuthError(failure.message)), (authResult) => emit(Authenticated(authResult.user)));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (authResult) => emit(Authenticated(authResult.user)),
+    );
   }
 
   /// Login with Google
@@ -47,7 +54,10 @@ class AuthCubit extends Cubit<AuthState> {
 
     final result = await _googleLoginUseCase();
 
-    result.fold((failure) => emit(AuthError(failure.message)), (authResult) => emit(Authenticated(authResult.user)));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (authResult) => emit(Authenticated(authResult.user)),
+    );
   }
 
   /// Login with demo account
@@ -56,7 +66,10 @@ class AuthCubit extends Cubit<AuthState> {
 
     final result = await _demoLoginUseCase();
 
-    result.fold((failure) => emit(AuthError(failure.message)), (authResult) => emit(Authenticated(authResult.user)));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (authResult) => emit(Authenticated(authResult.user)),
+    );
   }
 
   /// Logout
@@ -65,33 +78,56 @@ class AuthCubit extends Cubit<AuthState> {
 
     final result = await _logoutUseCase();
 
-    result.fold((failure) => emit(AuthError(failure.message)), (_) => emit(const Unauthenticated()));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(const Unauthenticated()),
+    );
   }
 
   /// Check authentication status and restore session if valid
   Future<void> checkAuthStatus() async {
     AppLogger.methodEntry('checkAuthStatus', tag: 'AuthCubit');
-    AppLogger.debug('🔍 Starting authentication status check...', tag: 'AuthCubit');
+    AppLogger.debug(
+      '🔍 Starting authentication status check...',
+      tag: 'AuthCubit',
+    );
     emit(const AuthLoading());
 
     final statusResult = await _checkAuthStatusUseCase();
 
     await statusResult.fold(
       (failure) async {
-        AppLogger.error('❌ Auth status check failed', tag: 'AuthCubit', error: failure);
-        AppLogger.debug('🔄 Emitting Unauthenticated state due to check failure', tag: 'AuthCubit');
+        AppLogger.error(
+          '❌ Auth status check failed',
+          tag: 'AuthCubit',
+          error: failure,
+        );
+        AppLogger.debug(
+          '🔄 Emitting Unauthenticated state due to check failure',
+          tag: 'AuthCubit',
+        );
         emit(const Unauthenticated());
       },
       (isAuthenticated) async {
-        AppLogger.info('✅ Auth status result: $isAuthenticated', tag: 'AuthCubit');
+        AppLogger.info(
+          '✅ Auth status result: $isAuthenticated',
+          tag: 'AuthCubit',
+        );
         if (isAuthenticated) {
           AppLogger.debug('📦 Fetching user from storage...', tag: 'AuthCubit');
           // Fetch and restore user from storage
           final userResult = await _getCurrentUserUseCase();
           userResult.fold(
             (failure) {
-              AppLogger.error('❌ Failed to get current user from storage', tag: 'AuthCubit', error: failure);
-              AppLogger.debug('🔄 Emitting Unauthenticated state due to user fetch failure', tag: 'AuthCubit');
+              AppLogger.error(
+                '❌ Failed to get current user from storage',
+                tag: 'AuthCubit',
+                error: failure,
+              );
+              AppLogger.debug(
+                '🔄 Emitting Unauthenticated state due to user fetch failure',
+                tag: 'AuthCubit',
+              );
               emit(const Unauthenticated());
             },
             (authResult) {
@@ -110,22 +146,40 @@ class AuthCubit extends Cubit<AuthState> {
                     '🚨 CRITICAL: Retrieved userId is EMPTY! email: "$email", authMethod: ${authResult.user.authMethod}',
                     tag: 'AuthCubit',
                   );
-                  AppLogger.debug('🔄 Emitting Unauthenticated state due to empty userId', tag: 'AuthCubit');
+                  AppLogger.debug(
+                    '🔄 Emitting Unauthenticated state due to empty userId',
+                    tag: 'AuthCubit',
+                  );
                   emit(const Unauthenticated());
                 } else {
-                  AppLogger.debug('🔄 Emitting Authenticated state with userId: "$userId"', tag: 'AuthCubit');
+                  AppLogger.debug(
+                    '🔄 Emitting Authenticated state with userId: "$userId"',
+                    tag: 'AuthCubit',
+                  );
                   emit(Authenticated(authResult.user));
-                  AppLogger.info('✅ Authentication state emitted successfully', tag: 'AuthCubit');
+                  AppLogger.info(
+                    '✅ Authentication state emitted successfully',
+                    tag: 'AuthCubit',
+                  );
                 }
               } else {
-                AppLogger.warning('⚠️ No auth result found in storage (null)', tag: 'AuthCubit');
-                AppLogger.debug('🔄 Emitting Unauthenticated state due to null auth result', tag: 'AuthCubit');
+                AppLogger.warning(
+                  '⚠️ No auth result found in storage (null)',
+                  tag: 'AuthCubit',
+                );
+                AppLogger.debug(
+                  '🔄 Emitting Unauthenticated state due to null auth result',
+                  tag: 'AuthCubit',
+                );
                 emit(const Unauthenticated());
               }
             },
           );
         } else {
-          AppLogger.debug('🔄 Emitting Unauthenticated state (isAuthenticated = false)', tag: 'AuthCubit');
+          AppLogger.debug(
+            '🔄 Emitting Unauthenticated state (isAuthenticated = false)',
+            tag: 'AuthCubit',
+          );
           emit(const Unauthenticated());
         }
       },
@@ -142,13 +196,24 @@ class AuthCubit extends Cubit<AuthState> {
     required String confirmPassword,
     String? phone,
   }) async {
+    if (password != confirmPassword) {
+      emit(const AuthError('Passwords do not match'));
+      return;
+    }
+
     emit(const AuthLoading());
 
     try {
-      // TODO: Implement registration with proper use case integration
-      // Critical: Do not emit false success - show clear error instead
-      emit(
-        const AuthError('Registration feature is not yet fully implemented. Please use existing login credentials.'),
+      final result = await _registerUseCase(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
+
+      result.fold(
+        (failure) => emit(AuthError(failure.message)),
+        (authResult) => emit(Authenticated(authResult.user)),
       );
     } catch (e) {
       emit(AuthError(e.toString()));

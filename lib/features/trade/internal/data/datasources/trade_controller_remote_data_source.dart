@@ -64,12 +64,25 @@ abstract class TradeControllerRemoteDataSource {
 
 /// Implementation of TradeControllerRemoteDataSource
 class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSource {
-  TradeControllerRemoteDataSourceImpl({required ApiClient apiClient, required ApiConfig apiConfig})
-    : _apiClient = apiClient,
-      _apiConfig = apiConfig;
+  TradeControllerRemoteDataSourceImpl({
+    required ApiClient apiClient,
+    required TradeApiConfig tradeConfig,
+  }) : _apiClient = apiClient,
+       _tradeConfig = tradeConfig;
 
   final ApiClient _apiClient;
-  final ApiConfig _apiConfig;
+  final TradeApiConfig _tradeConfig;
+
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    final cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+    return '$cleanBase$cleanResource';
+  }
 
   @override
   Future<List<TradeDetailsDto>> getTradeDetailsByPortfolioAndSymbols({
@@ -83,7 +96,9 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     );
 
     try {
-      var fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/portfolio/$portfolioId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details/portfolio');
+      var fullUri = '$baseUri/$portfolioId';
+
       if (symbols != null && symbols.isNotEmpty) {
         final symbolsParam = symbols.map((s) => 'symbols=$s').join('&');
         fullUri = '$fullUri?$symbolsParam';
@@ -117,7 +132,7 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     AppLogger.methodEntry('addTrade', tag: 'TradeControllerRemoteDataSource');
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details');
 
       // Log a summary first (single line) - use DTO properties directly to avoid casting issues
       AppLogger.info(
@@ -178,7 +193,8 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     AppLogger.methodEntry('updateTrade', tag: 'TradeControllerRemoteDataSource', params: {'tradeId': tradeId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/$tradeId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details');
+      final fullUri = '$baseUri/$tradeId';
 
       final response = await _apiClient.put<TradeDetailsDto>(
         fullUri,
@@ -204,7 +220,8 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     AppLogger.methodEntry('deleteTrade', tag: 'TradeControllerRemoteDataSource', params: {'tradeId': tradeId});
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/$tradeId';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details');
+      final fullUri = '$baseUri/$tradeId';
 
       await _apiClient.delete<void>(fullUri, parser: (_) {});
 
@@ -262,7 +279,8 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
         queryParams.add('sort=$sort');
       }
 
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/filter?${queryParams.join('&')}';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/filter');
+      final fullUri = '$baseUri?${queryParams.join('&')}';
 
       final response = await _apiClient.get<PaginatedTradeResponseDto>(
         fullUri,
@@ -291,7 +309,7 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     );
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/batch';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details/batch');
 
       final response = await _apiClient.post<List<TradeDetailsDto>>(
         fullUri,
@@ -326,7 +344,7 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
     );
 
     try {
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/by-ids';
+      final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details/by-ids');
 
       final response = await _apiClient.post<List<TradeDetailsDto>>(
         fullUri,
@@ -371,7 +389,8 @@ class TradeControllerRemoteDataSourceImpl implements TradeControllerRemoteDataSo
         queryParams.add('sort=$sort');
       }
 
-      final fullUri = '${_apiConfig.baseUrl}/api/v1/trades/details/filter?${queryParams.join('&')}';
+      final baseUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/trades/details/filter');
+      final fullUri = '$baseUri?${queryParams.join('&')}';
 
       final requestData = FilterTradeDetailsRequestDto(
         userId: userId,

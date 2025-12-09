@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_entity.dart';
 
-/// Authentication state
-abstract class AuthState extends Equatable {
+/// Authentication sealed state
+sealed class AuthState extends Equatable {
   const AuthState();
 
   @override
@@ -10,17 +10,17 @@ abstract class AuthState extends Equatable {
 }
 
 /// Initial state
-class AuthInitial extends AuthState {
+final class AuthInitial extends AuthState {
   const AuthInitial();
 }
 
 /// Loading state
-class AuthLoading extends AuthState {
+final class AuthLoading extends AuthState {
   const AuthLoading();
 }
 
 /// Authenticated state
-class Authenticated extends AuthState {
+final class Authenticated extends AuthState {
   const Authenticated(this.user);
   final UserEntity user;
 
@@ -29,12 +29,12 @@ class Authenticated extends AuthState {
 }
 
 /// Unauthenticated state
-class Unauthenticated extends AuthState {
+final class Unauthenticated extends AuthState {
   const Unauthenticated();
 }
 
 /// Authentication error state
-class AuthError extends AuthState {
+final class AuthError extends AuthState {
   const AuthError(this.message);
   final String message;
 
@@ -43,11 +43,11 @@ class AuthError extends AuthState {
 }
 
 /// Password reset email sent state
-class PasswordResetEmailSent extends AuthState {
+final class PasswordResetEmailSent extends AuthState {
   const PasswordResetEmailSent();
 }
 
 /// Password reset success state
-class PasswordResetSuccess extends AuthState {
+final class PasswordResetSuccess extends AuthState {
   const PasswordResetSuccess();
 }

@@ -6,8 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/auth_providers.dart';
 import 'features/authentication/presentation/pages/auth_wrapper.dart';
-import 'features/authentication/presentation/pages/forgot_password_page.dart';
-import 'features/authentication/presentation/pages/register_page.dart';
+import 'features/authentication/presentation/pages/login_screen.dart';
 import 'features/authentication/presentation/pages/reset_password_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/trade/presentation/add_trade/pages/add_trade_web_page.dart';
@@ -15,9 +14,9 @@ import 'features/trade/presentation/calendar/pages/trade_calendar_analytics_web_
 import 'features/trade/presentation/cubit/trade_controller_cubit.dart';
 import 'features/trade/presentation/holdings/pages/trade_holdings_dashboard_web_page.dart';
 import 'features/trade/presentation/mobile/pages/trade_holdings_dashboard_mobile_page.dart';
+import 'features/market_analysis/presentation/pages/market_analysis_page.dart';
 import 'features/trade/presentation/web/pages/trade_portfolio_list_web_page.dart';
 import 'features/trade/providers/trade_controller_providers.dart';
-// import 'features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart';
 
 /// Root app widget that sets up DI, router, and theme.
 /// Uses adaptive navigation if needed (e.g., sidebar on web).
@@ -56,9 +55,9 @@ class _MaterialApp extends StatelessWidget {
         case '/portfolio':
           return MaterialPageRoute(builder: (context) => const PortfolioScreen(userId: ''));
         case '/register':
-          return MaterialPageRoute(builder: (context) => const RegisterPage());
+          return MaterialPageRoute(builder: (context) => const LoginScreen(initialView: AuthView.register));
         case '/forgot-password':
-          return MaterialPageRoute(builder: (context) => const ForgotPasswordPage());
+          return MaterialPageRoute(builder: (context) => const LoginScreen(initialView: AuthView.forgotPassword));
         case '/reset-password':
           return MaterialPageRoute(builder: (context) => const ResetPasswordPage());
         case '/trade/portfolios':
@@ -77,6 +76,8 @@ class _MaterialApp extends StatelessWidget {
             builder: (context) =>
                 TradeCalendarAnalyticsWebPage(userId: args['userId']!, portfolioId: args['portfolioId']!),
           );
+        case '/market-analysis':
+          return MaterialPageRoute(builder: (context) => const MarketAnalysisPage());
         case '/trade/add':
           final args = settings.arguments! as Map<String, dynamic>;
           return MaterialPageRoute(

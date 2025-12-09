@@ -9,7 +9,7 @@ part 'trade_holding_dto.g.dart';
 typedef TradeHoldingDto = TradeDetailsDto;
 
 @freezed
-class PageableDto with _$PageableDto {
+abstract class PageableDto with _$PageableDto {
   const factory PageableDto({
     @Default(0) int pageNumber,
     @Default(50) int pageSize,
@@ -22,7 +22,7 @@ class PageableDto with _$PageableDto {
 }
 
 @freezed
-class TradeHoldingsDto with _$TradeHoldingsDto {
+abstract class TradeHoldingsDto with _$TradeHoldingsDto {
   const factory TradeHoldingsDto({
     @Default([]) List<TradeDetailsDto> content,
     PageableDto? pageable,

@@ -16,6 +16,7 @@ class TradeDetailViewPage extends ConsumerStatefulWidget {
     required this.userId,
     required this.portfolioId,
     this.onClose,
+    this.onNavigateToChart,
     super.key,
   });
 
@@ -23,6 +24,7 @@ class TradeDetailViewPage extends ConsumerStatefulWidget {
   final String userId;
   final String portfolioId;
   final VoidCallback? onClose;
+  final Function(String symbol)? onNavigateToChart;
 
   @override
   ConsumerState<TradeDetailViewPage> createState() => _TradeDetailViewPageState();
@@ -46,6 +48,7 @@ class _TradeDetailViewPageState extends ConsumerState<TradeDetailViewPage> {
           ModernTradeHeader(
             trade: widget.trade,
             onClose: widget.onClose,
+            onSymbolTap: widget.onNavigateToChart,
             onFilterChanged: (value) {
               setState(() {
                 _symbolFilter = value?.trim().isEmpty ?? true ? null : value;

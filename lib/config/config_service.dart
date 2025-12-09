@@ -139,7 +139,8 @@ class ConfigService with PropertyInjection {
           ),
           calendarFinancialYearResource: properties.getValue(
             PropertyKeys.apiTradeCalendarFinancialYearResource,
-            defaultValue: AppConstants.defaultTradeCalendarFinancialYearResource,
+            defaultValue:
+                AppConstants.defaultTradeCalendarFinancialYearResource,
           ),
           searchResource: properties.getValue(
             PropertyKeys.apiTradeSearchResource,
@@ -182,6 +183,78 @@ class ConfigService with PropertyInjection {
           enabled: properties.getBoolValue(
             PropertyKeys.apiDocumentEnabled,
             defaultValue: AppConstants.defaultDocumentEnabled,
+          ),
+        ),
+        auth: AuthApiConfig(
+          baseUrl: properties.getValue(
+            PropertyKeys.apiAuthBaseUrl,
+            defaultValue: AppConstants.defaultAuthBaseUrl,
+          ),
+          loginEndpoint: properties.getValue(
+            PropertyKeys.apiAuthLoginEndpoint,
+            defaultValue: AppConstants.defaultAuthLoginEndpoint,
+          ),
+          refreshTokenEndpoint: properties.getValue(
+            PropertyKeys.apiAuthRefreshTokenEndpoint,
+            defaultValue: AppConstants.defaultAuthRefreshTokenEndpoint,
+          ),
+          logoutEndpoint: properties.getValue(
+            PropertyKeys.apiAuthLogoutEndpoint,
+            defaultValue: AppConstants.defaultAuthLogoutEndpoint,
+          ),
+          googleLoginEndpoint: properties.getValue(
+            PropertyKeys.apiAuthGoogleLoginEndpoint,
+            defaultValue: AppConstants.defaultAuthGoogleLoginEndpoint,
+          ),
+          connectTimeout: properties.getIntValue(
+            PropertyKeys.apiAuthConnectTimeout,
+            defaultValue: AppConstants.defaultConnectTimeout,
+          ),
+          receiveTimeout: properties.getIntValue(
+            PropertyKeys.apiAuthReceiveTimeout,
+            defaultValue: AppConstants.defaultReceiveTimeout,
+          ),
+          sendTimeout: properties.getIntValue(
+            PropertyKeys.apiAuthSendTimeout,
+            defaultValue: AppConstants.defaultSendTimeout,
+          ),
+          enabled: properties.getBoolValue(
+            PropertyKeys.apiAuthEnabled,
+            defaultValue: AppConstants.defaultAuthEnabled,
+          ),
+        ),
+        user: UserApiConfig(
+          baseUrl: properties.getValue(
+            PropertyKeys.apiUserBaseUrl,
+            defaultValue: AppConstants.defaultUserBaseUrl,
+          ),
+          registerEndpoint: properties.getValue(
+            PropertyKeys.apiUserRegisterEndpoint,
+            defaultValue: AppConstants.defaultUserRegisterEndpoint,
+          ),
+          forgotPasswordEndpoint: properties.getValue(
+            PropertyKeys.apiUserForgotPasswordEndpoint,
+            defaultValue: AppConstants.defaultUserForgotPasswordEndpoint,
+          ),
+          resetPasswordEndpoint: properties.getValue(
+            PropertyKeys.apiUserResetPasswordEndpoint,
+            defaultValue: AppConstants.defaultUserResetPasswordEndpoint,
+          ),
+          connectTimeout: properties.getIntValue(
+            PropertyKeys.apiUserConnectTimeout,
+            defaultValue: AppConstants.defaultConnectTimeout,
+          ),
+          receiveTimeout: properties.getIntValue(
+            PropertyKeys.apiUserReceiveTimeout,
+            defaultValue: AppConstants.defaultReceiveTimeout,
+          ),
+          sendTimeout: properties.getIntValue(
+            PropertyKeys.apiUserSendTimeout,
+            defaultValue: AppConstants.defaultSendTimeout,
+          ),
+          enabled: properties.getBoolValue(
+            PropertyKeys.apiUserEnabled,
+            defaultValue: AppConstants.defaultUserEnabled,
           ),
         ),
       ),

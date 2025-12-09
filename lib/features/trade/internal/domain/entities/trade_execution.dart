@@ -4,7 +4,7 @@ import 'instrument_info.dart';
 part 'trade_execution.freezed.dart';
 
 @freezed
-class TradeExecutionBasicInfo with _$TradeExecutionBasicInfo {
+abstract class TradeExecutionBasicInfo with _$TradeExecutionBasicInfo {
   const factory TradeExecutionBasicInfo({
     String? tradeId,
     String? orderId,
@@ -16,7 +16,7 @@ class TradeExecutionBasicInfo with _$TradeExecutionBasicInfo {
 }
 
 @freezed
-class TradeExecutionInfo with _$TradeExecutionInfo {
+abstract class TradeExecutionInfo with _$TradeExecutionInfo {
   const factory TradeExecutionInfo({
     String? tradeType,
     String? auction,
@@ -26,7 +26,7 @@ class TradeExecutionInfo with _$TradeExecutionInfo {
 }
 
 @freezed
-class TradeExecution with _$TradeExecution {
+abstract class TradeExecution with _$TradeExecution {
   const factory TradeExecution({
     TradeExecutionBasicInfo? basicInfo,
     InstrumentInfo? instrumentInfo,

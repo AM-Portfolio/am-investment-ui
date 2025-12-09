@@ -7,7 +7,7 @@ part 'trade_holding.freezed.dart';
 /// Domain entity for paginated trade holdings collection
 /// Uses TradeDetails from trade_controller_entities as the core trade model
 @freezed
-class TradeHoldings with _$TradeHoldings {
+abstract class TradeHoldings with _$TradeHoldings {
   const factory TradeHoldings({
     required String userId,
     required String portfolioId,

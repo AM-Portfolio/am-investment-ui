@@ -11,10 +11,15 @@ import '../holdings/pages/trade_holdings_dashboard_web_page.dart';
 import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
 import '../trades/pages/trade_list_web_page.dart';
+import '../metrics/trade_metrics_page.dart';
 import 'widgets/trade_sidebar.dart';
+import '../../../market_analysis/presentation/widgets/trading_view_chart_widget.dart';
+import '../../../market_analysis/providers/market_analysis_providers.dart';
+import '../pages/trade_market_page.dart';
+import '../pages/trade_unified_view_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar, trades, journal }
+enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal, marketAnalysis, unified }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -43,6 +48,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
   late TradeViewType _selectedView;
   String? _currentPortfolioId;
   String? _currentPortfolioName;
+  late TextEditingController _symbolController;
 
   @override
   void initState() {
@@ -50,6 +56,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     _selectedView = widget.initialView;
     _currentPortfolioId = widget.selectedPortfolioId;
     _currentPortfolioName = widget.selectedPortfolioName;
+    _symbolController = TextEditingController(text: 'NASDAQ:AAPL');
 
     // CRITICAL: Validate userId is not empty
     AppLogger.debug(
@@ -247,14 +254,25 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         title = 'Trade Journal';
         showTitle = false; // Custom header in page
         break;
+      case TradeViewType.analysis:
+        title = 'Trade Analysis';
+        showTitle = false; // Hide title - page has its own app bar
+        break;
+      case TradeViewType.marketAnalysis:
+        title = 'Market Analysis';
+        break;
+      case TradeViewType.unified:
+        title = 'Trade Dashboard';
+        showTitle = false; // Custom header in page
+        break;
     }
 
     return AppBar(
       // Automatically shows menu button on mobile when drawer is present
-      toolbarHeight: showTitle && _selectedView != TradeViewType.calendar
+      toolbarHeight: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? kToolbarHeight
-          : 0, // Hide app bar completely when no title or in calendar view
-      title: showTitle && _selectedView != TradeViewType.calendar
+          : 0, // Hide app bar completely when no title, calendar, or market analysis view
+      title: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -264,7 +282,6 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                   child: Text(
                     title,
                     overflow: TextOverflow.ellipsis,
-                    style: isMobile ? const TextStyle(fontSize: 16) : null,
                   ),
                 ),
               ],
@@ -273,7 +290,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       foregroundColor: Theme.of(context).textTheme.titleLarge?.color,
-      actions: showTitle && _selectedView != TradeViewType.calendar
+      actions: showTitle && _selectedView != TradeViewType.calendar && _selectedView != TradeViewType.marketAnalysis
           ? [
               // Back to portfolios button (when portfolio is selected)
               if (_currentPortfolioId != null && _selectedView != TradeViewType.portfolios)
@@ -337,6 +354,16 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         case TradeViewType.journal:
                           // Journal doesn't use providers, no refresh needed
                           break;
+                        case TradeViewType.analysis:
+                          // Analysis handles its own refresh via its internal app bar
+                          break;
+                          break;
+                        case TradeViewType.marketAnalysis:
+                          // Market analysis handles its own refresh and symbol updates internally
+                          break;
+                        case TradeViewType.unified:
+                          // Unified view handles its own refresh internally
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -369,6 +396,10 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           key: ValueKey('holdings_$_currentPortfolioId'),
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
+          onNavigateToChart: (symbol) {
+            ref.read(marketAnalysisSymbolProvider.notifier).updateSymbol(symbol);
+            _onViewChanged(TradeViewType.marketAnalysis);
+          },
         );
 
       case TradeViewType.calendar:
@@ -389,10 +420,30 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
           key: ValueKey('trades_$_currentPortfolioId'),
           userId: widget.userId,
           portfolioId: _currentPortfolioId!,
+          onNavigateToChart: (symbol) {
+            ref.read(marketAnalysisSymbolProvider.notifier).updateSymbol(symbol);
+            _onViewChanged(TradeViewType.marketAnalysis);
+          },
         );
 
       case TradeViewType.journal:
         return JournalWebPage(userId: widget.userId, portfolioId: _currentPortfolioId);
+        
+      case TradeViewType.analysis:
+        if (_currentPortfolioId == null) {
+          return _buildSelectPortfolioPrompt();
+        }
+        return TradeMetricsPage(
+          key: ValueKey('metrics_$_currentPortfolioId'),
+          userId: widget.userId,
+          portfolioId: _currentPortfolioId!,
+        );
+
+      case TradeViewType.marketAnalysis:
+        return const TradeMarketPage();
+
+      case TradeViewType.unified:
+        return TradeUnifiedViewPage(userId: widget.userId);
     }
   }
 
@@ -478,7 +529,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          _selectedView == TradeViewType.holdings ? Icons.dashboard_outlined : Icons.calendar_today_outlined,
+          _getPromptIcon(),
           size: 64,
           color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
@@ -491,9 +542,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          _selectedView == TradeViewType.holdings
-              ? 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views'
-              : 'Choose a portfolio to explore the interactive calendar analytics with trade event insights',
+          _getPromptDescription(),
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
@@ -513,4 +562,30 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       ],
     ),
   );
+
+  IconData _getPromptIcon() {
+    switch (_selectedView) {
+      case TradeViewType.holdings:
+        return Icons.dashboard_outlined;
+      case TradeViewType.calendar:
+        return Icons.calendar_today_outlined;
+      case TradeViewType.analysis:
+        return Icons.analytics_outlined;
+      default:
+        return Icons.folder_open_outlined;
+    }
+  }
+
+  String _getPromptDescription() {
+    switch (_selectedView) {
+      case TradeViewType.holdings:
+        return 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views';
+      case TradeViewType.calendar:
+        return 'Choose a portfolio to explore the interactive calendar analytics with trade event insights';
+      case TradeViewType.analysis:
+        return 'Choose a portfolio to view detailed performance metrics, risk analysis, and trade distribution charts';
+      default:
+        return 'Select a portfolio to view details';
+    }
+  }
 }

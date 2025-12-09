@@ -6,8 +6,8 @@ abstract class AuthDataSource {
   /// Login with email and password
   Future<AuthResultModel> emailLogin(String email, String password);
 
-  /// Login with Google
-  Future<AuthResultModel> googleLogin();
+  /// Google login
+  Future<AuthResultModel> googleLogin(String idToken);
 
   /// Login with demo account
   Future<AuthResultModel> demoLogin();
@@ -17,6 +17,14 @@ abstract class AuthDataSource {
 
   /// Refresh token
   Future<AuthTokensModel> refreshToken(String refreshToken);
+
+  /// Register with email and password
+  Future<AuthResultModel> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+  });
 
   /// Check if user is authenticated
   Future<bool> isAuthenticated();

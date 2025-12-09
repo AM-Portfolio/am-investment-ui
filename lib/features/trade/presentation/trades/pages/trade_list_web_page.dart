@@ -8,10 +8,11 @@ import 'trade_detail_view_page.dart';
 
 /// Web page for displaying all trades in a list view
 class TradeListWebPage extends ConsumerStatefulWidget {
-  const TradeListWebPage({required this.userId, required this.portfolioId, super.key});
+  const TradeListWebPage({required this.userId, required this.portfolioId, this.onNavigateToChart, super.key});
 
   final String userId;
   final String portfolioId;
+  final Function(String symbol)? onNavigateToChart;
 
   @override
   ConsumerState<TradeListWebPage> createState() => _TradeListWebPageState();
@@ -254,6 +255,20 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
                         style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: statusColor.withOpacity(0.7)),
                       ),
                     ),
+                    if (widget.onNavigateToChart != null) ...[
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.show_chart, size: 16),
+                          tooltip: 'View Chart',
+                          color: statusColor.withOpacity(0.7),
+                          onPressed: () => widget.onNavigateToChart!(holding.displaySymbol),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -337,6 +352,7 @@ class _TradeListWebPageState extends ConsumerState<TradeListWebPage> {
       trade: _selectedTrade!,
       userId: widget.userId,
       portfolioId: widget.portfolioId,
+      onNavigateToChart: widget.onNavigateToChart,
       onClose: () {
         setState(() {
           _selectedTrade = null;

@@ -21,7 +21,7 @@ final _apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 final _favoriteFilterRemoteDataSourceProvider = Provider<FavoriteFilterRemoteDataSource>((ref) {
   final apiClient = ref.watch(_apiClientProvider);
   final apiConfig = ConfigService.config.api;
-  return FavoriteFilterRemoteDataSourceImpl(apiClient: apiClient, apiConfig: apiConfig);
+  return FavoriteFilterRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.trade);
 });
 
 /// Provider for FavoriteFilterRepository

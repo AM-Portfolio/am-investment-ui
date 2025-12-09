@@ -11,9 +11,10 @@ import '../../widgets/filter_panel.dart';
 import '../components/trade_holdings_advanced_template.dart';
 
 class TradeHoldingsDashboardWebPage extends ConsumerStatefulWidget {
-  const TradeHoldingsDashboardWebPage({required this.userId, required this.portfolioId, super.key});
+  const TradeHoldingsDashboardWebPage({required this.userId, required this.portfolioId, this.onNavigateToChart, super.key});
   final String userId;
   final String portfolioId;
+  final Function(String symbol)? onNavigateToChart;
 
   @override
   ConsumerState<TradeHoldingsDashboardWebPage> createState() => _TradeHoldingsDashboardWebPageState();
@@ -87,6 +88,7 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
                 holdings: filteredHoldings,
                 isLoading: false,
                 onHoldingSelected: (holding) => _showHoldingDetails(context, holding),
+                onSymbolTap: widget.onNavigateToChart,
                 onRefresh: () {
                   ref.invalidate(tradeHoldingsStreamProvider(params));
                 },

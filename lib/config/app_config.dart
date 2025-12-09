@@ -46,6 +46,8 @@ class ApiConfig {
     required this.trade,
     this.document,
     this.cloudinary,
+    this.auth,
+    this.user,
   });
   final String baseUrl;
   final int timeout;
@@ -54,6 +56,8 @@ class ApiConfig {
   final TradeApiConfig trade;
   final DocumentApiConfig? document;
   final CloudinaryApiConfig? cloudinary;
+  final AuthApiConfig? auth;
+  final UserApiConfig? user;
 }
 
 /// Portfolio API configuration
@@ -124,7 +128,11 @@ class DocumentApiConfig {
 
 /// Environment configuration
 class EnvironmentConfig {
-  const EnvironmentConfig({required this.name, required this.debugMode, required this.logLevel});
+  const EnvironmentConfig({
+    required this.name,
+    required this.debugMode,
+    required this.logLevel,
+  });
   final String name;
   final bool debugMode;
   final String logLevel;
@@ -137,4 +145,50 @@ class GoogleConfig {
 
   /// Check if Google Sign-In is configured
   bool get isConfigured => webClientId.isNotEmpty;
+}
+
+/// Authentication API configuration
+class AuthApiConfig {
+  const AuthApiConfig({
+    required this.baseUrl,
+    required this.loginEndpoint,
+    required this.refreshTokenEndpoint,
+    required this.logoutEndpoint,
+    required this.googleLoginEndpoint,
+    this.connectTimeout = 30,
+    this.receiveTimeout = 60,
+    this.sendTimeout = 60,
+    this.enabled = true,
+  });
+  final String baseUrl;
+  final String loginEndpoint;
+  final String refreshTokenEndpoint;
+  final String logoutEndpoint;
+  final String googleLoginEndpoint;
+  final int connectTimeout;
+  final int receiveTimeout;
+  final int sendTimeout;
+  final bool enabled;
+}
+
+/// User Management API configuration
+class UserApiConfig {
+  const UserApiConfig({
+    required this.baseUrl,
+    required this.registerEndpoint,
+    required this.forgotPasswordEndpoint,
+    required this.resetPasswordEndpoint,
+    this.connectTimeout = 30,
+    this.receiveTimeout = 60,
+    this.sendTimeout = 60,
+    this.enabled = true,
+  });
+  final String baseUrl;
+  final String registerEndpoint;
+  final String forgotPasswordEndpoint;
+  final String resetPasswordEndpoint;
+  final int connectTimeout;
+  final int receiveTimeout;
+  final int sendTimeout;
+  final bool enabled;
 }

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Sign-In Callback</title>
+</head>
+<body>
+    <script>
+        // This page handles the OAuth redirect from Google
+        // Extract the token from the URL hash and send it to the parent window
+        
+        console.log('OAuth callback page loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('Hash:', window.location.hash);
+        
+        // Parse the hash fragment
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            
+            const idToken = params.get('id_token');
+            const accessToken = params.get('access_token');
+            
+            console.log('ID Token found:', idToken ? 'Yes' : 'No');
+            console.log('Access Token found:', accessToken ? 'Yes' : 'No');
+            
+            if (idToken || accessToken) {
+                // Send the token to the parent window
+                if (window.opener) {
+                    console.log('Sending token to parent window');
+                    window.opener.postMessage({
+                        type: 'google-signin-success',
+                        id_token: idToken,
+                        access_token: accessToken
+                    }, window.location.origin);
+                    
+                    // Close this popup window
+                    setTimeout(() => {
+                        window.close();
+                    }, 500);
+                } else {
+                    console.error('No opener window found');
+                }
+            } else {
+                console.error('No tokens found in URL hash');
+            }
+        } else {
+            console.log('No hash fragment in URL');
+        }
+    </script>
+    <p>Completing sign-in...</p>
+</body>
+</html>

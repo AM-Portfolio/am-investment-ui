@@ -204,6 +204,36 @@ class PortfolioSidebarContent extends StatelessWidget {
               ],
             ],
           ),
+        )
+      else if (portfolios.isNotEmpty && onPortfolioSelected != null)
+        // Compact Portfolio Selector
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: PopupMenuButton<String>(
+            tooltip: 'Select Portfolio',
+            offset: const Offset(40, 0),
+            color: const Color(0xFF2C2C3E),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6C5DD3).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.account_balance_wallet, color: Color(0xFF6C5DD3), size: 20),
+            ),
+            onSelected: (portfolioId) {
+              final portfolio = portfolios.firstWhere((p) => p.id == portfolioId);
+              onPortfolioSelected!(portfolioId, portfolio.name);
+            },
+            itemBuilder: (context) => portfolios.map((portfolio) => PopupMenuItem<String>(
+              value: portfolio.id,
+              child: Text(
+                portfolio.name,
+                style: const TextStyle(color: Colors.white),
+              ),
+            )).toList(),
+          ),
         ),
 
       if (isFull) const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
@@ -248,9 +278,45 @@ class PortfolioSidebarContent extends StatelessWidget {
       // Trade Management Section
       SidebarNavItem<TradeViewType>(
         icon: Icons.receipt_long,
-        title: 'View Trades',
+        title: 'Trades',
         subtitle: 'All trade transactions',
         value: TradeViewType.trades,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      SidebarNavItem<TradeViewType>(
+        icon: Icons.analytics_outlined,
+        title: 'Analysis',
+        subtitle: 'Performance metrics',
+        value: TradeViewType.analysis,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      SidebarNavItem<TradeViewType>(
+        icon: Icons.show_chart,
+        title: 'Market Analysis',
+        subtitle: 'TradingView Charts',
+        value: TradeViewType.marketAnalysis,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      SidebarNavItem<TradeViewType>(
+        icon: Icons.dashboard_customize,
+        title: 'Dashboard',
+        subtitle: 'Unified trade view',
+        value: TradeViewType.unified,
         groupValue: selectedView,
         onChanged: onViewChanged,
         isEnabled: true,
@@ -266,7 +332,7 @@ class PortfolioSidebarContent extends StatelessWidget {
       // Trade Journal - Always enabled
       SidebarNavItem<TradeViewType>(
         icon: Icons.book,
-        title: 'Trade Journal',
+        title: 'Journal',
         subtitle: 'Personal trading notes',
         value: TradeViewType.journal,
         groupValue: selectedView,

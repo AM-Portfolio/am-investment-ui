@@ -187,98 +187,186 @@ class JournalEntryItem extends StatefulWidget {
 
 class _JournalEntryItemState extends State<JournalEntryItem> {
   bool _isHovered = false;
+  bool _isDragging = false;
 
   @override
   Widget build(BuildContext context) {
     final dateStr = DateFormat('EEE, MMM dd, yyyy').format(widget.entry.entryDate);
     final subDateStr = DateFormat('MM/dd/yyyy').format(widget.entry.entryDate);
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    return Draggable<JournalEntry>(
+      data: widget.entry,
+      feedback: Material(
+        elevation: 12,
+        borderRadius: BorderRadius.circular(12),
+
+      
+        child: Container(
+          width: 260,
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: widget.isSelected
-                ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-                : _isHovered
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                    : null,
-            border: Border(
-              bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Selection indicator or checkbox
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: Checkbox(
-                  value: false,
-                  onChanged: (v) {},
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                  side: BorderSide(color: Theme.of(context).disabledColor),
-                ),
+              Row(
+                children: [
+                  Icon(Icons.drag_indicator, 
+                    color: Theme.of(context).colorScheme.primary, 
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      dateStr,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          dateStr,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: widget.isSelected || _isHovered
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.onSurface,
-                              ),
-                        ),
-                        // PNL Placeholder
-                        Text(
-                          '+\$1,330', // Placeholder
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          subDateStr,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                        // Stats Placeholder
-                        Row(
-                          children: [
-                            _buildMiniStat(context, '54% Win'),
-                            const SizedBox(width: 8),
-                            _buildMiniStat(context, '11 Trades'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+              const SizedBox(height: 4),
+              Text(
+                subDateStr,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
                 ),
               ),
             ],
           ),
         ),
+      ).animate().scale(duration: 150.ms),
+      childWhenDragging: Opacity(
+        opacity: 0.3,
+        child: _buildEntryCard(context, dateStr, subDateStr),
+      ),
+      onDragStarted: () {
+        setState(() => _isDragging = true);
+      },
+      onDragEnd: (details) {
+        setState(() => _isDragging = false);
+      },
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        cursor: SystemMouseCursors.grab,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: _buildEntryCard(context, dateStr, subDateStr),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEntryCard(BuildContext context, String dateStr, String subDateStr) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: widget.isSelected
+            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+            : Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: widget.isSelected
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+              : _isHovered
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                  : Theme.of(context).dividerColor.withOpacity(0.1),
+          width: widget.isSelected || _isHovered ? 2 : 1,
+        ),
+        boxShadow: [
+          if (_isHovered || widget.isSelected)
+            BoxShadow(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+        ],
+      ),
+      transform: _isHovered ? (Matrix4.identity()..scale(1.02)) : Matrix4.identity(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle
+          Icon(
+            Icons.drag_indicator,
+            size: 20,
+            color: _isHovered 
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        dateStr,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: widget.isSelected || _isHovered
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                    ),
+                    // PNL Placeholder
+                    Text(
+                      '+\$1,330', // Placeholder
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      subDateStr,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    // Stats Placeholder
+                    Row(
+                      children: [
+                        _buildMiniStat(context, '54% Win'),
+                        const SizedBox(width: 8),
+                        _buildMiniStat(context, '11 Trades'),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

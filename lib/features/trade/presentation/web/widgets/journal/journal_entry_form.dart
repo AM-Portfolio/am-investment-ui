@@ -19,9 +19,16 @@ import 'utils/journal_helpers.dart';
 import 'widgets/rich_text_editor.dart';
 import 'widgets/trade_overview_selector.dart';
 import 'widgets/trade_preview_dialog.dart';
+import 'hover_input_field.dart';
 
 class JournalEntryForm extends ConsumerStatefulWidget {
-  const JournalEntryForm({required this.userId, required this.cubit, required this.portfolioId, super.key, this.entry});
+  const JournalEntryForm({
+    required this.userId,
+    required this.cubit,
+    required this.portfolioId,
+    super.key,
+    this.entry,
+  });
 
   final String userId;
   final JournalCubit cubit;
@@ -98,6 +105,8 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     _midSentiment = widget.entry?.customFields['midSentiment'];
 
     // Initialize end phase from customFields (with legacy fallback)
+  
+
     _endBehaviorController = TextEditingController(text: widget.entry?.customFields['endBehavior'] ?? '');
     _endMood =
         widget.entry?.customFields['endMood'] ??
@@ -463,11 +472,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
   Widget _buildTitleField() {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return HoverInputField(
       child: TextFormField(
         controller: _titleController,
         enabled: _isEditMode,
@@ -583,4 +588,3 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
     });
   }
 }
-

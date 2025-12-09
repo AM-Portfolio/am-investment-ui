@@ -18,7 +18,7 @@ part 'trade_controller_entities.freezed.dart';
 
 /// Domain entity for derivative information
 @freezed
-class DerivativeInfo with _$DerivativeInfo {
+abstract class DerivativeInfo with _$DerivativeInfo {
   const factory DerivativeInfo({
     DerivativeTypes? derivativeType,
     double? strikePrice,
@@ -32,7 +32,7 @@ class DerivativeInfo with _$DerivativeInfo {
 
 /// Domain entity for instrument information
 @freezed
-class InstrumentInfo with _$InstrumentInfo {
+abstract class InstrumentInfo with _$InstrumentInfo {
   const factory InstrumentInfo({
     String? symbol,
     String? isin,
@@ -52,7 +52,7 @@ class InstrumentInfo with _$InstrumentInfo {
 
 /// Domain entity for entry/exit information
 @freezed
-class EntryExitInfo with _$EntryExitInfo {
+abstract class EntryExitInfo with _$EntryExitInfo {
   const factory EntryExitInfo({
     DateTime? timestamp,
     double? price,
@@ -67,7 +67,7 @@ class EntryExitInfo with _$EntryExitInfo {
 
 /// Domain entity for trade metrics
 @freezed
-class TradeMetrics with _$TradeMetrics {
+abstract class TradeMetrics with _$TradeMetrics {
   const factory TradeMetrics({
     double? profitLoss,
     double? profitLossPercentage,
@@ -87,7 +87,7 @@ class TradeMetrics with _$TradeMetrics {
 
 /// Domain entity for file attachments
 @freezed
-class Attachment with _$Attachment {
+abstract class Attachment with _$Attachment {
   const factory Attachment({
     String? fileName,
     String? fileUrl,
@@ -101,7 +101,7 @@ class Attachment with _$Attachment {
 
 /// Domain entity for trade psychology data
 @freezed
-class TradePsychologyData with _$TradePsychologyData {
+abstract class TradePsychologyData with _$TradePsychologyData {
   const factory TradePsychologyData({
     List<EntryPsychologyFactors>? entryPsychologyFactors,
     List<ExitPsychologyFactors>? exitPsychologyFactors,
@@ -115,7 +115,7 @@ class TradePsychologyData with _$TradePsychologyData {
 
 /// Domain entity for trade entry/exit reasoning
 @freezed
-class TradeEntryExitReasoning with _$TradeEntryExitReasoning {
+abstract class TradeEntryExitReasoning with _$TradeEntryExitReasoning {
   const factory TradeEntryExitReasoning({
     List<TechnicalReasons>? technicalReasons,
     List<FundamentalReasons>? fundamentalReasons,
@@ -138,7 +138,7 @@ class TradeEntryExitReasoning with _$TradeEntryExitReasoning {
 
 /// Domain entity for basic trade execution info
 @freezed
-class BasicInfo with _$BasicInfo {
+abstract class BasicInfo with _$BasicInfo {
   const factory BasicInfo({
     String? tradeId,
     String? orderId,
@@ -153,7 +153,7 @@ class BasicInfo with _$BasicInfo {
 
 /// Domain entity for execution details
 @freezed
-class ExecutionInfo with _$ExecutionInfo {
+abstract class ExecutionInfo with _$ExecutionInfo {
   const factory ExecutionInfo({int? quantity, double? price, OrderTypes? orderType}) = _ExecutionInfo;
 
   factory ExecutionInfo.empty() => const ExecutionInfo();
@@ -161,7 +161,7 @@ class ExecutionInfo with _$ExecutionInfo {
 
 /// Domain entity for F&O specific info
 @freezed
-class FnOInfo with _$FnOInfo {
+abstract class FnOInfo with _$FnOInfo {
   const factory FnOInfo({DateTime? expiryDate, double? strikePrice, OptionTypes? optionType}) = _FnOInfo;
 
   factory FnOInfo.empty() => const FnOInfo();
@@ -169,7 +169,7 @@ class FnOInfo with _$FnOInfo {
 
 /// Domain entity for trading charges
 @freezed
-class Charges with _$Charges {
+abstract class Charges with _$Charges {
   const factory Charges({
     double? brokerage,
     double? stt,
@@ -185,7 +185,7 @@ class Charges with _$Charges {
 
 /// Domain entity for financial summary
 @freezed
-class Financials with _$Financials {
+abstract class Financials with _$Financials {
   const factory Financials({double? turnover, double? netAmount}) = _Financials;
 
   factory Financials.empty() => const Financials();
@@ -193,7 +193,7 @@ class Financials with _$Financials {
 
 /// Domain entity for trade model (execution based on broker trade book)
 @freezed
-class TradeModel with _$TradeModel {
+abstract class TradeModel with _$TradeModel {
   const factory TradeModel({
     BasicInfo? basicInfo,
     InstrumentInfo? instrumentInfo,
@@ -208,7 +208,7 @@ class TradeModel with _$TradeModel {
 
 /// Domain entity for complete trade details
 @freezed
-class TradeDetails with _$TradeDetails {
+abstract class TradeDetails with _$TradeDetails {
   const factory TradeDetails({
     required String tradeId,
     required String portfolioId,
@@ -242,7 +242,7 @@ class TradeDetails with _$TradeDetails {
 
 /// Domain entity for filter summary
 @freezed
-class FilterSummary with _$FilterSummary {
+abstract class FilterSummary with _$FilterSummary {
   const factory FilterSummary({
     List<String>? portfolioIds,
     List<String>? symbols,
@@ -258,7 +258,7 @@ class FilterSummary with _$FilterSummary {
 
 /// Domain entity for filter trade details response
 @freezed
-class FilterTradeDetailsResponse with _$FilterTradeDetailsResponse {
+abstract class FilterTradeDetailsResponse with _$FilterTradeDetailsResponse {
   const factory FilterTradeDetailsResponse({
     List<TradeDetails>? trades,
     int? totalCount,
@@ -276,7 +276,7 @@ class FilterTradeDetailsResponse with _$FilterTradeDetailsResponse {
 
 /// Domain entity for paginated trade response
 @freezed
-class PaginatedTradeResponse with _$PaginatedTradeResponse {
+abstract class PaginatedTradeResponse with _$PaginatedTradeResponse {
   const factory PaginatedTradeResponse({
     List<TradeDetails>? content,
     int? totalElements,
@@ -290,7 +290,7 @@ class PaginatedTradeResponse with _$PaginatedTradeResponse {
 
 /// Domain entity for error response
 @freezed
-class ErrorResponse with _$ErrorResponse {
+abstract class ErrorResponse with _$ErrorResponse {
   const factory ErrorResponse({
     DateTime? timestamp,
     int? status,

@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'instrument_info.freezed.dart';
 
 @freezed
-class InstrumentInfo with _$InstrumentInfo {
+abstract class InstrumentInfo with _$InstrumentInfo {
   const factory InstrumentInfo({
     required String symbol,
     String? isin,
