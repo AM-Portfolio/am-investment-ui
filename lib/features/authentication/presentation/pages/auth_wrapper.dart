@@ -235,6 +235,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
               activeNavItem: _currentPage,
               userName: state.user.displayName ?? state.user.email,
               userEmail: state.user.email,
+              userAvatarUrl: state.user.photoUrl,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
               child: _getCurrentScreen(userId),

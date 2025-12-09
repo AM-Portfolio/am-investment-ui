@@ -109,24 +109,43 @@ class GlobalSidebar extends StatelessWidget {
                     tooltip: 'Profile Menu',
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: selectedColor,
-                          backgroundImage: userAvatarUrl != null
-                              ? NetworkImage(userAvatarUrl!)
-                              : null,
-                          child: userAvatarUrl == null
-                              ? Text(
-                                  (userName ?? userEmail ?? 'U')[0]
-                                      .toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                )
-                              : null,
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: selectedColor,
                         ),
+                        child: ClipOval(
+                          child: userAvatarUrl != null
+                              ? Image.network(
+                                  userAvatarUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Center(
+                                      child: Text(
+                                        (userName ?? userEmail ?? 'U')[0].toUpperCase(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Center(
+                                  child: Text(
+                                    (userName ?? userEmail ?? 'U')[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
                         const SizedBox(height: 8),
                         if (userName != null)
                           Text(

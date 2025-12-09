@@ -13,6 +13,7 @@ class WebLayout extends StatelessWidget {
     this.activeNavItem = 'Dashboard',
     this.userName = 'User',
     this.userEmail,
+    this.userAvatarUrl,
     this.onLogout,
     this.onNavigate,
   });
@@ -32,6 +33,9 @@ class WebLayout extends StatelessWidget {
   /// User email
   final String? userEmail;
 
+  /// User avatar URL
+  final String? userAvatarUrl;
+
   /// Callback when logout is requested
   final VoidCallback? onLogout;
 
@@ -47,6 +51,7 @@ class WebLayout extends StatelessWidget {
           activeNavItem: activeNavItem,
           userName: userName,
           userEmail: userEmail,
+          userAvatarUrl: userAvatarUrl,
           onNavigate: (navItem) {
             if (onNavigate != null) {
               onNavigate!(navItem);
