@@ -8,7 +8,6 @@ import '../../../../shared/widgets/calendar/universal_calendar/universal_calenda
 import '../../../../shared/widgets/calendar/universal_calendar/calendar_types.dart';
 import '../../../../shared/widgets/calendar/universal_calendar/data_provider.dart';
 import '../../../trade/presentation/models/trade_calendar_view_model.dart';
-import '../widgets/dashboard_sidebar.dart';
 import '../widgets/dashboard_widgets.dart';
 
 class DashboardWebPage extends ConsumerStatefulWidget {
@@ -54,7 +53,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                         }
                       });
                     }
-                    return _buildTopBar(portfolios.map((p) => p.name).toList());
+                    return _buildTopBar(portfolios);
                   },
                   loading: () => _buildTopBar([]),
                   error: (_, __) => _buildTopBar([]),
@@ -93,7 +92,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
     );
   }
 
-  Widget _buildTopBar(List<String> portfolioNames) {
+  Widget _buildTopBar(List<dynamic> portfolios) {
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -162,25 +161,49 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
           const SizedBox(width: 12),
 
           // Account Selector
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  _selectedPortfolioName ?? 'Select Portfolio',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF2D3436),
+          // Account Selector
+          PopupMenuButton<String>(
+            offset: const Offset(0, 40),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (String id) {
+              final selected = portfolios.firstWhere((p) => p.id == id);
+              setState(() {
+                _selectedPortfolioId = selected.id;
+                _selectedPortfolioName = selected.name;
+              });
+            },
+            itemBuilder: (context) => portfolios.map((portfolio) {
+              return PopupMenuItem<String>(
+                value: portfolio.id,
+                child: Text(
+                  portfolio.name,
+                  style: TextStyle(
+                    fontWeight: portfolio.id == _selectedPortfolioId ? FontWeight.bold : FontWeight.normal,
+                    color: portfolio.id == _selectedPortfolioId ? const Color(0xFF6C5DD3) : Colors.black87,
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_drop_down, size: 18, color: Colors.grey),
-              ],
+              );
+            }).toList(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F6FA),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    _selectedPortfolioName ?? 'Select Portfolio',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF2D3436),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_drop_down, size: 18, color: Colors.grey),
+                ],
+              ),
             ),
           ),
         ],
