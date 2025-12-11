@@ -15,6 +15,7 @@ class PortfolioSidebar extends StatelessWidget {
     this.currentPortfolioName,
     this.portfolios = const [],
     this.onPortfolioSelected,
+    this.isCompact = false,
   });
 
   final PortfolioViewType selectedView;
@@ -23,6 +24,7 @@ class PortfolioSidebar extends StatelessWidget {
   final String? currentPortfolioName;
   final List<PortfolioItem> portfolios;
   final Function(String portfolioId, String portfolioName)? onPortfolioSelected;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -124,26 +126,32 @@ class PortfolioSidebar extends StatelessWidget {
             ),
             child: const Icon(Icons.pie_chart, color: Color(0xFF6C5DD3), size: 18),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Portfolio Manager',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                ),
-                Text(
-                  'Asset Allocation',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 11,
+          if (!isCompact) ...[
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Portfolio Manager',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                ),
-              ],
+                  Text(
+                    'Asset Allocation',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 11,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -159,6 +167,7 @@ class PortfolioSidebar extends StatelessWidget {
       onPortfolioSelected: onPortfolioSelected!,
       idExtractor: (p) => p.portfolioId,
       nameExtractor: (p) => p.portfolioName,
+      isCompact: isCompact,
     );
   }
 
@@ -177,7 +186,7 @@ class PortfolioSidebar extends StatelessWidget {
       groupValue: selectedView,
       onChanged: onViewChanged,
       isEnabled: true,
-      isCompact: false,
+      isCompact: isCompact,
       isCondensed: false,
     );
   }
@@ -187,24 +196,26 @@ class PortfolioSidebar extends StatelessWidget {
     decoration: BoxDecoration(
       border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Trade System v1.0',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-            fontWeight: FontWeight.w500,
+    child: isCompact 
+        ? const SizedBox.shrink() 
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Trade System v1.0',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Professional trading analysis',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Professional trading analysis',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
-        ),
-      ],
-    ),
   );
 }

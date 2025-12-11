@@ -111,33 +111,46 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
     body: Row(
       children: [
         // Left sidebar for navigation
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          width: widget.isSidebarVisible ? 250 : 0,
-          curve: Curves.easeInOut,
-          child: OverflowBox(
-            minWidth: 250,
-            maxWidth: 250,
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 250,
-              decoration: BoxDecoration(
-                border: Border(right: BorderSide(color: Colors.grey.shade300)),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Determine if sidebar should be compact based on screen width
+            // Using 1200 as breakpoint for "minimized" view preference
+            final screenWidth = MediaQuery.of(context).size.width;
+            final isCompact = screenWidth < 1200;
+            final sidebarWidth = widget.isSidebarVisible 
+                ? (isCompact ? 72.0 : 250.0) 
+                : 0.0;
+            
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: sidebarWidth,
+              curve: Curves.easeInOut,
+              child: OverflowBox(
+                minWidth: isCompact ? 72 : 250,
+                maxWidth: isCompact ? 72 : 250,
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: isCompact ? 72 : 250,
+                  decoration: BoxDecoration(
+                    border: Border(right: BorderSide(color: Colors.grey.shade300)),
+                  ),
+                  child: PortfolioSidebar(
+                    selectedView: _selectedView,
+                    onViewChanged: (viewType) {
+                      setState(() {
+                        _selectedView = viewType;
+                      });
+                    },
+                    currentPortfolioId: _currentPortfolioId,
+                    currentPortfolioName: widget.selectedPortfolioName,
+                    portfolios: widget.portfolios ?? [],
+                    onPortfolioSelected: widget.onPortfolioChanged,
+                    isCompact: isCompact,
+                  ),
+                ),
               ),
-              child: PortfolioSidebar(
-                selectedView: _selectedView,
-                onViewChanged: (viewType) {
-                  setState(() {
-                    _selectedView = viewType;
-                  });
-                },
-                currentPortfolioId: _currentPortfolioId,
-                currentPortfolioName: widget.selectedPortfolioName,
-                portfolios: widget.portfolios ?? [],
-                onPortfolioSelected: widget.onPortfolioChanged,
-              ),
-            ),
-          ),
+            );
+          },
         ),
         // Main content area
         Expanded(child: _buildMainContent(context)),
