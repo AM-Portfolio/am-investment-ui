@@ -50,7 +50,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
+              color: const Color(0xFF6C5DD3).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.account_balance_wallet, color: Color(0xFF6C5DD3), size: 20),
@@ -77,12 +77,12 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
         color: const Color(0xFF2C2C3E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Colors.white.withOpacity(0.05),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -96,7 +96,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
+                  color: const Color(0xFF6C5DD3).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Icon(
@@ -142,9 +142,9 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
               height: 32,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(

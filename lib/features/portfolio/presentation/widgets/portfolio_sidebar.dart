@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/navigation/sidebar_nav_item.dart';
+import '../../../../shared/widgets/selectors/shared_portfolio_selector.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
-import 'shared_portfolio_selector.dart';
 import '../cubit/portfolio_state.dart';
 
 /// Portfolio sidebar widget with view selection
@@ -43,7 +43,7 @@ class PortfolioSidebar extends StatelessWidget {
         bodyColor: Colors.white,
         displayColor: Colors.white,
       ),
-      dividerColor: Colors.white.withValues(alpha: 0.1),
+      dividerColor: Colors.white.withOpacity(0.1),
     );
 
     return Theme(
@@ -112,14 +112,14 @@ class PortfolioSidebar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
+              color: const Color(0xFF6C5DD3).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.pie_chart, color: Color(0xFF6C5DD3), size: 18),
@@ -137,7 +137,7 @@ class PortfolioSidebar extends StatelessWidget {
                 Text(
                   'Asset Allocation',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: Colors.white.withOpacity(0.6),
                     fontSize: 11,
                   ),
                 ),
@@ -185,7 +185,7 @@ class PortfolioSidebar extends StatelessWidget {
   Widget _buildFooter(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+      border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

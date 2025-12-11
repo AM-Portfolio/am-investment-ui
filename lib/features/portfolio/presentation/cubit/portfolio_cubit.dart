@@ -1,9 +1,10 @@
 ﻿import 'package:flutter_bloc/flutter_bloc.dart';
-import 'portfolio_state.dart';
-import '../../internal/domain/entities/portfolio_summary.dart';
-import '../../internal/domain/entities/portfolio_holding.dart';
-import '../../internal/services/portfolio_service.dart';
+
 import '../../../../core/utils/logger.dart';
+import '../../internal/domain/entities/portfolio_holding.dart';
+import '../../internal/domain/entities/portfolio_summary.dart';
+import '../../internal/services/portfolio_service.dart';
+import 'portfolio_state.dart';
 
 class PortfolioCubit extends Cubit<PortfolioState> {
   PortfolioCubit(this._portfolioService) : super(PortfolioInitial());
