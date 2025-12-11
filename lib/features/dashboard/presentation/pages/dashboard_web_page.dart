@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -37,32 +38,8 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
-      body: Row(
+      body: Column(
         children: [
-          // Sidebar
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: widget.isSidebarVisible ? 280 : 0,
-            curve: Curves.easeInOut,
-            child: OverflowBox(
-              minWidth: 280,
-              maxWidth: 280,
-              alignment: Alignment.centerLeft,
-              child: DashboardSidebar(
-                currentView: _currentView,
-                onViewChanged: (view) {
-                  setState(() {
-                    _currentView = view;
-                  });
-                },
-              ),
-            ),
-          ),
-
-          // Main Content
-          Expanded(
-            child: Column(
-              children: [
                 // Top Bar
                 portfoliosAsync.when(
                   data: (portfolios) {
@@ -112,9 +89,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
+
     );
   }
 
@@ -129,13 +104,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
       child: Row(
         children: [
           // Toggle Sidebar Button
-          IconButton(
-            icon: Icon(widget.isSidebarVisible ? Icons.menu_open : Icons.menu),
-            color: Colors.grey[600],
-            onPressed: () {
-              widget.onToggleSidebar?.call();
-            },
-          ),
+
           const SizedBox(width: 8),
           // Breadcrumb / Title
           const Icon(Icons.chevron_left, color: Colors.grey),
@@ -220,79 +189,223 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
   }
 
   Widget _buildDashboardContent() {
+    if (_selectedPortfolioId == null) {
+      return const Center(child: Text('Select a portfolio to view dashboard'));
+    }
+
+    final userId = widget.userId;
+    final portfolioId = _selectedPortfolioId!;
+
+    // Watch Trade Summary
+    final tradeSummaryAsync = ref.watch(tradeSummaryStreamProvider((userId: userId, portfolioId: portfolioId)));
+    // Watch Trade Holdings for Charts
+    final tradeHoldingsAsync = ref.watch(tradeHoldingsStreamProvider((userId: userId, portfolioId: portfolioId)));
+
     return Column(
       children: [
         // Stats Row
-        const Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: 'Net P&L',
-                value: '\$135.00',
-                valueColor: Color(0xFF00B894),
-                icon: Icons.attach_money,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Trade Expectancy',
-                value: '\$27.00',
-                icon: Icons.analytics_outlined,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Profit Factor',
-                value: '1.90',
-                progress: 0.7,
-                isPositive: true,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Trade Win %',
-                value: '60.00%',
-                progress: 0.6,
-                isPositive: true,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Avg win/loss trade',
-                value: '1.27',
-                subtitle: '\$95 / -\$75',
-                progress: 0.6,
-                isPositive: true,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Improvement Rate',
-                value: '15%',
-                icon: Icons.trending_up,
-                valueColor: Color(0xFF00B894),
-                subtitle: '+2.5% vs last week',
-                isPositive: true,
-              ),
-            ),
-          ],
+        tradeSummaryAsync.when(
+          data: (summary) {
+            final metrics = summary.metrics;
+            // Calculate Avg Win/Loss
+            final avgWin = metrics.winningTrades > 0 
+                ? (metrics.totalProfit ?? 0) / metrics.winningTrades 
+                : 0.0;
+            final avgLoss = metrics.losingTrades > 0 
+                ? (metrics.totalLoss ?? 0) / metrics.losingTrades 
+                : 0.0;
+            final avgWinLossRatio = avgLoss != 0 ? (avgWin / avgLoss.abs()) : 0.0;
+
+            final winRate = (metrics.winRate ?? 0) * 100;
+            
+            return Row(
+              children: [
+                Expanded(
+                  child: StatCard(
+                    title: 'Net P&L',
+                    value: '\$${(metrics.netProfitLoss ?? 0).toStringAsFixed(2)}',
+                    valueColor: (metrics.netProfitLoss ?? 0) >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
+                    icon: Icons.attach_money,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatCard(
+                    title: 'Trade Expectancy',
+                     // Expectancy usually is $ per trade
+                    value: '\$${(metrics.expectancy ?? 0).toStringAsFixed(2)}',
+                    icon: Icons.analytics_outlined,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatCard(
+                    title: 'Profit Factor',
+                    value: (metrics.profitFactor ?? 0).toStringAsFixed(2),
+                    progress: (metrics.profitFactor ?? 0) / 3.0, // simplified max
+                    isPositive: (metrics.profitFactor ?? 0) >= 1,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatCard(
+                    title: 'Trade Win %',
+                    value: '${winRate.toStringAsFixed(2)}%',
+                    progress: metrics.winRate ?? 0,
+                    isPositive: winRate >= 50,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: StatCard(
+                    title: 'Avg win/loss trade',
+                    value: avgWinLossRatio.toStringAsFixed(2),
+                    subtitle: '\$${avgWin.toStringAsFixed(0)} / \$${avgLoss.toStringAsFixed(0)}',
+                    progress: avgWinLossRatio / 3.0, // simplified
+                    isPositive: avgWinLossRatio >= 1,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: StatCard(
+                    title: 'Improvement Rate',
+                    value: '15%', // Mocked: Implementation requires historical comparison
+                    icon: Icons.trending_up,
+                    valueColor: Color(0xFF00B894),
+                    subtitle: '+2.5% vs last week',
+                    isPositive: true,
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
+          error: (e, _) => SizedBox(height: 140, child: Center(child: Text('Error: $e'))),
         ),
+        
         const SizedBox(height: 24),
+        
         // Charts Row
-        const SizedBox(
+        SizedBox(
           height: 350,
           child: Row(
             children: [
-              Expanded(flex: 2, child: ZellaScoreChart()),
-              SizedBox(width: 16),
-              Expanded(flex: 3, child: NetCumulativePnLChart()),
-              SizedBox(width: 16),
-              Expanded(flex: 2, child: NetDailyPnLChart()),
+              Expanded(
+                flex: 2, 
+                child: tradeSummaryAsync.when(
+                  data: (summary) {
+                     final metrics = summary.metrics;
+                     // Simple Score Calculation Mock
+                     final score = ((metrics.winRate ?? 0) * 0.4 + 
+                                    ((metrics.profitFactor ?? 0) / 5) * 0.3 + 
+                                    ((metrics.netProfitLoss ?? 0) > 0 ? 0.3 : 0)) * 100;
+                     
+                     // Helper for avg win/loss
+                    final avgWin = metrics.winningTrades > 0 ? (metrics.totalProfit ?? 0) / metrics.winningTrades : 0.0;
+                    final avgLoss = metrics.losingTrades > 0 ? (metrics.totalLoss ?? 0) / metrics.losingTrades : 0.0;
+                    final ratio = avgLoss != 0 ? (avgWin / avgLoss.abs()) : 0.0;
+
+                     return ZellaScoreChart(
+                       score: score.clamp(0, 100),
+                       winRate: metrics.winRate ?? 0,
+                       profitFactor: metrics.profitFactor ?? 0,
+                       avgWinLoss: ratio,
+                     );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_,__) => const Center(child: Text('Error')),
+                )
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 3, 
+                child: tradeHoldingsAsync.when(
+                  data: (data) {
+                    final trades = data.holdings;
+                    if (trades.isEmpty) return NetCumulativePnLChart(spots: const [], dates: const []);
+
+                    // Calculate Daily P&L Map
+                    final dailyPnl = <String, double>{};
+                    // Sort trades by date
+                    final sortedTrades = [...trades]..sort((a, b) {
+                      final timeA = a.entryTimestamp ?? DateTime.now();
+                      final timeB = b.entryTimestamp ?? DateTime.now();
+                      return timeA.compareTo(timeB);
+                    });
+
+                    for (var trade in sortedTrades) {
+                      final date = trade.entryTimestamp; // Should use exit/close date for PnL technically
+                      if (date != null && trade.profitLoss != null) {
+                        final key = DateFormat('MM/dd/yy').format(date);
+                        dailyPnl[key] = (dailyPnl[key] ?? 0.0) + (trade.profitLoss!);
+                      }
+                    }
+                    
+                    // Ensure keys are sorted chronologically
+                    final sortedKeys = dailyPnl.keys.toList()..sort((a, b) {
+                        try {
+                          final dA = DateFormat('MM/dd/yy').parse(a);
+                          final dB = DateFormat('MM/dd/yy').parse(b);
+                          return dA.compareTo(dB);
+                        } catch(e) { return a.compareTo(b); }
+                    });
+
+                    final spots = <FlSpot>[];
+                    final dates = <String>[];
+                    double cumulative = 0;
+                    
+                    for (int i = 0; i < sortedKeys.length; i++) {
+                      final key = sortedKeys[i];
+                      cumulative += dailyPnl[key]!;
+                      spots.add(FlSpot(i.toDouble(), cumulative));
+                      dates.add(key);
+                    }
+
+                    return NetCumulativePnLChart(spots: spots, dates: dates);
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_,__) => const Center(child: Text('Error')),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2, 
+                child: tradeHoldingsAsync.when(
+                  data: (data) {
+                    // Similar logic for bar chart, simpler
+                     final trades = data.holdings;
+                     if (trades.isEmpty) return NetDailyPnLChart(dailyData: const []);
+
+                    final dailyPnl = <String, double>{};
+                    for (var trade in trades) {
+                      final date = trade.entryTimestamp; 
+                      if (date != null && trade.profitLoss != null) {
+                         // Sort check needed? Map isn't sorted
+                        final key = DateFormat('MM/dd/yy').format(date);
+                        dailyPnl[key] = (dailyPnl[key] ?? 0.0) + (trade.profitLoss!);
+                      }
+                    }
+                    // Sort by Date
+                    // Need parsing back to sort correctly
+                    final entries = dailyPnl.entries.toList();
+                    entries.sort((a, b) {
+                       try {
+                         final dA = DateFormat('MM/dd/yy').parse(a.key);
+                         final dB = DateFormat('MM/dd/yy').parse(b.key);
+                         return dA.compareTo(dB);
+                       } catch(e) { return 0; }
+                    });
+
+                    final chartData = entries.map((e) => (date: e.key, pnl: e.value)).toList();
+                    // Limit to last 7 days? Or take all? Let's take last 7 for visual clarity
+                    final limitedData = chartData.length > 7 ? chartData.sublist(chartData.length - 7) : chartData;
+
+                    return NetDailyPnLChart(dailyData: limitedData);
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (_,__) => const Center(child: Text('Error')),
+                ),
+              ),
             ],
           ),
         ),

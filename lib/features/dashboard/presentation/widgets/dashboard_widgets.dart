@@ -140,10 +140,27 @@ class StatCard extends StatelessWidget {
 
 // --- Zella Score Chart (Radar) ---
 class ZellaScoreChart extends StatelessWidget {
-  const ZellaScoreChart({super.key});
+  const ZellaScoreChart({
+    super.key,
+    required this.score,
+    required this.winRate,
+    required this.profitFactor,
+    required this.avgWinLoss,
+  });
+
+  final double score;
+  final double winRate;
+  final double profitFactor;
+  final double avgWinLoss;
 
   @override
   Widget build(BuildContext context) {
+    // Normalize values for radar chart (0-100 scale)
+    // specific normalization logic can be adjusted
+    final winRateNormalized = (winRate * 100).clamp(0.0, 100.0);
+    final profitFactorNormalized = (profitFactor * 20).clamp(0.0, 100.0); // Assuming PF 5.0 is 100
+    final avgWinLossNormalized = (avgWinLoss * 30).clamp(0.0, 100.0); // Assuming Ratio 3.33 is 100
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -200,9 +217,9 @@ class ZellaScoreChart extends StatelessWidget {
                       borderColor: const Color(0xFF6C5DD3),
                       entryRadius: 2,
                       dataEntries: [
-                        const RadarEntry(value: 80), // Win %
-                        const RadarEntry(value: 60), // Profit Factor
-                        const RadarEntry(value: 70), // Avg win/loss
+                        RadarEntry(value: winRateNormalized), // Win %
+                        RadarEntry(value: profitFactorNormalized), // Profit Factor
+                        RadarEntry(value: avgWinLossNormalized), // Avg win/loss
                       ],
                     ),
                   ],
@@ -230,15 +247,15 @@ class ZellaScoreChart extends StatelessWidget {
             const SizedBox(height: 10),
             Center(
               child: RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   children: [
-                    TextSpan(
+                    const TextSpan(
                       text: 'Your Zella Score: ',
                       style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     TextSpan(
-                      text: '60.95',
-                      style: TextStyle(
+                      text: score.toStringAsFixed(2),
+                      style: const TextStyle(
                         color: Color(0xFF00B894),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -257,10 +274,26 @@ class ZellaScoreChart extends StatelessWidget {
 
 // --- Net Cumulative P&L Chart (Area) ---
 class NetCumulativePnLChart extends StatelessWidget {
-  const NetCumulativePnLChart({super.key});
+  const NetCumulativePnLChart({
+    super.key,
+    required this.spots,
+    required this.dates,
+  });
+
+  final List<FlSpot> spots;
+  final List<String> dates;
 
   @override
   Widget build(BuildContext context) {
+    if (spots.isEmpty) {
+      return const Center(child: Text("No Data"));
+    }
+    
+    // Determine min and max Y for scaling
+    final minY = spots.map((e) => e.y).reduce((a, b) => a < b ? a : b);
+    final maxY = spots.map((e) => e.y).reduce((a, b) => a > b ? a : b);
+    final buffer = (maxY - minY).abs() * 0.1;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -294,7 +327,7 @@ class NetCumulativePnLChart extends StatelessWidget {
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: false,
-                    horizontalInterval: 20,
+                    horizontalInterval: (maxY - minY) / 5 == 0 ? 1 : (maxY - minY) / 5,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
                         color: Colors.grey.withValues(alpha: 0.1),
@@ -312,13 +345,14 @@ class NetCumulativePnLChart extends StatelessWidget {
                         reservedSize: 30,
                         interval: 1,
                         getTitlesWidget: (value, meta) {
-                          switch (value.toInt()) {
-                            case 0:
-                              return const Text('08/13/23', style: TextStyle(color: Colors.grey, fontSize: 10));
-                            case 1:
-                              return const Text('08/14/23', style: TextStyle(color: Colors.grey, fontSize: 10));
-                            case 2:
-                              return const Text('08/15/23', style: TextStyle(color: Colors.grey, fontSize: 10));
+                          final index = value.toInt();
+                          if (index >= 0 && index < dates.length) {
+                             // Only show labels for some points to avoid crowding if needed
+                             if (dates.length > 5 && index % (dates.length ~/ 3) != 0) return const SizedBox();
+                             return Padding(
+                               padding: const EdgeInsets.only(top: 8.0),
+                               child: Text(dates[index], style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                             );
                           }
                           return const Text('');
                         },
@@ -327,7 +361,7 @@ class NetCumulativePnLChart extends StatelessWidget {
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        interval: 20,
+                        interval: (maxY - minY) / 4 == 0 ? 1 : (maxY - minY) / 4,
                         reservedSize: 40,
                         getTitlesWidget: (value, meta) {
                           return Text(
@@ -340,16 +374,12 @@ class NetCumulativePnLChart extends StatelessWidget {
                   ),
                   borderData: FlBorderData(show: false),
                   minX: 0,
-                  maxX: 2,
-                  minY: 0,
-                  maxY: 140,
+                  maxX: (spots.length - 1).toDouble(),
+                  minY: minY - buffer,
+                  maxY: maxY + buffer,
                   lineBarsData: [
                     LineChartBarData(
-                      spots: const [
-                        FlSpot(0, 0),
-                        FlSpot(1, 130),
-                        FlSpot(2, 135),
-                      ],
+                      spots: spots,
                       isCurved: true,
                       color: const Color(0xFF6C5DD3),
                       barWidth: 2,
@@ -380,10 +410,24 @@ class NetCumulativePnLChart extends StatelessWidget {
 
 // --- Net Daily P&L Chart (Bar) ---
 class NetDailyPnLChart extends StatelessWidget {
-  const NetDailyPnLChart({super.key});
+  const NetDailyPnLChart({
+    super.key,
+    required this.dailyData,
+  });
+
+  final List<({String date, double pnl})> dailyData;
 
   @override
   Widget build(BuildContext context) {
+    if (dailyData.isEmpty) {
+      return const Center(child: Text("No Data"));
+    }
+
+    // Determine Y range
+    final minY = dailyData.map((e) => e.pnl).reduce((a, b) => a < b ? a : b);
+    final maxY = dailyData.map((e) => e.pnl).reduce((a, b) => a > b ? a : b);
+    final absMax = (maxY.abs() > minY.abs() ? maxY.abs() : minY.abs()) * 1.2;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -415,7 +459,8 @@ class NetDailyPnLChart extends StatelessWidget {
               child: BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
-                  maxY: 140,
+                  maxY: absMax,
+                  minY: -absMax, // To support negative bars if needed, but here we center 0 usually or just use positive/negative
                   barTouchData: BarTouchData(
                     enabled: false,
                     touchTooltipData: BarTouchTooltipData(
@@ -430,8 +475,8 @@ class NetDailyPnLChart extends StatelessWidget {
                       ) {
                         return BarTooltipItem(
                           rod.toY.round().toString(),
-                          const TextStyle(
-                            color: Colors.cyan,
+                          TextStyle(
+                            color: rod.toY >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
                             fontWeight: FontWeight.bold,
                           ),
                         );
@@ -445,13 +490,12 @@ class NetDailyPnLChart extends StatelessWidget {
                         showTitles: true,
                         reservedSize: 30,
                         getTitlesWidget: (value, meta) {
-                          switch (value.toInt()) {
-                            case 0:
-                              return const Text('08/14/23', style: TextStyle(color: Colors.grey, fontSize: 10));
-                            case 1:
-                              return const Text('08/15/23', style: TextStyle(color: Colors.grey, fontSize: 10));
-                          }
-                          return const Text('');
+                           final index = value.toInt();
+                           if (index >= 0 && index < dailyData.length) {
+                             if (dailyData.length > 5 && index % (dailyData.length ~/ 3) != 0) return const SizedBox();
+                             return Text(dailyData[index].date, style: const TextStyle(color: Colors.grey, fontSize: 10));
+                           }
+                           return const Text('');
                         },
                       ),
                     ),
@@ -459,8 +503,9 @@ class NetDailyPnLChart extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
-                        interval: 20,
+                        interval: absMax / 2 == 0 ? 10 : absMax / 2,
                         getTitlesWidget: (value, meta) {
+                          if (value == 0) return const Text('0', style: TextStyle(color: Colors.grey, fontSize: 10));
                           return Text(
                             '\$${value.toInt()}',
                             style: const TextStyle(color: Colors.grey, fontSize: 10),
@@ -474,7 +519,7 @@ class NetDailyPnLChart extends StatelessWidget {
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: false,
-                    horizontalInterval: 20,
+                    horizontalInterval: absMax / 2 == 0 ? 10 : absMax / 2,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
                         color: Colors.grey.withValues(alpha: 0.1),
@@ -483,30 +528,21 @@ class NetDailyPnLChart extends StatelessWidget {
                     },
                   ),
                   borderData: FlBorderData(show: false),
-                  barGroups: [
-                    BarChartGroupData(
-                      x: 0,
+                  barGroups: dailyData.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final data = entry.value;
+                    return BarChartGroupData(
+                      x: index,
                       barRods: [
                         BarChartRodData(
-                          toY: 130,
-                          color: const Color(0xFF00B894),
+                          toY: data.pnl,
+                          color: data.pnl >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
                           width: 16,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ],
-                    ),
-                    BarChartGroupData(
-                      x: 1,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 5,
-                          color: const Color(0xFF00B894),
-                          width: 16,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ),
             ),
