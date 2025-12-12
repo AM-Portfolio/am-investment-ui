@@ -12,6 +12,7 @@ import '../journal/pages/journal_web_page.dart';
 import '../models/trade_portfolio_view_model.dart';
 import '../trades/pages/trade_list_web_page.dart';
 import '../metrics/trade_metrics_page.dart';
+import '../report/pages/trade_report_page.dart';
 import 'widgets/trade_sidebar.dart';
 import '../../../market_analysis/presentation/widgets/trading_view_chart_widget.dart';
 import '../../../market_analysis/providers/market_analysis_providers.dart';
@@ -19,7 +20,7 @@ import '../pages/trade_market_page.dart';
 import '../pages/trade_unified_view_page.dart';
 
 /// Trade view types for navigation
-enum TradeViewType { portfolios, holdings, calendar, analysis, trades, journal, marketAnalysis, unified }
+enum TradeViewType { portfolios, holdings, calendar, analysis, report, trades, journal, marketAnalysis, unified }
 
 /// Web-specific trade screen implementation with sidebar navigation
 class TradeWebScreen extends ConsumerStatefulWidget {
@@ -265,6 +266,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         title = 'Trade Dashboard';
         showTitle = false; // Custom header in page
         break;
+      case TradeViewType.report:
+        title = 'Trade Report';
+        break;
     }
 
     return AppBar(
@@ -364,6 +368,18 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         case TradeViewType.unified:
                           // Unified view handles its own refresh internally
                           break;
+                        case TradeViewType.report:
+                          if (_currentPortfolioId != null) {
+                            // Invalidate provider if we had one for report, or just let page rebuild
+                            // Since report uses a cubit load call, re-selecting the view or a specialized provider check might be needed
+                            // For now, simpler to just let the user re-apply filter or we can expose a detailed refresh later
+                             ref.read(tradeReportCubitProvider).loadReport(MetricsFilterRequest(
+                                portfolioIds: [_currentPortfolioId!],
+                                startDate: DateTime(DateTime.now().year, 1, 1), // Default or current config
+                                endDate: DateTime.now(),
+                             ));
+                          }
+                          break;
                       }
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -441,6 +457,16 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
 
       case TradeViewType.marketAnalysis:
         return const TradeMarketPage();
+
+      case TradeViewType.report:
+        if (_currentPortfolioId == null) {
+          return _buildSelectPortfolioPrompt();
+        }
+        return TradeReportPage(
+          key: ValueKey('report_$_currentPortfolioId'),
+          userId: widget.userId,
+          portfolioId: _currentPortfolioId!,
+        );
 
       case TradeViewType.unified:
         return TradeUnifiedViewPage(userId: widget.userId);
@@ -569,6 +595,8 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         return Icons.dashboard_outlined;
       case TradeViewType.calendar:
         return Icons.calendar_today_outlined;
+      case TradeViewType.report:
+        return Icons.summarize_outlined;
       case TradeViewType.analysis:
         return Icons.analytics_outlined;
       default:
@@ -582,6 +610,8 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         return 'Choose a portfolio to access the comprehensive holdings dashboard with detailed analytics and summary views';
       case TradeViewType.calendar:
         return 'Choose a portfolio to explore the interactive calendar analytics with trade event insights';
+      case TradeViewType.report:
+        return 'Choose a portfolio to generate and view comprehensive trade reports';
       case TradeViewType.analysis:
         return 'Choose a portfolio to view detailed performance metrics, risk analysis, and trade distribution charts';
       default:
