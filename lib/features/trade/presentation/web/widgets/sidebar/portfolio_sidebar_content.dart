@@ -166,6 +166,18 @@ class PortfolioSidebarContent extends StatelessWidget {
       ),
 
       SidebarNavItem<TradeViewType>(
+        icon: Icons.summarize,
+        title: 'Report',
+        subtitle: 'Performance report',
+        value: TradeViewType.report,
+        groupValue: selectedView,
+        onChanged: onViewChanged,
+        isEnabled: true,
+        isCompact: isCompact,
+        isCondensed: isCondensed,
+      ),
+
+      SidebarNavItem<TradeViewType>(
         icon: Icons.show_chart,
         title: 'Market Analysis',
         subtitle: 'TradingView Charts',

@@ -18,7 +18,7 @@ class TradeReportRemoteDataSource {
     };
 
     return _client.get(
-      '/performance/summary',
+      'api/v1/performance/summary',
       queryParams: queryParams,
       parser: (data) => TradePerformanceSummaryDto.fromJson(data),
     );
@@ -32,7 +32,7 @@ class TradeReportRemoteDataSource {
     };
 
     return _client.get(
-      '/performance/daily',
+      'api/v1/performance/daily',
       queryParams: queryParams,
       // API returns a List, parser handles dynamic data
       parser: (data) => (data as List).map((e) => DailyPerformanceDto.fromJson(e)).toList(),
@@ -46,7 +46,7 @@ class TradeReportRemoteDataSource {
     };
 
     return _client.get(
-      '/performance/timing',
+      'api/v1/performance/timing',
       queryParams: queryParams,
       parser: (data) => TimingAnalysisDto.fromJson(data),
     );

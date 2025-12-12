@@ -270,6 +270,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         break;
       case TradeViewType.report:
         title = 'Trade Report';
+        showTitle = false; // Custom header in page
         break;
     }
 
