@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,14 +86,14 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
             const SizedBox(height: 24),
 
             // Main Content Area
-            Builder(
-              builder: (context) {
-                if (cubit.state is TradeReportLoading) {
+            BlocBuilder<TradeReportCubit, TradeReportState>(
+              bloc: cubit,
+              builder: (context, state) {
+                if (state is TradeReportLoading) {
                   return const SizedBox(height: 400, child: Center(child: CircularProgressIndicator()));
-                } else if (cubit.state is TradeReportError) {
-                  return Center(child: Text('Error: ${(cubit.state as TradeReportError).message}', style: const TextStyle(color: Colors.red)));
-                } else if (cubit.state is TradeReportLoaded) {
-                  final state = cubit.state as TradeReportLoaded;
+                } else if (state is TradeReportError) {
+                  return Center(child: Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)));
+                } else if (state is TradeReportLoaded) {
                   return _buildPerformanceTab(state);
                 }
                 return const SizedBox.shrink();
@@ -364,4 +365,3 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
     );
   }
 }
-
