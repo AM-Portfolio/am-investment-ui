@@ -61,7 +61,31 @@ class HourlyPerformanceDto {
     required this.metrics,
   });
 
-  factory HourlyPerformanceDto.fromJson(Map<String, dynamic> json) => _$HourlyPerformanceDtoFromJson(json);
+  factory HourlyPerformanceDto.fromJson(Map<String, dynamic> json) {
+    final patchedJson = Map<String, dynamic>.from(json);
+    final numericFields = ['totalProfitLoss', 'tradeCount', 'winCount', 'lossCount', 'winRate', 'averageWinAmount', 'averageLossAmount', 'averageHoldingTime'];
+    
+    // Patch Infinity
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+    // Patch Nulls
+    for (var field in numericFields) {
+        if (patchedJson[field] == null) {
+            patchedJson[field] = 0;
+        }
+    }
+    return _$HourlyPerformanceDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$HourlyPerformanceDtoToJson(this);
 }
 
@@ -93,7 +117,31 @@ class DayOfWeekPerformanceDto {
     required this.metrics,
   });
 
-  factory DayOfWeekPerformanceDto.fromJson(Map<String, dynamic> json) => _$DayOfWeekPerformanceDtoFromJson(json);
+  factory DayOfWeekPerformanceDto.fromJson(Map<String, dynamic> json) {
+    final patchedJson = Map<String, dynamic>.from(json);
+    final numericFields = ['dayOrder', 'tradeCount', 'winCount', 'lossCount', 'winRate', 'totalProfitLoss', 'averageWinAmount', 'averageLossAmount', 'averageHoldingTime'];
+
+    // Patch Infinity
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+     // Patch Nulls
+    for (var field in numericFields) {
+        if (patchedJson[field] == null) {
+            patchedJson[field] = 0;
+        }
+    }
+    return _$DayOfWeekPerformanceDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$DayOfWeekPerformanceDtoToJson(this);
 }
 
@@ -125,7 +173,31 @@ class MonthlyPerformanceDto {
     required this.metrics,
   });
 
-  factory MonthlyPerformanceDto.fromJson(Map<String, dynamic> json) => _$MonthlyPerformanceDtoFromJson(json);
+  factory MonthlyPerformanceDto.fromJson(Map<String, dynamic> json) {
+    final patchedJson = Map<String, dynamic>.from(json);
+    final numericFields = ['monthOrder', 'tradeCount', 'winCount', 'lossCount', 'winRate', 'totalProfitLoss', 'averageWinAmount', 'averageLossAmount', 'averageHoldingTime'];
+
+    // Patch Infinity
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+     // Patch Nulls
+    for (var field in numericFields) {
+        if (patchedJson[field] == null) {
+            patchedJson[field] = 0;
+        }
+    }
+    return _$MonthlyPerformanceDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$MonthlyPerformanceDtoToJson(this);
 }
 
@@ -155,7 +227,31 @@ class YearlyPerformanceDto {
     required this.metrics,
   });
 
-  factory YearlyPerformanceDto.fromJson(Map<String, dynamic> json) => _$YearlyPerformanceDtoFromJson(json);
+  factory YearlyPerformanceDto.fromJson(Map<String, dynamic> json) {
+    final patchedJson = Map<String, dynamic>.from(json);
+    final numericFields = ['year', 'tradeCount', 'winCount', 'lossCount', 'winRate', 'totalProfitLoss', 'averageWinAmount', 'averageLossAmount', 'averageHoldingTime'];
+
+    // Patch Infinity
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+    // Patch Nulls
+    for (var field in numericFields) {
+        if (patchedJson[field] == null) {
+            patchedJson[field] = 0;
+        }
+    }
+    return _$YearlyPerformanceDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$YearlyPerformanceDtoToJson(this);
 }
 
@@ -179,6 +275,30 @@ class WeeklyPerformanceDto {
     required this.metrics,
   });
 
-  factory WeeklyPerformanceDto.fromJson(Map<String, dynamic> json) => _$WeeklyPerformanceDtoFromJson(json);
+  factory WeeklyPerformanceDto.fromJson(Map<String, dynamic> json) {
+    final patchedJson = Map<String, dynamic>.from(json);
+    final numericFields = ['tradeCount', 'winCount', 'lossCount', 'winRate', 'totalProfitLoss'];
+
+    // Patch Infinity
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+    // Patch Nulls
+    for (var field in numericFields) {
+        if (patchedJson[field] == null) {
+            patchedJson[field] = 0;
+        }
+    }
+    return _$WeeklyPerformanceDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$WeeklyPerformanceDtoToJson(this);
 }

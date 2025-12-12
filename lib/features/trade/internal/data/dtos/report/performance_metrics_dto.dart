@@ -73,7 +73,23 @@ class PerformanceMetricsDto {
     this.winningDays,
   });
 
-  factory PerformanceMetricsDto.fromJson(Map<String, dynamic> json) => _$PerformanceMetricsDtoFromJson(json);
+  factory PerformanceMetricsDto.fromJson(Map<String, dynamic> json) {
+    // Handle "Infinity" strings from API
+    final patchedJson = Map<String, dynamic>.from(json);
+    for (final key in patchedJson.keys) {
+      final value = patchedJson[key];
+      if (value is String) {
+        if (value == 'Infinity' || value == '+Infinity') {
+            patchedJson[key] = double.infinity;
+        } else if (value == '-Infinity') {
+            patchedJson[key] = double.negativeInfinity;
+        } else if (value == 'NaN') {
+            patchedJson[key] = double.nan;
+        }
+      }
+    }
+    return _$PerformanceMetricsDtoFromJson(patchedJson);
+  }
   Map<String, dynamic> toJson() => _$PerformanceMetricsDtoToJson(this);
 
   ReportPerformanceMetrics toEntity() => ReportPerformanceMetrics(
