@@ -139,7 +139,7 @@ class ApiClient {
     Map<String, String>? headers,
     Map<String, dynamic>? queryParams,
   }) async {
-    late Uri uri; // Declare uri outside try block for catch block access
+    Uri? uri;
     final stopwatch = Stopwatch()..start();
     try {
       uri = _buildUri(endpoint, queryParams: queryParams);
@@ -172,7 +172,7 @@ class ApiClient {
     } catch (e) {
       stopwatch.stop();
       AppLogger.error(
-        'GET request failed - Endpoint: $endpoint, Full URI: ${uri.toString()}',
+        'GET request failed - Endpoint: $endpoint, Full URI: ${uri?.toString() ?? 'Failed to build URI'}',
         tag: 'ApiClient',
         error: e,
         stackTrace: StackTrace.current,

@@ -48,7 +48,7 @@ class TradeReportRemoteDataSource {
   Future<List<DailyPerformanceDto>> getDaily(MetricsFilterRequestDto filter) async {
     final queryParams = {
       if (filter.portfolioIds != null && filter.portfolioIds!.isNotEmpty) 'portfolioId': filter.portfolioIds!.first,
-      'limit': 1000, 
+      'limit': '1000', 
     };
 
     final fullUri = _buildUri(_tradeConfig.baseUrl, 'api/v1/performance/daily');
