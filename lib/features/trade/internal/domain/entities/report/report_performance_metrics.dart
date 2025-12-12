@@ -1,10 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'performance_metrics.freezed.dart';
+part 'report_performance_metrics.freezed.dart';
 
 @freezed
-class PerformanceMetrics with _$PerformanceMetrics {
-  const factory PerformanceMetrics({
+abstract class ReportPerformanceMetrics with _$ReportPerformanceMetrics {
+  const factory ReportPerformanceMetrics({
     double? avgHoldTime,
     double? longestTradeDuration,
     double? maxTradingWeeksDuration,
@@ -37,5 +37,5 @@ class PerformanceMetrics with _$PerformanceMetrics {
     double? shortsWinPercentage,
     double? winPercentage,
     int? winningDays,
-  }) = _PerformanceMetrics;
+  }) = _ReportPerformanceMetrics;
 }

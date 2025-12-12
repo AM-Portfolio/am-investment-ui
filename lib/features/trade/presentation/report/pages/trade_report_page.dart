@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../internal/domain/entities/metrics/metrics_filter_request.dart';
-import '../../internal/domain/entities/metrics_filter_config.dart';
-import '../../providers/trade_report_providers.dart';
-import '../metrics/widgets/glossy_card.dart';
-import '../metrics/widgets/trade_metrics_filter_panel.dart';
-import 'cubit/trade_report_cubit.dart';
-import 'cubit/trade_report_state.dart';
+import '../../../internal/domain/entities/metrics/metrics_filter_request.dart';
+import '../../../internal/domain/entities/metrics_filter_config.dart';
+import '../../../internal/domain/entities/filter_criteria.dart';
+import '../../../providers/trade_report_providers.dart';
+import '../../metrics/widgets/glossy_card.dart';
+import '../../metrics/widgets/trade_metrics_filter_panel.dart';
+import '../cubit/trade_report_cubit.dart';
+import '../cubit/trade_report_state.dart';
 
 class TradeReportPage extends ConsumerStatefulWidget {
   final String userId;

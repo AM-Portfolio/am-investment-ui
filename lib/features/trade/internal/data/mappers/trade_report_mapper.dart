@@ -1,5 +1,5 @@
 import '../../domain/entities/report/daily_performance.dart';
-import '../../domain/entities/report/performance_metrics.dart';
+import '../../domain/entities/report/report_performance_metrics.dart';
 import '../../domain/entities/report/timing_analysis.dart';
 import '../../domain/entities/report/trade_performance_summary.dart';
 import '../dtos/report/daily_performance_dto.dart';
@@ -8,8 +8,8 @@ import '../dtos/report/timing_analysis_dto.dart';
 import '../dtos/report/trade_performance_summary_dto.dart';
 
 class TradeReportMapper {
-  static PerformanceMetrics toPerformanceMetrics(PerformanceMetricsDto dto) {
-    return PerformanceMetrics(
+  static ReportPerformanceMetrics toPerformanceMetrics(PerformanceMetricsDto dto) {
+    return ReportPerformanceMetrics(
       avgHoldTime: dto.avgHoldTime?.toDouble(),
       longestTradeDuration: dto.longestTradeDuration?.toDouble(),
       maxTradingWeeksDuration: dto.maxTradingWeeksDuration?.toDouble(),

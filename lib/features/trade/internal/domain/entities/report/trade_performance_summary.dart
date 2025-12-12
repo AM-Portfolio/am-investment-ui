@@ -1,10 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'performance_metrics.dart';
+
+import 'report_performance_metrics.dart';
 
 part 'trade_performance_summary.freezed.dart';
 
 @freezed
-class TradePerformanceSummary with _$TradePerformanceSummary {
+abstract class TradePerformanceSummary with _$TradePerformanceSummary {
   const factory TradePerformanceSummary({
     required int totalTrades,
     required int winningTrades,
@@ -21,6 +22,6 @@ class TradePerformanceSummary with _$TradePerformanceSummary {
     required double profitFactor,
     required double largestWin,
     required double largestLoss,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _TradePerformanceSummary;
 }

@@ -1,10 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'performance_metrics.dart';
+import 'report_performance_metrics.dart';
 
 part 'timing_analysis.freezed.dart';
 
 @freezed
-class TimingAnalysis with _$TimingAnalysis {
+abstract class TimingAnalysis with _$TimingAnalysis {
   const factory TimingAnalysis({
     required List<HourlyPerformance> hourlyPerformance,
     required List<DayOfWeekPerformance> dayOfWeekPerformance,
@@ -21,7 +21,7 @@ class TimingAnalysis with _$TimingAnalysis {
 }
 
 @freezed
-class HourlyPerformance with _$HourlyPerformance {
+abstract class HourlyPerformance with _$HourlyPerformance {
   const factory HourlyPerformance({
     required int hour,
     required int tradeCount,
@@ -32,12 +32,12 @@ class HourlyPerformance with _$HourlyPerformance {
     required double averageWinAmount,
     required double averageLossAmount,
     required double averageHoldingTime,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _HourlyPerformance;
 }
 
 @freezed
-class DayOfWeekPerformance with _$DayOfWeekPerformance {
+abstract class DayOfWeekPerformance with _$DayOfWeekPerformance {
   const factory DayOfWeekPerformance({
     required String dayOfWeek,
     required int dayOrder,
@@ -49,12 +49,12 @@ class DayOfWeekPerformance with _$DayOfWeekPerformance {
     required double averageWinAmount,
     required double averageLossAmount,
     required double averageHoldingTime,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _DayOfWeekPerformance;
 }
 
 @freezed
-class MonthlyPerformance with _$MonthlyPerformance {
+abstract class MonthlyPerformance with _$MonthlyPerformance {
   const factory MonthlyPerformance({
     required String month,
     required int monthOrder,
@@ -66,12 +66,12 @@ class MonthlyPerformance with _$MonthlyPerformance {
     required double averageWinAmount,
     required double averageLossAmount,
     required double averageHoldingTime,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _MonthlyPerformance;
 }
 
 @freezed
-class YearlyPerformance with _$YearlyPerformance {
+abstract class YearlyPerformance with _$YearlyPerformance {
   const factory YearlyPerformance({
     required int year,
     required int tradeCount,
@@ -82,12 +82,12 @@ class YearlyPerformance with _$YearlyPerformance {
     required double averageWinAmount,
     required double averageLossAmount,
     required double averageHoldingTime,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _YearlyPerformance;
 }
 
 @freezed
-class WeeklyPerformance with _$WeeklyPerformance {
+abstract class WeeklyPerformance with _$WeeklyPerformance {
   const factory WeeklyPerformance({
     required String weekId,
     required int tradeCount,
@@ -95,6 +95,6 @@ class WeeklyPerformance with _$WeeklyPerformance {
     required int lossCount,
     required double winRate,
     required double totalProfitLoss,
-    required PerformanceMetrics metrics,
+    required ReportPerformanceMetrics metrics,
   }) = _WeeklyPerformance;
 }

@@ -1,4 +1,5 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
+import '../../../domain/entities/report/report_performance_metrics.dart';
 
 part 'performance_metrics_dto.g.dart';
 
@@ -74,4 +75,39 @@ class PerformanceMetricsDto {
 
   factory PerformanceMetricsDto.fromJson(Map<String, dynamic> json) => _$PerformanceMetricsDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PerformanceMetricsDtoToJson(this);
+
+  ReportPerformanceMetrics toEntity() => ReportPerformanceMetrics(
+    avgHoldTime: avgHoldTime?.toDouble() ?? 0.0,
+    longestTradeDuration: longestTradeDuration?.toDouble() ?? 0.0,
+    maxTradingWeeksDuration: maxTradingWeeksDuration?.toDouble() ?? 0.0,
+    avgTradingWeeksDuration: avgTradingWeeksDuration?.toDouble() ?? 0.0,
+    avgGrossTradePnL: avgGrossTradePnL?.toDouble() ?? 0.0,
+    avgLoss: avgLoss?.toDouble() ?? 0.0,
+    avgMaxTradeLoss: avgMaxTradeLoss?.toDouble() ?? 0.0,
+    avgMaxTradeProfit: avgMaxTradeProfit?.toDouble() ?? 0.0,
+    avgTradeWinLossRatio: avgTradeWinLossRatio?.toDouble() ?? 0.0,
+    avgWeeklyGrossPnL: avgWeeklyGrossPnL?.toDouble() ?? 0.0,
+    avgWeeklyWinLossRatio: avgWeeklyWinLossRatio?.toDouble() ?? 0.0,
+    avgWin: avgWin?.toDouble() ?? 0.0,
+    grossPnL: grossPnL?.toDouble() ?? 0.0,
+    largestLosingTrade: largestLosingTrade?.toDouble() ?? 0.0,
+    largestProfitableTrade: largestProfitableTrade?.toDouble() ?? 0.0,
+    profitFactor: profitFactor?.toDouble() ?? 0.0,
+    avgWeeklyGrossDrawdown: avgWeeklyGrossDrawdown?.toDouble() ?? 0.0,
+    avgPlannedRMultiple: avgPlannedRMultiple?.toDouble() ?? 0.0,
+    avgRealizedRMultiple: avgRealizedRMultiple?.toDouble() ?? 0.0,
+    breakevenDays: breakevenDays ?? 0,
+    breakevenTrades: breakevenTrades ?? 0,
+    losingDays: losingDays ?? 0,
+    maxWeeklyGrossDrawdown: maxWeeklyGrossDrawdown?.toDouble() ?? 0.0,
+    avgWeeklyWinPercentage: avgWeeklyWinPercentage?.toDouble() ?? 0.0,
+    longsWinPercentage: longsWinPercentage?.toDouble() ?? 0.0,
+    maxConsecutiveLosingWeeks: maxConsecutiveLosingWeeks ?? 0,
+    maxConsecutiveLosses: maxConsecutiveLosses ?? 0,
+    maxConsecutiveWinningWeeks: maxConsecutiveWinningWeeks ?? 0,
+    maxConsecutiveWins: maxConsecutiveWins ?? 0,
+    shortsWinPercentage: shortsWinPercentage?.toDouble() ?? 0.0,
+    winPercentage: winPercentage?.toDouble() ?? 0.0,
+    winningDays: winningDays ?? 0,
+  );
 }

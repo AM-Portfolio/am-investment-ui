@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../../../core/utils/json_utils.dart'; // Assuming this exists or standard JsonKey usage
+
 import 'performance_metrics_dto.dart';
 
 part 'trade_performance_summary_dto.g.dart';

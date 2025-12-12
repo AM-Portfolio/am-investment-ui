@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../internal/data/datasources/trade_report_remote_datasource.dart';
-import '../../internal/data/repositories/trade_report_repository_impl.dart';
-import '../../internal/domain/repositories/trade_report_repository.dart';
-import '../../internal/domain/usecases/get_trade_performance_summary_usecase.dart';
-import '../../internal/domain/usecases/get_daily_performance_usecase.dart';
-import '../../internal/domain/usecases/get_timing_analysis_usecase.dart';
+import '../internal/data/datasources/trade_report_remote_datasource.dart';
+import '../internal/data/repositories/trade_report_repository_impl.dart';
+import '../internal/domain/repositories/trade_report_repository.dart';
+import '../internal/domain/usecases/get_trade_performance_summary_usecase.dart';
+import '../internal/domain/usecases/get_daily_performance_usecase.dart';
+import '../internal/domain/usecases/get_timing_analysis_usecase.dart';
 import '../presentation/report/cubit/trade_report_cubit.dart';
 import '../../../../core/network/api_client.dart';
 

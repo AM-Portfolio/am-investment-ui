@@ -1,4 +1,4 @@
-import '../../../../core/network/api_client.dart';
+import '../../../../../core/network/api_client.dart';
 import '../dtos/metrics/metrics_dtos.dart';
 import '../dtos/report/trade_performance_summary_dto.dart';
 import '../dtos/report/daily_performance_dto.dart';
@@ -13,15 +13,15 @@ class TradeReportRemoteDataSource {
   Future<TradePerformanceSummaryDto> getSummary(MetricsFilterRequestDto filter) async {
     final queryParams = {
       if (filter.portfolioIds != null && filter.portfolioIds!.isNotEmpty) 'portfolioId': filter.portfolioIds!.first,
-      'startDate': filter.startDate, 
-      'endDate': filter.endDate, 
+      'startDate': filter.dateRange.startDate.toIso8601String(), 
+      'endDate': filter.dateRange.endDate.toIso8601String(), 
     };
 
-    final response = await _client.get(
+    return _client.get(
       '/performance/summary',
-      queryParameters: queryParams,
+      queryParams: queryParams,
+      parser: (data) => TradePerformanceSummaryDto.fromJson(data),
     );
-    return TradePerformanceSummaryDto.fromJson(response.data);
   }
 
   /// Get daily performance breakdown
@@ -31,12 +31,12 @@ class TradeReportRemoteDataSource {
       'limit': 1000, 
     };
 
-    final response = await _client.get(
+    return _client.get(
       '/performance/daily',
-      queryParameters: queryParams,
+      queryParams: queryParams,
+      // API returns a List, parser handles dynamic data
+      parser: (data) => (data as List).map((e) => DailyPerformanceDto.fromJson(e)).toList(),
     );
-     // API returns a List
-    return (response.data as List).map((e) => DailyPerformanceDto.fromJson(e)).toList();
   }
 
   /// Get timing analysis
@@ -45,10 +45,10 @@ class TradeReportRemoteDataSource {
       if (filter.portfolioIds != null && filter.portfolioIds!.isNotEmpty) 'portfolioId': filter.portfolioIds!.first,
     };
 
-    final response = await _client.get(
+    return _client.get(
       '/performance/timing',
-      queryParameters: queryParams,
+      queryParams: queryParams,
+      parser: (data) => TimingAnalysisDto.fromJson(data),
     );
-    return TimingAnalysisDto.fromJson(response.data);
   }
 }

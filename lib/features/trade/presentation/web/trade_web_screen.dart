@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../../authentication/presentation/cubit/auth_cubit.dart';
+import '../../internal/domain/entities/metrics/metrics_filter_request.dart';
 import '../../providers/trade_internal_providers.dart';
+import '../../providers/trade_report_providers.dart';
 import '../calendar/pages/trade_calendar_analytics_web_page.dart';
 import '../components/templates/trade_portfolio_discovery_template.dart';
 import '../holdings/pages/trade_holdings_dashboard_web_page.dart';

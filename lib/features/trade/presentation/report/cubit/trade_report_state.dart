@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import '../../internal/domain/entities/report/daily_performance.dart';
-import '../../internal/domain/entities/report/timing_analysis.dart';
-import '../../internal/domain/entities/report/trade_performance_summary.dart';
+import '../../../internal/domain/entities/report/daily_performance.dart';
+import '../../../internal/domain/entities/report/timing_analysis.dart';
+import '../../../internal/domain/entities/report/trade_performance_summary.dart';
 
 abstract class TradeReportState extends Equatable {
   const TradeReportState();
