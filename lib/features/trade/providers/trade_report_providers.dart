@@ -8,8 +8,11 @@ import '../internal/domain/usecases/get_timing_analysis_usecase.dart';
 import '../presentation/report/cubit/trade_report_cubit.dart';
 import '../../../../core/network/api_client.dart';
 
+import '../../../../../config/config_service.dart';
+
 final tradeReportRemoteDataSourceProvider = Provider<TradeReportRemoteDataSource>((ref) {
-  return TradeReportRemoteDataSource(ApiClient()); 
+  final apiConfig = ConfigService.config.api;
+  return TradeReportRemoteDataSource(ApiClient(), apiConfig.trade); 
 });
 
 final tradeReportRepositoryProvider = Provider<TradeReportRepository>((ref) {
