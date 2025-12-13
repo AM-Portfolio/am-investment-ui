@@ -164,8 +164,10 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                        Icon(widget.isBarChart ? Icons.bar_chart : Icons.show_chart, size: 20, color: theme.colorScheme.primary),
                        const SizedBox(width: 8),
                        // Metric Multi-Select
-                       PopupMenuButton<ChartMetric>(
-                         tooltip: 'Select Metrics',
+                       // Metric Multi-Select Button
+                       InkWell(
+                         onTap: () => _showMetricsSelectionDialog(context),
+                         borderRadius: BorderRadius.circular(8),
                          child: Container(
                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                            decoration: BoxDecoration(
@@ -180,43 +182,6 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                                ]
                            ),
                          ),
-                         itemBuilder: (context) => ChartMetric.values.map((metric) {
-                             final isSelected = _selectedMetrics.contains(metric);
-                             return PopupMenuItem<ChartMetric>(
-                                 value: metric,
-                                 child: StatefulBuilder(
-                                     builder: (context, setInnerState) {
-                                         return Row(
-                                             children: [
-                                                 Checkbox(
-                                                     value: isSelected,
-                                                     activeColor: _metricColors[metric],
-                                                     onChanged: (val) {
-                                                         // We can't easily update parent state from here without closing menu usually,
-                                                         // but let's try just returning the value.
-                                                         // Actually PopupMenuItem logic closes on tap.
-                                                         // Better: Dont use Checkbox onChanged if we want to TAP the row.
-                                                         // Just display state.
-                                                     }
-                                                 ),
-                                                 Text(metric.label),
-                                             ]
-                                         );
-                                     }
-                                 ),
-                             );
-                         }).toList(),
-                         onSelected: (metric) {
-                             setState(() {
-                                 if (_selectedMetrics.contains(metric)) {
-                                     if (_selectedMetrics.length > 1) {
-                                         _selectedMetrics.remove(metric);
-                                     }
-                                 } else {
-                                     _selectedMetrics.add(metric);
-                                 }
-                             });
-                         },
                        ),
                    ]
                  ),
@@ -249,16 +214,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
             const SizedBox(height: 10),
             
             // Legend
-            Wrap(
-                spacing: 16,
-                children: _selectedMetrics.map((m) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                        Container(width: 12, height: 12, color: _metricColors[m], margin: const EdgeInsets.only(right: 6)),
-                        Text(m.label, style: const TextStyle(fontSize: 12)),
-                    ]
-                )).toList(),
-            ),
+            const SizedBox(height: 20),
             const SizedBox(height: 20),
             
             // Chart
@@ -279,12 +235,17 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                                         // Use first metric's data for labels. Assuming sync X-axis.
                                         if (index >= 0 && index < firstMetricData.length) {
                                             return Padding(
-                                              padding: const EdgeInsets.only(top: 4),
-                                              child: Text(firstMetricData[index].xLabel, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                              padding: const EdgeInsets.only(top: 8),
+                                              child: Text(
+                                                firstMetricData[index].xLabel, 
+                                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), 
+                                                textAlign: TextAlign.center
+                                              ),
                                             );
                                         }
                                         return const SizedBox.shrink();
-                                    }
+                                    },
+                                    reservedSize: 60, // Increased for multiline year labels
                                 )
                             )
                          ),
@@ -320,6 +281,26 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                          ),
                       ),
                     ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Legend
+             Wrap(
+                spacing: 24,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: _selectedMetrics.map((m) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        Container(
+                          width: 12, 
+                          height: 12, 
+                          decoration: BoxDecoration(color: _metricColors[m], shape: BoxShape.circle),
+                          margin: const EdgeInsets.only(right: 8)
+                        ),
+                        Text(m.label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                    ]
+                )).toList(),
             ),
           ],
         ),
@@ -395,5 +376,51 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                for(var m in metricsList) sumPf += (m.profitFactor ?? 0);
                return sumPf / metricsList.length;
         }
+  }
+
+
+  void _showMetricsSelectionDialog(BuildContext context) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+              title: const Text('Select Metrics'),
+              content: SingleChildScrollView(
+                  child: StatefulBuilder(
+                      builder: (context, setState) { 
+                          return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: ChartMetric.values.map((metric) {
+                                  final isSelected = _selectedMetrics.contains(metric);
+                                  return CheckboxListTile(
+                                      title: Text(metric.label),
+                                      value: isSelected,
+                                      activeColor: _metricColors[metric],
+                                      onChanged: (bool? value) {
+                                          setState(() {
+                                              if (value == true) {
+                                                  _selectedMetrics.add(metric);
+                                              } else {
+                                                  if (_selectedMetrics.length > 1) { 
+                                                      _selectedMetrics.remove(metric);
+                                                  }
+                                              }
+                                          });
+                                          // Update main widget state
+                                          this.setState(() {}); 
+                                      },
+                                  );
+                              }).toList(),
+                          );
+                      }
+                  ),
+              ),
+              actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Done'),
+                  )
+              ],
+          )
+      );
   }
 }

@@ -85,7 +85,7 @@ class ChartAggregator {
            final items = grouped[key] ?? [];
            
            final aggValue = _aggregateMetric(items, metric);
-           final label = DateFormat('MMM\n\'yy').format(current);
+           final label = DateFormat("MMM ''yy").format(current);
            
            result.add(ChartDataPoint(
                xLabel: label,
