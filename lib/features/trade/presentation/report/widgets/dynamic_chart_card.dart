@@ -11,15 +11,15 @@ class DynamicChartCard extends StatefulWidget {
   final String title;
   final TimingAnalysis timingAnalysis;
   final List<DailyPerformance> dailyPerformance;
-  final ChartMetric initialMetric;
+  final List<ChartMetric> initialMetrics;
   final ChartTimeFrame initialTimeFrame;
-  final bool isBarChart;
+  final bool isBarChart; // Keep flag, but likely force Line for multi-metric
 
   const DynamicChartCard({
     required this.title,
     required this.timingAnalysis,
     required this.dailyPerformance,
-    this.initialMetric = ChartMetric.winRate,
+    this.initialMetrics = const [ChartMetric.winRate],
     this.initialTimeFrame = ChartTimeFrame.dailyLinear,
     this.isBarChart = false,
     super.key,
@@ -30,13 +30,25 @@ class DynamicChartCard extends StatefulWidget {
 }
 
 class _DynamicChartCardState extends State<DynamicChartCard> {
-  late ChartMetric _selectedMetric;
+  late Set<ChartMetric> _selectedMetrics;
   late ChartTimeFrame _selectedTimeFrame;
+  
+  // Define colors for metrics
+  final Map<ChartMetric, Color> _metricColors = {
+      ChartMetric.winRate: const Color(0xFF6C5DD3), // Purple
+      ChartMetric.tradeCount: const Color(0xFFFFA500), // Orange
+      ChartMetric.avgWin: const Color(0xFF00FF00), // Green
+      ChartMetric.avgLoss: const Color(0xFFFF0000), // Red
+      ChartMetric.grossPnL: const Color(0xFF00BFFF), // Blue
+      ChartMetric.holdTime: const Color(0xFFFF69B4), // Pink
+      ChartMetric.profitFactor: const Color(0xFF8B4513), // Brown
+  };
 
   @override
   void initState() {
     super.initState();
-    _selectedMetric = widget.initialMetric;
+    _selectedMetrics = widget.initialMetrics.toSet();
+    if (_selectedMetrics.isEmpty) _selectedMetrics = {ChartMetric.winRate};
     _selectedTimeFrame = widget.initialTimeFrame;
   }
   
@@ -50,85 +62,78 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
       }
   }
 
-  List<ChartDataPoint> _getData() {
+  Map<ChartMetric, List<ChartDataPoint>> _getAllData() {
+      final Map<ChartMetric, List<ChartDataPoint>> data = {};
+      for (var metric in _selectedMetrics) {
+          data[metric] = _getDataForMetric(metric);
+      }
+      return data;
+  }
+
+  List<ChartDataPoint> _getDataForMetric(ChartMetric metric) {
     List<ChartDataPoint> points = [];
     
     switch (_selectedTimeFrame) {
       // Linear Time Series
       case ChartTimeFrame.dailyLinear:
-        points = ChartAggregator.accumulateDaily(widget.dailyPerformance, _selectedMetric);
+        points = ChartAggregator.accumulateDaily(widget.dailyPerformance, metric);
         break;
       case ChartTimeFrame.weeklyLinear:
-        points = ChartAggregator.accumulateWeekly(widget.dailyPerformance, _selectedMetric);
+        points = ChartAggregator.accumulateWeekly(widget.dailyPerformance, metric);
         break;
       case ChartTimeFrame.monthlyLinear:
-        points = ChartAggregator.accumulateMonthly(widget.dailyPerformance, _selectedMetric);
+        points = ChartAggregator.accumulateMonthly(widget.dailyPerformance, metric);
         break;
 
       // Seasonality
-      // Seasonality
       case ChartTimeFrame.hourSeason:
-        // Aggregate by hour (0-23)
         final Map<int, List<HourlyPerformance>> grouped = {};
         for (var item in widget.timingAnalysis.hourlyPerformance) {
             grouped.putIfAbsent(item.hour, () => []).add(item);
         }
-        
-        // Sort 0-23
         final sortedKeys = grouped.keys.toList()..sort();
-        
         for (var hour in sortedKeys) {
             final items = grouped[hour]!;
-            final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), _selectedMetric);
+            final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), metric);
             String label = '$hour';
             points.add(ChartDataPoint(xLabel: label, yValue: aggValue, xIndex: hour));
         }
         break;
 
       case ChartTimeFrame.daySeason:
-        // Aggregate by dayOrder (1-7)
         final Map<int, List<DayOfWeekPerformance>> grouped = {};
         for(var item in widget.timingAnalysis.dayOfWeekPerformance) {
             grouped.putIfAbsent(item.dayOrder, () => []).add(item);
         }
-        
         final sortedKeys = grouped.keys.toList()..sort();
-        
         for(var dayOrder in sortedKeys) {
             final items = grouped[dayOrder]!;
-            final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), _selectedMetric);
-            // Use first item's day name (e.g. "Monday")
+            final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), metric);
             final label = items.first.dayOfWeek.substring(0, 3);
             points.add(ChartDataPoint(xLabel: label, yValue: aggValue, xIndex: dayOrder));
         }
         break;
         
       case ChartTimeFrame.monthSeason:
-         // Aggregate by monthOrder(1-12)
          final Map<int, List<MonthlyPerformance>> grouped = {};
          for (var item in widget.timingAnalysis.monthlyPerformance) {
              grouped.putIfAbsent(item.monthOrder, () => []).add(item);
          }
-         
          final sortedKeys = grouped.keys.toList()..sort();
-         
          for(var monthOrder in sortedKeys) {
              final items = grouped[monthOrder]!;
-             final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), _selectedMetric);
+             final aggValue = _aggregateSeasonality(items.map((e) => e.metrics).toList(), items.map((e) => e.tradeCount).toList(), metric);
              final label = items.first.month.substring(0, 3);
              points.add(ChartDataPoint(xLabel: label, yValue: aggValue, xIndex: monthOrder));
          }
          break;
          
       case ChartTimeFrame.yearSeason:
-        // Yearly is implicitly linear? Or could be multiple portfolios?
-        // Assuming year is unique enough for now, but sorting helps.
-        // Actually, if we have duplicate years it's weird.
         final data = List.of(widget.timingAnalysis.yearlyPerformance);
         data.sort((a,b) => a.year.compareTo(b.year));
         for(var i=0; i<data.length; i++) {
             final item = data[i];
-            final val = _selectedMetric.getValue(item.metrics, tradeCount: item.tradeCount);
+            final val = metric.getValue(item.metrics, tradeCount: item.tradeCount);
             points.add(ChartDataPoint(xLabel: '${item.year}', yValue: val, xIndex: i));
         }
         break;
@@ -139,8 +144,12 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dataPoints = _getData();
-
+    final allData = _getAllData();
+    final firstMetricData = allData.values.isNotEmpty ? allData.values.first : <ChartDataPoint>[];
+    
+    // Determine labels from the first available dataset (assuming shared X access)
+    // If multiple timeframes alignment is an issue, we assume standardized X-axis by aggregator.
+    
     return GlossyCard(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -154,20 +163,60 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                    children: [
                        Icon(widget.isBarChart ? Icons.bar_chart : Icons.show_chart, size: 20, color: theme.colorScheme.primary),
                        const SizedBox(width: 8),
-                       // Metric Dropdown
-                       DropdownButton<ChartMetric>(
-                         value: _selectedMetric,
-                         underline: const SizedBox(),
-                         icon: const Icon(Icons.arrow_drop_down, size: 16),
-                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                         items: ChartMetric.values.map((e) => DropdownMenuItem(
-                           value: e,
-                           child: Text(e.label, style: TextStyle(color: theme.colorScheme.onSurface)),
-                         )).toList(),
-                         onChanged: (val) {
-                           if(val != null) setState(() => _selectedMetric = val);
+                       // Metric Multi-Select
+                       PopupMenuButton<ChartMetric>(
+                         tooltip: 'Select Metrics',
+                         child: Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                           decoration: BoxDecoration(
+                               border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                               borderRadius: BorderRadius.circular(8),
+                           ),
+                           child: Row(
+                               children: [
+                                   Text('${_selectedMetrics.length} Metrics', style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)),
+                                   const SizedBox(width: 8),
+                                   Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface),
+                               ]
+                           ),
+                         ),
+                         itemBuilder: (context) => ChartMetric.values.map((metric) {
+                             final isSelected = _selectedMetrics.contains(metric);
+                             return PopupMenuItem<ChartMetric>(
+                                 value: metric,
+                                 child: StatefulBuilder(
+                                     builder: (context, setInnerState) {
+                                         return Row(
+                                             children: [
+                                                 Checkbox(
+                                                     value: isSelected,
+                                                     activeColor: _metricColors[metric],
+                                                     onChanged: (val) {
+                                                         // We can't easily update parent state from here without closing menu usually,
+                                                         // but let's try just returning the value.
+                                                         // Actually PopupMenuItem logic closes on tap.
+                                                         // Better: Dont use Checkbox onChanged if we want to TAP the row.
+                                                         // Just display state.
+                                                     }
+                                                 ),
+                                                 Text(metric.label),
+                                             ]
+                                         );
+                                     }
+                                 ),
+                             );
+                         }).toList(),
+                         onSelected: (metric) {
+                             setState(() {
+                                 if (_selectedMetrics.contains(metric)) {
+                                     if (_selectedMetrics.length > 1) {
+                                         _selectedMetrics.remove(metric);
+                                     }
+                                 } else {
+                                     _selectedMetrics.add(metric);
+                                 }
+                             });
                          },
-                         dropdownColor: theme.colorScheme.surface,
                        ),
                    ]
                  ),
@@ -197,53 +246,26 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                  ),
               ],
             ),
+            const SizedBox(height: 10),
+            
+            // Legend
+            Wrap(
+                spacing: 16,
+                children: _selectedMetrics.map((m) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        Container(width: 12, height: 12, color: _metricColors[m], margin: const EdgeInsets.only(right: 6)),
+                        Text(m.label, style: const TextStyle(fontSize: 12)),
+                    ]
+                )).toList(),
+            ),
             const SizedBox(height: 20),
             
             // Chart
             Expanded(
-              child: dataPoints.isEmpty 
+              child: allData.isEmpty || allData.values.every((l) => l.isEmpty)
                ? const Center(child: Text("No data available"))
-               : widget.isBarChart 
-                  ? BarChart(
-                      BarChartData(
-                        gridData: const FlGridData(show: true, drawVerticalLine: false),
-                        titlesData: FlTitlesData(
-                            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text(val.toInt().toString(), style: const TextStyle(fontSize: 10)))),
-                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (val, meta) {
-                                        final index = val.toInt();
-                                        if (index >= 0 && index < dataPoints.length) {
-                                            // Show label if enough space or simply show periodically
-                                            // Simple logic: Show all for small datasets, skip for large?
-                                            // For now showing all.
-                                            return Padding(
-                                              padding: const EdgeInsets.only(top: 4),
-                                              child: Text(dataPoints[index].xLabel, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
-                                            );
-                                        }
-                                        return const SizedBox.shrink();
-                                    }
-                                )
-                            )
-                        ),
-                        borderData: FlBorderData(show: false),
-                        barGroups: dataPoints.map((p) => BarChartGroupData(
-                            x: p.xIndex,
-                            barRods: [
-                                BarChartRodData(
-                                    toY: p.yValue,
-                                    color: p.yValue < 0 ? Colors.red.withOpacity(0.7) : const Color(0xFF6C5DD3),
-                                    width: 12, 
-                                    borderRadius: BorderRadius.circular(4)
-                                )
-                            ]
-                        )).toList(),
-                      ),
-                    )
-                  : LineChart(
+               : LineChart(
                       LineChartData(
                          gridData: const FlGridData(show: true, drawVerticalLine: false),
                          titlesData: FlTitlesData(
@@ -254,10 +276,11 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                                     showTitles: true,
                                     getTitlesWidget: (val, meta) {
                                         final index = val.toInt();
-                                        if (index >= 0 && index < dataPoints.length) {
+                                        // Use first metric's data for labels. Assuming sync X-axis.
+                                        if (index >= 0 && index < firstMetricData.length) {
                                             return Padding(
                                               padding: const EdgeInsets.only(top: 4),
-                                              child: Text(dataPoints[index].xLabel, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
+                                              child: Text(firstMetricData[index].xLabel, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
                                             );
                                         }
                                         return const SizedBox.shrink();
@@ -266,16 +289,35 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                             )
                          ),
                          borderData: FlBorderData(show: false),
-                         lineBarsData: [
-                            LineChartBarData(
-                                spots: dataPoints.map((p) => FlSpot(p.xIndex.toDouble(), p.yValue)).toList(),
+                         lineBarsData: _selectedMetrics.map((metric) {
+                            final points = allData[metric] ?? [];
+                            return LineChartBarData(
+                                spots: points.map((p) => FlSpot(p.xIndex.toDouble(), p.yValue)).toList(),
                                 isCurved: true,
-                                color: const Color(0xFF6C5DD3),
+                                color: _metricColors[metric] ?? theme.colorScheme.primary,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(show: true, color: const Color(0xFF6C5DD3).withOpacity(0.1)),
-                            ),
-                         ],
+                                belowBarData: BarAreaData(show: true, color: (_metricColors[metric] ?? theme.colorScheme.primary).withOpacity(0.1)),
+                            );
+                         }).toList(),
+                         
+                         // Tooltip logic for multiple lines?
+                         lineTouchData: LineTouchData(
+                             touchTooltipData: LineTouchTooltipData(
+                                 getTooltipItems: (touchedSpots) {
+                                     return touchedSpots.map((spot) {
+                                         // Find which bar/metric this spot belongs to
+                                         // FlSpot doesn't carry ref to BarData.
+                                         // But touchedSpots has barIndex.
+                                         final metric = _selectedMetrics.elementAt(spot.barIndex);
+                                         return LineTooltipItem(
+                                             '${metric.label}: ${spot.y.toStringAsFixed(1)}',
+                                             TextStyle(color: _metricColors[metric], fontWeight: FontWeight.bold),
+                                         );
+                                     }).toList();
+                                 }
+                             )
+                         ),
                       ),
                     ),
             ),

@@ -31,14 +31,12 @@ class TradeReportPage extends ConsumerStatefulWidget {
   ConsumerState<TradeReportPage> createState() => _TradeReportPageState();
 }
 
-class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _TradeReportPageState extends ConsumerState<TradeReportPage> {
   MetricsFilterConfig _currentConfig = MetricsFilterConfig.empty();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
     _currentConfig = MetricsFilterConfig(
       dateRange: DateRangeFilter(
         startDate: DateTime(DateTime.now().year, 1, 1),
@@ -52,7 +50,6 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -114,9 +111,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
             _buildHeader(context),
             const SizedBox(height: 24),
 
-            // Tab Bar
-            _buildTabBar(context),
-            const SizedBox(height: 24),
+
 
             // Main Content Area
             BlocBuilder<TradeReportCubit, TradeReportState>(
@@ -185,8 +180,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
                   ),
                 ),
             ),
-             const SizedBox(width: 12),
-            _buildFilterChip(context, 'My Trades', Icons.person_outline),
+
           ],
         ).animate().fadeIn().slideX(begin: 0.2),
       ],
@@ -203,32 +197,14 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
       children: [
         // Charts Row
         SizedBox(
-          height: 380, 
-          child: Row(
-            children: [
-              Expanded(
-                child: DynamicChartCard(
-                  key: ValueKey('chart1_$autoTimeFrame'), // Force rebuild on duration change
-                  title: 'Chart 1',
-                  timingAnalysis: state.timingAnalysis,
-                  dailyPerformance: state.dailyPerformance,
-                  initialMetric: ChartMetric.winRate,
-                  initialTimeFrame: autoTimeFrame,
-                )
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: DynamicChartCard(
-                  key: ValueKey('chart2_$autoTimeFrame'),
-                  title: 'Chart 2',
-                  timingAnalysis: state.timingAnalysis,
-                  dailyPerformance: state.dailyPerformance,
-                  initialMetric: ChartMetric.holdTime,
-                  initialTimeFrame: autoTimeFrame,
-                  isBarChart: true,
-                )
-              ),
-            ],
+          height: 450, 
+          child: DynamicChartCard(
+            key: ValueKey('chart_unified_$autoTimeFrame'),
+            title: 'Performance Analysis',
+            timingAnalysis: state.timingAnalysis,
+            dailyPerformance: state.dailyPerformance,
+            initialMetrics: const [ChartMetric.winRate],
+            initialTimeFrame: autoTimeFrame,
           ),
         ),
         // ... (Key Stats Row)
@@ -273,46 +249,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> with SingleTi
     );
   }
 
-  Widget _buildTabBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.2))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              labelColor: const Color(0xFF6C5DD3), // Primary color
-              unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              indicatorColor: const Color(0xFF6C5DD3),
-              indicatorWeight: 3,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              tabs: const [
-                Text('Performance'),
-                Text('Overview'),
-                Text('Reports'),
-                Text('Compare'),
-                Text('Calendar'),
-              ],
-            ),
-          ),
-           ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.download, size: 16),
-            label: const Text('Export PDF'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
-              elevation: 0,
-              side: BorderSide(color: Theme.of(context).dividerColor),
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(delay: 100.ms);
-  }
+
 
 
 
