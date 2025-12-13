@@ -409,6 +409,29 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                   titlesData: _buildTitlesData(firstMetricData),
                   borderData: FlBorderData(show: false),
                   barGroups: _buildBarGroups(allData),
+                  barTouchData: BarTouchData(
+                      touchTooltipData: BarTouchTooltipData(
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                              final metric = _selectedMetrics.elementAt(rodIndex);
+                              return BarTooltipItem(
+                                  '${metric.label}\n',
+                                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                  children: [
+                                      TextSpan(
+                                          text: rod.toY.toStringAsFixed(1),
+                                          style: TextStyle(color: _metricColors[metric], fontWeight: FontWeight.w500, fontSize: 12),
+                                      )
+                                  ]
+                              );
+                          },
+                          // Force dark background for contrast
+                          getTooltipColor: (_) => Colors.blueGrey.shade900.withOpacity(0.9),
+                          tooltipPadding: const EdgeInsets.all(8),
+                          tooltipMargin: 8,
+                          fitInsideHorizontally: true,
+                          fitInsideVertically: true, 
+                      )
+                  ),
               )
           );
       }
@@ -432,8 +455,34 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       ),
                   );
               }).toList(),
-          )
-      );
+              // Tooltip logic for multiple lines
+              // Tooltip logic for multiple lines
+              lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                          return touchedSpots.map((spot) {
+                              final metric = _selectedMetrics.elementAt(spot.barIndex);
+                              return LineTooltipItem(
+                                  '${metric.label}: ',
+                                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                  children: [
+                                      TextSpan(
+                                          text: spot.y.toStringAsFixed(1),
+                                          style: TextStyle(color: _metricColors[metric], fontWeight: FontWeight.bold, fontSize: 12),
+                                      )
+                                  ]
+                              );
+                          }).toList();
+                      },
+                      // Force dark background
+                      getTooltipColor: (_) => Colors.blueGrey.shade900.withOpacity(0.9),
+                      tooltipPadding: const EdgeInsets.all(8),
+                      fitInsideHorizontally: true,
+                      fitInsideVertically: true,
+                  )
+              ),
+            )
+       );
   }
 
   FlTitlesData _buildTitlesData(List<ChartDataPoint> firstMetricData) {
