@@ -8,7 +8,10 @@ import '../../../internal/domain/entities/report/daily_performance.dart';
 import '../utils/chart_aggregator.dart';
 import '../../../internal/domain/entities/report/report_performance_metrics.dart';
 
-class DynamicChartCard extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../shared/core/config/user_currency_config.dart';
+
+class DynamicChartCard extends ConsumerStatefulWidget {
   final String title;
   final TimingAnalysis timingAnalysis;
   final List<DailyPerformance> dailyPerformance;
@@ -27,10 +30,10 @@ class DynamicChartCard extends StatefulWidget {
   });
 
   @override
-  State<DynamicChartCard> createState() => _DynamicChartCardState();
+  ConsumerState<DynamicChartCard> createState() => _DynamicChartCardState();
 }
 
-class _DynamicChartCardState extends State<DynamicChartCard> {
+class _DynamicChartCardState extends ConsumerState<DynamicChartCard> {
   late Set<ChartMetric> _selectedMetrics;
   late ChartTimeFrame _selectedTimeFrame;
   late ChartType _selectedChartType;
@@ -610,6 +613,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       touchTooltipData: BarTouchTooltipData(
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                               final metric = _selectedMetrics.elementAt(rodIndex);
+                              final currency = ref.watch(userCurrencyProvider);
                               String formattedValue = rod.toY.toStringAsFixed(1);
                               
                               if (metric.label.toLowerCase().contains('pnl') || 
@@ -618,7 +622,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                                   metric.label.toLowerCase().contains('profit') ||
                                   metric.label.toLowerCase().contains('drawdown')) {
                                   if (!metric.label.toLowerCase().contains('rate') && !metric.label.toLowerCase().contains('count')) {
-                                      formattedValue = '\$${rod.toY.toStringAsFixed(2)}';
+                                      formattedValue = '${currency.symbol}${rod.toY.toStringAsFixed(2)}';
                                   }
                               }
                               if (metric.label.toLowerCase().contains('rate') || metric.label.toLowerCase().contains('percentage')) {
@@ -687,6 +691,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       getTooltipItems: (touchedSpots) {
                           return touchedSpots.map((spot) {
                               final metric = _selectedMetrics.elementAt(spot.barIndex);
+                              final currency = ref.watch(userCurrencyProvider);
                               String formattedValue = spot.y.toStringAsFixed(1);
                               
                               // Add formatting based on metric
@@ -697,7 +702,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                                   metric.label.toLowerCase().contains('drawdown')) {
                                   // Money
                                   if (!metric.label.toLowerCase().contains('rate') && !metric.label.toLowerCase().contains('count')) {
-                                      formattedValue = '\$${spot.y.toStringAsFixed(2)}';
+                                      formattedValue = '${currency.symbol}${spot.y.toStringAsFixed(2)}';
                                   }
                               }
                               if (metric.label.toLowerCase().contains('rate') || metric.label.toLowerCase().contains('percentage')) {

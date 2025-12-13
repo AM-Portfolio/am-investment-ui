@@ -15,7 +15,8 @@ import '../models/chart_config.dart';
 import '../cubit/trade_report_cubit.dart';
 import '../cubit/trade_report_cubit.dart';
 import '../cubit/trade_report_state.dart';
-import '../../../../../../shared/core/ui/components/trade/compact_date_range_picker.dart';
+import '../../../../../shared/core/config/user_currency_config.dart';
+import '../../../../../shared/core/ui/components/trade/compact_date_range_picker.dart';
 
 class TradeReportPage extends ConsumerStatefulWidget {
   final String userId;
@@ -99,6 +100,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
   @override
   Widget build(BuildContext context) {
     final cubit = ref.watch(tradeReportCubitProvider);
+    final currency = ref.watch(userCurrencyProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent, 
@@ -138,51 +140,31 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // ... (Title Text)
-        Text(
-          'Reports',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
-        ).animate().fadeIn().slideX(begin: -0.2),
-
-        // Filters Row
-        Row(
-          children: [
-             // ... (Currency Chip)
-            _buildFilterChip(context, 'USD', Icons.attach_money),
-            const SizedBox(width: 12),
-
-             // Date Range Picker Display
-            GestureDetector(
-                onTap: () => _showDatePicker(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        // Date Range Picker Display
+        GestureDetector(
+            onTap: () => _showDatePicker(context),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${dateFormat.format(_currentConfig.dateRange?.startDate ?? DateTime.now())} - ${dateFormat.format(_currentConfig.dateRange?.endDate ?? DateTime.now())}',
+                    style: theme.textTheme.bodyMedium,
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calendar_today, size: 16, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${dateFormat.format(_currentConfig.dateRange?.startDate ?? DateTime.now())} - ${dateFormat.format(_currentConfig.dateRange?.endDate ?? DateTime.now())}',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(Icons.arrow_drop_down, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.5)),
-                    ],
-                  ),
-                ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.arrow_drop_down, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                ],
+              ),
             ),
-
-          ],
-        ).animate().fadeIn().slideX(begin: 0.2),
+        ).animate().fadeIn().slideX(begin: -0.2),
       ],
     );
   }
@@ -190,6 +172,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
   // ... (keep _buildFilterChip and _buildTabBar)
 
   Widget _buildPerformanceTab(TradeReportLoaded state) {
+    final currency = ref.watch(userCurrencyProvider);
     // Determine default timeframe based on date range
     final autoTimeFrame = _getAutoTimeFrame();
 
@@ -282,28 +265,28 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
                 // --- Values ---
                 _buildCompactMetric(
                   'Avg Win', 
-                  '\$${state.summary.averageWinAmount.toStringAsFixed(2)}', 
+                  '${currency.symbol}${state.summary.averageWinAmount.toStringAsFixed(2)}', 
                   Icons.arrow_upward,
                   Colors.green,
                    width: itemWidth
                 ),
                 _buildCompactMetric(
                   'Avg Loss', 
-                  '\$${state.summary.averageLossAmount.toStringAsFixed(2)}', 
+                  '${currency.symbol}${state.summary.averageLossAmount.toStringAsFixed(2)}', 
                   Icons.arrow_downward,
                   Colors.red,
                    width: itemWidth
                 ),
                  _buildCompactMetric(
                   'Largest Win', 
-                  '\$${state.summary.largestWin.toStringAsFixed(2)}', 
+                  '${currency.symbol}${state.summary.largestWin.toStringAsFixed(2)}', 
                   Icons.emoji_events,
                   Colors.amber,
                    width: itemWidth
                 ),
                 _buildCompactMetric(
                   'Largest Loss', 
-                  '\$${state.summary.largestLoss.toStringAsFixed(2)}', 
+                  '${currency.symbol}${state.summary.largestLoss.toStringAsFixed(2)}', 
                   Icons.warning,
                   Colors.deepOrange,
                    width: itemWidth
@@ -312,7 +295,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
                 // --- Stats ---
                  _buildCompactMetric(
                   'Max Drawdown', 
-                  '\$${state.summary.maxDrawdown.toStringAsFixed(2)}', 
+                  '${currency.symbol}${state.summary.maxDrawdown.toStringAsFixed(2)}', 
                   Icons.waterfall_chart,
                   Colors.red.shade700,
                    width: itemWidth
