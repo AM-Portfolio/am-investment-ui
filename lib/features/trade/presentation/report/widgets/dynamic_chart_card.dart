@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../metrics/widgets/glossy_card.dart';
 import '../models/chart_config.dart';
@@ -33,6 +34,9 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
   late Set<ChartMetric> _selectedMetrics;
   late ChartTimeFrame _selectedTimeFrame;
   late ChartType _selectedChartType;
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _dropdownOverlay;
+  final GlobalKey _metricsButtonKey = GlobalKey();
   
   // Define colors for metrics
   final Map<ChartMetric, Color> _metricColors = {
@@ -182,25 +186,28 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                            )
                        ),
                        const SizedBox(width: 12),
-                       // Metric Multi-Select
                        // Metric Multi-Select Button
-                       InkWell(
-                         onTap: () => _showMetricsSelectionDialog(context),
-                         borderRadius: BorderRadius.circular(8),
-                         child: Container(
-                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                           decoration: BoxDecoration(
-                               border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
-                               borderRadius: BorderRadius.circular(8),
+                       CompositedTransformTarget(
+                           link: _layerLink,
+                           child: InkWell(
+                             key: _metricsButtonKey,
+                             onTap: _toggleMetricsDropdown,
+                             borderRadius: BorderRadius.circular(8),
+                             child: Container(
+                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                               decoration: BoxDecoration(
+                                   border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                                   borderRadius: BorderRadius.circular(8),
+                               ),
+                               child: Row(
+                                   children: [
+                                       Text('${_selectedMetrics.length} Metrics', style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)),
+                                       const SizedBox(width: 8),
+                                       Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface),
+                                   ]
+                               ),
+                             ),
                            ),
-                           child: Row(
-                               children: [
-                                   Text('${_selectedMetrics.length} Metrics', style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)),
-                                   const SizedBox(width: 8),
-                                   Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface),
-                               ]
-                           ),
-                         ),
                        ),
                    ]
                  ),
@@ -339,51 +346,241 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
   }
 
 
-  void _showMetricsSelectionDialog(BuildContext context) {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-              title: const Text('Select Metrics'),
-              content: SingleChildScrollView(
-                  child: StatefulBuilder(
-                      builder: (context, setState) { 
-                          return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: ChartMetric.values
-                                  .where((m) => m != ChartMetric.profitFactor) // Remove Profit Factor
-                                  .map((metric) {
-                                  final isSelected = _selectedMetrics.contains(metric);
-                                  return CheckboxListTile(
-                                      title: Text(metric.label),
-                                      value: isSelected,
-                                      activeColor: _metricColors[metric],
-                                      onChanged: (bool? value) {
-                                          setState(() {
-                                              if (value == true) {
-                                                  _selectedMetrics.add(metric);
-                                              } else {
-                                                  if (_selectedMetrics.length > 1) { 
-                                                      _selectedMetrics.remove(metric);
-                                                  }
-                                              }
-                                          });
-                                          // Update main widget state
-                                          this.setState(() {}); 
-                                      },
-                                  );
-                              }).toList(),
-                          );
-                      }
-                  ),
-              ),
-              actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Done'),
-                  )
-              ],
-          )
+  void _toggleMetricsDropdown() {
+      if (_dropdownOverlay != null) {
+          _closeDropdown();
+      } else {
+          _showDropdown();
+      }
+  }
+
+  void _closeDropdown() {
+      _dropdownOverlay?.remove();
+      _dropdownOverlay = null;
+  }
+
+  void _showDropdown() {
+      // Define metric groups
+      final Map<String, List<ChartMetric>> groups = {
+          'Activity': [ChartMetric.tradeCount, ChartMetric.winRate],
+          'PnL Performance': [ChartMetric.grossPnL, ChartMetric.avgWin, ChartMetric.avgLoss],
+          'Efficiency': [ChartMetric.holdTime],
+      };
+
+      _dropdownOverlay = OverlayEntry(
+          builder: (context) {
+              return Stack(
+                  children: [
+                      // Barrier to close on click outside
+                      Positioned.fill(
+                          child: GestureDetector(
+                              onTap: _closeDropdown,
+                              behavior: HitTestBehavior.translucent,
+                              child: Container(color: Colors.transparent),
+                          )
+                      ),
+                      // Dropdown Content
+                      Positioned(
+                          width: 320,
+                          child: CompositedTransformFollower(
+                              link: _layerLink,
+                              offset: const Offset(0, 45), // Position below the button
+                              showWhenUnlinked: false,
+                              child: TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeOutBack,
+                                  builder: (context, value, child) {
+                                      return Transform.scale(
+                                          scale: value,
+                                          alignment: Alignment.topLeft,
+                                          child: Opacity(
+                                              opacity: value.clamp(0.0, 1.0),
+                                              child: child,
+                                          )
+                                      );
+                                  },
+                                  child: Material(
+                                      color: Colors.transparent,
+                                      child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: BackdropFilter(
+                                              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                                              child: Container(
+                                                  constraints: const BoxConstraints(maxHeight: 450),
+                                                  decoration: BoxDecoration(
+                                                      color: Theme.of(context).colorScheme.surface.withOpacity(0.7), 
+                                                      borderRadius: BorderRadius.circular(20),
+                                                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                                      gradient: LinearGradient(
+                                                          begin: Alignment.topLeft,
+                                                          end: Alignment.bottomRight,
+                                                          colors: [
+                                                              Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                                              Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                                                          ]
+                                                      ),
+                                                      boxShadow: [
+                                                          BoxShadow(
+                                                              color: Colors.black.withOpacity(0.2), 
+                                                              blurRadius: 30, 
+                                                              offset: const Offset(0, 15),
+                                                              spreadRadius: -5
+                                                          )
+                                                      ]
+                                                  ),
+                                                  child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                                  children: [
+                                                      // Header gradient
+                                                      Container(
+                                                          padding: const EdgeInsets.all(16),
+                                                          decoration: BoxDecoration(
+                                                              gradient: LinearGradient(
+                                                                  colors: [
+                                                                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                                                      Colors.transparent
+                                                                  ],
+                                                                  begin: Alignment.topCenter,
+                                                                  end: Alignment.bottomCenter
+                                                              )
+                                                          ),
+                                                          child: Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                  Text("Chart Metrics", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                                                                  Text("${_selectedMetrics.length} Active", style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.primary)),
+                                                              ]
+                                                          )
+                                                      ),
+                                                      // Scrollable Content
+                                                      Flexible(
+                                                          child: SingleChildScrollView(
+                                                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                                              child: StatefulBuilder(
+                                                                  builder: (context, setState) {
+                                                                      return Column(
+                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                          children: [
+                                                                              // Quick Select Chips (Glossy)
+                                                                              Wrap(
+                                                                                  spacing: 8, 
+                                                                                  runSpacing: 8,
+                                                                                  children: groups.keys.map((groupName) {
+                                                                                      final groupMetrics = groups[groupName]!;
+                                                                                      final isFullySelected = groupMetrics.every((m) => _selectedMetrics.contains(m));
+                                                                                      return InkWell(
+                                                                                          onTap: () {
+                                                                                              setState(() {
+                                                                                                  if (isFullySelected) {
+                                                                                                      // Don't unselect if it would leave list empty
+                                                                                                      final remaining = _selectedMetrics.difference(groupMetrics.toSet());
+                                                                                                      if (remaining.isNotEmpty) {
+                                                                                                          _selectedMetrics.removeAll(groupMetrics);
+                                                                                                      }
+                                                                                                  } else {
+                                                                                                      _selectedMetrics.addAll(groupMetrics);
+                                                                                                  }
+                                                                                              });
+                                                                                              this.setState(() {}); 
+                                                                                          },
+                                                                                          borderRadius: BorderRadius.circular(20),
+                                                                                          child: Container(
+                                                                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                                                              decoration: BoxDecoration(
+                                                                                                  color: isFullySelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                                  border: Border.all(color: isFullySelected ? Colors.transparent : Theme.of(context).colorScheme.outline.withOpacity(0.2))
+                                                                                              ),
+                                                                                              child: Text(
+                                                                                                  groupName, 
+                                                                                                  style: TextStyle(
+                                                                                                      fontSize: 11, 
+                                                                                                      fontWeight: FontWeight.w600,
+                                                                                                      color: isFullySelected ? Colors.white : Theme.of(context).colorScheme.onSurface
+                                                                                                  )
+                                                                                              ),
+                                                                                          ),
+                                                                                      );
+                                                                                  }).toList(),
+                                                                              ),
+                                                                              const SizedBox(height: 20),
+                                                                              
+                                                                              // Grouped List
+                                                                              ...groups.entries.map((entry) {
+                                                                                  return Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                      children: [
+                                                                                          Padding(
+                                                                                              padding: const EdgeInsets.only(top: 8, bottom: 8),
+                                                                                              child: Text(entry.key.toUpperCase(), style: TextStyle(color: Theme.of(context).colorScheme.primary.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                                                                                          ),
+                                                                                          ...entry.value.map((metric) {
+                                                                                              final isSelected = _selectedMetrics.contains(metric);
+                                                                                              return InkWell(
+                                                                                                  onTap: () {
+                                                                                                      setState(() {
+                                                                                                          if (!isSelected) {
+                                                                                                              _selectedMetrics.add(metric);
+                                                                                                          } else {
+                                                                                                              if (_selectedMetrics.length > 1) { 
+                                                                                                                  _selectedMetrics.remove(metric);
+                                                                                                              }
+                                                                                                          }
+                                                                                                      });
+                                                                                                      this.setState(() {}); 
+                                                                                                  },
+                                                                                                  child: Padding(
+                                                                                                      padding: const EdgeInsets.symmetric(vertical: 6),
+                                                                                                      child: Row(
+                                                                                                          children: [
+                                                                                                              AnimatedContainer(
+                                                                                                                  duration: const Duration(milliseconds: 200),
+                                                                                                                  width: 18, 
+                                                                                                                  height: 18,
+                                                                                                                  decoration: BoxDecoration(
+                                                                                                                      color: isSelected ? _metricColors[metric] : Colors.transparent,
+                                                                                                                      borderRadius: BorderRadius.circular(5),
+                                                                                                                      border: Border.all(
+                                                                                                                          color: isSelected ? Colors.transparent : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                                                                                                                          width: 1.5
+                                                                                                                      )
+                                                                                                                  ),
+                                                                                                                  child: isSelected ? const Icon(Icons.check, size: 12, color: Colors.white) : null,
+                                                                                                              ),
+                                                                                                              const SizedBox(width: 10),
+                                                                                                              Text(metric.label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                                                                                          ]
+                                                                                                      ),
+                                                                                                  )
+                                                                                              );
+                                                                                          }),
+                                                                                          const SizedBox(height: 12),
+                                                                                      ],
+                                                                                  );
+                                                                              }),
+                                                                          ],
+                                                                      );
+                                                                  }
+                                                              ),
+                                                          )
+                                                      ),
+                                                  ]
+                                              )
+                                          )
+                                      )
+                                  )
+                              )
+                          )
+                      )
+                      ),
+                  ]
+              );
+          }
       );
+      
+      Overlay.of(context).insert(_dropdownOverlay!);
   }
 
   Widget _buildChartTypeIcon(ChartType type, IconData icon) {
