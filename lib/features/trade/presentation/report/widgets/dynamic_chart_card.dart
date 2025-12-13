@@ -437,14 +437,23 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
   }
 
   FlTitlesData _buildTitlesData(List<ChartDataPoint> firstMetricData) {
+      double interval = 1;
+      if (firstMetricData.length > 6) {
+          interval = (firstMetricData.length / 6).ceilToDouble();
+      }
+
       return FlTitlesData(
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text(val.toInt().toString(), style: const TextStyle(fontSize: 10)))),
           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
              sideTitles: SideTitles(
                  showTitles: true,
+                 interval: interval, 
                  getTitlesWidget: (val, meta) {
                      final index = val.toInt();
+                     // Explicitly handle interval skipping for safety
+                     if (index % interval != 0) return const SizedBox.shrink();
+
                      if (index >= 0 && index < firstMetricData.length) {
                          return Padding(
                            padding: const EdgeInsets.only(top: 8),
