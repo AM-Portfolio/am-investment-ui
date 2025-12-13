@@ -20,6 +20,7 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
   late DateTime _displayedMonth;
   DateTime? _startDate;
   DateTime? _endDate;
+  bool _selectingStart = true;
   String? _selectedShortcut;
 
   @override
@@ -37,28 +38,35 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
       _startDate = start;
       _endDate = end;
       _displayedMonth = end;
-      _viewMode = _PickerView.calendar; // Ensure we go back to calendar
+      _viewMode = _PickerView.calendar;
+      _selectingStart = true; // reset to start default or keep as is? usually done means done.
     });
   }
 
   void _onDateSelected(DateTime date) {
-      if (_startDate != null && _endDate == null) {
-          if (date.isBefore(_startDate!)) {
-              setState(() {
-                  _startDate = date;
-                  _endDate = null;
-              });
-          } else {
-              setState(() {
-                  _endDate = date;
-                  _selectedShortcut = null;
-              });
-          }
-      } else {
+      if (_selectingStart) {
           setState(() {
               _startDate = date;
-              _endDate = null;
-              _selectedShortcut = null;
+              // If end date exists and is before new start, clear it
+              if (_endDate != null && _endDate!.isBefore(date)) {
+                  _endDate = null;
+              }
+              _selectingStart = false; // Move to end date selection
+          });
+      } else {
+          setState(() {
+              // If selecting end date but clicked before start, strict check or swap?
+              // Standard: just set end. If invalid, user fixes.
+              // Better: if date < start, treat as new start?
+              if (_startDate != null && date.isBefore(_startDate!)) {
+                  _startDate = date;
+                  _endDate = null; // Clear end
+                  _selectingStart = false; // Still selecting end? No, move to end next.
+              } else {
+                  _endDate = date;
+                  _selectedShortcut = null;
+                  // Optional: Close or just wait for Apply
+              }
           });
       }
   }
@@ -84,7 +92,7 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 700, maxHeight: 400),
+        constraints: const BoxConstraints(maxWidth: 700, maxHeight: 500),
         child: Row(
           children: [
             // Sidebar
@@ -156,15 +164,27 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                                Text(
-                                    _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select start',
-                                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+                                InkWell(
+                                    onTap: () => setState(() => _selectingStart = true),
+                                    child: Text(
+                                        _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select start',
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: _selectingStart ? theme.colorScheme.primary : theme.textTheme.bodyMedium?.color?.withOpacity(0.6)
+                                        )
+                                    ),
                                 ),
-                                if (_endDate != null) ...[
+                                if (_endDate != null || !_selectingStart) ...[
                                     Text('to', style: theme.textTheme.bodySmall),
-                                    Text(
-                                        DateFormat('MMM d, yyyy').format(_endDate!),
-                                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+                                    InkWell(
+                                        onTap: () => setState(() => _selectingStart = false),
+                                        child: Text(
+                                            _endDate != null ? DateFormat('MMM d, yyyy').format(_endDate!) : 'Select end',
+                                            style: theme.textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: !_selectingStart ? theme.colorScheme.primary : theme.textTheme.bodyMedium?.color?.withOpacity(0.6)
+                                            )
+                                        ),
                                     ),
                                 ]
                             ],
@@ -221,10 +241,7 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
                    
                    // Grid
                    Expanded(
-                       child: Padding(
-                         padding: const EdgeInsets.all(16),
-                         child: _buildMainContent(theme),
-                       )
+                       child: _buildMainContent(theme), // Removed padding
                    ),
                    
                    // Action Buttons
@@ -239,8 +256,16 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
                          ),
                          const SizedBox(width: 8),
                          ElevatedButton(
-                           onPressed: (_startDate != null && _endDate != null) 
-                            ? () => Navigator.of(context).pop(DateTimeRange(start: _startDate!, end: _endDate!))
+                           onPressed: (_startDate != null) 
+                            ? () {
+                                final end = _endDate ?? DateTime.now();
+                                // Ensure start is before end just in case, though logic should prevent inverse
+                                if (end.isBefore(_startDate!)) {
+                                     Navigator.of(context).pop(DateTimeRange(start: end, end: _startDate!));
+                                } else {
+                                     Navigator.of(context).pop(DateTimeRange(start: _startDate!, end: end));
+                                }
+                            }
                             : null,
                            style: ElevatedButton.styleFrom(
                                backgroundColor: theme.colorScheme.primary,
@@ -285,21 +310,27 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
 
   Widget _buildYearGrid(ThemeData theme) {
       final currentYear = DateTime.now().year;
-      final years = List.generate(20, (index) => currentYear - 10 + index); // +/- 10 years
+      // Show last 20 years including current
+      final startYear = currentYear - 19;
+      final years = List.generate(20, (index) => startYear + index); 
       
       return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(), // Prevent scrolling
+          padding: const EdgeInsets.all(16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2.0,
+              crossAxisCount: 5, // 5 columns x 4 rows = 20 items
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.5, // Significantly wider/shorter
           ),
           itemCount: years.length,
           itemBuilder: (context, index) {
               final year = years[index];
               final isSelected = year == _displayedMonth.year;
+              final isFuture = year > currentYear;
+
               return InkWell(
-                  onTap: () {
+                  onTap: isFuture ? null : () {
                       setState(() {
                           _displayedMonth = DateTime(year, _displayedMonth.month);
                           _viewMode = _PickerView.month; // Go to month selection
@@ -308,14 +339,18 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                       decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                          color: isSelected ? theme.colorScheme.primary : (isFuture ? null : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3)),
                           borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                           '$year',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                              color: isSelected ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isSelected 
+                                ? theme.colorScheme.onPrimary 
+                                : isFuture 
+                                    ? theme.disabledColor 
+                                    : theme.textTheme.bodyMedium?.color,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
                           ),
                       ),
@@ -327,20 +362,32 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
   
   Widget _buildMonthGrid(ThemeData theme) {
       final months = DateFormat().dateSymbols.SHORTMONTHS;
-      
+      final now = DateTime.now();
+
       return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2.0,
+              crossAxisCount: 4, // 4 cols x 3 rows = 12 items. Wider layout.
+              mainAxisSpacing: 12, 
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.5, // Squashed
           ),
           itemCount: 12,
           itemBuilder: (context, index) {
               final monthIndex = index + 1;
               final isSelected = monthIndex == _displayedMonth.month;
+              
+              // Disable future months if showing current year
+              bool isFuture = false;
+              if (_displayedMonth.year == now.year && monthIndex > now.month) {
+                  isFuture = true;
+              } else if (_displayedMonth.year > now.year) {
+                  isFuture = true;
+              }
+
               return InkWell(
-                  onTap: () {
+                  onTap: isFuture ? null : () {
                       setState(() {
                           _displayedMonth = DateTime(_displayedMonth.year, monthIndex);
                           _viewMode = _PickerView.calendar;
@@ -349,14 +396,18 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                       decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                          color: isSelected ? theme.colorScheme.primary : (isFuture ? null : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3)),
                           borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                           months[index],
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                              color: isSelected ? theme.colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isSelected 
+                                ? theme.colorScheme.onPrimary 
+                                : isFuture 
+                                    ? theme.disabledColor 
+                                    : theme.textTheme.bodyMedium?.color,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
                           ),
                       ),
@@ -396,10 +447,12 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
       
       return GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16), // minimal padding horizontal
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7, 
-              mainAxisSpacing: 4, 
-              crossAxisSpacing: 4
+              mainAxisSpacing: 2, // Tighter
+              crossAxisSpacing: 2,
+              childAspectRatio: 1.5, // Squash slightly more
           ),
           itemCount: totalSlots,
           itemBuilder: (context, index) {
@@ -413,11 +466,15 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
               final isStart = _startDate != null && isSameDay(date, _startDate!);
               final isEnd = _endDate != null && isSameDay(date, _endDate!);
               final inBetween = _startDate != null && _endDate != null && date.isAfter(_startDate!) && date.isBefore(_endDate!);
+              
+              final isFuture = date.isAfter(DateTime.now());
 
               BoxDecoration? decoration;
               Color? textColor;
-
-              if (isStart || isEnd) {
+              
+              if (isFuture) {
+                  textColor = theme.disabledColor;
+              } else if (isStart || isEnd) {
                   decoration = BoxDecoration(
                       color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
@@ -431,7 +488,7 @@ class _CompactDateRangePickerDialogState extends State<CompactDateRangePickerDia
               }
 
               return GestureDetector(
-                  onTap: () => _onDateSelected(date),
+                  onTap: isFuture ? null : () => _onDateSelected(date),
                   child: Container(
                       decoration: decoration,
                       child: Center(
