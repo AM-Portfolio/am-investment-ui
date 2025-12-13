@@ -610,21 +610,49 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       touchTooltipData: BarTouchTooltipData(
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                               final metric = _selectedMetrics.elementAt(rodIndex);
+                              String formattedValue = rod.toY.toStringAsFixed(1);
+                              
+                              if (metric.label.toLowerCase().contains('pnl') || 
+                                  metric.label.toLowerCase().contains('win') || 
+                                  metric.label.toLowerCase().contains('loss') ||
+                                  metric.label.toLowerCase().contains('profit') ||
+                                  metric.label.toLowerCase().contains('drawdown')) {
+                                  if (!metric.label.toLowerCase().contains('rate') && !metric.label.toLowerCase().contains('count')) {
+                                      formattedValue = '\$${rod.toY.toStringAsFixed(2)}';
+                                  }
+                              }
+                              if (metric.label.toLowerCase().contains('rate') || metric.label.toLowerCase().contains('percentage')) {
+                                  formattedValue = '${rod.toY.toStringAsFixed(1)}%';
+                              }
+
                               return BarTooltipItem(
                                   '${metric.label}\n',
-                                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                  const TextStyle(
+                                      color: Colors.white70, 
+                                      fontWeight: FontWeight.w500, 
+                                      fontSize: 10,
+                                      height: 1.2
+                                  ),
                                   children: [
                                       TextSpan(
-                                          text: rod.toY.toStringAsFixed(1),
-                                          style: TextStyle(color: _metricColors[metric], fontWeight: FontWeight.w500, fontSize: 12),
+                                          text: formattedValue,
+                                          style: TextStyle(
+                                              color: _metricColors[metric] ?? Colors.white, 
+                                              fontWeight: FontWeight.bold, 
+                                              fontSize: 12,
+                                              height: 1.2
+                                          ),
                                       )
-                                  ]
+                                  ],
+                                  textAlign: TextAlign.left,
                               );
                           },
-                          // Force dark background for contrast
-                          getTooltipColor: (_) => Colors.blueGrey.shade900.withOpacity(0.9),
-                          tooltipPadding: const EdgeInsets.all(8),
+                          // Glossy dark background
+                          getTooltipColor: (_) => const Color(0xFF1E1E2C).withOpacity(0.95),
+                          tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           tooltipMargin: 8,
+                          tooltipBorder: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                          tooltipRoundedRadius: 8,
                           fitInsideHorizontally: true,
                           fitInsideVertically: true, 
                       )
@@ -659,21 +687,51 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       getTooltipItems: (touchedSpots) {
                           return touchedSpots.map((spot) {
                               final metric = _selectedMetrics.elementAt(spot.barIndex);
+                              String formattedValue = spot.y.toStringAsFixed(1);
+                              
+                              // Add formatting based on metric
+                              if (metric.label.toLowerCase().contains('pnl') || 
+                                  metric.label.toLowerCase().contains('win') || 
+                                  metric.label.toLowerCase().contains('loss') ||
+                                  metric.label.toLowerCase().contains('profit') ||
+                                  metric.label.toLowerCase().contains('drawdown')) {
+                                  // Money
+                                  if (!metric.label.toLowerCase().contains('rate') && !metric.label.toLowerCase().contains('count')) {
+                                      formattedValue = '\$${spot.y.toStringAsFixed(2)}';
+                                  }
+                              }
+                              if (metric.label.toLowerCase().contains('rate') || metric.label.toLowerCase().contains('percentage')) {
+                                  formattedValue = '${spot.y.toStringAsFixed(1)}%';
+                              }
+
                               return LineTooltipItem(
-                                  '${metric.label}: ',
-                                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                  '${metric.label}\n',
+                                  const TextStyle(
+                                      color: Colors.white70, 
+                                      fontWeight: FontWeight.w500, 
+                                      fontSize: 10,
+                                      height: 1.2
+                                  ),
                                   children: [
                                       TextSpan(
-                                          text: spot.y.toStringAsFixed(1),
-                                          style: TextStyle(color: _metricColors[metric], fontWeight: FontWeight.bold, fontSize: 12),
+                                          text: formattedValue,
+                                          style: TextStyle(
+                                              color: _metricColors[metric] ?? Colors.white, 
+                                              fontWeight: FontWeight.bold, 
+                                              fontSize: 12,
+                                              height: 1.2
+                                          ),
                                       )
-                                  ]
+                                  ],
+                                  textAlign: TextAlign.left,
                               );
                           }).toList();
                       },
-                      // Force dark background
-                      getTooltipColor: (_) => Colors.blueGrey.shade900.withOpacity(0.9),
-                      tooltipPadding: const EdgeInsets.all(8),
+                      // Glossy dark background
+                      getTooltipColor: (_) => const Color(0xFF1E1E2C).withOpacity(0.95),
+                      tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      tooltipBorder: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                      tooltipRoundedRadius: 8,
                       fitInsideHorizontally: true,
                       fitInsideVertically: true,
                   )
