@@ -209,19 +209,138 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
         ),
         // ... (Key Stats Row)
         const SizedBox(height: 24),
-        SizedBox( // Ensure height constraint for stats
-            height: 120,
-            child: Row(
-            children: [
-                Expanded(child: _buildStatCard('Avg daily win %', '${((state.summary.winPercentage > 1 ? state.summary.winPercentage : state.summary.winPercentage * 100)).toStringAsFixed(1)}%', '(${state.summary.winningTrades}/${state.summary.totalTrades})', Icons.pie_chart, Colors.blue)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildStatCard('Avg daily win/loss', (state.summary.profitFactor.isInfinite || state.summary.profitFactor.isNaN) ? 'N/A' : state.summary.profitFactor.toStringAsFixed(2), '', Icons.incomplete_circle, Colors.orange)),
-                 const SizedBox(width: 16),
-                Expanded(child: _buildStatCard('Largest profit', '\$${state.summary.largestWin.toStringAsFixed(0)}', '', Icons.arrow_upward, Colors.green)),
-                 const SizedBox(width: 16),
-                Expanded(child: _buildStatCard('Total P&L', '\$${state.summary.totalProfitLoss.toStringAsFixed(0)}', '', Icons.attach_money, state.summary.totalProfitLoss >= 0 ? Colors.green : Colors.red)),
-            ],
-            ),
+        // Expanded Metrics Grid
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate item width for responsive grid (approx 4 items per row on desktop)
+            final double itemWidth = (constraints.maxWidth - 36) / 4; // 3 gaps of 12px
+            
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                // --- Performance ---
+                _buildCompactMetric(
+                  'Total P&L', 
+                  '\$${state.summary.totalProfitLoss.toStringAsFixed(2)}', 
+                  state.summary.totalProfitLoss >= 0 ? Icons.trending_up : Icons.trending_down,
+                  state.summary.totalProfitLoss >= 0 ? Colors.green : Colors.red,
+                  width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Win Rate', 
+                  '${state.summary.winPercentage.toStringAsFixed(1)}%', 
+                  Icons.pie_chart,
+                  Colors.blue,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Profit Factor', 
+                   (state.summary.profitFactor.isInfinite || state.summary.profitFactor.isNaN) ? '∞' : state.summary.profitFactor.toStringAsFixed(2),
+                  Icons.scale,
+                  Colors.orange,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Total Trades', 
+                  state.summary.totalTrades.toString(), 
+                  Icons.bar_chart,
+                  Theme.of(context).colorScheme.onSurface,
+                   width: itemWidth
+                ),
+
+                // --- Trade Counts ---
+                _buildCompactMetric(
+                  'Winning Trades', 
+                  state.summary.winningTrades.toString(), 
+                  Icons.check_circle,
+                  Colors.green.shade400,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Losing Trades', 
+                  state.summary.losingTrades.toString(), 
+                  Icons.cancel,
+                  Colors.red.shade400,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Break Even', 
+                  state.summary.breakEvenTrades.toString(), 
+                  Icons.remove_circle_outline,
+                  Colors.grey,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Avg Win/Loss', 
+                  state.summary.metrics.avgTradeWinLossRatio?.toStringAsFixed(2) ?? '0.00',
+                  Icons.compare_arrows,
+                  Theme.of(context).colorScheme.tertiary,
+                   width: itemWidth
+                ),
+
+                // --- Values ---
+                _buildCompactMetric(
+                  'Avg Win', 
+                  '\$${state.summary.averageWinAmount.toStringAsFixed(2)}', 
+                  Icons.arrow_upward,
+                  Colors.green,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Avg Loss', 
+                  '\$${state.summary.averageLossAmount.toStringAsFixed(2)}', 
+                  Icons.arrow_downward,
+                  Colors.red,
+                   width: itemWidth
+                ),
+                 _buildCompactMetric(
+                  'Largest Win', 
+                  '\$${state.summary.largestWin.toStringAsFixed(2)}', 
+                  Icons.emoji_events,
+                  Colors.amber,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Largest Loss', 
+                  '\$${state.summary.largestLoss.toStringAsFixed(2)}', 
+                  Icons.warning,
+                  Colors.deepOrange,
+                   width: itemWidth
+                ),
+
+                // --- Stats ---
+                 _buildCompactMetric(
+                  'Max Drawdown', 
+                  '\$${state.summary.maxDrawdown.toStringAsFixed(2)}', 
+                  Icons.waterfall_chart,
+                  Colors.red.shade700,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Avg Hold (Win)', 
+                  '${state.summary.averageHoldingTimeWin.toStringAsFixed(1)} h', 
+                  Icons.timer,
+                  Colors.blueGrey,
+                   width: itemWidth
+                ),
+                 _buildCompactMetric(
+                  'Avg Hold (Loss)', 
+                  '${state.summary.averageHoldingTimeLoss.toStringAsFixed(1)} h', 
+                  Icons.timer_off,
+                  Colors.blueGrey,
+                   width: itemWidth
+                ),
+                _buildCompactMetric(
+                  'Expectancy', 
+                   (state.summary.metrics.avgGrossTradePnL ?? 0).toStringAsFixed(2),
+                  Icons.analytics,
+                  Theme.of(context).colorScheme.primary,
+                   width: itemWidth
+                ),
+              ],
+            );
+          }
         ),
       ],
     ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1);
@@ -253,28 +372,50 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
 
 
 
-  Widget _buildStatCard(String title, String value, String subtitle, IconData icon, Color color) {
-    return GlossyCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-           Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color, fontSize: 13)),
-           Row(
-               crossAxisAlignment: CrossAxisAlignment.end,
-               children: [
-                   Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-                   if (subtitle.isNotEmpty) ...[
-                       const SizedBox(width: 8),
-                       Padding(
-                         padding: const EdgeInsets.only(bottom: 4),
-                         child: Text(subtitle, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color)),
-                       ),
-                   ]
-               ],
-           ),
-        ],
+  Widget _buildCompactMetric(
+    String title, 
+    String value, 
+    IconData icon, 
+    Color color,
+    {required double width}
+  ) {
+    return SizedBox(
+      width: width,
+      child: GlossyCard(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 14, color: color.withOpacity(0.8)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title, 
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), 
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value, 
+              style: TextStyle(
+                fontSize: 16, 
+                fontWeight: FontWeight.bold, 
+                color: Theme.of(context).colorScheme.onSurface
+              )
+            ),
+          ],
+        ),
       ),
     );
   }
