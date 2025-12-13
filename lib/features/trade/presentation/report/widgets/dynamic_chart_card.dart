@@ -13,7 +13,7 @@ class DynamicChartCard extends StatefulWidget {
   final List<DailyPerformance> dailyPerformance;
   final List<ChartMetric> initialMetrics;
   final ChartTimeFrame initialTimeFrame;
-  final bool isBarChart; // Keep flag, but likely force Line for multi-metric
+  final ChartType initialChartType;
 
   const DynamicChartCard({
     required this.title,
@@ -21,7 +21,7 @@ class DynamicChartCard extends StatefulWidget {
     required this.dailyPerformance,
     this.initialMetrics = const [ChartMetric.winRate],
     this.initialTimeFrame = ChartTimeFrame.dailyLinear,
-    this.isBarChart = false,
+    this.initialChartType = ChartType.line,
     super.key,
   });
 
@@ -32,6 +32,7 @@ class DynamicChartCard extends StatefulWidget {
 class _DynamicChartCardState extends State<DynamicChartCard> {
   late Set<ChartMetric> _selectedMetrics;
   late ChartTimeFrame _selectedTimeFrame;
+  late ChartType _selectedChartType;
   
   // Define colors for metrics
   final Map<ChartMetric, Color> _metricColors = {
@@ -50,6 +51,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
     _selectedMetrics = widget.initialMetrics.toSet();
     if (_selectedMetrics.isEmpty) _selectedMetrics = {ChartMetric.winRate};
     _selectedTimeFrame = widget.initialTimeFrame;
+    _selectedChartType = widget.initialChartType;
   }
   
   @override 
@@ -161,8 +163,25 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
               children: [
                  Row(
                    children: [
-                       Icon(widget.isBarChart ? Icons.bar_chart : Icons.show_chart, size: 20, color: theme.colorScheme.primary),
-                       const SizedBox(width: 8),
+                       // Chart Type Selector
+                       Container(
+                           height: 32,
+                           padding: const EdgeInsets.symmetric(horizontal: 8),
+                           decoration: BoxDecoration(
+                               color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                               borderRadius: BorderRadius.circular(8),
+                           ),
+                           child: Row(
+                               children: [
+                                   _buildChartTypeIcon(ChartType.line, Icons.show_chart),
+                                   const SizedBox(width: 4),
+                                   _buildChartTypeIcon(ChartType.area, Icons.area_chart),
+                                   const SizedBox(width: 4),
+                                   _buildChartTypeIcon(ChartType.bar, Icons.bar_chart),
+                               ]
+                           )
+                       ),
+                       const SizedBox(width: 12),
                        // Metric Multi-Select
                        // Metric Multi-Select Button
                        InkWell(
@@ -221,66 +240,7 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
             Expanded(
               child: allData.isEmpty || allData.values.every((l) => l.isEmpty)
                ? const Center(child: Text("No data available"))
-               : LineChart(
-                      LineChartData(
-                         gridData: const FlGridData(show: true, drawVerticalLine: false),
-                         titlesData: FlTitlesData(
-                             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text(val.toInt().toString(), style: const TextStyle(fontSize: 10)))),
-                             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                             bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (val, meta) {
-                                        final index = val.toInt();
-                                        // Use first metric's data for labels. Assuming sync X-axis.
-                                        if (index >= 0 && index < firstMetricData.length) {
-                                            return Padding(
-                                              padding: const EdgeInsets.only(top: 8),
-                                              child: Text(
-                                                firstMetricData[index].xLabel, 
-                                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), 
-                                                textAlign: TextAlign.center
-                                              ),
-                                            );
-                                        }
-                                        return const SizedBox.shrink();
-                                    },
-                                    reservedSize: 60, // Increased for multiline year labels
-                                )
-                            )
-                         ),
-                         borderData: FlBorderData(show: false),
-                         lineBarsData: _selectedMetrics.map((metric) {
-                            final points = allData[metric] ?? [];
-                            return LineChartBarData(
-                                spots: points.map((p) => FlSpot(p.xIndex.toDouble(), p.yValue)).toList(),
-                                isCurved: true,
-                                color: _metricColors[metric] ?? theme.colorScheme.primary,
-                                barWidth: 3,
-                                dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(show: true, color: (_metricColors[metric] ?? theme.colorScheme.primary).withOpacity(0.1)),
-                            );
-                         }).toList(),
-                         
-                         // Tooltip logic for multiple lines?
-                         lineTouchData: LineTouchData(
-                             touchTooltipData: LineTouchTooltipData(
-                                 getTooltipItems: (touchedSpots) {
-                                     return touchedSpots.map((spot) {
-                                         // Find which bar/metric this spot belongs to
-                                         // FlSpot doesn't carry ref to BarData.
-                                         // But touchedSpots has barIndex.
-                                         final metric = _selectedMetrics.elementAt(spot.barIndex);
-                                         return LineTooltipItem(
-                                             '${metric.label}: ${spot.y.toStringAsFixed(1)}',
-                                             TextStyle(color: _metricColors[metric], fontWeight: FontWeight.bold),
-                                         );
-                                     }).toList();
-                                 }
-                             )
-                         ),
-                      ),
-                    ),
+               : _buildChart(allData, firstMetricData, theme),
             ),
             const SizedBox(height: 16),
             
@@ -389,7 +349,9 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
                       builder: (context, setState) { 
                           return Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: ChartMetric.values.map((metric) {
+                              children: ChartMetric.values
+                                  .where((m) => m != ChartMetric.profitFactor) // Remove Profit Factor
+                                  .map((metric) {
                                   final isSelected = _selectedMetrics.contains(metric);
                                   return CheckboxListTile(
                                       title: Text(metric.label),
@@ -423,4 +385,114 @@ class _DynamicChartCardState extends State<DynamicChartCard> {
           )
       );
   }
+
+  Widget _buildChartTypeIcon(ChartType type, IconData icon) {
+      final isSelected = _selectedChartType == type;
+      return InkWell(
+          onTap: () => setState(() => _selectedChartType = type),
+          child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                  color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.2) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+              ),
+              child: Icon(icon, size: 16, color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+          ),
+      );
+  }
+
+  Widget _buildChart(Map<ChartMetric, List<ChartDataPoint>> allData, List<ChartDataPoint> firstMetricData, ThemeData theme) {
+      if (_selectedChartType == ChartType.bar) {
+          return BarChart(
+              BarChartData(
+                  gridData: const FlGridData(show: true, drawVerticalLine: false),
+                  titlesData: _buildTitlesData(firstMetricData),
+                  borderData: FlBorderData(show: false),
+                  barGroups: _buildBarGroups(allData),
+              )
+          );
+      }
+      
+      return LineChart(
+          LineChartData(
+              gridData: const FlGridData(show: true, drawVerticalLine: false),
+              titlesData: _buildTitlesData(firstMetricData),
+              borderData: FlBorderData(show: false),
+              lineBarsData: _selectedMetrics.map((metric) {
+                  final points = allData[metric] ?? [];
+                  return LineChartBarData(
+                      spots: points.map((p) => FlSpot(p.xIndex.toDouble(), p.yValue)).toList(),
+                      isCurved: true,
+                      color: _metricColors[metric] ?? theme.colorScheme.primary,
+                      barWidth: 3,
+                      dotData: const FlDotData(show: false), // Hide dots for cleaner look
+                      belowBarData: BarAreaData(
+                          show: _selectedChartType == ChartType.area,
+                          color: (_metricColors[metric] ?? theme.colorScheme.primary).withOpacity(0.15)
+                      ),
+                  );
+              }).toList(),
+          )
+      );
+  }
+
+  FlTitlesData _buildTitlesData(List<ChartDataPoint> firstMetricData) {
+      return FlTitlesData(
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40, getTitlesWidget: (val, meta) => Text(val.toInt().toString(), style: const TextStyle(fontSize: 10)))),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+             sideTitles: SideTitles(
+                 showTitles: true,
+                 getTitlesWidget: (val, meta) {
+                     final index = val.toInt();
+                     if (index >= 0 && index < firstMetricData.length) {
+                         return Padding(
+                           padding: const EdgeInsets.only(top: 8),
+                           child: Text(
+                             firstMetricData[index].xLabel, 
+                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), 
+                             textAlign: TextAlign.center
+                           ),
+                         );
+                     }
+                     return const SizedBox.shrink();
+                 },
+                 reservedSize: 60,
+             )
+         )
+      );
+  }
+
+  List<BarChartGroupData> _buildBarGroups(Map<ChartMetric, List<ChartDataPoint>> allData) {
+      // Assuming all metrics have same x-indices.
+      // We need to group by index.
+      final Map<int, List<BarChartRodData>> groups = {};
+      
+      int metricIndex = 0;
+      for (var metric in _selectedMetrics) {
+          final points = allData[metric] ?? [];
+          for (var p in points) {
+             groups.putIfAbsent(p.xIndex, () => []);
+             groups[p.xIndex]!.add(
+                 BarChartRodData(
+                     toY: p.yValue,
+                     color: _metricColors[metric],
+                     width: 8, // Thinner bars for groups
+                     borderRadius: BorderRadius.circular(2)
+                 )
+             );
+          }
+          metricIndex++;
+      }
+      
+      final sortedIndices = groups.keys.toList()..sort();
+      return sortedIndices.map((index) {
+          return BarChartGroupData(
+              x: index,
+              barRods: groups[index]!,
+              barsSpace: 4, // Space between bars in a group
+          );
+      }).toList();
+  }
 }
+

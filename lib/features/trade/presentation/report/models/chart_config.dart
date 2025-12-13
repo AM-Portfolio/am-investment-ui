@@ -17,6 +17,15 @@ enum ChartTimeFrame {
   const ChartTimeFrame(this.label);
 }
 
+enum ChartType {
+  line('Line'),
+  area('Area'),
+  bar('Bar');
+
+  final String label;
+  const ChartType(this.label);
+}
+
 enum ChartMetric {
   winRate('Win Rate (%)', isPercent: true),
   grossPnL('Gross PnL', isCurrency: true),
