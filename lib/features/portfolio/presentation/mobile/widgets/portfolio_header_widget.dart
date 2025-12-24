@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../internal/domain/entities/portfolio_list.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../widgets/gmail_sync/gmail_connect_button.dart';
 
 /// Widget that displays the portfolio selector and tab bar
 class PortfolioHeaderWidget extends StatelessWidget {
@@ -77,6 +78,9 @@ class PortfolioHeaderWidget extends StatelessWidget {
             ),
           ),
         ),
+        // Gmail Connect Button
+        const GmailConnectButton(),
+        const SizedBox(width: 8),
         // Logout button
         IconButton(
           icon: const Icon(Icons.logout),

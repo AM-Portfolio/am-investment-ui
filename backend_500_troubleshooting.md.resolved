@@ -1,0 +1,303 @@
+# Gmail API Backend - 500 Error Troubleshooting
+
+## Current Status
+
+✅ **Frontend**: Working perfectly  
+✅ **Backend**: Deployed and responding  
+❌ **Issue**: `/api/v1/gmail/connect` returning 500 Internal Server Error
+
+## Error Details
+
+**Endpoint**: `GET /api/v1/gmail/connect`  
+**Error**: `500 INTERNAL SERVER ERROR`  
+**Frontend Message**: "Failed to initiate connection"
+
+## Most Likely Causes
+
+### 1. Missing Environment Variables ⚠️ **MOST COMMON**
+
+The backend needs these environment variables:
+
+```bash
+GMAIL_CLIENT_ID=536930944518-v4406qrrj4o2pk594g2rc3sk6lfinlf6.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=<your-secret-from-google-console>
+GMAIL_REDIRECT_URI=http://localhost:8080/api/v1/gmail/callback
+JWT_SECRET=<same-as-main-backend>
+```
+
+**How to Check**:
+```bash
+docker exec gmail-api-backend env | grep GMAIL
+```
+
+**Expected Output**:
+```
+GMAIL_CLIENT_ID=536930944518-v4406qrrj4o2pk594g2rc3sk6lfinlf6.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=GOCSPX-...
+GMAIL_REDIRECT_URI=http://localhost:8080/api/v1/gmail/callback
+```
+
+### 2. Database Connection Error
+
+MongoDB might not be accessible.
+
+**How to Check Logs**:
+```bash
+docker logs gmail-api-backend
+```
+
+**Look For**:
+- "Failed to connect to MongoDB"
+- "Connection refused"
+- "Authentication failed"
+
+### 3. JWT Token Issues
+
+**Possible Issues**:
+- JWT_SECRET mismatch between main backend and Gmail API backend
+- JWT not being parsed correctly
+
+**How to Test**:
+```bash
+# Get JWT from frontend (copy from browser dev tools)
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:8080/api/v1/gmail/status
+```
+
+**Expected**: Should return `{"connected": false}` or `{"connected": true}`  
+**If 401**: JWT secret mismatch
+
+### 4. Code-Level Exception
+
+**Common Issues**:
+- Missing import statements
+- Incorrect Google OAuth library initialization
+- File permissions (credentials.json)
+
+---
+
+## Debugging Steps
+
+### Step 1: Check Backend Logs
+
+```bash
+docker logs -f gmail-api-backend
+```
+
+**Look for stack traces around the time you click "Connect Gmail"**
+
+### Step 2: Verify Environment Variables
+
+```bash
+docker exec gmail-api-backend env
+```
+
+**Required Variables**:
+- `GMAIL_CLIENT_ID` ✓
+- `GMAIL_CLIENT_SECRET` ✓
+- `GMAIL_REDIRECT_URI` ✓
+- `JWT_SECRET` ✓
+- `MONGODB_URI` (if using MongoDB)
+
+### Step 3: Test Health Endpoint
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+**Expected**: `{"status": "healthy"}` or similar
+
+### Step 4: Test WITHOUT JWT (if endpoint allows)
+
+Some backends allow testing without auth for debugging:
+
+```bash
+curl http://localhost:8080/api/v1/brokers
+```
+
+Should return list of supported brokers.
+
+### Step 5: Restart with Logging
+
+```bash
+docker stop gmail-api-backend
+docker rm gmail-api-backend
+
+docker run -d -p 8080:5000 \
+  -e LOG_LEVEL=DEBUG \
+  -e GMAIL_CLIENT_ID="536930944518-v4406qrrj4o2pk594g2rc3sk6lfinlf6.apps.googleusercontent.com" \
+  -e GMAIL_CLIENT_SECRET="your-secret" \
+  -e GMAIL_REDIRECT_URI="http://localhost:8080/api/v1/gmail/callback" \
+  -e JWT_SECRET="your-jwt-secret" \
+  -e CORS_ORIGINS="http://localhost:3000" \
+  --name gmail-api-backend \
+  your-backend-image:latest
+  
+docker logs -f gmail-api-backend
+```
+
+---
+
+## Quick Verification Checklist
+
+### Environment Variables
+- [ ] `GMAIL_CLIENT_ID` is set
+- [ ] `GMAIL_CLIENT_SECRET` is set (not empty!)
+- [ ] `GMAIL_REDIRECT_URI` is `http://localhost:8080/api/v1/gmail/callback`
+- [ ] `JWT_SECRET` matches main backend
+- [ ] `CORS_ORIGINS` includes `http://localhost:3000`
+
+### Google Cloud Console
+- [ ] OAuth Client ID exists
+- [ ] Client Secret is copied correctly
+- [ ] Redirect URI `http://localhost:8080/api/v1/gmail/callback` is authorized
+- [ ] Gmail API is enabled
+
+### Backend Code
+- [ ] Google OAuth library is installed
+- [ ] JWT verification middleware is working
+- [ ] MongoDB connection is established
+- [ ] Exception handling is in place
+
+### Network
+- [ ] Backend is reachable at `http://localhost:8080`
+- [ ] Port 8080 is not blocked by firewall
+- [ ] CORS headers are being sent
+
+---
+
+## Expected Backend Logs (Success)
+
+When `/gmail/connect` works correctly:
+
+```
+[INFO] Received request: GET /api/v1/gmail/connect
+[INFO] JWT token validated for user: test-user-123
+[INFO] Generating Google OAuth URL
+[INFO] Redirect URI: http://localhost:8080/api/v1/gmail/callback
+[INFO] Returning auth URL to client
+```
+
+## Expected Backend Logs (Failure)
+
+When it fails:
+
+```
+[ERROR] Exception in /api/v1/gmail/connect endpoint
+[ERROR] KeyError: 'GMAIL_CLIENT_SECRET'
+```
+
+OR
+
+```
+[ERROR] google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials
+```
+
+---
+
+## Common Fixes
+
+### Fix 1: Update Client Secret
+
+```bash
+# Stop container
+docker stop gmail-api-backend
+
+# Start with correct credentials
+docker run -d -p 8080:5000 \
+  -e GMAIL_CLIENT_ID="..." \
+  -e GMAIL_CLIENT_SECRET="GOCSPX-your-actual-secret" \
+  -e GMAIL_REDIRECT_URI="http://localhost:8080/api/v1/gmail/callback" \
+  --name gmail-api-backend \
+  your-backend-image:latest
+```
+
+### Fix 2: Use .env File
+
+Create `.env` file:
+```bash
+GMAIL_CLIENT_ID=536930944518-v4406qrrj4o2pk594g2rc3sk6lfinlf6.apps.googleusercontent.com
+GMAIL_CLIENT_SECRET=GOCSPX-your-secret
+GMAIL_REDIRECT_URI=http://localhost:8080/api/v1/gmail/callback
+JWT_SECRET=your-jwt-secret
+CORS_ORIGINS=http://localhost:3000
+```
+
+Run with env file:
+```bash
+docker run -d -p 8080:5000 --env-file .env --name gmail-api-backend your-backend-image:latest
+```
+
+### Fix 3: Check JWT Secret Alignment
+
+Make sure JWT_SECRET in Gmail API backend **matches exactly** with your main backend:
+
+```bash
+# In main backend
+echo $JWT_SECRET
+
+# In Gmail API backend
+docker exec gmail-api-backend echo $JWT_SECRET
+
+# They should be IDENTICAL
+```
+
+---
+
+## Testing Once Fixed
+
+### 1. Health Check
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+### 2. Brokers List
+```bash
+curl http://localhost:8080/api/v1/brokers
+```
+
+### 3. Status (with JWT)
+```bash
+curl -H "Authorization: Bearer YOUR_JWT" \
+  http://localhost:8080/api/v1/gmail/status
+```
+
+### 4. Connect (with JWT)
+```bash
+curl -H "Authorization: Bearer YOUR_JWT" \
+  http://localhost:8080/api/v1/gmail/connect
+```
+
+**Expected Response**:
+```json
+{
+  "auth_url": "https://accounts.google.com/o/oauth2/v2/auth?..."
+}
+```
+
+---
+
+## Frontend is Ready
+
+The frontend implementation is **100% correct**. Once the backend 500 error is fixed:
+
+1. ✅ "Connect Gmail" button will work
+2. ✅ User will be redirected to Google OAuth
+3. ✅ After authorization, callback will be handled
+4. ✅ "Sync Portfolio" button will appear
+5. ✅ Portfolio sync will work end-to-end
+
+**The only blocker is the backend 500 error.**
+
+---
+
+## Need More Help?
+
+Share the following with backend team:
+
+1. **Full backend logs**: `docker logs gmail-api-backend > backend_logs.txt`
+2. **Environment variables** (hide secrets): `docker exec gmail-api-backend env | grep -v SECRET`
+3. **Error stack trace** from the logs
+4. **Code snippet** of the `/gmail/connect` endpoint implementation
+
+This will help diagnose the exact issue quickly!

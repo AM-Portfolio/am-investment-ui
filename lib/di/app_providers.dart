@@ -41,3 +41,12 @@ Future<PortfolioApiConfig> portfolioApiConfig(Ref ref) async {
   final config = await ref.watch(appConfigProvider.future);
   return config.api.portfolio;
 }
+
+@riverpod
+Future<GmailApiConfig> gmailApiConfig(Ref ref) async {
+  final config = await ref.watch(appConfigProvider.future);
+  if (config.api.gmail == null) {
+    throw Exception('Gmail API configuration is missing');
+  }
+  return config.api.gmail!;
+}
