@@ -8,6 +8,7 @@ import '../../internal/domain/entities/portfolio_list.dart';
 import '../../../../core/utils/logger.dart';
 import '../mobile/portfolio_mobile_screen.dart';
 import '../web/portfolio_web_screen.dart';
+import 'gmail_sync/gmail_connect_button.dart';
 
 /// Wrapper widget that handles portfolio list loading and selection
 /// Provides portfolio selection functionality for both mobile and web screens
@@ -215,20 +216,23 @@ class _PortfolioListWrapperState extends ConsumerState<PortfolioListWrapper> {
       );
 
   /// Builds empty portfolios screen
-  Widget _buildEmptyPortfoliosScreen() => const Scaffold(
+  Widget _buildEmptyPortfoliosScreen() => Scaffold(
     body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.account_balance_wallet_outlined,
             size: 64,
             color: Colors.grey,
           ),
-          SizedBox(height: 16),
-          Text('No portfolios found'),
-          SizedBox(height: 8),
-          Text('Create a portfolio to get started'),
+          const SizedBox(height: 16),
+          const Text('No portfolios found'),
+          const SizedBox(height: 8),
+          const Text('Create a portfolio to get started'),
+          const SizedBox(height: 24),
+          // Add Gmail Connect button even when no portfolios exist
+          const GmailConnectButton(),
         ],
       ),
     ),

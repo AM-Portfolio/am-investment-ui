@@ -48,6 +48,7 @@ class ApiConfig {
     this.cloudinary,
     this.auth,
     this.user,
+    this.gmail,
   });
   final String baseUrl;
   final int timeout;
@@ -58,6 +59,29 @@ class ApiConfig {
   final CloudinaryApiConfig? cloudinary;
   final AuthApiConfig? auth;
   final UserApiConfig? user;
+  final GmailApiConfig? gmail;
+}
+
+/// Gmail Sync API configuration
+class GmailApiConfig {
+  const GmailApiConfig({
+    required this.baseUrl,
+    required this.statusEndpoint,
+    required this.connectEndpoint,
+    required this.extractEndpoint,
+    this.connectTimeout = 30,
+    this.receiveTimeout = 60,
+    this.sendTimeout = 60,
+    this.enabled = true,
+  });
+  final String baseUrl;
+  final String statusEndpoint;
+  final String connectEndpoint;
+  final String extractEndpoint;
+  final int connectTimeout;
+  final int receiveTimeout;
+  final int sendTimeout;
+  final bool enabled;
 }
 
 /// Portfolio API configuration

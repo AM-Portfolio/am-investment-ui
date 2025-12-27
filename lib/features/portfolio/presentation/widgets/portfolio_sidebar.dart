@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/navigation/sidebar_nav_item.dart';
+import '../../../../shared/widgets/selectors/shared_portfolio_selector.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
 import '../cubit/portfolio_state.dart';
 
@@ -14,6 +15,7 @@ class PortfolioSidebar extends StatelessWidget {
     this.currentPortfolioName,
     this.portfolios = const [],
     this.onPortfolioSelected,
+    this.isCompact = false,
   });
 
   final PortfolioViewType selectedView;
@@ -22,6 +24,7 @@ class PortfolioSidebar extends StatelessWidget {
   final String? currentPortfolioName;
   final List<PortfolioItem> portfolios;
   final Function(String portfolioId, String portfolioName)? onPortfolioSelected;
+  final bool isCompact;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class PortfolioSidebar extends StatelessWidget {
         bodyColor: Colors.white,
         displayColor: Colors.white,
       ),
-      dividerColor: Colors.white.withValues(alpha: 0.1),
+      dividerColor: Colors.white.withOpacity(0.1),
     );
 
     return Theme(
@@ -111,127 +114,60 @@ class PortfolioSidebar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
+              color: const Color(0xFF6C5DD3).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.pie_chart, color: Color(0xFF6C5DD3), size: 18),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Portfolio Manager',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                ),
-                Text(
-                  'Asset Allocation',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 11,
+          if (!isCompact) ...[
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Portfolio Manager',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                ),
-              ],
+                  Text(
+                    'Asset Allocation',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 11,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildPortfolioSelector(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.account_balance_wallet, size: 16, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'Current Portfolio',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            currentPortfolioName ?? 'No Portfolio Selected',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (currentPortfolioId != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              'ID: ${currentPortfolioId!.substring(0, 8)}...',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-                fontSize: 10,
-                fontFamily: 'monospace',
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-          // Portfolio Dropdown Selector
-          if (portfolios.isNotEmpty && onPortfolioSelected != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
-              ),
-              child: DropdownButton<String>(
-                value: currentPortfolioId,
-                isExpanded: true,
-                underline: const SizedBox(),
-                hint: const Text('Select Portfolio'),
-                icon: const Icon(Icons.arrow_drop_down, size: 20),
-                items: portfolios
-                    .map(
-                      (portfolio) => DropdownMenuItem<String>(
-                        value: portfolio.portfolioId,
-                        child: Text(
-                          portfolio.portfolioName,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (portfolioId) {
-                  if (portfolioId != null) {
-                    final portfolio = portfolios.firstWhere((p) => p.portfolioId == portfolioId);
-                    onPortfolioSelected!(portfolioId, portfolio.portfolioName);
-                  }
-                },
-              ),
-            ),
-        ],
-      ),
+    if (portfolios.isEmpty || onPortfolioSelected == null) return const SizedBox.shrink();
+
+    return SharedPortfolioSelector<PortfolioItem>(
+      currentPortfolioId: currentPortfolioId,
+      currentPortfolioName: currentPortfolioName,
+      portfolios: portfolios,
+      onPortfolioSelected: onPortfolioSelected!,
+      idExtractor: (p) => p.portfolioId,
+      nameExtractor: (p) => p.portfolioName,
+      isCompact: isCompact,
     );
   }
 
@@ -250,7 +186,7 @@ class PortfolioSidebar extends StatelessWidget {
       groupValue: selectedView,
       onChanged: onViewChanged,
       isEnabled: true,
-      isCompact: false,
+      isCompact: isCompact,
       isCondensed: false,
     );
   }
@@ -258,26 +194,28 @@ class PortfolioSidebar extends StatelessWidget {
   Widget _buildFooter(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+      border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Trade System v1.0',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-            fontWeight: FontWeight.w500,
+    child: isCompact 
+        ? const SizedBox.shrink() 
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Trade System v1.0',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Professional trading analysis',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Professional trading analysis',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
-        ),
-      ],
-    ),
   );
 }

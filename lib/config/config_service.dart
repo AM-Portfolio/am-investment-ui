@@ -257,6 +257,40 @@ class ConfigService with PropertyInjection {
             defaultValue: AppConstants.defaultUserEnabled,
           ),
         ),
+        gmail: GmailApiConfig(
+          baseUrl: properties.getValue(
+            'api.gmail.baseUrl',
+            defaultValue: AppConstants.defaultBaseUrl, // Reusing default base url if specific one not provided
+          ),
+          statusEndpoint: properties.getValue(
+            'api.gmail.statusEndpoint',
+            defaultValue: '/api/v1/gmail/status',
+          ),
+          connectEndpoint: properties.getValue(
+            'api.gmail.connectEndpoint',
+            defaultValue: '/api/v1/gmail/connect',
+          ),
+          extractEndpoint: properties.getValue(
+            'api.gmail.extractEndpoint',
+            defaultValue: '/api/v1/extract/gmail',
+          ),
+          connectTimeout: properties.getIntValue(
+            'api.gmail.connectTimeout',
+            defaultValue: AppConstants.defaultConnectTimeout,
+          ),
+          receiveTimeout: properties.getIntValue(
+            'api.gmail.receiveTimeout',
+            defaultValue: AppConstants.defaultReceiveTimeout,
+          ),
+          sendTimeout: properties.getIntValue(
+            'api.gmail.sendTimeout',
+            defaultValue: AppConstants.defaultSendTimeout,
+          ),
+          enabled: properties.getBoolValue(
+            'api.gmail.enabled',
+            defaultValue: true,
+          ),
+        ),
       ),
       environment: EnvironmentConfig(
         name: properties.getValue(

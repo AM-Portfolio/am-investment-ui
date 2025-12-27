@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../components/journal_form_header.dart';
-import '../widgets/url_preview_widget.dart';
+import '../widgets/url_preview_widget.dart' if (dart.library.io) '../widgets/url_preview_widget_stub.dart';
 
 /// Section containing optional fields like date, trade ID, and URL
 class OptionalFieldsSection extends StatefulWidget {

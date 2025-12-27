@@ -480,12 +480,53 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       // Use ApiClient for consistent error handling and logging
       final listResponse = await _apiClient.get<PortfolioListDto>(
         fullUri,
-        parser: (data) =>
-            PortfolioMapper.portfolioListFromJson(data! as List<dynamic>),
+        parser: (data) {
+          // Defensive parsing: Handle both List and String responses
+          if (data == null) {
+            AppLogger.warning(
+              'Portfolio list response is null, returning empty list',
+              tag: 'PortfolioRemoteDataSource',
+            );
+            return PortfolioListDto(portfolios: []);
+          }
+
+          // If backend returns a string (error message), log it and return empty list
+          if (data is String) {
+            AppLogger.warning(
+              'Portfolio list API returned a String instead of List: "$data"',
+              tag: 'PortfolioRemoteDataSource',
+            );
+            // Return empty portfolio list instead of crashing
+            return PortfolioListDto(portfolios: []);
+          }
+
+          // If it's a Map (unexpected but possible), check if it contains an error message
+          if (data is Map<String, dynamic>) {
+            if (data.containsKey('error') || data.containsKey('message')) {
+              final errorMsg = data['error'] ?? data['message'];
+              AppLogger.warning(
+                'Portfolio list API returned error message: "$errorMsg"',
+                tag: 'PortfolioRemoteDataSource',
+              );
+              return PortfolioListDto(portfolios: []);
+            }
+          }
+
+          // Normal case: data is a List
+          if (data is! List) {
+            AppLogger.error(
+              'Portfolio list API returned unexpected type: ${data.runtimeType}',
+              tag: 'PortfolioRemoteDataSource',
+            );
+            return PortfolioListDto(portfolios: []);
+          }
+
+          return PortfolioMapper.portfolioListFromJson(data as List<dynamic>);
+        },
       );
 
       AppLogger.info(
-        'Portfolios list fetched successfully from API',
+        'Portfolios list fetched successfully from API (${listResponse.portfolios.length} portfolios)',
         tag: 'PortfolioRemoteDataSource',
       );
       AppLogger.methodExit(

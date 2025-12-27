@@ -117,12 +117,11 @@ flutter:
     - lib/assets/mock_data/trade/
     - lib/assets/mock_data/trade/holdings/
     - lib/assets/mock_data/trade/calander/
-    - assets/mock-data/users/
-    - assets/mock-data/tokens/
-    - assets/mock-data/google/
-    - assets/mock-data/api_responses/
-    - assets/sounds/
-    - assets/images/
+    - lib/assets/mock_data/users/
+    - lib/assets/mock_data/tokens/
+    - lib/assets/mock_data/google/
+    - lib/assets/mock_data/api_responses/
+    - lib/assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -36,10 +36,17 @@ class AuthRemoteDataSource implements AuthDataSource {
         print('Login API Response: ${response.data}');
         final data = response.data;
 
+        // robust ID parsing
+        final userId = data['user_id'] ?? data['id'] ?? data['_id'] ?? data['userId'] ?? '';
+
+        if (userId.toString().isEmpty) {
+          AppLogger.error('🚨 CRITICAL: Login response has empty User ID! Data keys: ${data.keys.toList()}');
+        }
+
         final user = UserModel(
-          id: data['user_id'],
-          email: data['email'],
-          displayName: data['username'],
+          id: userId.toString(),
+          email: data['email'] ?? email,
+          displayName: data['username'] ?? data['name'] ?? data['full_name'],
           authMethod: AuthConstants.authMethodEmail,
         );
 
@@ -284,8 +291,11 @@ class AuthRemoteDataSource implements AuthDataSource {
           return emailLogin(email, password);
         }
 
+        // robust ID parsing for registration
+        final userId = data['user_id'] ?? data['id'] ?? data['_id'] ?? data['userId'] ?? '';
+
         final user = UserModel(
-          id: data['user_id'] ?? '',
+          id: userId.toString(),
           email: data['email'] ?? email,
           displayName: data['full_name'] ?? name,
           authMethod: AuthConstants.authMethodEmail,
