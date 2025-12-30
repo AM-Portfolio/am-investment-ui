@@ -1,37 +1,39 @@
 /// API endpoint constants
 class ApiEndpoints {
   // Base URLs
-  static const String baseUrl = '/api/v1';
+  static const String authBaseUrl = '/auth/v1';
+  static const String userBaseUrl = '/users/v1';
+  static const String apiBaseUrl = '/api/v1'; // For other services
   
   // Authentication endpoints
-  static const String login = '$baseUrl/auth/login';
-  static const String logout = '$baseUrl/auth/logout';
-  static const String refreshToken = '$baseUrl/auth/refresh';
-  static const String register = '$baseUrl/auth/register';
+  static const String login = '$authBaseUrl/tokens'; // Changed from /auth/login
+  static const String logout = '$authBaseUrl/logout';
+  static const String refreshToken = '$authBaseUrl/refresh';
+  static const String register = '$userBaseUrl/auth/register'; // Changed from /auth/register
   
   // User endpoints
-  static const String userProfile = '$baseUrl/user/profile';
-  static const String updateProfile = '$baseUrl/user/profile';
+  static const String userProfile = '$userBaseUrl/users/profile';
+  static const String updateProfile = '$userBaseUrl/users/profile';
   
   // Portfolio endpoints
-  static const String portfolios = '$baseUrl/portfolios';
-  static const String portfolioSummary = '$baseUrl/portfolios/summary';
-  static const String portfolioHoldings = '$baseUrl/portfolios/holdings';
+  static const String portfolios = '$apiBaseUrl/portfolios';
+  static const String portfolioSummary = '$apiBaseUrl/portfolios/summary';
+  static const String portfolioHoldings = '$apiBaseUrl/portfolios/holdings';
   
   // Trade endpoints
-  static const String trades = '$baseUrl/trades';
-  static const String tradeHistory = '$baseUrl/trades/history';
-  static const String orders = '$baseUrl/orders';
-  static const String positions = '$baseUrl/positions';
+  static const String trades = '$apiBaseUrl/trades';
+  static const String tradeHistory = '$apiBaseUrl/trades/history';
+  static const String orders = '$apiBaseUrl/orders';
+  static const String positions = '$apiBaseUrl/positions';
   
   // Document endpoints
-  static const String documentUpload = '$baseUrl/documents/process';
-  static const String documentStatus = '$baseUrl/documents/status';
+  static const String documentUpload = '$apiBaseUrl/documents/process';
+  static const String documentStatus = '$apiBaseUrl/documents/status';
   
   // Analysis endpoints
-  static const String analysis = '$baseUrl/analysis';
-  static const String performanceAnalysis = '$baseUrl/analysis/performance';
-  static const String riskAnalysis = '$baseUrl/analysis/risk';
+  static const String analysis = '$apiBaseUrl/analysis';
+  static const String performanceAnalysis = '$apiBaseUrl/analysis/performance';
+  static const String riskAnalysis = '$apiBaseUrl/analysis/risk';
   
   /// Get portfolio by ID endpoint
   static String portfolioById(String id) => '$portfolios/$id';
