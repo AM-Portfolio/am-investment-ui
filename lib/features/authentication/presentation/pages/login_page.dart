@@ -9,7 +9,7 @@ import '../widgets/demo_login_button_widget.dart';
 import '../widgets/email_login_form_widget.dart';
 import '../widgets/feature_flag_panel_widget.dart';
 import '../widgets/google_login_button_widget.dart';
-import '../widgets/interactive_particle_background.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 /// Main login page with all authentication options
 class LoginPage extends StatelessWidget {

@@ -366,6 +366,7 @@ class TradeRepositoryImpl implements TradeRepository {
     } else {
       getTradeHoldings(userId, portfolioId).catchError((error) {
         AppLogger.error('Failed to fetch initial holdings for stream', tag: 'TradeRepository', error: error);
+        _holdingsController.addError(error);
         return TradeHoldings.empty(userId, portfolioId);
       });
     }
@@ -382,6 +383,7 @@ class TradeRepositoryImpl implements TradeRepository {
     } else {
       getTradePortfolios(userId).catchError((error) {
         AppLogger.error('Failed to fetch initial portfolios for stream', tag: 'TradeRepository', error: error);
+        _portfoliosController.addError(error);
         return TradePortfolioList.empty(userId);
       });
     }
@@ -403,6 +405,7 @@ class TradeRepositoryImpl implements TradeRepository {
     } else {
       getTradeSummary(userId, portfolioId).catchError((error) {
         AppLogger.error('Failed to fetch initial summary for stream', tag: 'TradeRepository', error: error);
+        _summaryController.addError(error);
         return TradeSummary.empty(portfolioId, userId);
       });
     }
@@ -424,6 +427,7 @@ class TradeRepositoryImpl implements TradeRepository {
     } else {
       getTradeCalendar(userId, portfolioId).catchError((error) {
         AppLogger.error('Failed to fetch initial calendar for stream', tag: 'TradeRepository', error: error);
+        _calendarController.addError(error);
         return TradeCalendar.empty(userId, portfolioId);
       });
     }

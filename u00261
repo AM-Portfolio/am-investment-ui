@@ -1,0 +1,803 @@
+Unexpected wasm dry run failure (255):
+
+Unhandled exception:
+Unsupported operation: Cannot extract a file path from a org-dartlang-untranslatable-uri URI
+#0      _Uri.toFilePath (dart:core/uri.dart:3433)
+#1      DryRunSummarizer._lintChecks (package:dart2wasm/dry_run.dart:150)
+#2      DryRunSummarizer.summarize (package:dart2wasm/dry_run.dart:221)
+#3      compileToModule (package:dart2wasm/compile.dart:224)
+<asynchronous suspension>
+#4      generateWasm (package:dart2wasm/generate_wasm.dart:81)
+<asynchronous suspension>
+#5      main (file:///Volumes/Work/s/w/ir/x/w/sdk/pkg/dart2wasm/bin/dart2wasm.dart:10)
+<asynchronous suspension>
+
+Use --no-wasm-dry-run to disable these warnings.
+Target dart2js failed: ProcessException: Process exited abnormally with exit code 1:
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_converter.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart'.
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:6:8:
+Error: Error when reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart': Error reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart';
+       ^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:7:8:
+Error: Error when reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart': Error reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart';
+       ^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:8:8:
+Error: Error when reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart': Error reading 'lib/features/trade/presentation/calendar/package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
+       ^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:9:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_converter.dart'
+import 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_converter.dart';
+       ^
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/year_calendar/calendar_types.dart'.
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:6:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_converter.dart'
+import 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_converter.dart';
+       ^
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_widget.dart'.
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:7:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
+       ^
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:8:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart';
+       ^
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:9:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart';
+       ^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:4:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart' as calendar_types;
+       ^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:5:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
+       ^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:3:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
+       ^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:2:8:
+Error: Error when reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart': Error reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart';
+       ^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:2:8:
+Error: Error when reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart': Error reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart';
+       ^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:3:8:
+Error: Error when reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/types.dart': Error reading 'lib/features/trade/presentation/package:am_common_ui/widgets/calendar/universal_calendar/types.dart'  (No such file or directory)
+import '../package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
+       ^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:5:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/year_calendar/calendar_types.dart'
+import 'package:am_common_ui/widgets/calendar/year_calendar/calendar_types.dart';
+       ^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:7:8:
+Error: Not found: 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_widget.dart'
+import 'package:am_common_ui/widgets/calendar/year_calendar/year_calendar_widget.dart';
+       ^
+lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart:5:8:
+Error: Error when reading 'lib/shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart': Error reading 'lib/shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart'  (No such file or directory)
+import '../../../../../shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart';
+       ^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:7:8:
+Error: Error when reading 'lib/shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart': Error reading 'lib/shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart'  (No such file or directory)
+import 'charts/market_cap_allocation/animated_market_cap_chart.dart';
+       ^
+lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart:6:8:
+Error: Error when reading 'lib/package%3Aam_common_ui/widgets/charts/portfolio_charts/sector_allocation/animated_sector_donut_chart.dart': Error reading 'lib/package%3Aam_common_ui/widgets/charts/portfolio_charts/sector_allocation/animated_sector_donut_chart.dart'  (No such file or directory)
+import '../../../../../package:am_common_ui/widgets/charts/portfolio_charts/sector_allocation/animated_sector_donut_chart.dart';
+       ^
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/universal_heatmap.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/loaders/heatmap_skeleton_loader.dart'.
+lib/shared/models/heatmap/heatmap_ui_data.dart:7:8:
+Error: Error when reading 'lib/shared/widgets/heatmap/heatmap_config.dart': Error reading 'lib/shared/widgets/heatmap/heatmap_config.dart'  (No such file or directory)
+import '../../widgets/heatmap/heatmap_config.dart' as ui_config;
+       ^
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/configs/display_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/configs/interaction_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/configs/layout_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/configs/selector_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/configs/visual_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/heatmap_config.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/templates/mobile_heatmap_defaults.dart'.
+Error: Couldn't resolve the package 'am_common_ui' in 'package:am_common_ui/widgets/charts/heatmap/templates/web_heatmap_defaults.dart'.
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:6:8:
+Error: Error when reading 'lib/shared/widgets/portfolio_overview/charts/base/chart_colors.dart': Error reading 'lib/shared/widgets/portfolio_overview/charts/base/chart_colors.dart'  (No such file or directory)
+import 'charts/base/chart_colors.dart';
+       ^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:8:8:
+Error: Error when reading 'lib/shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart': Error reading 'lib/shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart'  (No such file or directory)
+import 'charts/sector_allocation/animated_sector_donut_chart.dart';
+       ^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:6:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/universal_heatmap.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/universal_heatmap.dart';
+       ^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:7:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/loaders/heatmap_skeleton_loader.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/loaders/heatmap_skeleton_loader.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:4:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/configs/display_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/configs/display_config.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:5:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/configs/interaction_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/configs/interaction_config.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:6:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/configs/layout_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/configs/layout_config.dart'
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:8:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/configs/selector_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/configs/selector_config.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:9:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/configs/visual_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/configs/visual_config.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:10:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/heatmap_config.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/heatmap_config.dart' as ui_config;
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:11:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/templates/mobile_heatmap_defaults.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/templates/mobile_heatmap_defaults.dart';
+       ^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:12:8:
+Error: Not found: 'package:am_common_ui/widgets/charts/heatmap/templates/web_heatmap_defaults.dart'
+import 'package:am_common_ui/widgets/charts/heatmap/templates/web_heatmap_defaults.dart';
+       ^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:83:32:
+Error: Type 'DateSelection' not found.
+  void _onDateSelectionChanged(DateSelection selection, TradeCalendarCubit cubit) {
+                               ^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:107:35:
+Error: Type 'DateSelection' not found.
+  void _showDateSelectionFeedback(DateSelection selection) {
+                                  ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:68:5:
+Error: Type 'DateSelection' not found.
+    DateSelection? dateFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:133:5:
+Error: Type 'DateSelection' not found.
+    DateSelection? dateFilter, {
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:167:14:
+Error: Type 'DateSelection' not found.
+    required DateSelection dateSelection,
+             ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:252:5:
+Error: Type 'DateSelection' not found.
+    DateSelection? initialFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:333:8:
+Error: Type 'calendar_types.CalendarCardConfig' not found.
+  List<calendar_types.CalendarCardConfig> getUniversalCardConfigs() => [
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:358:20:
+Error: Type 'calendar_types.CardData' not found.
+  Map<String, List<calendar_types.CardData>> _filterCalendarDataByDate(
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:359:22:
+Error: Type 'calendar_types.CardData' not found.
+    Map<String, List<calendar_types.CardData>> calendarData,
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:360:5:
+Error: Type 'DateSelection' not found.
+    DateSelection dateSelection,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:41:9:
+Error: Type 'DateSelection' not found.
+  final DateSelection? selectedDateRange;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:49:5:
+Error: Type 'DateSelection' not found.
+    DateSelection? selectedDateRange,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:101:9:
+Error: Type 'DateSelection' not found.
+  final DateSelection filterCriteria;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:75:26:
+Error: Type 'CardData' not found.
+  final Map<String, List<CardData>> calendarData;
+                         ^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:81:9:
+Error: Type 'DateSelection' not found.
+  final DateSelection? dateFilter;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:98:3:
+Error: Type 'DateSelection' not found.
+  DateSelection? get dateRange {
+  ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:161:22:
+Error: Type 'CardData' not found.
+    Map<String, List<CardData>>? calendarData,
+                     ^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:163:5:
+Error: Type 'DateSelection' not found.
+    DateSelection? dateFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:134:61:
+Error: Type 'CalendarDayData' not found.
+  void _showDayDetails(BuildContext context, DateTime date, CalendarDayData dayData) {
+                                                            ^^^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:14:27:
+Error: Type 'CardData' not found.
+  static Map<String, List<CardData>> convertEntityToCalendarData({required TradeCalendar entity}) {
+                          ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:65:15:
+Error: Type 'CardData' not found.
+  static List<CardData> _addTradeToCardData(List<CardData> existingCards, TradeDetails trade, String dateKey) {
+              ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:65:50:
+Error: Type 'CardData' not found.
+  static List<CardData> _addTradeToCardData(List<CardData> existingCards, TradeDetails trade, String dateKey) {
+                                                 ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:85:10:
+Error: Type 'TradeCardData' not found.
+  static TradeCardData _createTradeCardData(String dateKey, List<TradeDetails> trades) {
+         ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:122:10:
+Error: Type 'TradeCardData' not found.
+  static TradeCardData _updateTradeCardData(TradeCardData existingCard, TradeDetails newTrade) {
+         ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:122:45:
+Error: Type 'TradeCardData' not found.
+  static TradeCardData _updateTradeCardData(TradeCardData existingCard, TradeDetails newTrade) {
+                                            ^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:64:9:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  final ui_config.HeatmapConfig configuration;
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:33:14:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    required ui_config.HeatmapConfig configuration,
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:272:5:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    ui_config.HeatmapConfig? configuration,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:32:9:
+Error: Type 'UniversalTemplateType' not found.
+  final UniversalTemplateType templateType;
+        ^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:20:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig getHeatmapConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:43:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _loadEnvironmentAwareConfig(
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:55:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _loadPlatformDefaultConfig(bool showSubCards) {
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:73:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyEnvironmentOverrides(
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:74:5:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    ui_config.HeatmapConfig baseConfig,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:88:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyPortfolioConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:89:14:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    required ui_config.HeatmapConfig defaultConfig,
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:105:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyPortfolioCustomizations({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:106:14:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    required ui_config.HeatmapConfig defaultConfig,
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:135:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyDevelopmentOverrides(
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:136:5:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    ui_config.HeatmapConfig baseConfig,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:153:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyPreprodOverrides(
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:154:5:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    ui_config.HeatmapConfig baseConfig,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:165:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig _applyProductionOverrides(
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:166:5:
+Error: Type 'ui_config.HeatmapConfig' not found.
+    ui_config.HeatmapConfig baseConfig,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:193:10:
+Error: Type 'SelectorConfig' not found.
+  static SelectorConfig createPortfolioSelectorConfig() => SelectorConfig(
+         ^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:236:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig growthPortfolioConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:247:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig valuePortfolioConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:258:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig dividendPortfolioConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:269:10:
+Error: Type 'ui_config.HeatmapConfig' not found.
+  static ui_config.HeatmapConfig balancedPortfolioConfig({
+         ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:44:19:
+Error: Undefined name 'UniversalTemplateType'.
+    templateType: UniversalTemplateType.compact,
+                  ^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:57:19:
+Error: Undefined name 'UniversalTemplateType'.
+    templateType: UniversalTemplateType.full,
+                  ^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:83:32:
+Error: 'DateSelection' isn't a type.
+  void _onDateSelectionChanged(DateSelection selection, TradeCalendarCubit cubit) {
+                               ^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:107:35:
+Error: 'DateSelection' isn't a type.
+  void _showDateSelectionFeedback(DateSelection selection) {
+                                  ^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:185:11:
+Error: The getter 'YearCalendarConverter' isn't defined for the type '_TradeCalendarAnalyticsWebPageState'.
+ - '_TradeCalendarAnalyticsWebPageState' is from 'package:todo_app/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart' ('lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart').
+        ? YearCalendarConverter.convertToMonthsData(
+          ^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:223:20:
+Error: The method 'UniversalCalendarWidget' isn't defined for the type '_TradeCalendarAnalyticsWebPageState'.
+ - '_TradeCalendarAnalyticsWebPageState' is from 'package:todo_app/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart' ('lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart').
+            child: UniversalCalendarWidget(
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:226:29:
+Error: The getter 'CalendarTemplateType' isn't defined for the type '_TradeCalendarAnalyticsWebPageState'.
+ - '_TradeCalendarAnalyticsWebPageState' is from 'package:todo_app/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart' ('lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart').
+              templateType: CalendarTemplateType.full,
+                            ^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:229:29:
+Error: The method 'TradeCalendarDataProvider' isn't defined for the type '_TradeCalendarAnalyticsWebPageState'.
+ - '_TradeCalendarAnalyticsWebPageState' is from 'package:todo_app/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart' ('lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart').
+              dataProvider: TradeCalendarDataProvider(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart:350:21:
+Error: 'TradeCardData' isn't a type.
+        if (card is TradeCardData) {
+                    ^^^^^^^^^^^^^
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:462:27:
+Error: The method 'UniversalCalendarWidget' isn't defined for the type '_DashboardWebPageState'.
+ - '_DashboardWebPageState' is from 'package:todo_app/features/dashboard/presentation/pages/dashboard_web_page.dart' ('lib/features/dashboard/presentation/pages/dashboard_web_page.dart').
+                        ? UniversalCalendarWidget(
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:464:43:
+Error: The getter 'CalendarTemplateType' isn't defined for the type '_DashboardWebPageState'.
+ - '_DashboardWebPageState' is from 'package:todo_app/features/dashboard/presentation/pages/dashboard_web_page.dart' ('lib/features/dashboard/presentation/pages/dashboard_web_page.dart').
+                            templateType: CalendarTemplateType.compact,
+                                          ^^^^^^^^^^^^^^^^^^^^
+lib/features/dashboard/presentation/pages/dashboard_web_page.dart:470:43:
+Error: The method 'TradeCalendarDataProvider' isn't defined for the type '_DashboardWebPageState'.
+ - '_DashboardWebPageState' is from 'package:todo_app/features/dashboard/presentation/pages/dashboard_web_page.dart' ('lib/features/dashboard/presentation/pages/dashboard_web_page.dart').
+                            dataProvider: TradeCalendarDataProvider(
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:68:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? dateFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:133:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? dateFilter, {
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:167:14:
+Error: 'DateSelection' isn't a type.
+    required DateSelection dateSelection,
+             ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:233:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? currentFilter;
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:252:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? initialFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:271:9:
+Error: The method 'DateSelection' isn't defined for the type 'TradeCalendarCubit'.
+ - 'TradeCalendarCubit' is from 'package:todo_app/features/trade/presentation/cubit/trade_calendar_cubit.dart' ('lib/features/trade/presentation/cubit/trade_calendar_cubit.dart').
+        DateSelection(
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:275:23:
+Error: The getter 'DateFilterMode' isn't defined for the type 'TradeCalendarCubit'.
+ - 'TradeCalendarCubit' is from 'package:todo_app/features/trade/presentation/cubit/trade_calendar_cubit.dart' ('lib/features/trade/presentation/cubit/trade_calendar_cubit.dart').
+          filterType: DateFilterMode.quick,
+                      ^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:334:66:
+Error: Undefined name 'CalendarCardType'.
+    const calendar_types.CalendarCardConfig(type: calendar_types.CalendarCardType.pnlSummary, title: 'Daily P&L'),
+                                                                 ^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:334:26:
+Error: Couldn't find constructor 'CalendarCardConfig'.
+    const calendar_types.CalendarCardConfig(type: calendar_types.CalendarCardType.pnlSummary, title: 'Daily P&L'),
+                         ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:336:28:
+Error: Undefined name 'CalendarCardType'.
+      type: calendar_types.CalendarCardType.tradeMetrics,
+                           ^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:338:28:
+Error: Undefined name 'CardSizeType'.
+      size: calendar_types.CardSizeType.large,
+                           ^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:339:30:
+Error: Undefined name 'CardLayoutStyle'.
+      layout: calendar_types.CardLayoutStyle.grid,
+                             ^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:340:29:
+Error: Undefined name 'CardTheme'.
+      theme: calendar_types.CardTheme.info,
+                            ^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:335:26:
+Error: Couldn't find constructor 'CalendarCardConfig'.
+    const calendar_types.CalendarCardConfig(
+                         ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:343:28:
+Error: Undefined name 'CalendarCardType'.
+      type: calendar_types.CalendarCardType.winLossRatio,
+                           ^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:345:28:
+Error: Undefined name 'CardSizeType'.
+      size: calendar_types.CardSizeType.small,
+                           ^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:346:30:
+Error: Undefined name 'CardLayoutStyle'.
+      layout: calendar_types.CardLayoutStyle.chart,
+                             ^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:347:29:
+Error: Undefined name 'CardTheme'.
+      theme: calendar_types.CardTheme.success,
+                            ^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:342:26:
+Error: Couldn't find constructor 'CalendarCardConfig'.
+    const calendar_types.CalendarCardConfig(
+                         ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:350:28:
+Error: Undefined name 'CalendarCardType'.
+      type: calendar_types.CalendarCardType.riskReward,
+                           ^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:352:30:
+Error: Undefined name 'CardLayoutStyle'.
+      layout: calendar_types.CardLayoutStyle.comparison,
+                             ^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:353:29:
+Error: Undefined name 'CardTheme'.
+      theme: calendar_types.CardTheme.info,
+                            ^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:349:26:
+Error: Couldn't find constructor 'CalendarCardConfig'.
+    const calendar_types.CalendarCardConfig(
+                         ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:359:37:
+Error: 'CardData' isn't a type.
+    Map<String, List<calendar_types.CardData>> calendarData,
+                                    ^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:360:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection dateSelection,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_cubit.dart:366:55:
+Error: 'CardData' isn't a type.
+    final filteredData = <String, List<calendar_types.CardData>>{};
+                                                      ^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:41:9:
+Error: 'DateSelection' isn't a type.
+  final DateSelection? selectedDateRange;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:49:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? selectedDateRange,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/cubit/trade_calendar_state.dart:101:9:
+Error: 'DateSelection' isn't a type.
+  final DateSelection filterCriteria;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:75:26:
+Error: 'CardData' isn't a type.
+  final Map<String, List<CardData>> calendarData;
+                         ^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:81:9:
+Error: 'DateSelection' isn't a type.
+  final DateSelection? dateFilter;
+        ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:104:12:
+Error: The method 'DateSelection' isn't defined for the type 'TradeCalendarViewModel'.
+ - 'TradeCalendarViewModel' is from 'package:todo_app/features/trade/presentation/models/trade_calendar_view_model.dart' ('lib/features/trade/presentation/models/trade_calendar_view_model.dart').
+    return DateSelection(
+           ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:108:19:
+Error: The getter 'DateFilterMode' isn't defined for the type 'TradeCalendarViewModel'.
+ - 'TradeCalendarViewModel' is from 'package:todo_app/features/trade/presentation/models/trade_calendar_view_model.dart' ('lib/features/trade/presentation/models/trade_calendar_view_model.dart').
+      filterType: DateFilterMode.custom,
+                  ^^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:120:21:
+Error: 'TradeCardData' isn't a type.
+        if (card is TradeCardData) {
+                    ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:133:21:
+Error: 'TradeCardData' isn't a type.
+        if (card is TradeCardData) {
+                    ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:148:21:
+Error: 'TradeCardData' isn't a type.
+        if (card is TradeCardData) {
+                    ^^^^^^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:161:22:
+Error: 'CardData' isn't a type.
+    Map<String, List<CardData>>? calendarData,
+                     ^^^^^^^^
+lib/features/trade/presentation/models/trade_calendar_view_model.dart:163:5:
+Error: 'DateSelection' isn't a type.
+    DateSelection? dateFilter,
+    ^^^^^^^^^^^^^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:101:30:
+Error: The getter 'YearCalendarConverter' isn't defined for the type '_TradeCalendarAnalyticsMobilePageState'.
+ - '_TradeCalendarAnalyticsMobilePageState' is from 'package:todo_app/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart' ('lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart').
+    final yearCalendarData = YearCalendarConverter.convertToMonthsData(
+                             ^^^^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:111:18:
+Error: The method 'YearCalendarWidget' isn't defined for the type '_TradeCalendarAnalyticsMobilePageState'.
+ - '_TradeCalendarAnalyticsMobilePageState' is from 'package:todo_app/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart' ('lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart').
+          child: YearCalendarWidget(
+                 ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:114:21:
+Error: The method 'YearCalendarConfig' isn't defined for the type '_TradeCalendarAnalyticsMobilePageState'.
+ - '_TradeCalendarAnalyticsMobilePageState' is from 'package:todo_app/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart' ('lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart').
+            config: YearCalendarConfig(
+                    ^^^^^^^^^^^^^^^^^^
+lib/features/trade/presentation/mobile/pages/trade_calendar_analytics_mobile_page.dart:134:61:
+Error: 'CalendarDayData' isn't a type.
+  void _showDayDetails(BuildContext context, DateTime date, CalendarDayData dayData) {
+                                                            ^^^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:22:36:
+Error: 'CardData' isn't a type.
+      final result = <String, List<CardData>>{};
+                                   ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:65:50:
+Error: 'CardData' isn't a type.
+  static List<CardData> _addTradeToCardData(List<CardData> existingCards, TradeDetails trade, String dateKey) {
+                                                 ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:67:79:
+Error: 'TradeCardData' isn't a type.
+    final existingTradeCardIndex = existingCards.indexWhere((card) => card is TradeCardData);
+                                                                              ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:71:69:
+Error: 'TradeCardData' isn't a type.
+      final existingCard = existingCards[existingTradeCardIndex] as TradeCardData;
+                                                                    ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:74:33:
+Error: 'CardData' isn't a type.
+      final updatedCards = List<CardData>.from(existingCards);
+                                ^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:91:12:
+Error: Method not found: 'TradeCardData'.
+    return TradeCardData(
+           ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:122:45:
+Error: 'TradeCardData' isn't a type.
+  static TradeCardData _updateTradeCardData(TradeCardData existingCard, TradeDetails newTrade) {
+                                            ^^^^^^^^^^^^^
+lib/features/trade/presentation/converters/trade_calendar_converter.dart:140:12:
+Error: Method not found: 'TradeCardData'.
+    return TradeCardData(
+           ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart:413:19:
+Error: The method 'AnimatedSectorDonutChart' isn't defined for the type '_PortfolioAnalysisWebPageState'.
+ - '_PortfolioAnalysisWebPageState' is from 'package:todo_app/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart' ('lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart').
+                : AnimatedSectorDonutChart(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart:449:19:
+Error: The method 'AnimatedMarketCapChart' isn't defined for the type '_PortfolioAnalysisWebPageState'.
+ - '_PortfolioAnalysisWebPageState' is from 'package:todo_app/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart' ('lib/features/portfolio/presentation/web/pages/portfolio_analysis_web_page.dart').
+                : AnimatedMarketCapChart(
+                  ^^^^^^^^^^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:33:24:
+Error: 'HeatmapConfig' isn't a type.
+    required ui_config.HeatmapConfig configuration,
+                       ^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:64:19:
+Error: 'HeatmapConfig' isn't a type.
+  final ui_config.HeatmapConfig configuration;
+                  ^^^^^^^^^^^^^
+lib/shared/models/heatmap/heatmap_ui_data.dart:272:15:
+Error: 'HeatmapConfig' isn't a type.
+    ui_config.HeatmapConfig? configuration,
+              ^^^^^^^^^^^^^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:225:83:
+Error: The getter 'ChartColors' isn't defined for the type '_PortfolioOverviewWidgetState'.
+ - '_PortfolioOverviewWidgetState' is from 'package:todo_app/shared/widgets/portfolio_overview/portfolio_overview_widget.dart' ('lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart').
+        Expanded(child: _buildMoversCard(context, 'Top Gainers', data.topGainers, ChartColors.positiveColor)),
+                                                                                  ^^^^^^^^^^^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:227:81:
+Error: The getter 'ChartColors' isn't defined for the type '_PortfolioOverviewWidgetState'.
+ - '_PortfolioOverviewWidgetState' is from 'package:todo_app/shared/widgets/portfolio_overview/portfolio_overview_widget.dart' ('lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart').
+        Expanded(child: _buildMoversCard(context, 'Top Losers', data.topLosers, ChartColors.negativeColor)),
+                                                                                ^^^^^^^^^^^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:364:14:
+Error: The method 'AnimatedSectorDonutChart' isn't defined for the type '_PortfolioOverviewWidgetState'.
+ - '_PortfolioOverviewWidgetState' is from 'package:todo_app/shared/widgets/portfolio_overview/portfolio_overview_widget.dart' ('lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart').
+      return AnimatedSectorDonutChart(allocations: allocations);
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart:366:14:
+Error: The method 'AnimatedMarketCapChart' isn't defined for the type '_PortfolioOverviewWidgetState'.
+ - '_PortfolioOverviewWidgetState' is from 'package:todo_app/shared/widgets/portfolio_overview/portfolio_overview_widget.dart' ('lib/shared/widgets/portfolio_overview/portfolio_overview_widget.dart').
+      return AnimatedMarketCapChart(allocations: allocations);
+             ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:32:9:
+Error: 'UniversalTemplateType' isn't a type.
+  final UniversalTemplateType templateType;
+        ^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:221:18:
+Error: Not a constant expression.
+    return const HeatmapSkeletonLoader();
+                 ^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:308:14:
+Error: The method 'UniversalHeatmapWidget' isn't defined for the type '_PortfolioHeatmapWidgetState'.
+ - '_PortfolioHeatmapWidgetState' is from 'package:todo_app/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart' ('lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart').
+      child: UniversalHeatmapWidget(
+             ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart:309:25:
+Error: The getter 'InvestmentType' isn't defined for the type '_PortfolioHeatmapWidgetState'.
+ - '_PortfolioHeatmapWidgetState' is from 'package:todo_app/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart' ('lib/features/portfolio/presentation/widgets/portfolio_heatmap_widget.dart').
+        investmentType: InvestmentType.portfolio,
+                        ^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:61:25:
+Error: Undefined name 'SelectorLayoutType'.
+        selectorLayout: SelectorLayoutType.compact,
+                        ^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:59:14:
+Error: Undefined name 'WebHeatmapDefaults'.
+      return WebHeatmapDefaults.portfolio(
+             ^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:67:25:
+Error: Undefined name 'SelectorLayoutType'.
+        selectorLayout: SelectorLayoutType.compact,
+                        ^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:65:14:
+Error: Undefined name 'MobileHeatmapDefaults'.
+      return MobileHeatmapDefaults.portfolio(
+             ^^^^^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:74:15:
+Error: 'HeatmapConfig' isn't a type.
+    ui_config.HeatmapConfig baseConfig,
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:89:24:
+Error: 'HeatmapConfig' isn't a type.
+    required ui_config.HeatmapConfig defaultConfig,
+                       ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:106:24:
+Error: 'HeatmapConfig' isn't a type.
+    required ui_config.HeatmapConfig defaultConfig,
+                       ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:115:59:
+Error: Couldn't find constructor 'DisplayConfig'.
+      display: defaultConfig.display?.copyWith() ?? const DisplayConfig(),
+                                                          ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:121:25:
+Error: Method not found: 'LayoutConfig'.
+          layout_config.LayoutConfig(
+                        ^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:127:11:
+Error: Method not found: 'VisualConfig'.
+          VisualConfig(accentColor: accentColor),
+          ^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:136:15:
+Error: 'HeatmapConfig' isn't a type.
+    ui_config.HeatmapConfig baseConfig,
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:143:15:
+Error: Couldn't find constructor 'DisplayConfig'.
+        const DisplayConfig(),
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:149:15:
+Error: Couldn't find constructor 'InteractionConfig'.
+        const InteractionConfig(),
+              ^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:154:15:
+Error: 'HeatmapConfig' isn't a type.
+    ui_config.HeatmapConfig baseConfig,
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:158:15:
+Error: Couldn't find constructor 'DisplayConfig'.
+        const DisplayConfig(),
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:161:15:
+Error: Couldn't find constructor 'InteractionConfig'.
+        const InteractionConfig(),
+              ^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:166:15:
+Error: 'HeatmapConfig' isn't a type.
+    ui_config.HeatmapConfig baseConfig,
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:173:15:
+Error: Couldn't find constructor 'DisplayConfig'.
+        const DisplayConfig(showRefreshButton: false, showLegend: false),
+              ^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:180:15:
+Error: Couldn't find constructor 'InteractionConfig'.
+        const InteractionConfig(
+              ^^^^^^^^^^^^^^^^^
+lib/features/portfolio/presentation/config/portfolio_heatmap_config.dart:193:60:
+Error: Method not found: 'SelectorConfig'.
+  static SelectorConfig createPortfolioSelectorConfig() => SelectorConfig(
+                                                           ^^^^^^^^^^^^^^
+Error: Compilation failed.
+  Command: /Users/munishm/develop/flutter/bin/cache/dart-sdk/bin/dart compile js --platform-binaries=/Users/munishm/develop/flutter/bin/cache/flutter_web_sdk/kernel --invoker=flutter_tool -Ddart.vm.product=true -DFLUTTER_VERSION=3.38.3 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=19074d12f7 -DFLUTTER_ENGINE_REVISION=13e658725d -DFLUTTER_DART_VERSION=3.10.1 -DFLUTTER_WEB_USE_SKIA=true -DFLUTTER_WEB_USE_SKWASM=false -DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/13e658725ddaa270601426d1485636157e38c34c/ --native-null-assertions --no-source-maps -O4 --minify -o /Users/munishm/Documents/AM-Repos/am-investment-ui/.dart_tool/flutter_build/135bd5699693c3ec47359f433bea59eb/app.dill --packages=/Users/munishm/Documents/AM-Repos/am-investment-ui/.dart_tool/package_config.json --cfe-only /Users/munishm/Documents/AM-Repos/am-investment-ui/.dart_tool/flutter_build/135bd5699693c3ec47359f433bea59eb/main.dart
+#0      RunResult.throwException (package:flutter_tools/src/base/process.dart:153:5)
+#1      _DefaultProcessUtils.run (package:flutter_tools/src/base/process.dart:379:19)
+<asynchronous suspension>
+#2      Dart2JSTarget.build (package:flutter_tools/src/build_system/targets/web.dart:207:5)
+<asynchronous suspension>
+#3      _BuildInstance._invokeInternal (package:flutter_tools/src/build_system/build_system.dart:873:9)
+<asynchronous suspension>
+#4      Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+<asynchronous suspension>
+#5      _BuildInstance.invokeTarget (package:flutter_tools/src/build_system/build_system.dart:811:32)
+<asynchronous suspension>
+#6      Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+<asynchronous suspension>
+#7      _BuildInstance.invokeTarget (package:flutter_tools/src/build_system/build_system.dart:811:32)
+<asynchronous suspension>
+#8      FlutterBuildSystem.build (package:flutter_tools/src/build_system/build_system.dart:631:16)
+<asynchronous suspension>
+#9      WebBuilder.buildWeb (package:flutter_tools/src/web/compile.dart:94:34)
+<asynchronous suspension>
+#10     BuildWebCommand.runCommand (package:flutter_tools/src/commands/build_web.dart:296:5)
+<asynchronous suspension>
+#11     FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1559:27)
+<asynchronous suspension>
+#12     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+<asynchronous suspension>
+#13     CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+<asynchronous suspension>
+#14     FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:487:9)
+<asynchronous suspension>
+#15     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+<asynchronous suspension>
+#16     FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:422:5)
+<asynchronous suspension>
+#17     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:104:11)
+<asynchronous suspension>
+#18     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+<asynchronous suspension>
+#19     main (package:flutter_tools/executable.dart:103:3)
+<asynchronous suspension>
+
+Error: Failed to compile application for the Web.

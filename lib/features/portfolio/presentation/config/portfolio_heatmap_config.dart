@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../../config/environment.dart';
-import '../../../../shared/widgets/heatmap/configs/display_config.dart';
-import '../../../../shared/widgets/heatmap/configs/interaction_config.dart';
-import '../../../../shared/widgets/heatmap/configs/layout_config.dart'
+import 'package:am_common_ui/shared/widgets/heatmap/configs/display_config.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/configs/interaction_config.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/configs/layout_config.dart'
     as layout_config;
-import '../../../../shared/widgets/heatmap/configs/selector_config.dart';
-import '../../../../shared/widgets/heatmap/configs/visual_config.dart';
-import '../../../../shared/widgets/heatmap/heatmap_config.dart' as ui_config;
-import '../../../../shared/widgets/heatmap/templates/mobile_heatmap_defaults.dart';
-import '../../../../shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/configs/selector_config.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/configs/visual_config.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/heatmap_config.dart' as ui_config;
+import 'package:am_common_ui/shared/widgets/heatmap/templates/mobile_heatmap_defaults.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/templates/web_heatmap_defaults.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
 
 /// Configuration manager for portfolio heatmap

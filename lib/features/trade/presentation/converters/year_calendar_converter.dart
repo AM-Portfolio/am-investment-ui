@@ -1,6 +1,6 @@
-import '../../../../features/trade/internal/domain/entities/trade_calendar.dart';
-import '../../../../features/trade/internal/domain/entities/trade_controller_entities.dart';
-import 'calendar_types.dart';
+import 'package:am_common_ui/am_common_ui.dart';
+import '../../internal/domain/entities/trade_calendar.dart';
+import '../../internal/domain/entities/trade_controller_entities.dart';
 
 /// Converter to transform TradeCalendar entity to year calendar data
 class YearCalendarConverter {

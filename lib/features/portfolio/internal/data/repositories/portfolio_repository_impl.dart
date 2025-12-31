@@ -248,6 +248,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
           tag: 'PortfolioRepository',
           error: error,
         );
+        _holdingsController.addError(error);
         return PortfolioHoldings.empty(userId);
       });
     }
@@ -339,6 +340,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
           tag: 'PortfolioRepository',
           error: error,
         );
+        _summaryController.addError(error);
         return PortfolioSummary.empty(userId);
       });
     }

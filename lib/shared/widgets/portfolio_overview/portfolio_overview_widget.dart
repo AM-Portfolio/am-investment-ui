@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/portfolio/providers/portfolio_providers.dart';
 import 'adapters/portfolio_overview_data_adapter.dart';
-import 'charts/base/chart_colors.dart';
-import 'charts/market_cap_allocation/animated_market_cap_chart.dart';
-import 'charts/sector_allocation/animated_sector_donut_chart.dart';
+import 'package:am_common_ui/am_common_ui.dart';
+import 'package:am_common_ui/shared/widgets/portfolio_overview/charts/base/chart_colors.dart';
 import 'configs/portfolio_overview_config.dart';
 import 'models/portfolio_overview_data.dart';
 

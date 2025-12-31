@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/widgets/calendar/universal_calendar/config.dart'
+import 'package:am_common_ui/widgets/calendar/universal_calendar/config.dart'
     as calendar_config;
-import '../../../../shared/widgets/calendar/universal_calendar/types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
 
 /// Configuration manager for trade calendar
 /// Handles all configuration logic for trade-specific calendar display

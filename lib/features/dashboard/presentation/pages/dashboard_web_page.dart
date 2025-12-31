@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../trade/providers/trade_internal_providers.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/calendar_types.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/data_provider.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart';
 import '../../../trade/presentation/models/trade_calendar_view_model.dart';
 import '../widgets/dashboard_widgets.dart';
 

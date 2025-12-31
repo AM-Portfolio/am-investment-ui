@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
-import '../../../../shared/widgets/heatmap/universal_heatmap.dart';
-import '../../../../shared/widgets/heatmap/loaders/heatmap_skeleton_loader.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/universal_heatmap.dart';
+import 'package:am_common_ui/shared/widgets/heatmap/loaders/heatmap_skeleton_loader.dart';
 import '../../../../shared/widgets/selectors/selectors.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_analytics_state.dart';

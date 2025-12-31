@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/logger.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/card_types.dart' as calendar_types;
-import '../../../../shared/widgets/calendar/universal_calendar/types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart' as calendar_types;
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
 import '../../internal/domain/entities/trade_calendar.dart' as entities;
 import '../../internal/domain/usecases/get_trade_calendar.dart';
 import '../../internal/domain/usecases/get_trade_calendar_by_date_range.dart';

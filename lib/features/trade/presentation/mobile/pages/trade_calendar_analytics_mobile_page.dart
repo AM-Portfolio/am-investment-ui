@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../shared/widgets/calendar/year_calendar/calendar_types.dart';
-import '../../../../../shared/widgets/calendar/year_calendar/year_calendar_converter.dart';
-import '../../../../../shared/widgets/calendar/year_calendar/year_calendar_widget.dart';
+import 'package:am_common_ui/am_common_ui.dart';
+import '../../converters/year_calendar_converter.dart';
 import '../../../trade_calendar_providers.dart';
 import '../../cubit/trade_calendar_cubit.dart';
 import '../../cubit/trade_calendar_state.dart';

@@ -656,7 +656,7 @@ class _DynamicChartCardState extends ConsumerState<DynamicChartCard> {
                           tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           tooltipMargin: 8,
                           tooltipBorder: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
-                          tooltipRoundedRadius: 8,
+
                           fitInsideHorizontally: true,
                           fitInsideVertically: true, 
                       )
@@ -736,7 +736,7 @@ class _DynamicChartCardState extends ConsumerState<DynamicChartCard> {
                       getTooltipColor: (_) => const Color(0xFF1E1E2C).withOpacity(0.95),
                       tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       tooltipBorder: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
-                      tooltipRoundedRadius: 8,
+
                       fitInsideHorizontally: true,
                       fitInsideVertically: true,
                   )

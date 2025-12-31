@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
-import '../../../../shared/widgets/calendar/universal_calendar/types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
 
 /// Callback for date range selection with context
 typedef DateRangeCallback =

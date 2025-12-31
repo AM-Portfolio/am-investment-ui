@@ -1,5 +1,5 @@
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/widgets/calendar/universal_calendar/card_types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/card_types.dart';
 import '../../internal/domain/entities/trade_calendar.dart';
 import '../../internal/domain/entities/trade_controller_entities.dart';
 

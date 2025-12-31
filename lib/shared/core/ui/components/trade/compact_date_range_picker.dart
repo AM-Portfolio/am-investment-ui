@@ -7,7 +7,7 @@ class CompactDateRangePickerDialog extends StatefulWidget {
   const CompactDateRangePickerDialog({
     super.key,
     this.initialDateRange,
-  });
+  }); 
 
   @override
   State<CompactDateRangePickerDialog> createState() => _CompactDateRangePickerDialogState();

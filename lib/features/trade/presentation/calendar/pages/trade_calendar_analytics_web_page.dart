@@ -3,10 +3,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../shared/widgets/calendar/universal_calendar/calendar_types.dart';
-import '../../../../../shared/widgets/calendar/universal_calendar/data_provider.dart';
-import '../../../../../shared/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
-import '../../../../../shared/widgets/calendar/year_calendar/year_calendar_converter.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart';
+import 'package:am_common_ui/am_common_ui.dart';
+import '../../converters/year_calendar_converter.dart';
+import '../../../../portfolio/presentation/widgets/portfolio_heatmap_widget.dart';
 import '../../../trade_calendar_providers.dart';
 import '../../cubit/trade_calendar_cubit.dart';
 import '../../cubit/trade_calendar_state.dart';

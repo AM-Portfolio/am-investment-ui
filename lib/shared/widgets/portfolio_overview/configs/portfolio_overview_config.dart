@@ -1,4 +1,6 @@
 /// Configuration for portfolio overview display
+import 'package:am_common_ui/am_common_ui.dart';
+
 class PortfolioOverviewConfig {
   const PortfolioOverviewConfig({
     this.showSummary = true,
@@ -52,12 +54,7 @@ class PortfolioOverviewConfig {
       );
 }
 
-enum ChartType {
-  pie,
-  donut,
-  bar,
-  table,
-}
+
 
 enum AllocationType {
   sector,

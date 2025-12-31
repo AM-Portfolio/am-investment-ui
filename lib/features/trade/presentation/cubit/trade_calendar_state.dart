@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../shared/widgets/calendar/universal_calendar/types.dart';
+import 'package:am_common_ui/widgets/calendar/universal_calendar/types.dart';
 import '../../internal/domain/entities/trade_calendar.dart';
 import '../models/trade_calendar_view_model.dart';
 

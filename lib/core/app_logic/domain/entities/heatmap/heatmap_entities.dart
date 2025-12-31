@@ -1,3 +1,1 @@
-// Export all heatmap core entities
-export 'heatmap_data_entity.dart';
-export 'heatmap_tile_entity.dart';
+export 'package:am_common_ui/core/app_logic/domain/entities/heatmap/heatmap_entities.dart';

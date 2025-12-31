@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../shared/widgets/portfolio_overview/charts/market_cap_allocation/animated_market_cap_chart.dart';
-import '../../../../../shared/widgets/portfolio_overview/charts/sector_allocation/animated_sector_donut_chart.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 import '../../../../../shared/widgets/portfolio_overview/models/portfolio_overview_data.dart';
 import '../../../internal/domain/entities/portfolio_summary.dart';
 import '../../../providers/portfolio_providers.dart';

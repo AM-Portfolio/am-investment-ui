@@ -47,7 +47,7 @@ dependencies:
   injectable: ^2.4.4
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
-  fl_chart: 0.68.0
+  fl_chart: ^1.1.1
   # Document upload dependencies
   dio: ^5.4.0
   retrofit: ^4.1.0
@@ -71,6 +71,10 @@ dependencies:
   flutter_animate: ^4.5.2
   webview_flutter: ^4.13.0
   webview_flutter_web: ^0.2.3+4
+
+  # Common UI package
+  am_common_ui:
+    path: ../am_common_ui
 
 dev_dependencies:
   flutter_test:
