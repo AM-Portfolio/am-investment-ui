@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../config/config_service.dart';
+import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/constants/auth_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 
@@ -26,11 +27,7 @@ class UserActivationRemoteDataSource implements UserActivationDataSource {
         throw ServerException('User API not configured', statusCode: 500);
       }
 
-      final endpoint = AuthConstants.activateUserEndpoint.replaceAll(
-        '{userId}',
-        userId,
-      );
-      final fullUrl = '${userConfig.baseUrl}$endpoint';
+      final fullUrl = ApiEndpoints.userStatus(userId);
 
       final response = await _dio.patch(
         fullUrl,
@@ -74,11 +71,7 @@ class UserActivationRemoteDataSource implements UserActivationDataSource {
         throw ServerException('User API not configured', statusCode: 500);
       }
 
-      final endpoint = AuthConstants.getUserStatusEndpoint.replaceAll(
-        '{userId}',
-        userId,
-      );
-      final fullUrl = '${userConfig.baseUrl}$endpoint';
+      final fullUrl = ApiEndpoints.userStatus(userId);
 
       final response = await _dio.get(fullUrl);
 

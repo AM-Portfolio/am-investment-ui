@@ -32,30 +32,30 @@ class AppConstants {
 
   /// Portfolio API Defaults
   static const String defaultPortfolioBaseUrl = 'http://localhost:8072';
-  static const String defaultHoldingsResource = '/api/v1/portfolios/holdings';
-  static const String defaultSummaryResource = '/api/v1/portfolios/summary';
+  static const String defaultHoldingsResource = '/v1/portfolios/holdings';
+  static const String defaultSummaryResource = '/v1/portfolios/summary';
   static const String defaultTransactionsResource =
-      '/api/v1/portfolios/transactions';
+      '/v1/portfolios/transactions';
 
   /// Trade API Defaults
   static const String defaultTradeBaseUrl = 'https://api.munish.org/am/trade';
   static const String defaultTradePortfolioListResource =
-      '/api/v1/portfolio-summary/by-owner';
+      '/v1/portfolio-summary/by-owner';
   static const String defaultTradePortfolioSummaryResource =
-      '/api/v1/portfolio-summary';
+      '/v1/portfolio-summary';
   static const String defaultTradeHoldingsResource =
-      '/api/v1/trades/portfolio-details';
+      '/v1/trades/portfolio-details';
   static const String defaultTradeDetailsResource =
-      '/api/v1/trades/details/by-ids';
+      '/v1/trades/details/by-ids';
   static const String defaultTradeCalendarMonthResource =
-      '/api/v1/trades/calendar/{portfolioId}/month';
+      '/v1/trades/calendar/{portfolioId}/month';
   static const String defaultTradeCalendarDayResource =
-      '/api/v1/trades/calendar/{portfolioId}/day';
+      '/v1/trades/calendar/{portfolioId}/day';
   static const String defaultTradeCalendarQuarterResource =
-      '/api/v1/trades/calendar/{portfolioId}/quarter';
+      '/v1/trades/calendar/{portfolioId}/quarter';
   static const String defaultTradeCalendarFinancialYearResource =
-      '/api/v1/trades/calendar/{portfolioId}/financial-year';
-  static const String defaultTradeSearchResource = '/api/v1/trades/search';
+      '/v1/trades/calendar/{portfolioId}/financial-year';
+  static const String defaultTradeSearchResource = '/v1/trades/search';
   static const int defaultTradeConnectTimeout = 30;
   static const int defaultTradeReceiveTimeout = 60;
   static const int defaultTradeSendTimeout = 60;

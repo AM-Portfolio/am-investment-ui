@@ -1,3 +1,6 @@
+import '/config/app_properties.dart';
+import 'app_constants.dart';
+
 /// Authentication-related constants
 class AuthConstants {
   // Error messages
@@ -23,16 +26,7 @@ class AuthConstants {
   static const Duration tokenExpiryDuration = Duration(hours: 24);
   static const Duration refreshTokenExpiryDuration = Duration(days: 30);
 
-  // API endpoints (relative paths - base URL comes from environment config)
-  static const String loginEndpoint = '/api/v1/tokens';
-  static const String registerEndpoint = '/api/v1/auth/register';
-  static const String googleLoginEndpoint = '/api/v1/auth/google/token';
-  static const String forgotPasswordEndpoint = '/api/v1/auth/forgot-password';
-  static const String resetPasswordEndpoint = '/api/v1/auth/reset-password';
-  static const String refreshTokenEndpoint = '/api/v1/auth/refresh';
-  static const String logoutEndpoint = '/api/v1/auth/logout';
-  static const String activateUserEndpoint = '/api/v1/users/{userId}/status';
-  static const String getUserStatusEndpoint = '/api/v1/users/{userId}/status';
+  // API endpoints are now managed in ApiEndpoints class and read from AppProperties
 
   // Shared preferences keys
   static const String isLoggedInKey = 'is_logged_in';
@@ -44,3 +38,4 @@ class AuthConstants {
   static const String authMethodGoogle = 'google';
   static const String authMethodDemo = 'demo';
 }
+

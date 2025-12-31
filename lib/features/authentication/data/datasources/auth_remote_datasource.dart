@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../config/config_service.dart';
 import '../../../../config/environment_config.dart';
+import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/constants/auth_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/utils/logger.dart';
@@ -24,7 +25,7 @@ class AuthRemoteDataSource implements AuthDataSource {
         throw ServerException('Auth API not configured', statusCode: 500);
       }
 
-      final fullUrl = '${authConfig.baseUrl}${AuthConstants.loginEndpoint}';
+      final fullUrl = ApiEndpoints.login;
       final response = await _dio.post(
         fullUrl,
         data: {'username': email, 'password': password},
@@ -100,8 +101,7 @@ class AuthRemoteDataSource implements AuthDataSource {
         throw ServerException('Auth API not configured', statusCode: 500);
       }
 
-      final fullUrl =
-          '${authConfig.baseUrl}${AuthConstants.googleLoginEndpoint}';
+      final fullUrl = ApiEndpoints.googleLogin;
 
       AppLogger.info('🔵 [BACKEND] POST $fullUrl');
       AppLogger.debug('🔵 [BACKEND] ID Token length: ${idToken.length}');
@@ -196,7 +196,7 @@ class AuthRemoteDataSource implements AuthDataSource {
       final authConfig = ConfigService.config.api.auth;
       if (authConfig == null) return;
 
-      final fullUrl = '${authConfig.baseUrl}${AuthConstants.logoutEndpoint}';
+      final fullUrl = ApiEndpoints.logout;
       await _dio.post(fullUrl);
     } on DioException catch (e) {
       // Log but don't throw - logout should always succeed locally
@@ -212,8 +212,7 @@ class AuthRemoteDataSource implements AuthDataSource {
         throw ServerException('Auth API not configured', statusCode: 500);
       }
 
-      final fullUrl =
-          '${authConfig.baseUrl}${AuthConstants.refreshTokenEndpoint}';
+      final fullUrl = ApiEndpoints.refreshToken;
       final response = await _dio.post(
         fullUrl,
         data: {'refreshToken': refreshToken},
@@ -252,7 +251,7 @@ class AuthRemoteDataSource implements AuthDataSource {
         throw ServerException('User API not configured', statusCode: 500);
       }
 
-      final fullUrl = '${userConfig.baseUrl}${userConfig.registerEndpoint}';
+      final fullUrl = ApiEndpoints.register;
       final response = await _dio.post(
         fullUrl,
         data: {
