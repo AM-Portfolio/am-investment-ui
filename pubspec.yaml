@@ -72,9 +72,10 @@ dependencies:
   webview_flutter: ^4.13.0
   webview_flutter_web: ^0.2.3+4
 
-  # Common UI package
+  # Common UI package (v1.0.0 - Core components, auth, layouts)
   am_common_ui:
     path: ../am_common_ui
+    # version: ^1.0.0  # Using path dependency (local development)
 
 dev_dependencies:
   flutter_test:

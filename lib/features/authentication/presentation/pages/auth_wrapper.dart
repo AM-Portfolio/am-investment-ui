@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/platform_utils.dart';
+import '../../../../core/services/app_preload_service.dart';
 import '../../../../shared/widgets/layouts/mobile_layout.dart';
 import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
@@ -14,16 +16,17 @@ import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
 import 'login_screen.dart';
 
 /// Authentication-aware wrapper that manages authentication state
-class AuthWrapper extends StatefulWidget {
+class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
+  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
 }
 
-class _AuthWrapperState extends State<AuthWrapper> {
+class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   String _currentPage = 'Dashboard';
   bool _isSidebarExpanded = true;
+  bool _dataPreloaded = false;  // Track if data has been preloaded
 
   @override
   void initState() {
@@ -62,6 +65,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     setState(() {
       _currentPage = 'Dashboard';
       _isSidebarExpanded = true;
+      _dataPreloaded = false;  // Reset preload flag for next login
     });
   }
 
@@ -223,6 +227,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
         '✅ AuthWrapper: User authenticated successfully - userId: "$userId", email: "$email"',
         tag: 'AuthWrapper',
       );
+
+      // Preload essential data (once per authentication)
+      if (!_dataPreloaded) {
+        AppLogger.debug(
+          '📦 Preloading essential data for user...',
+          tag: 'AuthWrapper',
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          AppPreloadService.preloadEssentialData(ref, userId);
+          setState(() {
+            _dataPreloaded = true;
+          });
+        });
+      }
 
       AppLogger.debug(
         '🏗️ Building main app screen with userId: "$userId"',
