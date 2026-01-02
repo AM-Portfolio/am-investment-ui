@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../widgets/registration_form_widget.dart';
 
 /// User registration form for use inside persistent shell

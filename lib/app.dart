@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'di/auth_providers.dart';
 import 'features/authentication/presentation/pages/auth_wrapper.dart';
-import 'features/authentication/presentation/pages/login_screen.dart';
-import 'features/authentication/presentation/pages/reset_password_page.dart';
+import 'package:am_common_ui/features/authentication/presentation/pages/login_screen.dart';
+import 'package:am_common_ui/features/authentication/presentation/pages/reset_password_page.dart';
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/trade/presentation/add_trade/pages/add_trade_web_page.dart';
 import 'features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart';

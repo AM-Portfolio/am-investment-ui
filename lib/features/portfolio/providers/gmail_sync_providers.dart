@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../config/app_config.dart';
 import '../../../core/utils/logger.dart';
 import '../../../di/app_providers.dart';
 import '../internal/data/datasources/gmail_remote_data_source.dart';

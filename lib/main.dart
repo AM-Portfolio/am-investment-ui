@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
-import 'config/config_service.dart';
+import 'package:am_common_ui/config/config_service.dart';  // Migrated
 import 'di/injection.dart';
 
 /// SINGLE entry point for Android, iOS, and Web.

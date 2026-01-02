@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../config/app_config.dart';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import 'internal/data/datasources/journal_template_remote_datasource.dart';
 import 'internal/data/repositories/journal_template_repository_impl.dart';

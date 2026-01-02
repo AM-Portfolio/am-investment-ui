@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../shared/widgets/inputs/glass_text_field.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../widgets/developer_controls_panel.dart';
 import '../widgets/google_signin_button.dart';
 

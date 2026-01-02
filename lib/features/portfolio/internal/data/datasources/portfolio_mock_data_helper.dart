@@ -18,7 +18,7 @@ class PortfolioMockDataHelper {
     try {
       if (_cachedSummary == null) {
         final jsonString = await rootBundle
-            .loadString('lib/assets/mock_data/portfolio_summary.json');
+            .loadString('assets/mock_data/portfolio_summary.json');
         _cachedSummary = jsonDecode(jsonString) as Map<String, dynamic>;
       }
 
@@ -39,7 +39,7 @@ class PortfolioMockDataHelper {
     try {
       if (_cachedHoldings == null) {
         final jsonString = await rootBundle
-            .loadString('lib/assets/mock_data/portfolio_holdings.json');
+            .loadString('assets/mock_data/portfolio_holdings.json');
         _cachedHoldings = jsonDecode(jsonString) as Map<String, dynamic>;
       }
 
@@ -60,7 +60,7 @@ class PortfolioMockDataHelper {
     try {
       if (_cachedAnalytics == null) {
         final jsonString = await rootBundle
-            .loadString('lib/assets/mock_data/portfolio_analytics.json');
+            .loadString('assets/mock_data/portfolio_analytics.json');
         _cachedAnalytics = jsonDecode(jsonString) as Map<String, dynamic>;
       }
 

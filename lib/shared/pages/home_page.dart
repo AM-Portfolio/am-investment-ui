@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../features/authentication/presentation/cubit/auth_cubit.dart';
-import '../../features/authentication/presentation/cubit/auth_state.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';  // Migrated to am_common_ui
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';  // Migrated to am_common_ui
 
 /// Home page shown after authentication
 class HomePage extends StatelessWidget {

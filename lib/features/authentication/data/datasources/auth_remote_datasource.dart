@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 
-import '../../../../config/config_service.dart';
 import '../../../../config/environment_config.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/constants/auth_constants.dart';

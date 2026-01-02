@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 
-import '../../../config/config_service.dart';
 import '../../../core/network/api_client.dart';
 import '../internal/data/datasources/trade_remote_data_source.dart';
 import '../internal/data/repositories/trade_repository_impl.dart';

@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 
 import 'package:http/http.dart' as http;
 
-import '../../../../../../config/app_config.dart';
 import '../../../../../../core/utils/logger.dart';
 import '../dtos/cloudinary_dto.dart';
 

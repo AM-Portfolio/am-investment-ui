@@ -2,21 +2,21 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/network/auth_interceptor.dart';
-import '../core/services/secure_storage_service.dart';
-import '../features/authentication/data/datasources/auth_remote_datasource.dart';
-import '../features/authentication/data/datasources/mock_auth_datasource.dart';
-import '../features/authentication/data/repositories/auth_repository_impl.dart';
-import '../features/authentication/data/services/google_signin_service.dart';
-import '../features/authentication/data/services/mock_data_service.dart';
-import '../features/authentication/domain/repositories/auth_repository.dart';
-import '../features/authentication/domain/usecases/check_auth_status_usecase.dart';
-import '../features/authentication/domain/usecases/demo_login_usecase.dart';
-import '../features/authentication/domain/usecases/email_login_usecase.dart';
-import '../features/authentication/domain/usecases/get_current_user_usecase.dart';
-import '../features/authentication/domain/usecases/google_login_usecase.dart';
-import '../features/authentication/domain/usecases/logout_usecase.dart';
-import '../features/authentication/domain/usecases/register_usecase.dart';
-import '../features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:am_common_ui/core/services/secure_storage_service.dart';  // Migrated to am_common_ui
+import 'package:am_common_ui/features/authentication/data/datasources/auth_remote_datasource.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/data/datasources/mock_auth_datasource.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/data/repositories/auth_repository_impl.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/data/services/google_signin_service.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/data/services/mock_data_service.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/repositories/auth_repository.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/check_auth_status_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/demo_login_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/email_login_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/get_current_user_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/google_login_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/logout_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/domain/usecases/register_usecase.dart';  // Migrated
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';  // Migrated
 
 class AuthProviders {
   static SecureStorageService? _secureStorageService;

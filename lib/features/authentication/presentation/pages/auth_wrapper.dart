@@ -10,8 +10,8 @@ import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import '../../../trade/presentation/mobile/trade_mobile_screen.dart';
 import '../../../trade/presentation/web/trade_web_screen.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
+import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
 import 'login_screen.dart';
 

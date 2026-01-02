@@ -1,5 +1,6 @@
-import '../../../../../config/app_config.dart';
 import '../../../../../core/network/api_client.dart';
+import 'package:am_common_ui/config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';
 import '../../../../../core/utils/logger.dart';
 import '../dtos/gmail_status_dto.dart';
 import '../dtos/gmail_sync_response_dto.dart';

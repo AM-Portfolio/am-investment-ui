@@ -7,20 +7,20 @@ class AppConstants {
   static const int defaultPort = 3000;
 
   /// Asset Paths
-  static const String assetsPath = 'lib/assets';
+  static const String assetsPath = 'assets';
   static const String imagesPath = '$assetsPath/images';
   static const String mockDataPath = '$assetsPath/mock_data';
 
   /// Configuration Files
-  static const String mainPropertiesFile = 'lib/assets/application.properties';
+  static const String mainPropertiesFile = 'assets/application.properties';
   static const String devPropertiesFile =
-      'lib/assets/application-dev.properties';
+      'assets/application-dev.properties';
   static const String prodPropertiesFile =
-      'lib/assets/application-prod.properties';
+      'assets/application-prod.properties';
   static const String testPropertiesFile =
-      'lib/assets/application-test.properties';
+      'assets/application-test.properties';
   static const String stagingPropertiesFile =
-      'lib/assets/application-staging.properties';
+      'assets/application-staging.properties';
 
   /// Default Environment
   static const String defaultEnvironment = 'dev';

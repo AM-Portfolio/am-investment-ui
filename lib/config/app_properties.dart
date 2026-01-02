@@ -10,7 +10,7 @@ class AppProperties {
   final Map<String, String> _properties = {};
   bool _isLoaded = false;
 
-  /// Load properties from lib/assets/application.properties
+  /// Load properties from assets/application.properties
   /// Uses constants for all file paths and environment detection
   Future<void> loadProperties({String? environment}) async {
     if (_isLoaded) return;

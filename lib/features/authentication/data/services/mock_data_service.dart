@@ -15,7 +15,7 @@ class MockDataService {
   /// Load mock users from JSON
   Future<List<UserModel>> loadMockUsers() async {
     final response = await rootBundle.loadString(
-      'lib/assets/mock_data/users/auth_users.json',
+      'assets/mock_data/users/auth_users.json',
     );
     final Map<String, dynamic> data = json.decode(response);
     final List<dynamic> authUsers = data['auth_users'];
@@ -25,7 +25,7 @@ class MockDataService {
   /// Load mock Google users from JSON
   Future<List<UserModel>> loadMockGoogleUsers() async {
     final response = await rootBundle.loadString(
-      'lib/assets/mock_data/google/oauth_profiles.json',
+      'assets/mock_data/google/oauth_profiles.json',
     );
     final Map<String, dynamic> data = json.decode(response);
     final List<dynamic> googleProfiles = data['google_profiles'];
@@ -35,7 +35,7 @@ class MockDataService {
   /// Load test users from default JSON
   Future<List<Map<String, dynamic>>> loadTestUsers() async {
     final response = await rootBundle.loadString(
-      'lib/assets/test_users.json',
+      'assets/test_users.json',
     );
     final Map<String, dynamic> data = json.decode(response);
     final List<dynamic> users = data['users'];

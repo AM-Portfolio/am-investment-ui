@@ -111,22 +111,22 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib/assets/application.properties
-    - lib/assets/application-dev.properties
-    - lib/assets/application-prod.properties
-    - lib/assets/application-staging.properties
-    - lib/assets/application-test.properties
-    - lib/assets/test_users.json
-    - lib/assets/images/
-    - lib/assets/mock_data/
-    - lib/assets/mock_data/trade/
-    - lib/assets/mock_data/trade/holdings/
-    - lib/assets/mock_data/trade/calander/
-    - lib/assets/mock_data/users/
-    - lib/assets/mock_data/tokens/
-    - lib/assets/mock_data/google/
-    - lib/assets/mock_data/api_responses/
-    - lib/assets/images/
+    - assets/application.properties
+    - assets/application-dev.properties
+    - assets/application-prod.properties
+    - assets/application-staging.properties
+    - assets/application-test.properties
+    - assets/test_users.json
+    - assets/images/
+    - assets/mock_data/
+    - assets/mock_data/trade/
+    - assets/mock_data/trade/holdings/
+    - assets/mock_data/trade/calander/
+    - assets/mock_data/users/
+    - assets/mock_data/tokens/
+    - assets/mock_data/google/
+    - assets/mock_data/api_responses/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

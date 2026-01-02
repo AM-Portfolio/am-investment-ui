@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../config/app_config.dart';
-import '../config/config_service.dart';
+import 'package:am_common_ui/config/app_config.dart';  // Migrated to am_common_ui
+import 'package:am_common_ui/config/config_service.dart';  // Migrated to am_common_ui
 import '../config/environment_config.dart' as env_config;
 import '../core/network/api_client.dart';
 

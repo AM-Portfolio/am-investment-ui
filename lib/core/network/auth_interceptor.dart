@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../services/secure_storage_service.dart';
+import 'package:am_common_ui/core/services/secure_storage_service.dart';  // Migrated to am_common_ui
 
 /// Interceptor to add authentication token to requests
 class AuthInterceptor extends Interceptor {
