@@ -84,15 +84,18 @@ class _MaterialApp extends StatelessWidget {
             builder: (context) => Consumer(
               builder: (context, ref, _) {
                 // Get TradeControllerCubit from Riverpod provider
-                final tradeControllerCubit = ref.watch(tradeControllerCubitProvider);
+                final tradeControllerCubitAsync = ref.watch(tradeControllerCubitProvider);
 
-                // Wrap with BlocProvider so AddTradeWebPage can access it via context.read()
-                return BlocProvider<TradeControllerCubit>.value(
-                  value: tradeControllerCubit,
-                  child: AddTradeWebPage(
-                    portfolioId: args['portfolioId']! as String,
-                    portfolioName: args['portfolioName'] as String?,
+                return tradeControllerCubitAsync.when(
+                  data: (tradeControllerCubit) => BlocProvider<TradeControllerCubit>.value(
+                    value: tradeControllerCubit,
+                    child: AddTradeWebPage(
+                      portfolioId: args['portfolioId']! as String,
+                      portfolioName: args['portfolioName'] as String?,
+                    ),
                   ),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Center(child: Text('Error initializing trade controller: $error')),
                 );
               },
             ),

@@ -24,7 +24,7 @@ class MobileFilterPanel {
     VoidCallback? onReset,
   }) async {
     // Get the cubit from the existing provider - don't create a new one
-    final cubit = ref.read(favoriteFilterCubitProvider);
+    final cubit = await ref.read(favoriteFilterCubitProvider.future);
 
     await showModalBottomSheet(
       context: context,

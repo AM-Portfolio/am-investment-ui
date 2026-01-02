@@ -177,7 +177,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
 
       switch (period) {
         case TradePeriodType.daily:
-          final getTradeCalendarByDay = ref.read(getTradeCalendarByDayProvider);
+          final getTradeCalendarByDay = await ref.read(getTradeCalendarByDayProvider.future);
           final calendar = await getTradeCalendarByDay(widget.userId, widget.portfolioId, date: date);
           final trades = calendar.allTrades;
           setState(() {
@@ -191,7 +191,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
           break;
 
         case TradePeriodType.monthly:
-          final getTradeCalendarByMonth = ref.read(getTradeCalendarByMonthProvider);
+          final getTradeCalendarByMonth = await ref.read(getTradeCalendarByMonthProvider.future);
           final calendar = await getTradeCalendarByMonth(
             widget.userId,
             widget.portfolioId,
@@ -211,7 +211,7 @@ class _JournalEntryFormState extends ConsumerState<JournalEntryForm> {
       }
 
       // For weekly and yearly, use date range
-      final getTradeCalendarByDateRange = ref.read(getTradeCalendarByDateRangeProvider);
+      final getTradeCalendarByDateRange = await ref.read(getTradeCalendarByDateRangeProvider.future);
       final calendar = await getTradeCalendarByDateRange(
         widget.userId,
         widget.portfolioId,

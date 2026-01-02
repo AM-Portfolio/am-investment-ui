@@ -32,9 +32,9 @@ class _TradeCalendarAnalyticsMobilePageState extends ConsumerState<TradeCalendar
   }
 
   /// Initialize trade calendar with optimal settings
-  void _initializeTradeCalendar() {
+  void _initializeTradeCalendar() async {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
-    final cubit = ref.read(tradeCalendarCubitProvider(params));
+    final cubit = await ref.read(tradeCalendarCubitProvider(params).future);
 
     // Start in yearly view
     cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
@@ -43,50 +43,54 @@ class _TradeCalendarAnalyticsMobilePageState extends ConsumerState<TradeCalendar
   @override
   Widget build(BuildContext context) {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
-    final cubit = ref.watch(tradeCalendarCubitProvider(params));
+    final cubitAsyncValue = ref.watch(tradeCalendarCubitProvider(params));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Calendar - $_selectedYear'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<TradeCalendarCubit, TradeCalendarState>(
-        bloc: cubit,
-        builder: (context, state) => switch (state) {
-          TradeCalendarLoading() => const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Loading calendar...')],
+    return cubitAsyncValue.when(
+      data: (cubit) => Scaffold(
+        appBar: AppBar(
+          title: Text('Calendar - $_selectedYear'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
+              },
             ),
-          ),
-          TradeCalendarLoaded() => _buildCalendarView(context, cubit),
-          TradeCalendarError() => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red.withOpacity(0.5)),
-                const SizedBox(height: 16),
-                Text('Error: ${state.message}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
+          ],
+        ),
+        body: BlocBuilder<TradeCalendarCubit, TradeCalendarState>(
+          bloc: cubit,
+          builder: (context, state) => switch (state) {
+            TradeCalendarLoading() => const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Loading calendar...')],
+              ),
             ),
-          ),
-          _ => const Center(child: CircularProgressIndicator()),
-        },
+            TradeCalendarLoaded() => _buildCalendarView(context, cubit),
+            TradeCalendarError() => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red.withOpacity(0.5)),
+                  const SizedBox(height: 16),
+                  Text('Error: ${state.message}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+            _ => const Center(child: CircularProgressIndicator()),
+          },
+        ),
       ),
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) => Scaffold(body: Center(child: Text('Error initializing calendar: $error'))),
     );
   }
 

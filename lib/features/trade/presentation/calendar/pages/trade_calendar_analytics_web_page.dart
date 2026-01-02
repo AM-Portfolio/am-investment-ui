@@ -72,10 +72,10 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
   }
 
   /// Initialize trade calendar with optimal settings
-  void _initializeTradeCalendar() {
+  void _initializeTradeCalendar() async {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
-    final cubit = ref.read(tradeCalendarCubitProvider(params));
-
+    final cubit = await ref.read(tradeCalendarCubitProvider(params).future);
+    
     // Start in yearly view
     cubit.navigateToYearly(userId: widget.userId, portfolioId: widget.portfolioId, year: _selectedYear);
   }
@@ -131,21 +131,25 @@ class _TradeCalendarAnalyticsWebPageState extends ConsumerState<TradeCalendarAna
   @override
   Widget build(BuildContext context) {
     final params = (userId: widget.userId, portfolioId: widget.portfolioId);
-    final cubit = ref.watch(tradeCalendarCubitProvider(params));
+    final cubitAsync = ref.watch(tradeCalendarCubitProvider(params));
 
-    return Scaffold(
-      appBar: _buildAppBar(context, cubit),
-      body: BlocBuilder<TradeCalendarCubit, TradeCalendarState>(
-        bloc: cubit,
-        builder: (context, state) => switch (state) {
-          TradeCalendarLoading() => _buildLoadingState(context, state.isRefresh),
-          TradeCalendarLoaded() => _buildMainContent(context, state.viewModel, cubit),
-          TradeCalendarError() => _buildErrorState(context, cubit, state.message),
-          TradeCalendarFiltering() => _buildFilteringState(context, state.currentData.viewModel, cubit),
-          TradeCalendarRefreshing() => _buildRefreshingState(context, state.currentData.viewModel, cubit),
-          _ => _buildInitialState(context, cubit),
-        },
+    return cubitAsync.when(
+      data: (cubit) => Scaffold(
+        appBar: _buildAppBar(context, cubit),
+        body: BlocBuilder<TradeCalendarCubit, TradeCalendarState>(
+          bloc: cubit,
+          builder: (context, state) => switch (state) {
+            TradeCalendarLoading() => _buildLoadingState(context, state.isRefresh),
+            TradeCalendarLoaded() => _buildMainContent(context, state.viewModel, cubit),
+            TradeCalendarError() => _buildErrorState(context, cubit, state.message),
+            TradeCalendarFiltering() => _buildFilteringState(context, state.currentData.viewModel, cubit),
+            TradeCalendarRefreshing() => _buildRefreshingState(context, state.currentData.viewModel, cubit),
+            _ => _buildInitialState(context, cubit),
+          },
+        ),
       ),
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) => Scaffold(body: Center(child: Text('Error initializing calendar: $error'))),
     );
   }
 

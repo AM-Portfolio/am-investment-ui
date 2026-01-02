@@ -56,7 +56,7 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
 
 // ... (imports)
 
-  void _applyFilter(MetricsFilterConfig config) {
+  void _applyFilter(MetricsFilterConfig config) async {
     setState(() {
       _currentConfig = config;
     });
@@ -67,7 +67,8 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
       endDate: config.dateRange?.endDate ?? DateTime.now(),
     );
 
-    ref.read(tradeReportCubitProvider).loadReport(request);
+    final cubit = await ref.read(tradeReportCubitProvider.future);
+    cubit.loadReport(request);
   }
   
   ChartTimeFrame _getAutoTimeFrame() {
@@ -99,38 +100,40 @@ class _TradeReportPageState extends ConsumerState<TradeReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = ref.watch(tradeReportCubitProvider);
+    final cubitAsync = ref.watch(tradeReportCubitProvider);
     final currency = ref.watch(userCurrencyProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent, 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            _buildHeader(context),
-            const SizedBox(height: 24),
+      body: cubitAsync.when(
+        data: (cubit) => SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Section
+              _buildHeader(context),
+              const SizedBox(height: 24),
 
-
-
-            // Main Content Area
-            BlocBuilder<TradeReportCubit, TradeReportState>(
-              bloc: cubit,
-              builder: (context, state) {
-                if (state is TradeReportLoading) {
-                  return const SizedBox(height: 400, child: Center(child: CircularProgressIndicator()));
-                } else if (state is TradeReportError) {
-                  return Center(child: Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)));
-                } else if (state is TradeReportLoaded) {
-                  return _buildPerformanceTab(state);
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
+              // Main Content Area
+              BlocBuilder<TradeReportCubit, TradeReportState>(
+                bloc: cubit,
+                builder: (context, state) {
+                  if (state is TradeReportLoading) {
+                    return const SizedBox(height: 400, child: Center(child: CircularProgressIndicator()));
+                  } else if (state is TradeReportError) {
+                    return Center(child: Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)));
+                  } else if (state is TradeReportLoaded) {
+                    return _buildPerformanceTab(state);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error initializing report: $error')),
       ),
     );
   }

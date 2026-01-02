@@ -71,7 +71,7 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
     if (config.metricTypes.isEmpty) {
       try {
         // Fetch available metric types if not already loaded
-        final getMetricTypes = ref.read(getMetricTypesUseCaseProvider);
+        final getMetricTypes = await ref.read(getMetricTypesUseCaseProvider.future);
         final availableTypes = await getMetricTypes();
         metricTypesToUse = availableTypes;
       } catch (e) {
@@ -90,74 +90,79 @@ class _TradeMetricsPageState extends ConsumerState<TradeMetricsPage> {
       instruments: config.instrumentFilters?.baseSymbols,
     );
     
-    ref.read(tradeMetricsCubitProvider).loadMetrics(request);
+    final cubit = await ref.read(tradeMetricsCubitProvider.future);
+    cubit.loadMetrics(request);
   }
 
   @override
   Widget build(BuildContext context) {
-    final cubit = ref.watch(tradeMetricsCubitProvider);
+    final cubitAsync = ref.watch(tradeMetricsCubitProvider);
     
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Filter Panel
-            TradeMetricsFilterPanel(
-              userId: widget.userId,
-              initialConfig: _currentConfig,
-              onApplyFilter: _applyFilter,
-              onReset: () => _applyFilter(MetricsFilterConfig.empty()),
-              availableMetricTypes: (cubit.state is TradeMetricsLoaded) 
-                    ? (cubit.state as TradeMetricsLoaded).availableMetricTypes 
-                    : [],
-            ),
-            
-            const SizedBox(height: 16),
-
-            // Content Area
-            Builder(
-              builder: (context) {
-                final state = cubit.state;
-                  
-                  if (state is TradeMetricsLoading) {
-                    return const SizedBox(
-                      height: 400,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (state is TradeMetricsError) {
-                    return SizedBox(
-                      height: 400,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                            const SizedBox(height: 16),
-                            Text('Error loading metrics', style: Theme.of(context).textTheme.titleMedium),
-                            Text(state.message, style: Theme.of(context).textTheme.bodySmall),
-                            const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                              onPressed: () => _applyFilter(_currentConfig),
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  } else if (state is TradeMetricsLoaded) {
-                    return _buildDashboard(state.metrics);
-                  }
-                  return const SizedBox(height: 400, child: Center(child: Text('Initialize metrics to view data')));
-                },
+      body: cubitAsync.when(
+        data: (cubit) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Filter Panel
+              TradeMetricsFilterPanel(
+                userId: widget.userId,
+                initialConfig: _currentConfig,
+                onApplyFilter: _applyFilter,
+                onReset: () => _applyFilter(MetricsFilterConfig.empty()),
+                availableMetricTypes: (cubit.state is TradeMetricsLoaded) 
+                      ? (cubit.state as TradeMetricsLoaded).availableMetricTypes 
+                      : [],
               ),
-            ],
+              
+              const SizedBox(height: 16),
+
+              // Content Area
+              Builder(
+                builder: (context) {
+                  final state = cubit.state;
+                    
+                    if (state is TradeMetricsLoading) {
+                      return const SizedBox(
+                        height: 400,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    } else if (state is TradeMetricsError) {
+                      return SizedBox(
+                        height: 400,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                              const SizedBox(height: 16),
+                              Text('Error loading metrics', style: Theme.of(context).textTheme.titleMedium),
+                              Text(state.message, style: Theme.of(context).textTheme.bodySmall),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () => _applyFilter(_currentConfig),
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Retry'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else if (state is TradeMetricsLoaded) {
+                      return _buildDashboard(state.metrics);
+                    }
+                    return const SizedBox(height: 400, child: Center(child: Text('Initialize metrics to view data')));
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    }
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error initializing metrics: $error')),
+      ),
+    );
+  }
 
   Widget _buildDashboard(TradeMetricsResponse metrics) {
     return Column(

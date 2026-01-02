@@ -29,9 +29,9 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
   void initState() {
     super.initState();
     // Load favorite filters when page initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        final cubit = ref.read(favoriteFilterCubitProvider);
+        final cubit = await ref.read(favoriteFilterCubitProvider.future);
         cubit.loadFilters(widget.userId);
       }
     });
@@ -50,29 +50,33 @@ class _TradeHoldingsDashboardWebPageState extends ConsumerState<TradeHoldingsDas
         // Filter section
         Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-          child: BlocProvider(
-            create: (_) => ref.read(favoriteFilterCubitProvider),
-            child: FilterPanel(
-              userId: widget.userId,
-              initialConfig: _currentFilter,
-              onApplyFilter: (config) {
-                setState(() {
-                  _currentFilter = config;
-                });
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)));
-              },
-              onReset: () {
-                setState(() {
-                  _currentFilter = MetricsFilterConfig.empty();
-                });
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
-              },
-            ),
-          ),
+          child: ref.watch(favoriteFilterCubitProvider).when(
+                data: (cubit) => BlocProvider.value(
+                  value: cubit,
+                  child: FilterPanel(
+                    userId: widget.userId,
+                    initialConfig: _currentFilter,
+                    onApplyFilter: (config) {
+                      setState(() {
+                        _currentFilter = config;
+                      });
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Custom filters applied'), duration: Duration(seconds: 2)));
+                    },
+                    onReset: () {
+                      setState(() {
+                        _currentFilter = MetricsFilterConfig.empty();
+                      });
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Filters reset'), duration: Duration(seconds: 1)));
+                    },
+                  ),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Error loading filters: $error')),
+              ),
         ),
 
         const SizedBox(height: 6),

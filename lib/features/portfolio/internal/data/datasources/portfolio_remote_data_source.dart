@@ -52,6 +52,21 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
   final ApiClient _apiClient;
   final PortfolioApiConfig _portfolioConfig;
 
+  /// Helper to safely build URI avoiding double slashes
+  String _buildUri(String baseUrl, String resource) {
+    // Ensure baseUrl is clean
+    final cleanBase = baseUrl.endsWith('/')
+        ? baseUrl.substring(0, baseUrl.length - 1)
+        : baseUrl;
+    
+    // Ensure resource starts with /
+    var cleanResource = resource.startsWith('/')
+        ? resource
+        : '/$resource';
+        
+    return '$cleanBase$cleanResource';
+  }
+
   @override
   Future<PortfolioHoldingsDto> getPortfolioHoldings(String userId) async {
     AppLogger.methodEntry(
@@ -67,8 +82,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI from portfolio config with userId query parameter
-      final baseUri =
-          '${_portfolioConfig.baseUrl}${_portfolioConfig.holdingsResource}';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, _portfolioConfig.holdingsResource);
       final fullUri = '$baseUri?userId=$userId';
 
       // Use ApiClient for consistent error handling and logging
@@ -139,8 +153,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI from portfolio config with userId and portfolioId query parameters
-      final baseUri =
-          '${_portfolioConfig.baseUrl}${_portfolioConfig.holdingsResource}';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, _portfolioConfig.holdingsResource);
       final fullUri = '$baseUri?userId=$userId&portfolioId=$portfolioId';
 
       // Use ApiClient for consistent error handling and logging
@@ -208,8 +221,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI from portfolio config with userId query parameter
-      final baseUri =
-          '${_portfolioConfig.baseUrl}${_portfolioConfig.summaryResource}';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, _portfolioConfig.summaryResource);
       final fullUri = '$baseUri?userId=$userId';
 
       // Use ApiClient for consistent error handling and logging
@@ -280,8 +292,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI from portfolio config with userId and portfolioId query parameters
-      final baseUri =
-          '${_portfolioConfig.baseUrl}${_portfolioConfig.summaryResource}';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, _portfolioConfig.summaryResource);
       final fullUri = '$baseUri?userId=$userId&portfolioId=$portfolioId';
 
       // Use ApiClient for consistent error handling and logging
@@ -352,8 +363,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI for analytics endpoint
-      final baseUri =
-          '${_portfolioConfig.baseUrl}/api/v1/analytics/portfolio/$portfolioId/advanced';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, '/v1/analytics/portfolio/$portfolioId/advanced');
 
       // Use ApiClient for consistent error handling and logging with POST request
       final analyticsResponse = await _apiClient.post<PortfolioAnalyticsResponseDto>(
@@ -418,7 +428,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       AppLogger.info(
-        'Portfolio analytics fetched successfully from API',
+        'Portfolio analytics fetched successfully from API for $portfolioId',
         tag: 'PortfolioRemoteDataSource',
       );
       AppLogger.methodExit(
@@ -474,7 +484,7 @@ class PortfolioRemoteDataSourceImpl implements PortfolioRemoteDataSource {
       );
 
       // Construct full URI from portfolio config with userId query parameter
-      final baseUri = '${_portfolioConfig.baseUrl}/api/v1/portfolios/list';
+      final baseUri = _buildUri(_portfolioConfig.baseUrl, '/v1/portfolios/list');
       final fullUri = '$baseUri?userId=$userId';
 
       // Use ApiClient for consistent error handling and logging

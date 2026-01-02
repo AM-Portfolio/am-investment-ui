@@ -9,32 +9,38 @@ import '../presentation/report/cubit/trade_report_cubit.dart';
 import '../../../../core/network/api_client.dart';
 
 import '../../../../../config/config_service.dart';
+import '../../../../di/app_providers.dart';
 
-final tradeReportRemoteDataSourceProvider = Provider<TradeReportRemoteDataSource>((ref) {
-  final apiConfig = ConfigService.config.api;
-  return TradeReportRemoteDataSource(ApiClient(), apiConfig.trade); 
+final tradeReportRemoteDataSourceProvider = FutureProvider<TradeReportRemoteDataSource>((ref) async {
+  final apiClient = await ref.watch(apiClientProvider.future);
+  final apiConfig = await ref.watch(appConfigProvider.future);
+  return TradeReportRemoteDataSource(apiClient, apiConfig.api.trade); 
 });
 
-final tradeReportRepositoryProvider = Provider<TradeReportRepository>((ref) {
-  return TradeReportRepositoryImpl(ref.read(tradeReportRemoteDataSourceProvider));
+final tradeReportRepositoryProvider = FutureProvider<TradeReportRepository>((ref) async {
+  final remoteDataSource = await ref.watch(tradeReportRemoteDataSourceProvider.future);
+  return TradeReportRepositoryImpl(remoteDataSource);
 });
 
-final getTradePerformanceSummaryUseCaseProvider = Provider<GetTradePerformanceSummaryUseCase>((ref) {
-  return GetTradePerformanceSummaryUseCase(ref.read(tradeReportRepositoryProvider));
+final getTradePerformanceSummaryUseCaseProvider = FutureProvider<GetTradePerformanceSummaryUseCase>((ref) async {
+  final repository = await ref.watch(tradeReportRepositoryProvider.future);
+  return GetTradePerformanceSummaryUseCase(repository);
 });
 
-final getDailyPerformanceUseCaseProvider = Provider<GetDailyPerformanceUseCase>((ref) {
-  return GetDailyPerformanceUseCase(ref.read(tradeReportRepositoryProvider));
+final getDailyPerformanceUseCaseProvider = FutureProvider<GetDailyPerformanceUseCase>((ref) async {
+  final repository = await ref.watch(tradeReportRepositoryProvider.future);
+  return GetDailyPerformanceUseCase(repository);
 });
 
-final getTimingAnalysisUseCaseProvider = Provider<GetTimingAnalysisUseCase>((ref) {
-  return GetTimingAnalysisUseCase(ref.read(tradeReportRepositoryProvider));
+final getTimingAnalysisUseCaseProvider = FutureProvider<GetTimingAnalysisUseCase>((ref) async {
+  final repository = await ref.watch(tradeReportRepositoryProvider.future);
+  return GetTimingAnalysisUseCase(repository);
 });
 
-final tradeReportCubitProvider = Provider<TradeReportCubit>((ref) {
+final tradeReportCubitProvider = FutureProvider<TradeReportCubit>((ref) async {
   return TradeReportCubit(
-    ref.read(getTradePerformanceSummaryUseCaseProvider),
-    ref.read(getDailyPerformanceUseCaseProvider),
-    ref.read(getTimingAnalysisUseCaseProvider),
+    await ref.watch(getTradePerformanceSummaryUseCaseProvider.future),
+    await ref.watch(getDailyPerformanceUseCaseProvider.future),
+    await ref.watch(getTimingAnalysisUseCaseProvider.future),
   );
 });

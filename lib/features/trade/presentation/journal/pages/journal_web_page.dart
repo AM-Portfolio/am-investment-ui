@@ -29,14 +29,11 @@ class JournalWebPage extends ConsumerStatefulWidget {
 }
 
 class _JournalWebPageState extends ConsumerState<JournalWebPage> {
-  late final JournalCubit _journalCubit;
-  late final NotebookCubit _notebookCubit;
+  // Cubits are now managed via Riverpod FutureProviders
 
   @override
   void initState() {
     super.initState();
-    _journalCubit = ref.read(journalCubitProvider);
-    _notebookCubit = ref.read(notebookCubitProvider);
     
     // Mode Logger
     AppLogger.info(
@@ -52,8 +49,13 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       tag: 'JournalWebPage'
     );
     
-    _journalCubit.loadJournalEntries(widget.userId);
-    _notebookCubit.loadNotebook(widget.userId);
+    // Load data after cubits are initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final journalCubit = await ref.read(journalCubitProvider.future);
+      final notebookCubit = await ref.read(notebookCubitProvider.future);
+      journalCubit.loadJournalEntries(widget.userId);
+      notebookCubit.loadNotebook(widget.userId);
+    });
   }
 
   Future<void> _handleAddFolder() async {
@@ -82,7 +84,8 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       );
 
       // Call cubit to create folder
-      await _notebookCubit.createItem(folder);
+      final notebookCubit = await ref.read(notebookCubitProvider.future);
+      await notebookCubit.createItem(folder);
 
       // Show success message
       if (mounted) {
@@ -98,11 +101,14 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
     }
   }
 
-  Future<void> _handleEntryDropped(JournalEntry entry, String folderId) async {
+  Future<void> _handleEntryDropped(JournalEntry entry, String folderId, NotebookCubit notebookCubit) async {
     // Create a NOTE item in the folder that references the journal entry
     final note = NotebookItem(
       userId: widget.userId,
-      type: NotebookItemType.NOTE,
+      type: NotebookItemType.FOLDER, // Should this be folder or note? The original was NOTE but uses type FOLDER? 
+      // Wait, original line 79 said type: NotebookItemType.FOLDER for _handleAddFolder
+      // Line 105 said type: NotebookItemType.NOTE.
+      // Re-checking...
       title: 'Journal Entry - ${DateFormat('MMM dd, yyyy').format(entry.entryDate)}',
       parentId: folderId,
       content: entry.content ?? '',
@@ -113,12 +119,14 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
       },
       tagIds: entry.tagIds,
     );
+    // Actually using NOTE for entry links
+    final noteCorrected = note.copyWith(type: NotebookItemType.NOTE);
 
     // Call cubit to create note
-    await _notebookCubit.createItem(note);
+    await notebookCubit.createItem(noteCorrected);
     
     // Refresh notebook to show updated folder structure
-    await _notebookCubit.loadNotebook(widget.userId);
+    await notebookCubit.loadNotebook(widget.userId);
 
     // Show success message
     if (mounted) {
@@ -150,53 +158,66 @@ class _JournalWebPageState extends ConsumerState<JournalWebPage> {
 
 
   @override
-  Widget build(BuildContext context) => MultiBlocProvider(
-        providers: [
-          BlocProvider.value(value: _journalCubit),
-          BlocProvider.value(value: _notebookCubit),
-        ],
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<JournalCubit, JournalState>(
-              listener: (context, state) {
-                // Handle journal success/error messages if needed
-              },
-            ),
-            BlocListener<NotebookCubit, NotebookState>(
-              listener: (context, state) {
-                // Handle notebook success/error messages if needed
-              },
-            ),
+  Widget build(BuildContext context) {
+    final journalCubitAsync = ref.watch(journalCubitProvider);
+    final notebookCubitAsync = ref.watch(notebookCubitProvider);
+
+    return journalCubitAsync.when(
+      data: (journalCubit) => notebookCubitAsync.when(
+        data: (notebookCubit) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: journalCubit),
+            BlocProvider.value(value: notebookCubit),
           ],
-          child: Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: BlocBuilder<JournalCubit, JournalState>(
-              builder: (context, journalState) {
-                return BlocBuilder<NotebookCubit, NotebookState>(
-                  builder: (context, notebookState) {
-                    // Combine states or handle loading separately?
-                    // For now, let's show layout if journal is loaded, notebook can load in background or show loading in sidebar
-                    
-                    return journalState.when(
-                      initial: () => const SizedBox.shrink(),
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (message) => Center(child: Text('Error: $message')),
-                      success: (message) => const Center(child: CircularProgressIndicator()),
-                      loaded: (entries) => JournalThreeColumnLayout(
-                          entries: entries,
-                          userId: widget.userId,
-                          journalCubit: _journalCubit,
-                          notebookCubit: _notebookCubit,
-                          onAddFolder: _handleAddFolder,
-                          onEntryDropped: _handleEntryDropped,
-                        ),
-                    );
-                  },
-                );
-              },
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<JournalCubit, JournalState>(
+                listener: (context, state) {
+                  // Handle journal success/error messages if needed
+                },
+              ),
+              BlocListener<NotebookCubit, NotebookState>(
+                listener: (context, state) {
+                  // Handle notebook success/error messages if needed
+                },
+              ),
+            ],
+            child: Scaffold(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              body: BlocBuilder<JournalCubit, JournalState>(
+                builder: (context, journalState) {
+                  return BlocBuilder<NotebookCubit, NotebookState>(
+                    builder: (context, notebookState) {
+                      // Combine states or handle loading separately?
+                      // For now, let's show layout if journal is loaded, notebook can load in background or show loading in sidebar
+                      
+                      return journalState.when(
+                        initial: () => const SizedBox.shrink(),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (message) => Center(child: Text('Error: $message')),
+                        success: (message) => const Center(child: CircularProgressIndicator()),
+                        loaded: (entries) => JournalThreeColumnLayout(
+                            entries: entries,
+                            userId: widget.userId,
+                            journalCubit: journalCubit,
+                            notebookCubit: notebookCubit,
+                            onAddFolder: _handleAddFolder,
+                            onEntryDropped: (entry, folderId) => _handleEntryDropped(entry, folderId, notebookCubit),
+                          ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),
-      );
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error initializing notebook: $error')),
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error initializing journal: $error')),
+    );
+  }
 }
 

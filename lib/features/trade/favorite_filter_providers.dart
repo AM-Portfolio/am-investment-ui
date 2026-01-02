@@ -11,22 +11,20 @@ import 'internal/domain/usecases/delete_favorite_filter_usecase.dart';
 import 'internal/domain/usecases/get_favorite_filters_usecase.dart';
 import 'internal/domain/usecases/set_default_filter_usecase.dart';
 import 'presentation/cubit/favorite_filter/favorite_filter_cubit.dart';
+import '../../di/app_providers.dart';
 
 // Infrastructure Providers
 
-/// Provider for ApiClient
-final _apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
-
 /// Provider for FavoriteFilterRemoteDataSource
-final _favoriteFilterRemoteDataSourceProvider = Provider<FavoriteFilterRemoteDataSource>((ref) {
-  final apiClient = ref.watch(_apiClientProvider);
-  final apiConfig = ConfigService.config.api;
-  return FavoriteFilterRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.trade);
+final _favoriteFilterRemoteDataSourceProvider = FutureProvider<FavoriteFilterRemoteDataSource>((ref) async {
+  final apiClient = await ref.watch(apiClientProvider.future);
+  final apiConfig = await ref.watch(appConfigProvider.future);
+  return FavoriteFilterRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.api.trade);
 });
 
 /// Provider for FavoriteFilterRepository
-final _favoriteFilterRepositoryProvider = Provider<FavoriteFilterRepository>((ref) {
-  final remoteDataSource = ref.watch(_favoriteFilterRemoteDataSourceProvider);
+final _favoriteFilterRepositoryProvider = FutureProvider<FavoriteFilterRepository>((ref) async {
+  final remoteDataSource = await ref.watch(_favoriteFilterRemoteDataSourceProvider.future);
   return FavoriteFilterRepositoryImpl(remoteDataSource: remoteDataSource);
 });
 
@@ -34,7 +32,7 @@ final _favoriteFilterRepositoryProvider = Provider<FavoriteFilterRepository>((re
 
 /// Provider to get all favorite filters for a user
 final favoriteFiltersProvider = FutureProvider.family<FavoriteFilterList, String>((ref, userId) async {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return repository.getFavoriteFilters(userId);
 });
 
@@ -43,55 +41,55 @@ final favoriteFilterByIdProvider = FutureProvider.family<FavoriteFilter, ({Strin
   ref,
   params,
 ) async {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return repository.getFavoriteFilterById(params.userId, params.filterId);
 });
 
 /// Provider to watch favorite filters stream for real-time updates
-final watchFavoriteFiltersProvider = StreamProvider.family<FavoriteFilterList, String>((ref, userId) {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
-  return repository.watchFavoriteFilters(userId);
+final watchFavoriteFiltersProvider = StreamProvider.family<FavoriteFilterList, String>((ref, userId) async* {
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
+  yield* repository.watchFavoriteFilters(userId);
 });
 
 /// Provider to get the repository instance for direct method calls
-final favoriteFilterRepositoryProvider = Provider<FavoriteFilterRepository>(
-  (ref) => ref.watch(_favoriteFilterRepositoryProvider),
+final favoriteFilterRepositoryProvider = FutureProvider<FavoriteFilterRepository>(
+  (ref) async => await ref.watch(_favoriteFilterRepositoryProvider.future),
 );
 
 // Use Case Providers
 
 /// Provider for GetFavoriteFiltersUseCase
-final _getFavoriteFiltersUseCaseProvider = Provider<GetFavoriteFiltersUseCase>((ref) {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+final _getFavoriteFiltersUseCaseProvider = FutureProvider<GetFavoriteFiltersUseCase>((ref) async {
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return GetFavoriteFiltersUseCase(repository);
 });
 
 /// Provider for CreateFavoriteFilterUseCase
-final _createFavoriteFilterUseCaseProvider = Provider<CreateFavoriteFilterUseCase>((ref) {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+final _createFavoriteFilterUseCaseProvider = FutureProvider<CreateFavoriteFilterUseCase>((ref) async {
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return CreateFavoriteFilterUseCase(repository);
 });
 
 /// Provider for DeleteFavoriteFilterUseCase
-final _deleteFavoriteFilterUseCaseProvider = Provider<DeleteFavoriteFilterUseCase>((ref) {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+final _deleteFavoriteFilterUseCaseProvider = FutureProvider<DeleteFavoriteFilterUseCase>((ref) async {
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return DeleteFavoriteFilterUseCase(repository);
 });
 
 /// Provider for SetDefaultFilterUseCase
-final _setDefaultFilterUseCaseProvider = Provider<SetDefaultFilterUseCase>((ref) {
-  final repository = ref.watch(_favoriteFilterRepositoryProvider);
+final _setDefaultFilterUseCaseProvider = FutureProvider<SetDefaultFilterUseCase>((ref) async {
+  final repository = await ref.watch(_favoriteFilterRepositoryProvider.future);
   return SetDefaultFilterUseCase(repository);
 });
 
 // Cubit Provider
 
 /// Provider for FavoriteFilterCubit
-final favoriteFilterCubitProvider = Provider<FavoriteFilterCubit>(
-  (ref) => FavoriteFilterCubit(
-    getFavoriteFilters: ref.watch(_getFavoriteFiltersUseCaseProvider),
-    createFavoriteFilter: ref.watch(_createFavoriteFilterUseCaseProvider),
-    deleteFavoriteFilter: ref.watch(_deleteFavoriteFilterUseCaseProvider),
-    setDefaultFilter: ref.watch(_setDefaultFilterUseCaseProvider),
+final favoriteFilterCubitProvider = FutureProvider<FavoriteFilterCubit>(
+  (ref) async => FavoriteFilterCubit(
+    getFavoriteFilters: await ref.watch(_getFavoriteFiltersUseCaseProvider.future),
+    createFavoriteFilter: await ref.watch(_createFavoriteFilterUseCaseProvider.future),
+    deleteFavoriteFilter: await ref.watch(_deleteFavoriteFilterUseCaseProvider.future),
+    setDefaultFilter: await ref.watch(_setDefaultFilterUseCaseProvider.future),
   ),
 );

@@ -8,44 +8,42 @@ import '../internal/domain/repositories/trade_metrics_repository.dart';
 import '../internal/domain/usecases/get_trade_metrics.dart';
 import '../internal/domain/usecases/get_metric_types.dart';
 import '../presentation/metrics/cubit/trade_metrics_cubit.dart';
+import '../../../di/app_providers.dart';
 
 // Infrastructure
 
-/// Provider for ApiClient
-final _apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
-
 /// Provider for TradeMetricsRemoteDataSource
-final _tradeMetricsRemoteDataSourceProvider = Provider<TradeMetricsRemoteDataSource>((ref) {
-  final apiClient = ref.watch(_apiClientProvider);
-  final apiConfig = ConfigService.config.api;
-  return TradeMetricsRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.trade);
+final _tradeMetricsRemoteDataSourceProvider = FutureProvider<TradeMetricsRemoteDataSource>((ref) async {
+  final apiClient = await ref.watch(apiClientProvider.future);
+  final apiConfig = await ref.watch(appConfigProvider.future);
+  return TradeMetricsRemoteDataSourceImpl(apiClient: apiClient, tradeConfig: apiConfig.api.trade);
 });
 
 /// Provider for TradeMetricsRepository
-final _tradeMetricsRepositoryProvider = Provider<TradeMetricsRepository>((ref) {
-  final remoteDataSource = ref.watch(_tradeMetricsRemoteDataSourceProvider);
+final _tradeMetricsRepositoryProvider = FutureProvider<TradeMetricsRepository>((ref) async {
+  final remoteDataSource = await ref.watch(_tradeMetricsRemoteDataSourceProvider.future);
   return TradeMetricsRepositoryImpl(remoteDataSource);
 });
 
 // Use Cases
 
 /// Provider for GetTradeMetrics UseCase
-final getTradeMetricsUseCaseProvider = Provider<GetTradeMetrics>((ref) {
-  final repository = ref.watch(_tradeMetricsRepositoryProvider);
+final getTradeMetricsUseCaseProvider = FutureProvider<GetTradeMetrics>((ref) async {
+  final repository = await ref.watch(_tradeMetricsRepositoryProvider.future);
   return GetTradeMetrics(repository);
 });
 
 // Presentation
 
 /// Provider for GetMetricTypes UseCase
-final getMetricTypesUseCaseProvider = Provider<GetMetricTypes>((ref) {
-  final repository = ref.watch(_tradeMetricsRepositoryProvider);
+final getMetricTypesUseCaseProvider = FutureProvider<GetMetricTypes>((ref) async {
+  final repository = await ref.watch(_tradeMetricsRepositoryProvider.future);
   return GetMetricTypes(repository);
 });
 
 /// Provider for TradeMetricsCubit
-final tradeMetricsCubitProvider = Provider<TradeMetricsCubit>((ref) {
-  final getTradeMetrics = ref.watch(getTradeMetricsUseCaseProvider);
-  final getMetricTypes = ref.watch(getMetricTypesUseCaseProvider);
+final tradeMetricsCubitProvider = FutureProvider<TradeMetricsCubit>((ref) async {
+  final getTradeMetrics = await ref.watch(getTradeMetricsUseCaseProvider.future);
+  final getMetricTypes = await ref.watch(getMetricTypesUseCaseProvider.future);
   return TradeMetricsCubit(getTradeMetrics: getTradeMetrics, getMetricTypes: getMetricTypes);
 });

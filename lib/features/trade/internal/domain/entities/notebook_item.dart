@@ -26,4 +26,32 @@ class NotebookItem {
     this.createdAt,
     this.updatedAt,
   });
+
+  NotebookItem copyWith({
+    String? id,
+    String? userId,
+    NotebookItemType? type,
+    String? parentId,
+    String? title,
+    String? content,
+    List<String>? tagIds,
+    Map<String, dynamic>? metadata,
+    Map<String, dynamic>? goalDetails,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return NotebookItem(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      type: type ?? this.type,
+      parentId: parentId ?? this.parentId,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      tagIds: tagIds ?? this.tagIds,
+      metadata: metadata ?? this.metadata,
+      goalDetails: goalDetails ?? this.goalDetails,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

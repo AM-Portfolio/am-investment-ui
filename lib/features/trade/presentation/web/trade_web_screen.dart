@@ -376,11 +376,13 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                             // Invalidate provider if we had one for report, or just let page rebuild
                             // Since report uses a cubit load call, re-selecting the view or a specialized provider check might be needed
                             // For now, simpler to just let the user re-apply filter or we can expose a detailed refresh later
-                             ref.read(tradeReportCubitProvider).loadReport(MetricsFilterRequest(
-                                portfolioIds: [_currentPortfolioId!],
-                                startDate: DateTime(DateTime.now().year, 1, 1), // Default or current config
-                                endDate: DateTime.now(),
-                             ));
+                             ref.read(tradeReportCubitProvider.future).then((cubit) {
+                               cubit.loadReport(MetricsFilterRequest(
+                                  portfolioIds: [_currentPortfolioId!],
+                                  startDate: DateTime(DateTime.now().year, 1, 1), // Default or current config
+                                  endDate: DateTime.now(),
+                               ));
+                             });
                           }
                           break;
                       }

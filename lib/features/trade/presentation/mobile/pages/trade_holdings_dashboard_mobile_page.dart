@@ -36,8 +36,8 @@ class _TradeHoldingsDashboardMobilePageState extends ConsumerState<TradeHoldings
   void initState() {
     super.initState();
     // Load favorite filters when page initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cubit = ref.read(favoriteFilterCubitProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final cubit = await ref.read(favoriteFilterCubitProvider.future);
       cubit.loadFilters(widget.userId);
     });
 

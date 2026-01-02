@@ -469,14 +469,8 @@ class _ExpandableFolderItemState extends State<ExpandableFolderItem> {
   }
 
   IconData _getFolderIcon() {
-    if (widget.folder.metadata != null && widget.folder.metadata!['icon'] != null) {
-      try {
-        final iconCode = widget.folder.metadata!['icon'] as int;
-        return IconData(iconCode, fontFamily: 'MaterialIcons');
-      } catch (e) {
-        return Icons.folder;
-      }
-    }
+    // Note: Dynamic IconData(iconCode) breaks icon tree-shaking in Flutter Web builds.
+    // Defaulting to a constant icon for now to ensure clean build.
     return Icons.folder;
   }
 

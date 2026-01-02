@@ -86,6 +86,12 @@ class ApiClient {
   }) async {
     final token = await _getAuthToken();
 
+    if (token != null) {
+      AppLogger.debug('Attach token to header (length: ${token.length})');
+    } else {
+      AppLogger.debug('No auth token available for request headers');
+    }
+
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',

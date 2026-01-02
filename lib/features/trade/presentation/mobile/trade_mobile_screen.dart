@@ -260,22 +260,26 @@ class _TradeMobileScreenState extends ConsumerState<TradeMobileScreen> {
           return _buildSelectPortfolioPrompt(TradeViewType.addTrade);
         }
         // Get TradeControllerCubit from Riverpod provider
-        final tradeControllerCubit = ref.read(tradeControllerCubitProvider);
-        // Wrap with BlocProvider so AddTradeMobilePage can access it via context.read()
-        return BlocProvider<TradeControllerCubit>.value(
-          value: tradeControllerCubit,
-          child: AddTradeMobilePage(
-            portfolioId: _currentPortfolioId!,
-            portfolioName: _currentPortfolioName,
-            onTradeAdded: () {
-              // Refresh holdings when trade is added
-              if (_currentPortfolioId != null) {
-                ref.invalidate(tradeHoldingsStreamProvider((userId: widget.userId, portfolioId: _currentPortfolioId!)));
-              }
-              // Switch back to holdings view after adding trade
-              setState(() => _selectedView = TradeViewType.holdings);
-            },
+        final tradeControllerCubitAsync = ref.watch(tradeControllerCubitProvider);
+        
+        return tradeControllerCubitAsync.when(
+          data: (tradeControllerCubit) => BlocProvider<TradeControllerCubit>.value(
+            value: tradeControllerCubit,
+            child: AddTradeMobilePage(
+              portfolioId: _currentPortfolioId!,
+              portfolioName: _currentPortfolioName,
+              onTradeAdded: () {
+                // Refresh holdings when trade is added
+                if (_currentPortfolioId != null) {
+                  ref.invalidate(tradeHoldingsStreamProvider((userId: widget.userId, portfolioId: _currentPortfolioId!)));
+                }
+                // Switch back to holdings view after adding trade
+                setState(() => _selectedView = TradeViewType.holdings);
+              },
+            ),
           ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error initializing trade controller: $error')),
         );
     }
   }
