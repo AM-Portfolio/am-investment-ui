@@ -13,11 +13,13 @@ class PortfolioScreen extends StatelessWidget {
     super.key,
     this.isSidebarVisible = true,
     this.onToggleSidebar,
+    this.onBack,
   });
 
   final String userId;
   final bool isSidebarVisible;
   final VoidCallback? onToggleSidebar;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -26,21 +28,25 @@ class PortfolioScreen extends StatelessWidget {
       tag: 'PortfolioScreen',
     );
 
-    // Determine if we're on mobile platform
-    const isMobile = !kIsWeb;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use the same breakpoint (850px) as AuthWrapper for consistency
+        final isMobileView = constraints.maxWidth < 850;
 
-    AppLogger.debug(
-      'Using PortfolioListWrapper for ${isMobile ? 'mobile' : 'web'} platform',
-      tag: 'PortfolioScreen',
-    );
+        AppLogger.debug(
+          'Using PortfolioListWrapper for ${isMobileView ? 'mobile' : 'web'} view (width: ${constraints.maxWidth})',
+          tag: 'PortfolioScreen',
+        );
 
-    // Use PortfolioListWrapper to handle portfolio selection
-    // The wrapper will automatically select appropriate screens based on platform
-    return PortfolioListWrapper(
-      userId: userId,
-      isMobile: isMobile,
-      isSidebarVisible: isSidebarVisible,
-      onToggleSidebar: onToggleSidebar,
+        // Usage of PortfolioListWrapper handles platform-specific screen selection
+        return PortfolioListWrapper(
+          userId: userId,
+          isMobile: isMobileView, // Dynamic switch based on width
+          isSidebarVisible: isSidebarVisible,
+          onToggleSidebar: onToggleSidebar,
+          onBack: onBack,
+        );
+      },
     );
   }
 }

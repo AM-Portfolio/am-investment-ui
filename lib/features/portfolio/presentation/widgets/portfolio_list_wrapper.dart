@@ -19,11 +19,13 @@ class PortfolioListWrapper extends ConsumerStatefulWidget {
     super.key,
     this.isSidebarVisible = true,
     this.onToggleSidebar,
+    this.onBack,
   });
   final String userId;
   final bool isMobile;
   final bool isSidebarVisible;
   final VoidCallback? onToggleSidebar;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<PortfolioListWrapper> createState() =>
@@ -161,6 +163,7 @@ class _PortfolioListWrapperState extends ConsumerState<PortfolioListWrapper> {
         selectedPortfolioName: selectedPortfolioName,
         portfolios: portfolios,
         onPortfolioChanged: _onPortfolioChanged,
+        onBack: widget.onBack,
       );
     } else {
       return PortfolioWebScreen(

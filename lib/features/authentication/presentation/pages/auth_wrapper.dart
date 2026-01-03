@@ -206,7 +206,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
               activeNavItem: _currentPage,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
-              hideBottomNav: _currentPage == 'Trade', // Trade handles its own bottom nav
+              hideBottomNav: _currentPage == 'Trade' || _currentPage == 'Portfolio', // Portfolio and Trade handle their own nav
               child: _getCurrentScreen(userId, isMobileView),
             );
           } else {
@@ -243,6 +243,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           userId: userId,
           isSidebarVisible: _isSidebarExpanded,
           onToggleSidebar: _toggleSidebar,
+          onBack: () => _handleNavigation('Dashboard'),
         );
       case 'Dashboard':
         return DashboardWebPage(

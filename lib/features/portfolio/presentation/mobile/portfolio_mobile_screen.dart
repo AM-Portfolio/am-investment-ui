@@ -21,12 +21,14 @@ class PortfolioMobileScreen extends ConsumerWidget {
     this.selectedPortfolioName,
     this.portfolios,
     this.onPortfolioChanged,
+    this.onBack,
   });
   final String userId;
   final String? selectedPortfolioId;
   final String? selectedPortfolioName;
   final List<PortfolioItem>? portfolios;
   final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,6 +72,7 @@ class PortfolioMobileScreen extends ConsumerWidget {
               selectedPortfolioName: selectedPortfolioName,
               portfolios: portfolios,
               onPortfolioChanged: onPortfolioChanged,
+              onBack: onBack,
             ),
           ),
           loading: () =>
@@ -145,12 +148,14 @@ class PortfolioMobileView extends StatefulWidget {
     this.selectedPortfolioName,
     this.portfolios,
     this.onPortfolioChanged,
+    this.onBack,
   });
   final String userId;
   final String? selectedPortfolioId;
   final String? selectedPortfolioName;
   final List<PortfolioItem>? portfolios;
   final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
+  final VoidCallback? onBack;
 
   @override
   State<PortfolioMobileView> createState() => _PortfolioMobileViewState();
@@ -209,49 +214,186 @@ class _PortfolioMobileViewState extends State<PortfolioMobileView>
 
     return BlocListener<PortfolioCubit, PortfolioState>(
       listener: (context, state) {
-        AppLogger.stateChange(
-          'Previous',
-          state.runtimeType.toString(),
-          tag: 'PortfolioMobileView',
-        );
-
         if (state is PortfolioError) {
-          AppLogger.error(
-            'Portfolio error occurred: ${state.message}',
-            tag: 'PortfolioMobileView',
-          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.message}'),
               backgroundColor: Colors.red,
             ),
           );
-        } else if (state is PortfolioLoaded) {
-          AppLogger.info(
-            'Portfolio loaded successfully - ${state.holdings.length} holdings',
-            tag: 'PortfolioMobileView',
-          );
         }
       },
       child: Scaffold(
-        body: Column(
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Content Area
+              Expanded(
+                child: PortfolioTabContentWidget(
+                  tabController: _tabController,
+                  currentPortfolioId: _currentPortfolioId!,
+                  userId: widget.userId,
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(context),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
           children: [
-            // Portfolio header with selector and tabs
-            PortfolioHeaderWidget(
-              tabController: _tabController,
-              currentPortfolioId: _currentPortfolioId,
-              portfolios: widget.portfolios,
-              onPortfolioChanged: _onPortfolioChanged,
-              onLogout: () => PortfolioLogoutHandler.showLogoutDialog(context),
-            ),
-            // Tab content
+            // Internal Portfolio Tabs
             Expanded(
-              child: PortfolioTabContentWidget(
-                tabController: _tabController,
-                currentPortfolioId: _currentPortfolioId!,
-                userId: widget.userId,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: Theme.of(context).primaryColor,
+                unselectedLabelColor: Colors.grey,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorColor: Theme.of(context).primaryColor,
+                labelPadding: EdgeInsets.zero,
+                labelStyle: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold), // Reduced font size
+                tabs: const [
+                  Tab(icon: Icon(Icons.dashboard_outlined, size: 20), text: 'Overview'),
+                  Tab(icon: Icon(Icons.wallet, size: 20), text: 'Holdings'),
+                  Tab(icon: Icon(Icons.analytics_outlined, size: 20), text: 'Analysis'),
+                  Tab(icon: Icon(Icons.grid_view, size: 20), text: 'Heatmap'),
+                  Tab(icon: Icon(Icons.show_chart, size: 20), text: 'Trade'),
+                ],
               ),
             ),
+            
+            // Vertical Divider
+            Container(
+              height: 30,
+              width: 1,
+              color: Colors.grey.withOpacity(0.3),
+            ),
+
+            // Menu Button (Switch Portfolio / Back / Logout)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showMenuBottomSheet(context),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), // Reduced padding
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.menu, size: 24, color: Theme.of(context).textTheme.bodyMedium?.color),
+                      const SizedBox(height: 2),
+                      const Text('Menu', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMenuBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Portfolio Menu',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Portfolio List Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'SWITCH PORTFOLIO',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (widget.portfolios != null)
+              ...widget.portfolios!.map((p) => ListTile(
+                leading: Icon(
+                  Icons.account_balance_wallet, 
+                  color: p.portfolioId == _currentPortfolioId ? Theme.of(context).primaryColor : Colors.grey,
+                ),
+                title: Text(
+                  p.portfolioName,
+                  style: TextStyle(
+                    fontWeight: p.portfolioId == _currentPortfolioId ? FontWeight.bold : FontWeight.normal,
+                    color: p.portfolioId == _currentPortfolioId ? Theme.of(context).primaryColor : null,
+                  ),
+                ),
+                trailing: p.portfolioId == _currentPortfolioId ? Icon(Icons.check, color: Theme.of(context).primaryColor) : null,
+                onTap: () {
+                  Navigator.pop(context);
+                  _onPortfolioChanged(p.portfolioId, p.portfolioName);
+                },
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                dense: true,
+              )),
+
+            const Divider(height: 32),
+
+            // Navigation Actions
+            ListTile(
+              leading: const Icon(Icons.arrow_back),
+              title: const Text('Back to Dashboard'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+              onTap: () {
+                Navigator.pop(context);
+                if (widget.onBack != null) {
+                  widget.onBack!();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Use system back to return')));
+                }
+              },
+            ),
+
+             ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+              onTap: () {
+                Navigator.pop(context);
+                PortfolioLogoutHandler.showLogoutDialog(context);
+              },
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
