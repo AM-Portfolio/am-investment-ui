@@ -77,6 +77,10 @@ dependencies:
     path: ../am_common_ui
     # version: ^1.0.0  # Using path dependency (local development)
 
+  # Market Data module (embedded)
+  market_data_web:
+    path: ../am-market/am-market-web
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

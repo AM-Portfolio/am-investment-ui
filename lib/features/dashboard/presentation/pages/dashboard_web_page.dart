@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:todo_app/core/utils/logger.dart';
+
+
 import '../../../trade/providers/trade_internal_providers.dart';
+
 import 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
 import 'package:am_common_ui/widgets/calendar/universal_calendar/calendar_types.dart';
 import 'package:am_common_ui/widgets/calendar/universal_calendar/data_provider.dart';
 import '../../../trade/presentation/models/trade_calendar_view_model.dart';
 import '../widgets/dashboard_widgets.dart';
+
+
 
 class DashboardWebPage extends ConsumerStatefulWidget {
   const DashboardWebPage({
@@ -33,6 +39,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppLogger.methodEntry('build', tag: 'DashboardWebPage');
     final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
 
     return Scaffold(
@@ -42,10 +49,12 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                 // Top Bar
                 portfoliosAsync.when(
                   data: (portfolios) {
+                    AppLogger.debug('Portfolios loaded: ${portfolios.length}', tag: 'DashboardWebPage');
                     if (portfolios.isNotEmpty && _selectedPortfolioId == null) {
                       // Auto-select first portfolio if none selected
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) {
+                          AppLogger.info('Auto-selecting first portfolio: ${portfolios.first.name}', tag: 'DashboardWebPage');
                           setState(() {
                             _selectedPortfolioId = portfolios.first.id;
                             _selectedPortfolioName = portfolios.first.name;
@@ -55,9 +64,16 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                     }
                     return _buildTopBar(portfolios);
                   },
-                  loading: () => _buildTopBar([]),
-                  error: (_, __) => _buildTopBar([]),
+                  loading: () {
+                    AppLogger.debug('Loading portfolios...', tag: 'DashboardWebPage');
+                    return _buildTopBar([]);
+                  },
+                  error: (e, stack) {
+                    AppLogger.error('Error loading portfolios', tag: 'DashboardWebPage', error: e, stackTrace: stack);
+                    return _buildTopBar([]);
+                  },
                 ),
+
 
                 // Scrollable Content
                 Expanded(
@@ -218,6 +234,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
 
     final userId = widget.userId;
     final portfolioId = _selectedPortfolioId!;
+    AppLogger.debug('Building DashboardContent for portfolio: $portfolioId', tag: 'DashboardWebPage');
 
     // Watch Trade Summary
     final tradeSummaryAsync = ref.watch(tradeSummaryStreamProvider((userId: userId, portfolioId: portfolioId)));
@@ -229,6 +246,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
         // Stats Row
         tradeSummaryAsync.when(
           data: (summary) {
+            AppLogger.debug('Trade summary loaded successfully', tag: 'DashboardWebPage');
             final metrics = summary.metrics;
             // Calculate Avg Win/Loss
             final avgWin = metrics.winningTrades > 0 
@@ -299,12 +317,20 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                     isPositive: true,
                   ),
                 ),
+
               ],
             );
           },
-          loading: () => const SizedBox(height: 140, child: Center(child: CircularProgressIndicator())),
-          error: (e, _) => SizedBox(height: 140, child: Center(child: Text('Error: $e'))),
+          loading: () {
+            AppLogger.debug('Loading trade summary...', tag: 'DashboardWebPage');
+            return const SizedBox(height: 140, child: Center(child: CircularProgressIndicator()));
+          },
+          error: (e, stack) {
+            AppLogger.error('Error loading summary', tag: 'DashboardWebPage', error: e, stackTrace: stack);
+            return SizedBox(height: 140, child: Center(child: Text('Error: $e')));
+          },
         ),
+
         
         const SizedBox(height: 24),
         

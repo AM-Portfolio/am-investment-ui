@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'core/utils/logger.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -125,9 +127,64 @@ class _MaterialApp extends StatelessWidget {
   }
 }
 
-class _AppErrorBoundary extends StatelessWidget {
+class _AppErrorBoundary extends StatefulWidget {
   const _AppErrorBoundary({required this.child});
   final Widget child;
+
   @override
-  Widget build(BuildContext context) => child;
+  State<_AppErrorBoundary> createState() => _AppErrorBoundaryState();
 }
+
+class _AppErrorBoundaryState extends State<_AppErrorBoundary> {
+  @override
+  void initState() {
+    super.initState();
+    FlutterError.onError = (details) {
+      AppLogger.error(
+        'Flutter Framework Error: ${details.exception}',
+        tag: 'Framework',
+        error: details.exception,
+        stackTrace: details.stack,
+      );
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      AppLogger.error(
+        'UI Rendering Error: ${details.exception}',
+        tag: 'Renderer',
+        error: details.exception,
+        stackTrace: details.stack,
+      );
+
+      return Material(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                const Text('Something went wrong', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text(
+                  details.exception.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    };
+    return widget.child;
+  }
+}
+
+

@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 import '../../../models/trade_portfolio_view_model.dart';
 import '../../trade_web_screen.dart';
@@ -24,72 +24,30 @@ class TradeSidebarContainer extends StatelessWidget {
   final Function(String portfolioId, String portfolioName)? onPortfolioSelected;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      // Determine sidebar mode based on available width
-      final isCompact = constraints.maxWidth < 100; // Icon-only mode
-      final isCondensed = constraints.maxWidth >= 100 && constraints.maxWidth < 200; // Minimal text mode
-      final isFull = constraints.maxWidth >= 200; // Full mode
+  Widget build(BuildContext context) => SecondarySidebar(
+    title: 'Trade Analysis',
+    subtitle: 'Portfolio Management',
+    icon: Icons.show_chart_rounded,
+    accentColor: const Color(0xFF8b5cf6), // Purple accent for Trade
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine sidebar mode based on available width
+        final isCompact = constraints.maxWidth < 100; // Icon-only mode
+        final isCondensed = constraints.maxWidth >= 100 && constraints.maxWidth < 200; // Minimal text mode
+        final isFull = constraints.maxWidth >= 200; // Full mode
 
-      // Define dark theme for sidebar
-      final darkTheme = Theme.of(context).copyWith(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF1E1E2E),
-        cardColor: const Color(0xFF1E1E2E),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF6C5DD3),
-          surface: Color(0xFF1E1E2E),
-          onSurface: Colors.white,
-          primaryContainer: Color(0xFF2C2C3E), // Slightly lighter for containers
-          onPrimaryContainer: Colors.white,
-          outline: Colors.white24,
-        ),
-        textTheme: Theme.of(context).textTheme.apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-        dividerColor: Colors.white.withValues(alpha: 0.1),
-      );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Navigation Items
+            Expanded(child: _buildContent(context, isCompact, isCondensed, isFull)),
 
-      return Theme(
-        data: darkTheme,
-        child: Container(
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFF1E1E2E).withValues(alpha: 0.85),
-                      const Color(0xFF151520).withValues(alpha: 0.95),
-                    ],
-                  ),
-                  border: Border(
-                    right: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-                  ),
-                ),
-                child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Sidebar Header
-              _buildHeader(context, isFull, isCondensed),
-
-              // Navigation Items
-              Expanded(child: _buildContent(context, isCompact, isCondensed, isFull)),
-
-              // Footer
-              if (isFull) _buildFooter(context),
-            ],
-          ),
-        ),
-      ),
+            // Footer
+            if (isFull) _buildFooter(context),
+          ],
+        );
+      },
     ),
-  ),
-  );
-    },
   );
 
   Widget _buildContent(BuildContext context, bool isCompact, bool isCondensed, bool isFull) {
@@ -107,76 +65,7 @@ class TradeSidebarContainer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isFull, bool isCondensed) {
-    if (isFull) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 18),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Trade Analysis',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                  ),
-                  Text(
-                    'Portfolio Management',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (isCondensed) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF6C5DD3).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 18),
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-        ),
-        child: const Center(child: Icon(Icons.swap_horiz, color: Color(0xFF6C5DD3), size: 20)),
-      );
-    }
-  }
+
 
   Widget _buildFooter(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),

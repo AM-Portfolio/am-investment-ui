@@ -10,6 +10,7 @@ import '../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../portfolio/presentation/pages/portfolio_screen.dart';
 import '../../../trade/presentation/mobile/trade_mobile_screen.dart';
 import '../../../trade/presentation/web/trade_web_screen.dart';
+import '../../../market/presentation/pages/market_page.dart'; // Market module
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
@@ -271,7 +272,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
                 onToggleSidebar: _toggleSidebar,
               );
       case 'Market':
-        return _buildPlaceholderScreen('Market');
+        return MarketPage(userId: userId);
       case 'News':
         return _buildPlaceholderScreen('News');
       case 'Reports':
