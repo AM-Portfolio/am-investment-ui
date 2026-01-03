@@ -20,21 +20,21 @@ class PortfolioHoldingsWebPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: UniversalHoldingsWidget(
-          userId: userId,
-          portfolioId: portfolioId,
-          config: HoldingsDisplayConfig.web(),
-          templateType: HoldingsTemplateType.full,
-          title: portfolioName != null 
-              ? '$portfolioName Holdings' 
-              : 'Portfolio Holdings',
-          onHoldingTap: (holding) {
-            // Show holding details in dialog or navigate to details page
-            _showHoldingDetails(context, holding);
-          },
-        ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0),
-      ),
+          padding: const EdgeInsets.all(16.0),
+          child: UniversalHoldingsWidget(
+            userId: userId,
+            portfolioId: portfolioId,
+            config: HoldingsDisplayConfig.web(),
+            templateType: HoldingsTemplateType.full,
+            title: portfolioName != null 
+                ? '$portfolioName Holdings' 
+                : 'Portfolio Holdings',
+            onHoldingTap: (holding) {
+              // Show holding details in dialog or navigate to details page
+              _showHoldingDetails(context, holding);
+            },
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, end: 0),
+        ),
     );
   }
 

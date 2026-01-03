@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
@@ -61,9 +62,67 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
     widget.onPortfolioChanged?.call(portfolioId, portfolioName);
   }
 
+  bool _useNewSidebar = false;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) { 
+    if (_useNewSidebar) {
+      return UnifiedSidebarScaffold(
+        title: 'Portfolio',
+        subtitle: widget.selectedPortfolioName ?? 'My Portfolio',
+        icon: Icons.pie_chart_rounded,
+        accentColor: ModuleColors.portfolio,
+        body: _buildMainContent(context),
+        floatingActionButton: FloatingActionButton(
+          mini: true,
+          onPressed: () {
+            setState(() {
+              _useNewSidebar = false;
+            });
+          },
+          backgroundColor: Theme.of(context).cardColor,
+          child: const Icon(Icons.undo_rounded),
+        ),
+        items: [
+           SecondarySidebarItem(
+            title: 'Overview',
+            icon: Icons.dashboard_outlined,
+            isSelected: _selectedView == PortfolioViewType.overview,
+            onTap: () => setState(() => _selectedView = PortfolioViewType.overview),
+          ),
+          SecondarySidebarItem(
+            title: 'Holdings',
+            icon: Icons.list_alt_rounded,
+            isSelected: _selectedView == PortfolioViewType.holdings,
+            onTap: () => setState(() => _selectedView = PortfolioViewType.holdings),
+          ),
+          SecondarySidebarItem(
+            title: 'Analysis',
+            icon: Icons.donut_large_outlined,
+            isSelected: _selectedView == PortfolioViewType.analysis,
+            onTap: () => setState(() => _selectedView = PortfolioViewType.analysis),
+          ),
+          SecondarySidebarItem(
+            title: 'Heatmap',
+            icon: Icons.grid_view_rounded,
+            isSelected: _selectedView == PortfolioViewType.heatmap,
+            onTap: () => setState(() => _selectedView = PortfolioViewType.heatmap),
+          ),
+        ],
+      );
+    }
+
+    return Scaffold(
     appBar: null, // Hidden as per user request for cleaner UI
+    floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _useNewSidebar = true;
+          });
+        },
+        tooltip: 'Switch to New Sidebar',
+        child: const Icon(Icons.auto_awesome),
+      ),
     /* AppBar(
       title: Text(widget.selectedPortfolioName ?? 'Portfolio'),
       actions: [
@@ -157,6 +216,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
       ],
     ),
   );
+  }
 
   /// Build main content based on selected view
   Widget _buildMainContent(BuildContext context) {
