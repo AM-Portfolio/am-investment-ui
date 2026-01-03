@@ -17,6 +17,9 @@ import 'package:am_common_ui/features/authentication/domain/usecases/google_logi
 import 'package:am_common_ui/features/authentication/domain/usecases/logout_usecase.dart';  // Migrated
 import 'package:am_common_ui/features/authentication/domain/usecases/register_usecase.dart';  // Migrated
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';  // Migrated
+import '../features/authentication/presentation/cubit/feature_flag_cubit.dart'; // Local override
+import 'package:am_common_ui/core/theme/cubit/theme_cubit.dart';
+import 'package:am_common_ui/core/theme/theme_repository.dart';
 
 class AuthProviders {
   static SecureStorageService? _secureStorageService;
@@ -25,6 +28,8 @@ class AuthProviders {
   static MockAuthDataSource? _mockAuthDataSource;
   static AuthRemoteDataSource? _authRemoteDataSource;
   static AuthRepository? _authRepository;
+  static ThemeRepository? _themeRepository;
+
 
   static SecureStorageService get secureStorageService {
     _secureStorageService ??= SecureStorageService();
@@ -67,6 +72,12 @@ class AuthProviders {
     return _authRepository!;
   }
 
+  static ThemeRepository get themeRepository {
+    _themeRepository ??= ThemeRepository();
+    return _themeRepository!;
+  }
+
+
   static EmailLoginUseCase get emailLoginUseCase =>
       EmailLoginUseCase(authRepository);
 
@@ -100,5 +111,12 @@ class AuthProviders {
     BlocProvider<AuthCubit>(
       create: (context) => createAuthCubit()..checkAuthStatus(),
     ),
+    BlocProvider<ThemeCubit>(
+      create: (context) => ThemeCubit(themeRepository),
+    ),
+    BlocProvider<FeatureFlagCubit>(
+      create: (context) => FeatureFlagCubit(),
+    ),
   ];
+
 }

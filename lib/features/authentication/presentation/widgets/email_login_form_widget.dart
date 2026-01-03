@@ -42,10 +42,10 @@ class _EmailLoginFormWidgetState extends State<EmailLoginFormWidget> {
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: '📧 Email',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.email),
+          decoration: InputDecoration(
+            labelText: 'Email',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            prefixIcon: const Icon(Icons.email_outlined),
           ),
           validator: Validators.validateEmail,
         ),
@@ -56,12 +56,12 @@ class _EmailLoginFormWidgetState extends State<EmailLoginFormWidget> {
           controller: _passwordController,
           obscureText: _obscurePassword,
           decoration: InputDecoration(
-            labelText: '🔐 Password',
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.lock),
+            labelText: 'Password',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
               ),
               onPressed: () {
                 setState(() {
@@ -77,14 +77,24 @@ class _EmailLoginFormWidgetState extends State<EmailLoginFormWidget> {
         // Login button
         SizedBox(
           width: double.infinity,
-          height: 48,
+          height: 54, // Taller button
           child: ElevatedButton(
             onPressed: _handleLogin,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFF2962FF), // Vibrant Blue
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 4,
+              shadowColor: Colors.blue.withOpacity(0.4),
             ),
-            child: const Text('🚀 Sign In', style: TextStyle(fontSize: 16)),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                 Text('🚀', style: TextStyle(fontSize: 18)),
+                 SizedBox(width: 8),
+                 Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ),
       ],

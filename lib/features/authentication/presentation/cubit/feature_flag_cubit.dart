@@ -35,6 +35,12 @@ class FeatureFlagCubit extends Cubit<FeatureFlagState> {
     emit(FeatureFlagState(_featureFlags));
   }
 
+  /// Toggle developer panel visibility
+  void toggleDeveloperPanel() {
+    _featureFlags.showDeveloperPanel = !_featureFlags.showDeveloperPanel;
+    emit(FeatureFlagState(_featureFlags));
+  }
+
   /// Update mock API delay
   void updateMockDelay(int milliseconds) {
     _featureFlags.mockApiDelayMs = milliseconds;

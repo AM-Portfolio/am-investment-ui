@@ -9,17 +9,24 @@ class GoogleLoginButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    height: 48,
+    height: 54,
     child: ElevatedButton.icon(
       onPressed: () {
         context.read<AuthCubit>().loginWithGoogle();
       },
-      icon: const Icon(Icons.g_mobiledata, size: 28),
-      label: const Text('Continue with Google'),
+      icon: Image.network(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png',
+        height: 24, 
+        width: 24, 
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, size: 28, color: Colors.blue),
+      ),
+      label: const Text('Continue with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal)),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
-        side: const BorderSide(color: Colors.grey),
+        elevation: 0,
+        side: BorderSide(color: Colors.grey.shade300),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
   );

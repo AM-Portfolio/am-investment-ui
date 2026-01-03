@@ -13,7 +13,8 @@ import '../../../trade/presentation/web/trade_web_screen.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
-import 'login_screen.dart';
+import 'login_page.dart';
+
 
 /// Authentication-aware wrapper that manages authentication state
 class AuthWrapper extends ConsumerStatefulWidget {
@@ -86,63 +87,6 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     });
   }
 
-  Widget _getCurrentScreen(String userId) {
-    AppLogger.debug(
-      '🎯 _getCurrentScreen called - page: "$_currentPage", userId: "$userId" (length: ${userId.length})',
-      tag: 'AuthWrapper',
-    );
-
-    switch (_currentPage) {
-      case 'Portfolio':
-        AppLogger.debug(
-          '📊 Creating PortfolioScreen with userId: "$userId"',
-          tag: 'AuthWrapper',
-        );
-        return PortfolioScreen(
-          userId: userId,
-          isSidebarVisible: _isSidebarExpanded,
-          onToggleSidebar: _toggleSidebar,
-        );
-      case 'Dashboard':
-        return DashboardWebPage(
-          userId: userId,
-          isSidebarVisible: _isSidebarExpanded,
-          onToggleSidebar: _toggleSidebar,
-        );
-      case 'Trade':
-        AppLogger.debug(
-          '📈 Creating TradeWebScreen/TradeMobileScreen with userId: "$userId"',
-          tag: 'AuthWrapper',
-        );
-        return PlatformUtils.isWeb
-            ? TradeWebScreen(
-                userId: userId,
-                isSidebarVisible: _isSidebarExpanded,
-                onToggleSidebar: _toggleSidebar,
-              )
-            : TradeMobileScreen(
-                userId: userId,
-                onBack: () => _handleNavigation('Portfolio'),
-              );
-      case 'Market':
-        return _buildPlaceholderScreen('Market');
-      case 'News':
-        return _buildPlaceholderScreen('News');
-      case 'Reports':
-        return _buildPlaceholderScreen('Reports');
-      default:
-        AppLogger.debug(
-          '📊 Default: Creating PortfolioScreen with userId: "$userId"',
-          tag: 'AuthWrapper',
-        );
-        return PortfolioScreen(
-          userId: userId,
-          isSidebarVisible: _isSidebarExpanded,
-          onToggleSidebar: _toggleSidebar,
-        );
-    }
-  }
-
   Widget _buildPlaceholderScreen(String title) => Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -194,8 +138,9 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           '🔓 Not authenticated - showing login screen',
           tag: 'AuthWrapper',
         );
-        return LoginScreen(onLogin: _handleLogin);
+        return const LoginPage();
       }
+
 
       // Show main app if authenticated
       final userId = state.user.id;
@@ -220,8 +165,9 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.read<AuthCubit>().logout();
         });
-        return LoginScreen(onLogin: _handleLogin);
+        return const LoginPage();
       }
+
 
       AppLogger.info(
         '✅ AuthWrapper: User authenticated successfully - userId: "$userId", email: "$email"',
@@ -242,13 +188,29 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         });
       }
 
-      AppLogger.debug(
-        '🏗️ Building main app screen with userId: "$userId"',
-        tag: 'AuthWrapper',
-      );
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive Breakpoint: 850px
+          // Below 850px, we switch to Mobile Layout (Bottom Nav)
+          // Above 850px, we use Web Layout (Sidebar)
+          final isMobileView = constraints.maxWidth < 850;
 
-      return PlatformUtils.isWeb
-          ? WebLayout(
+          AppLogger.debug(
+            '🏗️ Building main app screen with userId: "$userId" (MobileView: $isMobileView)',
+            tag: 'AuthWrapper',
+          );
+
+          if (isMobileView) {
+            return MobileLayout(
+              title: 'AM Investment',
+              activeNavItem: _currentPage,
+              onLogout: _handleLogout,
+              onNavigate: _handleNavigation,
+              hideBottomNav: _currentPage == 'Trade', // Trade handles its own bottom nav
+              child: _getCurrentScreen(userId, isMobileView),
+            );
+          } else {
+            return WebLayout(
               title: _currentPage,
               activeNavItem: _currentPage,
               userName: state.user.displayName ?? state.user.email,
@@ -256,17 +218,66 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
               userAvatarUrl: state.user.photoUrl,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
-              child: _getCurrentScreen(userId),
-            )
-          : MobileLayout(
-              title: 'AM Investment',
-              activeNavItem: _currentPage,
-              onLogout: _handleLogout,
-              onNavigate: _handleNavigation,
-              hideBottomNav:
-                  _currentPage == 'Trade', // Hide bottom nav in Trade section
-              child: _getCurrentScreen(userId),
+              child: _getCurrentScreen(userId, isMobileView),
             );
+          }
+        },
+      );
     },
   );
+
+  Widget _getCurrentScreen(String userId, bool isMobileView) {
+    AppLogger.debug(
+      '🎯 _getCurrentScreen called - page: "$_currentPage", userId: "$userId", isMobile: $isMobileView',
+      tag: 'AuthWrapper',
+    );
+
+    switch (_currentPage) {
+      case 'Portfolio':
+        AppLogger.debug(
+          '📊 Creating PortfolioScreen with userId: "$userId"',
+          tag: 'AuthWrapper',
+        );
+        // PortfolioScreen might need responsive tweaks internally
+        return PortfolioScreen(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
+      case 'Dashboard':
+        return DashboardWebPage(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
+      case 'Trade':
+        AppLogger.debug(
+          '📈 Creating Trade Screen (Mobile: $isMobileView) with userId: "$userId"',
+          tag: 'AuthWrapper',
+        );
+        // Explicitly switch between Mobile and Web screens based on width
+        return isMobileView
+            ? TradeMobileScreen(
+                userId: userId,
+                onBack: () => _handleNavigation('Portfolio'),
+              )
+            : TradeWebScreen(
+                userId: userId,
+                isSidebarVisible: _isSidebarExpanded,
+                onToggleSidebar: _toggleSidebar,
+              );
+      case 'Market':
+        return _buildPlaceholderScreen('Market');
+      case 'News':
+        return _buildPlaceholderScreen('News');
+      case 'Reports':
+        return _buildPlaceholderScreen('Reports');
+      default:
+        return PortfolioScreen(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+        );
+    }
+  }
 }

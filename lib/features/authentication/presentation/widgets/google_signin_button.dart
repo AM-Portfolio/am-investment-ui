@@ -75,6 +75,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Google logo
                 Image.network(
@@ -85,12 +86,15 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                       const Icon(Icons.g_mobiledata, size: 20),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Continue with Google',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                const Flexible(
+                  child: Text(
+                    'Continue with Google',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

@@ -69,17 +69,17 @@ class AppConstants {
   static const bool defaultDocumentEnabled = true;
 
   /// Auth API Defaults
-  static const String defaultAuthBaseUrl = 'https://api.munish.org/auth';
-  // These are now relative to Auth Base URL, as per Postman
-  static const String defaultAuthLoginEndpoint = '/api/v1/tokens';
-  static const String defaultAuthRefreshTokenEndpoint = '/api/v1/auth/refresh';
-  static const String defaultAuthLogoutEndpoint = '/api/v1/auth/logout';
+  static const String defaultAuthBaseUrl = 'https://am.munish.org/auth';
+  // These are now relative to Auth Base URL, as per backend routing
+  static const String defaultAuthLoginEndpoint = '/token/v1/tokens';
+  static const String defaultAuthRefreshTokenEndpoint = '/token/v1/auth/refresh';
+  static const String defaultAuthLogoutEndpoint = '/token/v1/auth/logout';
   static const String defaultAuthGoogleLoginEndpoint =
-      '/api/v1/auth/google/token';
+      '/token/v1/auth/google/token';
   static const bool defaultAuthEnabled = true;
 
   /// User API Defaults
-  static const String defaultUserBaseUrl = 'https://api.munish.org/user';
+  static const String defaultUserBaseUrl = 'https://am.munish.org/users';
   static const String defaultUserRegisterEndpoint = '/api/v1/auth/register';
   static const String defaultUserForgotPasswordEndpoint =
       '/api/v1/auth/forgot-password';
