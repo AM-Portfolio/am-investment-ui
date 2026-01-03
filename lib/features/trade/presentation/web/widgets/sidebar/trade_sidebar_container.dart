@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../models/trade_portfolio_view_model.dart';
@@ -53,8 +54,24 @@ class TradeSidebarContainer extends StatelessWidget {
       return Theme(
         data: darkTheme,
         child: Container(
-          color: const Color(0xFF1E1E2E), // Dark background
-          child: Column(
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFF1E1E2E).withValues(alpha: 0.85),
+                      const Color(0xFF151520).withValues(alpha: 0.95),
+                    ],
+                  ),
+                  border: Border(
+                    right: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  ),
+                ),
+                child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Sidebar Header
@@ -68,7 +85,10 @@ class TradeSidebarContainer extends StatelessWidget {
             ],
           ),
         ),
-      );
+      ),
+    ),
+  ),
+  );
     },
   );
 

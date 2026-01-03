@@ -339,7 +339,7 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
       dataTableTheme: DataTableThemeData(
         headingRowHeight: 56,
         dataRowHeight: 56,
-        headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+        headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5)),
         dividerThickness: 0.5,
       ),
     ),
@@ -349,7 +349,7 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
         sortColumnIndex: _sortColumnIndex,
         sortAscending: _sortAscending,
         headingRowHeight: 56,
-        headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+        headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5)),
         columns: [
           DataColumn(label: const Text('Symbol'), onSort: _sort),
           DataColumn(label: const Text('Company'), onSort: _sort),
@@ -389,14 +389,17 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
 
           return DataRow(
             color: WidgetStateProperty.resolveWith((states) {
+              final rowColor = index.isEven 
+                  ? Colors.transparent 
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04);
               if (isHovered) {
                 return Color.lerp(
-                  index.isEven ? Colors.white : Colors.grey.shade50.withOpacity(0.3),
-                  Theme.of(context).primaryColor.withOpacity(0.15),
+                  rowColor,
+                  Theme.of(context).primaryColor.withValues(alpha: 0.15),
                   hoverAnimation.value,
                 );
               }
-              return index.isEven ? Colors.white : Colors.grey.shade50.withOpacity(0.3);
+              return rowColor;
             }),
             onSelectChanged: (_) {},
             onLongPress: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,

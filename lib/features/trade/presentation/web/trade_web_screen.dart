@@ -188,10 +188,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       width: sidebarWidth,
-                      decoration: BoxDecoration(
-                        border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
-                        color: Theme.of(context).cardColor,
-                      ),
+                      color: Colors.transparent,
                       child: portfoliosAsyncValue.when(
                         data: (portfolios) => TradeSidebar(
                           selectedView: _selectedView,
