@@ -38,7 +38,7 @@ class MarketPage extends StatelessWidget {
                 title: 'Market Data',
                 subtitle: 'Real-time market insights',
                 icon: Icons.trending_up_rounded,
-                accentColor: const Color(0xFF06b6d4), // Cyan
+                accentColor: ModuleColors.market, // Standardized Cyan
                 child: MarketSidebarContent(provider: provider),
               ),
               
@@ -53,4 +53,3 @@ class MarketPage extends StatelessWidget {
     );
   }
 }
-
