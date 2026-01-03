@@ -13,6 +13,7 @@ import '../../../trade/presentation/web/trade_web_screen.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
 import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
+import '../../../dashboard/presentation/pages/dashboard_mobile_page.dart';
 import 'login_page.dart';
 
 
@@ -246,11 +247,13 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           onBack: () => _handleNavigation('Dashboard'),
         );
       case 'Dashboard':
-        return DashboardWebPage(
-          userId: userId,
-          isSidebarVisible: _isSidebarExpanded,
-          onToggleSidebar: _toggleSidebar,
-        );
+        return isMobileView
+            ? DashboardMobilePage(userId: userId)
+            : DashboardWebPage(
+                userId: userId,
+                isSidebarVisible: _isSidebarExpanded,
+                onToggleSidebar: _toggleSidebar,
+              );
       case 'Trade':
         AppLogger.debug(
           '📈 Creating Trade Screen (Mobile: $isMobileView) with userId: "$userId"',
