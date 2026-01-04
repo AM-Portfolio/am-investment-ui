@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 /// A reusable widget for selecting a portfolio, extracted from the Trade Sidebar logic.
 /// Designed to be flexible with different portfolio data models via extractors.
@@ -12,6 +13,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
     required this.idExtractor,
     required this.nameExtractor,
     this.isCompact = false,
+    this.accentColor,
   });
 
   /// The ID of the currently selected portfolio
@@ -35,8 +37,13 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
   /// Whether to show in compact mode (icon only)
   final bool isCompact;
 
+  /// Primary accent color
+  final Color? accentColor;
+
   @override
   Widget build(BuildContext context) {
+    final color = accentColor ?? Theme.of(context).primaryColor;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Automatically switch to compact mode if width is constrained or explicitly requested
@@ -55,10 +62,10 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6C5DD3).withOpacity(0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.account_balance_wallet, color: Color(0xFF6C5DD3), size: 20),
+                child: Icon(Icons.account_balance_wallet, color: color, size: 20),
               ),
               onSelected: (portfolioId) {
                 final portfolio = portfolios.firstWhere((p) => idExtractor(p) == portfolioId);
@@ -75,120 +82,108 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
           );
         }
 
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF2C2C3E),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.05),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        return SidebarSelector(
+            accentColor: color,
+            isCompact: effectiveCompact,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6C5DD3).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_wallet,
-                      size: 14,
-                      color: Color(0xFF6C5DD3),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Current Portfolio',
-                          style: TextStyle(
-                            color: Color(0xFF6C5DD3),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 10,
-                            letterSpacing: 0.5,
-                          ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          currentPortfolioName ?? 'No Portfolio',
+                        child: Icon(
+                          Icons.account_balance_wallet,
+                          size: 14,
+                          color: color,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Current Portfolio',
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              currentPortfolioName ?? 'No Portfolio',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  if (portfolios.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 32,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: currentPortfolioId,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF2C2C3E),
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 16,
+                            color: Colors.white70,
+                          ),
                           style: const TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          hint: const Text(
+                            'Select Portfolio',
+                            style: TextStyle(color: Colors.white54, fontSize: 12),
+                          ),
+                          items: portfolios.map((portfolio) => DropdownMenuItem<String>(
+                            value: idExtractor(portfolio),
+                            child: Text(
+                              nameExtractor(portfolio),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          )).toList(),
+                          onChanged: (portfolioId) {
+                            if (portfolioId != null) {
+                              final portfolio =
+                                  portfolios.firstWhere((p) => idExtractor(p) == portfolioId);
+                              onPortfolioSelected(portfolioId, nameExtractor(portfolio));
+                            }
+                          },
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
-              
-              if (portfolios.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Container(
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: currentPortfolioId,
-                      isExpanded: true,
-                      dropdownColor: const Color(0xFF2C2C3E),
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 16,
-                        color: Colors.white70,
-                      ),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                      hint: const Text(
-                        'Select Portfolio',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
-                      items: portfolios.map((portfolio) => DropdownMenuItem<String>(
-                        value: idExtractor(portfolio),
-                        child: Text(
-                          nameExtractor(portfolio),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )).toList(),
-                      onChanged: (portfolioId) {
-                        if (portfolioId != null) {
-                          final portfolio =
-                              portfolios.firstWhere((p) => idExtractor(p) == portfolioId);
-                          onPortfolioSelected(portfolioId, nameExtractor(portfolio));
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
+            ),
         );
       },
     );

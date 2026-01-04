@@ -35,6 +35,7 @@ class TradeWebScreen extends ConsumerStatefulWidget {
     this.initialView = TradeViewType.portfolios,
     this.isSidebarVisible = true,
     this.onToggleSidebar,
+    this.onBack,
   });
 
   final String userId;
@@ -43,6 +44,7 @@ class TradeWebScreen extends ConsumerStatefulWidget {
   final TradeViewType initialView;
   final bool isSidebarVisible;
   final VoidCallback? onToggleSidebar;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<TradeWebScreen> createState() => _TradeWebScreenState();
@@ -122,10 +124,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     final portfolios = portfoliosAsyncValue.asData?.value ?? const [];
 
       return UnifiedSidebarScaffold(
-        title: 'Trade Analysis',
+        module: ModuleType.trade,
         subtitle: _currentPortfolioName ?? 'Portfolio Management',
-        icon: Icons.candlestick_chart_rounded,
-        accentColor: ModuleColors.trade,
+        onBackToGlobal: widget.onBack,
         body: _buildMainContent(context),
         sections: [
           SecondarySidebarSection(
@@ -139,7 +140,20 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                     if (!isCompact)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
-                        child: _buildAddTradeButton(context),
+                        child: SidebarPrimaryAction(
+                          title: 'Add Trade',
+                          icon: Icons.add,
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/trade/add',
+                              arguments: {
+                                'portfolioId': _currentPortfolioId,
+                                'portfolioName': _currentPortfolioName
+                              },
+                            );
+                          },
+                        ),
                       ),
                     
                     // Portfolio Selector
@@ -151,6 +165,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
                         onPortfolioSelected: _onPortfolioSelected,
                         idExtractor: (p) => p.id,
                         nameExtractor: (p) => p.name,
+                        // Accent color will be handled by module theme or default if not passed
                       ),
                   ],
                 );
@@ -220,58 +235,7 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
       );
   }
 
-  Widget _buildAddTradeButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6C5DD3), Color(0xFF8B80F8)],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6C5DD3).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/trade/add',
-              arguments: {
-                'portfolioId': _currentPortfolioId,
-                'portfolioName': _currentPortfolioName
-              },
-            );
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: const Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Add Trade',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   /// Build app bar with context-aware title and actions
   PreferredSizeWidget _buildAppBar(BuildContext context) {

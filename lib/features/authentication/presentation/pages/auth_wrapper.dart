@@ -208,7 +208,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
               activeNavItem: _currentPage,
               onLogout: _handleLogout,
               onNavigate: _handleNavigation,
-              hideBottomNav: _currentPage == 'Trade' || _currentPage == 'Portfolio', // Portfolio and Trade handle their own nav
+              hideBottomNav: _currentPage == 'Trade' || _currentPage == 'Portfolio' || _currentPage == 'Market', // Portfolio, Trade, and Market handle their own nav
               child: _getCurrentScreen(userId, isMobileView),
             );
           } else {
@@ -260,19 +260,18 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           '📈 Creating Trade Screen (Mobile: $isMobileView) with userId: "$userId"',
           tag: 'AuthWrapper',
         );
-        // Explicitly switch between Mobile and Web screens based on width
-        return isMobileView
-            ? TradeMobileScreen(
-                userId: userId,
-                onBack: () => _handleNavigation('Portfolio'),
-              )
-            : TradeWebScreen(
-                userId: userId,
-                isSidebarVisible: _isSidebarExpanded,
-                onToggleSidebar: _toggleSidebar,
-              );
+        // Universal Trade Screen handling both Mobile and Web
+        return TradeWebScreen(
+          userId: userId,
+          isSidebarVisible: _isSidebarExpanded,
+          onToggleSidebar: _toggleSidebar,
+          onBack: () => _handleNavigation('Dashboard'),
+        );
       case 'Market':
-        return MarketPage(userId: userId);
+        return MarketPage(
+          userId: userId,
+          onBack: () => _handleNavigation('Dashboard'),
+        );
       case 'News':
         return _buildPlaceholderScreen('News');
       case 'Reports':

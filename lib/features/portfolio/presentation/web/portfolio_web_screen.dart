@@ -26,6 +26,7 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
     this.onPortfolioChanged,
     this.isSidebarVisible = true,
     this.onToggleSidebar,
+    this.onBack,
   });
   final String userId;
   final String? selectedPortfolioId;
@@ -34,6 +35,7 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
   final Function(String portfolioId, String portfolioName)? onPortfolioChanged;
   final bool isSidebarVisible;
   final VoidCallback? onToggleSidebar;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<PortfolioWebScreen> createState() => _PortfolioWebScreenState();
@@ -66,10 +68,9 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
   @override
   Widget build(BuildContext context) { 
       return UnifiedSidebarScaffold(
-        title: 'Portfolio',
+        module: ModuleType.portfolio,
         subtitle: widget.selectedPortfolioName ?? 'My Portfolio',
-        icon: Icons.pie_chart_rounded,
-        accentColor: ModuleColors.portfolio,
+        onBackToGlobal: widget.onBack,
         body: _buildMainContent(context),
         sections: [
           // Portfolio Selector Section
@@ -83,7 +84,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
                 onPortfolioSelected: _onPortfolioChanged,
                 idExtractor: (p) => p.portfolioId,
                 nameExtractor: (p) => p.portfolioName,
-                // isCompact is handled internally by LayoutBuilder in SharedPortfolioSelector
+                // Accent color will be handled by module theme
               ),
             ),
           
