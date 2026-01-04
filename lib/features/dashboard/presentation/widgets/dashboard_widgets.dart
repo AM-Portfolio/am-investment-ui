@@ -67,6 +67,8 @@ class ZellaScoreChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chartTheme = AmChartTheme.of(context);
+    
     // Normalize values for radar chart (0-100 scale)
     // specific normalization logic can be adjusted
     final winRateNormalized = (winRate * 100).clamp(0.0, 100.0);
@@ -136,11 +138,10 @@ class ZellaScoreChart extends StatelessWidget {
                     ),
                   ],
                   radarBackgroundColor: Colors.transparent,
-                  borderData: FlBorderData(show: false),
                   radarBorderData: const BorderSide(color: Colors.transparent),
                   titlePositionPercentageOffset: 0.2,
-                  titleTextStyle: const TextStyle(color: Colors.grey, fontSize: 12),
-                  gridBorderData: BorderSide(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+                  titleTextStyle: TextStyle(color: chartTheme.axisLabel, fontSize: 12),
+                  gridBorderData: BorderSide(color: chartTheme.gridLine, width: 1),
                   getTitle: (index, angle) {
                     switch (index) {
                       case 0:
@@ -161,14 +162,14 @@ class ZellaScoreChart extends StatelessWidget {
               child: RichText(
                 text: TextSpan(
                   children: [
-                    const TextSpan(
+                    TextSpan(
                       text: 'Your Zella Score: ',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      style: TextStyle(color: chartTheme.axisLabel, fontSize: 14),
                     ),
                     TextSpan(
                       text: score.toStringAsFixed(2),
-                      style: const TextStyle(
-                        color: Color(0xFF00B894),
+                      style: TextStyle(
+                        color: chartTheme.success,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -205,6 +206,8 @@ class NetCumulativePnLChart extends StatelessWidget {
     final minY = spots.map((e) => e.y).reduce((a, b) => a < b ? a : b);
     final maxY = spots.map((e) => e.y).reduce((a, b) => a > b ? a : b);
     final buffer = (maxY - minY).abs() * 0.1;
+    
+    final chartTheme = AmChartTheme.of(context);
 
     return Card(
       elevation: 0,
@@ -225,11 +228,11 @@ class NetCumulativePnLChart extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: chartTheme.title,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.info_outline, size: 16, color: Colors.grey[400]),
+                Icon(Icons.info_outline, size: 16, color: chartTheme.icon),
               ],
             ),
             const SizedBox(height: 20),
@@ -242,7 +245,7 @@ class NetCumulativePnLChart extends StatelessWidget {
                     horizontalInterval: (maxY - minY) / 5 == 0 ? 1 : (maxY - minY) / 5,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.withValues(alpha: 0.1),
+                        color: chartTheme.gridLine,
                         strokeWidth: 1,
                       );
                     },
@@ -263,7 +266,7 @@ class NetCumulativePnLChart extends StatelessWidget {
                              if (dates.length > 5 && index % (dates.length ~/ 3) != 0) return const SizedBox();
                              return Padding(
                                padding: const EdgeInsets.only(top: 8.0),
-                               child: Text(dates[index], style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                               child: Text(dates[index], style: TextStyle(color: chartTheme.axisLabel, fontSize: 10)),
                              );
                           }
                           return const Text('');
@@ -278,7 +281,7 @@ class NetCumulativePnLChart extends StatelessWidget {
                         getTitlesWidget: (value, meta) {
                           return Text(
                             '\$${value.toInt()}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 10),
+                            style: TextStyle(color: chartTheme.axisLabel, fontSize: 10),
                           );
                         },
                       ),
@@ -290,25 +293,25 @@ class NetCumulativePnLChart extends StatelessWidget {
                   minY: minY - buffer,
                   maxY: maxY + buffer,
                   lineBarsData: [
-                    LineChartBarData(
-                      spots: spots,
-                      isCurved: true,
-                      color: const Color(0xFF6C5DD3),
-                      barWidth: 2,
-                      isStrokeCapRound: true,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFF6C5DD3).withValues(alpha: 0.3),
-                            const Color(0xFF6C5DD3).withValues(alpha: 0.0),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                      LineChartBarData(
+                        spots: spots,
+                        isCurved: true,
+                        color: chartTheme.primary,
+                        barWidth: 2,
+                        isStrokeCapRound: true,
+                        dotData: const FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          gradient: LinearGradient(
+                            colors: [
+                              chartTheme.primary.withValues(alpha: 0.3),
+                              chartTheme.primary.withValues(alpha: 0.0),
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -339,6 +342,8 @@ class NetDailyPnLChart extends StatelessWidget {
     final minY = dailyData.map((e) => e.pnl).reduce((a, b) => a < b ? a : b);
     final maxY = dailyData.map((e) => e.pnl).reduce((a, b) => a > b ? a : b);
     final absMax = (maxY.abs() > minY.abs() ? maxY.abs() : minY.abs()) * 1.2;
+    
+    final chartTheme = AmChartTheme.of(context);
 
     return Card(
       elevation: 0,
@@ -359,11 +364,11 @@ class NetDailyPnLChart extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: chartTheme.title,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.info_outline, size: 16, color: Colors.grey[400]),
+                Icon(Icons.info_outline, size: 16, color: chartTheme.icon),
               ],
             ),
             const SizedBox(height: 20),
@@ -388,7 +393,7 @@ class NetDailyPnLChart extends StatelessWidget {
                         return BarTooltipItem(
                           rod.toY.round().toString(),
                           TextStyle(
-                            color: rod.toY >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
+                            color: rod.toY >= 0 ? chartTheme.success : chartTheme.error,
                             fontWeight: FontWeight.bold,
                           ),
                         );
@@ -405,7 +410,7 @@ class NetDailyPnLChart extends StatelessWidget {
                            final index = value.toInt();
                            if (index >= 0 && index < dailyData.length) {
                              if (dailyData.length > 5 && index % (dailyData.length ~/ 3) != 0) return const SizedBox();
-                             return Text(dailyData[index].date, style: const TextStyle(color: Colors.grey, fontSize: 10));
+                             return Text(dailyData[index].date, style: TextStyle(color: chartTheme.axisLabel, fontSize: 10));
                            }
                            return const Text('');
                         },
@@ -417,10 +422,10 @@ class NetDailyPnLChart extends StatelessWidget {
                         reservedSize: 40,
                         interval: absMax / 2 == 0 ? 10 : absMax / 2,
                         getTitlesWidget: (value, meta) {
-                          if (value == 0) return const Text('0', style: TextStyle(color: Colors.grey, fontSize: 10));
+                          if (value == 0) return Text('0', style: TextStyle(color: chartTheme.axisLabel, fontSize: 10));
                           return Text(
                             '\$${value.toInt()}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 10),
+                            style: TextStyle(color: chartTheme.axisLabel, fontSize: 10),
                           );
                         },
                       ),
@@ -434,7 +439,7 @@ class NetDailyPnLChart extends StatelessWidget {
                     horizontalInterval: absMax / 2 == 0 ? 10 : absMax / 2,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.withValues(alpha: 0.1),
+                        color: chartTheme.gridLine,
                         strokeWidth: 1,
                       );
                     },
@@ -448,7 +453,7 @@ class NetDailyPnLChart extends StatelessWidget {
                       barRods: [
                         BarChartRodData(
                           toY: data.pnl,
-                          color: data.pnl >= 0 ? const Color(0xFF00B894) : const Color(0xFFFF7675),
+                          color: data.pnl >= 0 ? chartTheme.success : chartTheme.error,
                           width: 16,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -478,6 +483,7 @@ class RecentTradesWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final chartTheme = AmChartTheme.of(context);
     if (portfolioId == null) {
       return _buildEmptyState(context, 'Select a portfolio');
     }
@@ -511,9 +517,9 @@ class RecentTradesWidget extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               children: [
-                Expanded(child: Text('Close Date', style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w600))),
-                Expanded(child: Text('Symbol', style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w600))),
-                Expanded(child: Text('Net P&L', style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
+                Expanded(child: Text('Close Date', style: TextStyle(color: chartTheme.axisLabel, fontSize: 12, fontWeight: FontWeight.w600))),
+                Expanded(child: Text('Symbol', style: TextStyle(color: chartTheme.axisLabel, fontSize: 12, fontWeight: FontWeight.w600))),
+                Expanded(child: Text('Net P&L', style: TextStyle(color: chartTheme.axisLabel, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
               ],
             ),
           ),
@@ -576,12 +582,13 @@ class RecentTradesWidget extends ConsumerWidget {
   }
 
   Widget _buildTab(BuildContext context, String title, bool isSelected) {
+    final chartTheme = AmChartTheme.of(context);
     return Container(
       padding: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: isSelected ? const Color(0xFF6C5DD3) : Colors.transparent,
+            color: isSelected ? chartTheme.primary : Colors.transparent,
             width: 2,
           ),
         ),
@@ -631,6 +638,8 @@ class CalendarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chartTheme = AmChartTheme.of(context);
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
