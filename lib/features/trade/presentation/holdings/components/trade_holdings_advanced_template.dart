@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/trade_holding_view_model.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 class TradeHoldingsAdvancedTemplate extends StatefulWidget {
   const TradeHoldingsAdvancedTemplate({
@@ -30,7 +31,7 @@ class TradeHoldingsAdvancedTemplate extends StatefulWidget {
 
 class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTemplate> with TickerProviderStateMixin {
   final Set<String> _expandedItems = {};
-  final Map<String, AnimationController> _hoverControllers = {};
+  // _hoverControllers removed as AmDataTable handles hover states
   int _currentPage = 0;
   int? _sortColumnIndex;
   bool _sortAscending = true;
@@ -38,7 +39,6 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
   late AnimationController _refreshController;
   String _viewMode = 'table'; // 'table' or 'card'
   String _filterStatus = 'all'; // 'all', 'profit', 'loss'
-  String? _hoveredRowId;
 
   @override
   void initState() {
@@ -50,9 +50,6 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
   @override
   void dispose() {
     _refreshController.dispose();
-    for (final controller in _hoverControllers.values) {
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -323,33 +320,13 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
   Widget _buildAdvancedTableView() => SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: SingleChildScrollView(
-      child: MouseRegion(
-        onExit: (_) {
-          setState(() {
-            _hoveredRowId = null;
-          });
-        },
-        child: _buildEnhancedDataTable(),
-      ),
+      child: _buildEnhancedDataTable(),
     ),
   ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0);
 
-  Widget _buildEnhancedDataTable() => Theme(
-    data: Theme.of(context).copyWith(
-      dataTableTheme: DataTableThemeData(
-        headingRowHeight: 56,
-        dataRowHeight: 56,
-        headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5)),
-        dividerThickness: 0.5,
-      ),
-    ),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
+  Widget _buildEnhancedDataTable() => AmDataTable(
         sortColumnIndex: _sortColumnIndex,
         sortAscending: _sortAscending,
-        headingRowHeight: 56,
-        headingRowColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5)),
         columns: [
           DataColumn(label: const Text('Symbol'), onSort: _sort),
           DataColumn(label: const Text('Company'), onSort: _sort),
@@ -363,145 +340,57 @@ class _TradeHoldingsAdvancedTemplateState extends State<TradeHoldingsAdvancedTem
           DataColumn(label: const Text('R:R Ratio'), numeric: true, onSort: _sort),
         ],
         rows: _paginatedHoldings.asMap().entries.map((entry) {
-          final index = entry.key;
           final holding = entry.value;
           final isPositive = holding.isProfit;
-          final isHovered = _hoveredRowId == holding.tradeId;
-
-          // Create or reuse animation controller for this row
-          if (!_hoverControllers.containsKey(holding.tradeId)) {
-            _hoverControllers[holding.tradeId] = AnimationController(
-              duration: const Duration(milliseconds: 300),
-              vsync: this,
-            );
-          }
-
-          if (isHovered) {
-            _hoverControllers[holding.tradeId]!.forward();
-          } else {
-            _hoverControllers[holding.tradeId]!.reverse();
-          }
-
-          final hoverAnimation = Tween<double>(
-            begin: 0,
-            end: 1,
-          ).animate(CurvedAnimation(parent: _hoverControllers[holding.tradeId]!, curve: Curves.easeInOut));
 
           return DataRow(
-            color: WidgetStateProperty.resolveWith((states) {
-              final rowColor = index.isEven 
-                  ? Colors.transparent 
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04);
-              if (isHovered) {
-                return Color.lerp(
-                  rowColor,
-                  Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                  hoverAnimation.value,
-                );
-              }
-              return rowColor;
-            }),
-            onSelectChanged: (_) {},
+            onSelectChanged: (_) {}, // Enables hover effect in AmDataTable
             onLongPress: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
             cells: [
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: AnimatedBuilder(
-                    animation: hoverAnimation,
-                    builder: (context, child) => Transform.translate(
-                      offset: Offset(4 * hoverAnimation.value, 0),
-                      child: _buildSymbolCell(holding),
-                    ),
-                  ),
-                ),
+                _buildSymbolCell(holding),
                 onTap: widget.onSymbolTap != null ? () => widget.onSymbolTap!(holding.displaySymbol) : (widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null),
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: AnimatedBuilder(
-                    animation: hoverAnimation,
-                    builder: (context, child) => ScaleTransition(
-                      scale: Tween<double>(begin: 1.0, end: 1.02).animate(hoverAnimation),
-                      child: Text(holding.displayCompanyName),
-                    ),
-                  ),
-                ),
+                Text(holding.displayCompanyName),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: _buildStatusBadge(holding.displayStatus),
-                ),
+                _buildStatusBadge(holding.displayStatus),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: Text(holding.displayQuantity),
-                ),
+                Text(holding.displayQuantity),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: Text(holding.displayEntryPrice),
-                ),
+                Text(holding.displayEntryPrice),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: Text(holding.displayCurrentPrice),
-                ),
+                Text(holding.displayCurrentPrice),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: Text(holding.displayCurrentValue),
-                ),
+                Text(holding.displayCurrentValue),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: _buildPnLCell(holding.displayProfitLoss, isPositive),
-                ),
+                _buildPnLCell(holding.displayProfitLoss, isPositive),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: _buildPnLPercentageCell(holding.displayProfitLossPercentage, isPositive),
-                ),
+                _buildPnLPercentageCell(holding.displayProfitLossPercentage, isPositive),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
               DataCell(
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredRowId = holding.tradeId),
-                  onExit: (_) => setState(() => _hoveredRowId = null),
-                  child: Text(holding.displayRiskRewardRatio),
-                ),
+                Text(holding.displayRiskRewardRatio),
                 onTap: widget.onHoldingSelected != null ? () => widget.onHoldingSelected!(holding) : null,
               ),
             ],
           );
         }).toList(),
-      ),
-    ),
-  );
+      );
 
   Widget _buildSymbolCell(TradeHoldingViewModel holding) => Row(
     mainAxisSize: MainAxisSize.min,

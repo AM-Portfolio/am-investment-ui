@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../internal/domain/entities/metrics_filter_config.dart';
@@ -324,239 +325,133 @@ class _FilterPanelState extends ConsumerState<FilterPanel> with SingleTickerProv
   int get _activeFilterCount => _activeGroups.where((g) => g.hasActiveFilters).length;
 
   @override
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? theme.cardColor : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Modern Header
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                setState(() => _isExpanded = !_isExpanded);
-                _isExpanded ? _animationController.forward() : _animationController.reverse();
-              },
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [theme.primaryColor.withOpacity(0.05), theme.primaryColor.withOpacity(0.02)],
+    return AmFilterPanel(
+      title: 'Filters',
+      activeFilterCount: _activeFilterCount,
+      isExpanded: _isExpanded,
+      onExpandToggle: () {
+        setState(() => _isExpanded = !_isExpanded);
+        _isExpanded ? _animationController.forward() : _animationController.reverse();
+      },
+      headerActions: [
+        // Favorite Filter Dropdown
+        FavoriteFilterPanel(
+          userId: widget.userId,
+          onFilterSelected: (filter) => _applyFavoriteFilter(filter.filterConfig),
+        ),
+        const SizedBox(width: 12),
+        
+        // Add Filter Button
+        PopupMenuButton<FilterGroupType>(
+          itemBuilder: (context) => [
+            if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
+              PopupMenuItem(
+                value: FilterGroupType.dateRange,
+                child: _buildMenuTile(Icons.date_range_rounded, 'Date Range', theme),
+              ),
+            if (!_activeGroups.any((g) => g is InstrumentFilterGroup))
+              PopupMenuItem(
+                value: FilterGroupType.instrument,
+                child: _buildMenuTile(Icons.candlestick_chart_rounded, 'Instruments', theme),
+              ),
+            if (!_activeGroups.any((g) => g is TradeCharacteristicsFilterGroup))
+              PopupMenuItem(
+                value: FilterGroupType.tradeCharacteristics,
+                child: _buildMenuTile(Icons.insights_rounded, 'Trade Characteristics', theme),
+              ),
+            if (!_activeGroups.any((g) => g is ProfitLossFilterGroup))
+              PopupMenuItem(
+                value: FilterGroupType.profitLoss,
+                child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
+              ),
+          ],
+          onSelected: _addFilterGroup,
+          offset: const Offset(0, 40),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          tooltip: 'Add Filter Group',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add_circle_outline_rounded, size: 16, color: theme.primaryColor),
+                const SizedBox(width: 6),
+                Text(
+                  'Add',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.primaryColor,
                   ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 ),
-                child: Row(
-                  children: [
-                    // Left Section
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: theme.primaryColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.tune_rounded, color: theme.primaryColor, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Filters',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                            if (_activeGroups.isNotEmpty) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: theme.primaryColor.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '$_activeFilterCount active',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: theme.primaryColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        if (_activeGroups.isNotEmpty)
-                          Text(
-                            '${_activeGroups.length} group${_activeGroups.length > 1 ? 's' : ''}',
-                            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor, fontSize: 11),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    // Favorite Filter Dropdown
-                    FavoriteFilterPanel(
-                      userId: widget.userId,
-                      onFilterSelected: (filter) => _applyFavoriteFilter(filter.filterConfig),
-                    ),
-                    const Spacer(),
+              ],
+            ),
+          ),
+        ),
 
-                    // Right Section
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Add Filter Button
-                        PopupMenuButton<FilterGroupType>(
-                          itemBuilder: (context) => [
-                            if (!_activeGroups.any((g) => g is DateRangeFilterGroup))
-                              PopupMenuItem(
-                                value: FilterGroupType.dateRange,
-                                child: _buildMenuTile(Icons.date_range_rounded, 'Date Range', theme),
-                              ),
-                            if (!_activeGroups.any((g) => g is InstrumentFilterGroup))
-                              PopupMenuItem(
-                                value: FilterGroupType.instrument,
-                                child: _buildMenuTile(Icons.candlestick_chart_rounded, 'Instruments', theme),
-                              ),
-                            if (!_activeGroups.any((g) => g is TradeCharacteristicsFilterGroup))
-                              PopupMenuItem(
-                                value: FilterGroupType.tradeCharacteristics,
-                                child: _buildMenuTile(Icons.insights_rounded, 'Trade Characteristics', theme),
-                              ),
-                            if (!_activeGroups.any((g) => g is ProfitLossFilterGroup))
-                              PopupMenuItem(
-                                value: FilterGroupType.profitLoss,
-                                child: _buildMenuTile(Icons.account_balance_wallet_rounded, 'Profit & Loss', theme),
-                              ),
-                          ],
-                          onSelected: _addFilterGroup,
-                          offset: const Offset(0, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          tooltip: 'Add Filter Group',
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.add_circle_outline_rounded, size: 16, color: theme.primaryColor),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Add',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: theme.primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        if (_activeGroups.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          // Save as Favorite Button
-                          Tooltip(
-                            message: 'Save as favorite',
-                            child: InkWell(
-                              onTap: _showSaveDialog,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
-                                ),
-                                child: Icon(Icons.bookmark_add_rounded, size: 18, color: Colors.amber[700]),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Reset Button
-                          Tooltip(
-                            message: 'Reset all filters',
-                            child: InkWell(
-                              onTap: _resetAllFilters,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.error.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: theme.colorScheme.error.withOpacity(0.3)),
-                                ),
-                                child: Icon(Icons.refresh_rounded, size: 18, color: theme.colorScheme.error),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Apply Button
-                          FilledButton.icon(
-                            onPressed: _applyFilters,
-                            icon: const Icon(Icons.check_rounded, size: 16),
-                            label: const Text('Apply'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              minimumSize: const Size(0, 32),
-                              visualDensity: VisualDensity.compact,
-                              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ],
-
-                        const SizedBox(width: 8),
-                        // Expand/Collapse
-                        RotationTransition(
-                          turns: _rotationAnimation,
-                          child: Icon(Icons.expand_more_rounded, size: 20, color: theme.hintColor),
-                        ),
-                      ],
-                    ),
-                  ],
+        if (_activeGroups.isNotEmpty) ...[
+          const SizedBox(width: 8),
+          // Save as Favorite Button
+          Tooltip(
+            message: 'Save as favorite',
+            child: InkWell(
+              onTap: _showSaveDialog,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withOpacity(0.3)),
                 ),
+                child: Icon(Icons.bookmark_add_rounded, size: 18, color: Colors.amber[700]),
               ),
             ),
           ),
-
-          // Animated Content
-          AnimatedSize(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            child: _isExpanded
-                ? Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [_buildFilterGroupsContent(theme)],
-                    ),
-                  )
-                : const SizedBox.shrink(),
+          const SizedBox(width: 8),
+          // Reset Button
+          Tooltip(
+            message: 'Reset all filters',
+            child: InkWell(
+              onTap: _resetAllFilters,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: theme.colorScheme.error.withOpacity(0.3)),
+                ),
+                child: Icon(Icons.refresh_rounded, size: 18, color: theme.colorScheme.error),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Apply Button
+          FilledButton.icon(
+            onPressed: _applyFilters,
+            icon: const Icon(Icons.check_rounded, size: 16),
+            label: const Text('Apply'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              minimumSize: const Size(0, 32),
+              visualDensity: VisualDensity.compact,
+              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
           ),
         ],
-      ),
+      ],
+      child: _buildFilterGroupsContent(theme),
     );
   }
 

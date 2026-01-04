@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:todo_app/core/utils/logger.dart';
 
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:am_common_ui/core/theme/cubit/theme_cubit.dart';
+
 import '../../../trade/providers/trade_internal_providers.dart';
 
 import 'package:am_common_ui/widgets/calendar/universal_calendar/universal_calendar_widget.dart';
@@ -43,7 +46,7 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
     final portfoliosAsync = ref.watch(tradePortfoliosStreamProvider(widget.userId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      // backgroundColor: const Color(0xFFF5F6FA), // Removed to use Theme background
       body: Column(
         children: [
                 // Top Bar
@@ -83,12 +86,13 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Welcome Message
-                        const Text(
+                        Text(
                           'Good morning!',
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ) ?? const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF2D3436),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -113,8 +117,8 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
+        color: Theme.of(context).scaffoldBackgroundColor == Colors.black ? Colors.grey[900] : Colors.white, // Adaptation
+        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: Row(
         children: [
@@ -126,25 +130,38 @@ class _DashboardWebPageState extends ConsumerState<DashboardWebPage> {
           const SizedBox(width: 8),
           Text(
             _currentView,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2D3436),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+               fontSize: 18,
+               fontWeight: FontWeight.w600,
             ),
           ),
           
           const Spacer(),
 
+           // Theme Toggle for Verification
+           IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () {
+               // Simple toggle using cubit
+               final cubit = context.read<ThemeCubit>();
+               cubit.toggleTheme();
+            },
+            tooltip: 'Toggle Theme',
+          ),
+          const SizedBox(width: 12),
+
           // Right Side Actions
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest, // Use theme surface
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.monetization_on_outlined, size: 16, color: Color(0xFF6C5DD3)),
+                Icon(Icons.monetization_on_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
               ],
             ),
           ),

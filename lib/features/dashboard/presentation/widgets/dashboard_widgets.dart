@@ -5,6 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../trade/providers/trade_internal_providers.dart';
 
 // --- Stat Card ---
+// --- Stat Card ---
+// DEPRECATED: Use AmStatCard from am_common_ui directly.
+// This wrapper exists for migration compatibility.
+import 'package:am_common_ui/am_common_ui.dart';
+
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -27,114 +32,21 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(Icons.info_outline, size: 14, color: Colors.grey[300]),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: valueColor ?? const Color(0xFF1A1B25),
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (icon != null)
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: (valueColor ?? const Color(0xFF6C5DD3)).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 20,
-                      color: valueColor ?? const Color(0xFF6C5DD3),
-                    ),
-                  ),
-              ],
-            ),
-            if (subtitle != null || progress != null) ...[
-              const SizedBox(height: 16),
-              if (progress != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.grey[100],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        (isPositive ?? true) ? const Color(0xFF00B894) : const Color(0xFFFF7675),
-                      ),
-                      minHeight: 6,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ],
-                ),
-              if (subtitle != null)
-                Padding(
-                  padding: EdgeInsets.only(top: progress != null ? 8 : 0),
-                  child: Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: (isPositive == true)
-                          ? const Color(0xFF00B894)
-                          : (isPositive == false)
-                              ? const Color(0xFFFF7675)
-                              : Colors.grey[500],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-            ],
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuad);
+    // Map legacy props to new StatType
+    StatType type = StatType.neutral;
+    if (isPositive == true) type = StatType.positive;
+    if (isPositive == false) type = StatType.negative;
+    // valueColor typically implies an accent if it's not red/green
+    if (valueColor != null && isPositive == null) type = StatType.accent;
+
+    return AmStatCard(
+      title: title,
+      value: value,
+      subtitle: subtitle,
+      icon: icon,
+      progress: progress,
+      type: type,
+    );
   }
 }
 
@@ -165,9 +77,9 @@ class ZellaScoreChart extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -298,9 +210,9 @@ class NetCumulativePnLChart extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -432,9 +344,9 @@ class NetDailyPnLChart extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -567,7 +479,7 @@ class RecentTradesWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (portfolioId == null) {
-      return _buildEmptyState('Select a portfolio');
+      return _buildEmptyState(context, 'Select a portfolio');
     }
 
     final params = (userId: userId, portfolioId: portfolioId!);
@@ -577,9 +489,9 @@ class RecentTradesWidget extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -587,9 +499,9 @@ class RecentTradesWidget extends ConsumerWidget {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                _buildTab('RECENT TRADES', true),
+                _buildTab(context, 'RECENT TRADES', true),
                 const SizedBox(width: 20),
-                _buildTab('OPEN POSITIONS', false),
+                _buildTab(context, 'OPEN POSITIONS', false),
               ],
             ),
           ),
@@ -626,6 +538,7 @@ class RecentTradesWidget extends ConsumerWidget {
                   // TradeHoldingViewModel might not have close date directly exposed in a nice format
                   // We'll use displaySymbol and displayProfitLoss
                   return _buildRow(
+                    context,
                     '08/15/2023', // Placeholder date as it's not in view model easily
                     holding.displaySymbol,
                     holding.profitLoss ?? 0.0,
@@ -647,22 +560,22 @@ class RecentTradesWidget extends ConsumerWidget {
     ).animate().fadeIn(duration: 800.ms, delay: 600.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildEmptyState(String message) {
+  Widget _buildEmptyState(BuildContext context, String message) {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(
+            shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Center(child: Text(message)),
+        child: Center(child: Text(message, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))),
       ),
     );
   }
 
-  Widget _buildTab(String title, bool isSelected) {
+  Widget _buildTab(BuildContext context, String title, bool isSelected) {
     return Container(
       padding: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
@@ -684,7 +597,7 @@ class RecentTradesWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildRow(String date, String symbol, double pnl) {
+  Widget _buildRow(BuildContext context, String date, String symbol, double pnl) {
     final isPositive = pnl >= 0;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -693,8 +606,8 @@ class RecentTradesWidget extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: Text(date, style: const TextStyle(color: Color(0xFF2D3436), fontSize: 13))),
-          Expanded(child: Text(symbol, style: const TextStyle(color: Color(0xFF2D3436), fontWeight: FontWeight.w600, fontSize: 13))),
+          Expanded(child: Text(date, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 13))),
+          Expanded(child: Text(symbol, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontWeight: FontWeight.w600, fontSize: 13))),
           Expanded(
             child: Text(
               '\$${pnl.toStringAsFixed(2)}',
@@ -722,9 +635,9 @@ class CalendarWidget extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
-      color: Colors.white,
+      color: Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -748,12 +661,12 @@ class CalendarWidget extends StatelessWidget {
                     const SizedBox(width: 8),
                     const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
                     const SizedBox(width: 16),
-                    const Text(
+                    Text(
                       'August 2023',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3436),
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
                   ],
@@ -778,13 +691,13 @@ class CalendarWidget extends StatelessWidget {
             // Calendar Grid Row (Sample)
             Row(
               children: [
-                _buildDayCell('', null, null),
-                _buildDayCell('', null, null),
-                _buildDayCell('1', 105, 4),
-                _buildDayCell('2', 101, 5),
-                _buildDayCell('3', -248, 6),
-                _buildDayCell('4', -241, 4),
-                _buildDayCell('5', null, null),
+                _buildDayCell(context, '', null, null),
+                _buildDayCell(context, '', null, null),
+                _buildDayCell(context, '1', 105, 4),
+                _buildDayCell(context, '2', 101, 5),
+                _buildDayCell(context, '3', -248, 6),
+                _buildDayCell(context, '4', -241, 4),
+                _buildDayCell(context, '5', null, null),
               ],
             ),
           ],
@@ -793,9 +706,9 @@ class CalendarWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDayCell(String day, double? pnl, int? trades) {
+  Widget _buildDayCell(BuildContext context, String day, double? pnl, int? trades) {
     Color? bgColor;
-    Color textColor = const Color(0xFF2D3436);
+    Color textColor = Theme.of(context).textTheme.bodyMedium?.color ?? const Color(0xFF2D3436);
     
     if (pnl != null) {
       if (pnl > 0) {
@@ -812,8 +725,8 @@ class CalendarWidget extends StatelessWidget {
         height: 80,
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: bgColor ?? Colors.white,
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          color: bgColor ?? Theme.of(context).cardTheme.color ?? Theme.of(context).cardColor,
+          border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
