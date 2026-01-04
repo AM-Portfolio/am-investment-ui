@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit;
+import 'package:am_common_ui/am_common_ui.dart';
 
 import '../../../../core/utils/logger.dart';
-import '../../../authentication/presentation/cubit/auth_cubit.dart';
 import '../../internal/domain/entities/metrics/metrics_filter_request.dart';
 import '../../providers/trade_internal_providers.dart';
 import '../../providers/trade_report_providers.dart';

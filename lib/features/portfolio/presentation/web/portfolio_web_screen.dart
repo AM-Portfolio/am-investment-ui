@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit;
+import 'package:am_common_ui/am_common_ui.dart';
 
 import '../../../../core/utils/logger.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
@@ -15,7 +15,6 @@ import 'pages/portfolio_holdings_web_page.dart';
 import 'pages/portfolio_analysis_web_page.dart';
 import 'pages/portfolio_heatmap_web_page.dart';
 import '../../../profile/presentation/pages/profile_settings_page.dart';
-import '../../../authentication/presentation/cubit/auth_cubit.dart';
 
 /// Web-specific portfolio screen implementation
 class PortfolioWebScreen extends ConsumerStatefulWidget {

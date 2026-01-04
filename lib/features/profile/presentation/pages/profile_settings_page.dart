@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit;
-import '../../../authentication/presentation/cubit/auth_cubit.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 
 /// Profile and Settings page for user account management
 class ProfileSettingsPage extends StatelessWidget {

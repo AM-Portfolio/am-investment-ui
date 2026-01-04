@@ -1,14 +1,13 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../authentication/presentation/cubit/auth_cubit.dart';
-import '../../../../authentication/presentation/cubit/auth_state.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../cubit/trade_controller_cubit.dart';
 import '../../cubit/trade_controller_state.dart';
 import '../../web/trade_web_screen.dart'; // For types
-import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit, AuthState, Authenticated;
+import 'package:am_common_ui/am_common_ui.dart';
 import '../components/add_trade_form.dart';
 
 /// Web page for adding new trades with responsive design

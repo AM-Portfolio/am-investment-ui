@@ -5,18 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/platform_utils.dart';
 import '../../../../core/services/app_preload_service.dart';
-import '../../../../shared/widgets/layouts/mobile_layout.dart';
-import '../../../../shared/widgets/layouts/web_layout.dart';
-import '../../../portfolio/presentation/pages/portfolio_screen.dart';
-import '../../../trade/presentation/mobile/trade_mobile_screen.dart';
-import '../../../trade/presentation/web/trade_web_screen.dart';
-import '../../../market/presentation/pages/market_page.dart'; // Market module
+
+import '../../../../features/dashboard/presentation/pages/dashboard_web_page.dart';
+import '../../../../features/dashboard/presentation/pages/dashboard_mobile_page.dart';
+import '../../../../features/market_analysis/presentation/pages/market_analysis_page.dart';
+import '../../../../features/market/presentation/pages/market_page.dart';
+import '../../../../features/portfolio/presentation/pages/portfolio_screen.dart';
+import '../../../../features/trade/presentation/web/trade_web_screen.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_cubit.dart';
 import 'package:am_common_ui/features/authentication/presentation/cubit/auth_state.dart';
-import '../../../dashboard/presentation/pages/dashboard_web_page.dart';
-import '../../../dashboard/presentation/pages/dashboard_mobile_page.dart';
-import 'login_page.dart';
-
+import 'package:am_common_ui/core/theme/cubit/theme_cubit.dart';
+import 'package:am_common_ui/core/theme/app_colors.dart';
+import 'package:am_common_ui/shared/widgets/layouts/web_layout.dart';
+import 'package:am_common_ui/shared/widgets/layouts/mobile_layout.dart';
+import 'package:am_common_ui/features/authentication/presentation/pages/login_page.dart';
 
 /// Authentication-aware wrapper that manages authentication state
 class AuthWrapper extends ConsumerStatefulWidget {
@@ -140,6 +142,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
           '🔓 Not authenticated - showing login screen',
           tag: 'AuthWrapper',
         );
+        // Show Onboarding for unauthenticated users, or Login directly
         return const LoginPage();
       }
 

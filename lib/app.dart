@@ -5,14 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:am_common_ui/am_common_ui.dart' hide AuthWrapper, AuthProviders;
 
 import 'di/auth_providers.dart';
-import 'features/authentication/presentation/pages/auth_wrapper.dart';
-import 'package:am_common_ui/features/authentication/presentation/pages/login_page.dart';
-import 'package:am_common_ui/features/authentication/presentation/pages/register_page.dart';
-import 'package:am_common_ui/features/authentication/presentation/pages/forgot_password_page.dart';
-import 'package:am_common_ui/features/authentication/presentation/pages/reset_password_page.dart';
-import 'package:am_common_ui/core/theme/cubit/theme_cubit.dart';
+import 'features/authentication/presentation/pages/auth_wrapper.dart'; // Local - has custom routing
 import 'features/portfolio/presentation/pages/portfolio_screen.dart';
 import 'features/trade/presentation/add_trade/pages/add_trade_web_page.dart';
 import 'features/trade/presentation/calendar/pages/trade_calendar_analytics_web_page.dart';

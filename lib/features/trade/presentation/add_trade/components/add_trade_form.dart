@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../authentication/presentation/cubit/auth_cubit.dart';
-import '../../../../authentication/presentation/cubit/auth_state.dart';
+import 'package:am_common_ui/am_common_ui.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../../internal/domain/enums/broker_types.dart';
 import '../../../internal/domain/enums/derivative_types.dart';

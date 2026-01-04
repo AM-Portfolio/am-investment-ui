@@ -12,7 +12,7 @@ info:
     3. For service-to-service calls, exchange user token for service token
 
     ## Base URL
-    - **Production**: `https://api.munish.org/auth`
+    - **Production**: `https://am.munish.org/auth`
 
   version: 1.0.0
   contact:
@@ -20,7 +20,7 @@ info:
     email: auth@amportfolio.com
 
 servers:
-  - url: https://api.munish.org/auth
+  - url: https://am.munish.org/auth
     description: Production Auth Tokens Service
 
 tags:
