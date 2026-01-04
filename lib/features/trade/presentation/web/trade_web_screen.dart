@@ -16,7 +16,7 @@ import '../models/trade_portfolio_view_model.dart';
 import '../trades/pages/trade_list_web_page.dart';
 import '../metrics/trade_metrics_page.dart';
 import '../report/pages/trade_report_page.dart';
-import 'widgets/trade_sidebar.dart';
+import '../../../../shared/widgets/selectors/shared_portfolio_selector.dart';
 import '../../../market_analysis/presentation/widgets/trading_view_chart_widget.dart';
 import '../../../market_analysis/providers/market_analysis_providers.dart';
 import '../pages/trade_market_page.dart';
@@ -115,199 +115,160 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
     AppLogger.info('Portfolio selected: $portfolioName ($portfolioId)', tag: 'TradeWebScreen');
   }
 
-  bool _useNewSidebar = false;
-
   @override
   Widget build(BuildContext context) {
-    if (_useNewSidebar) {
+    // Watch portfolios stream
+    final portfoliosAsyncValue = ref.watch(tradePortfoliosStreamProvider(widget.userId));
+    final portfolios = portfoliosAsyncValue.asData?.value ?? const [];
+
       return UnifiedSidebarScaffold(
         title: 'Trade Analysis',
         subtitle: _currentPortfolioName ?? 'Portfolio Management',
         icon: Icons.candlestick_chart_rounded,
         accentColor: ModuleColors.trade,
         body: _buildMainContent(context),
-        floatingActionButton: FloatingActionButton(
-          mini: true,
-          onPressed: () {
-            setState(() {
-              _useNewSidebar = false;
-            });
-          },
-          backgroundColor: Theme.of(context).cardColor,
-          child: const Icon(Icons.undo_rounded),
-        ),
-        items: [
-          SecondarySidebarItem(
-            title: 'Portfolios',
-            icon: Icons.folder_open_outlined,
-            isSelected: _selectedView == TradeViewType.portfolios,
-            onTap: () => _onViewChanged(TradeViewType.portfolios),
-          ),
-          SecondarySidebarItem(
-            title: 'Holdings',
-            icon: Icons.dashboard_outlined,
-            isSelected: _selectedView == TradeViewType.holdings,
-            onTap: () => _onViewChanged(TradeViewType.holdings),
-          ),
-          SecondarySidebarItem(
-            title: 'Calendar',
-            icon: Icons.calendar_today_outlined,
-            isSelected: _selectedView == TradeViewType.calendar,
-            onTap: () => _onViewChanged(TradeViewType.calendar),
-          ),
-          SecondarySidebarItem(
-            title: 'Trades',
-            icon: Icons.list_alt_rounded,
-            isSelected: _selectedView == TradeViewType.trades,
-            onTap: () => _onViewChanged(TradeViewType.trades),
-          ),
-          SecondarySidebarItem(
-            title: 'Journal',
-            icon: Icons.book_outlined,
-            isSelected: _selectedView == TradeViewType.journal,
-            onTap: () => _onViewChanged(TradeViewType.journal),
-          ),
-          SecondarySidebarItem(
-            title: 'Analysis',
-            icon: Icons.analytics_outlined,
-            isSelected: _selectedView == TradeViewType.analysis,
-            onTap: () => _onViewChanged(TradeViewType.analysis),
-          ),
-          SecondarySidebarItem(
-            title: 'Market',
-            icon: Icons.trending_up_rounded,
-            isSelected: _selectedView == TradeViewType.marketAnalysis,
-            onTap: () => _onViewChanged(TradeViewType.marketAnalysis),
-          ),
-          SecondarySidebarItem(
-            title: 'Report',
-            icon: Icons.summarize_outlined,
-            isSelected: _selectedView == TradeViewType.report,
-            onTap: () => _onViewChanged(TradeViewType.report),
-          ),
-          SecondarySidebarItem(
-            title: 'Unified',
-            icon: Icons.view_quilt_outlined,
-            isSelected: _selectedView == TradeViewType.unified,
-            onTap: () => _onViewChanged(TradeViewType.unified),
-          ),
-        ],
-      );
-    }
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 800;
-
-    // Watch portfolios stream
-    final portfoliosAsyncValue = ref.watch(tradePortfoliosStreamProvider(widget.userId));
-
-    return Scaffold(
-      appBar: _buildAppBar(context),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _useNewSidebar = true;
-          });
-        },
-        tooltip: 'Switch to New Sidebar',
-        child: const Icon(Icons.auto_awesome),
-      ),
-      // Drawer for mobile
-      drawer: isMobile
-          ? Drawer(
-              child: portfoliosAsyncValue.when(
-                data: (portfolios) => TradeSidebar(
-                  selectedView: _selectedView,
-                  onViewChanged: (viewType) {
-                    _onViewChanged(viewType);
-                    Navigator.pop(context); // Close drawer after selection
-                  },
-                  currentPortfolioId: _currentPortfolioId,
-                  currentPortfolioName: _currentPortfolioName,
-                  portfolios: portfolios,
-                  onPortfolioSelected: _onPortfolioSelected,
-                ),
-                loading: () => TradeSidebar(
-                  selectedView: _selectedView,
-                  onViewChanged: (viewType) {
-                    _onViewChanged(viewType);
-                    Navigator.pop(context); // Close drawer after selection
-                  },
-                  currentPortfolioId: _currentPortfolioId,
-                  currentPortfolioName: _currentPortfolioName,
-                ),
-                error: (_, __) => TradeSidebar(
-                  selectedView: _selectedView,
-                  onViewChanged: (viewType) {
-                    _onViewChanged(viewType);
-                    Navigator.pop(context); // Close drawer after selection
-                  },
-                  currentPortfolioId: _currentPortfolioId,
-                  currentPortfolioName: _currentPortfolioName,
-                ),
-              ),
-            )
-          : null,
-      body: Row(
-        children: [
-          // Left sidebar for desktop only with responsive width
-          if (!isMobile)
-            LayoutBuilder(
+        sections: [
+          SecondarySidebarSection(
+            title: 'Actions',
+            customWidget: LayoutBuilder(
               builder: (context, constraints) {
-                // Calculate responsive sidebar width based on screen width
-                final screenWidth = MediaQuery.of(context).size.width;
-                double sidebarWidth;
-
-                if (screenWidth < 1000) {
-                  sidebarWidth = 60; // Icon-only mode
-                } else if (screenWidth < 1400) {
-                  sidebarWidth = 150; // Condensed mode
-                } else {
-                  sidebarWidth = 280; // Full mode
-                }
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: widget.isSidebarVisible ? sidebarWidth : 0,
-                  curve: Curves.easeInOut,
-                  child: OverflowBox(
-                    minWidth: sidebarWidth,
-                    maxWidth: sidebarWidth,
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: sidebarWidth,
-                      color: Colors.transparent,
-                      child: portfoliosAsyncValue.when(
-                        data: (portfolios) => TradeSidebar(
-                          selectedView: _selectedView,
-                          onViewChanged: _onViewChanged,
-                          currentPortfolioId: _currentPortfolioId,
-                          currentPortfolioName: _currentPortfolioName,
-                          portfolios: portfolios,
-                          onPortfolioSelected: _onPortfolioSelected,
-                        ),
-                        loading: () => TradeSidebar(
-                          selectedView: _selectedView,
-                          onViewChanged: _onViewChanged,
-                          currentPortfolioId: _currentPortfolioId,
-                          currentPortfolioName: _currentPortfolioName,
-                        ),
-                        error: (_, __) => TradeSidebar(
-                          selectedView: _selectedView,
-                          onViewChanged: _onViewChanged,
-                          currentPortfolioId: _currentPortfolioId,
-                          currentPortfolioName: _currentPortfolioName,
-                        ),
+                final isCompact = constraints.maxWidth < 100;
+                return Column(
+                  children: [
+                    // Add Trade Button - Only in full mode
+                    if (!isCompact)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _buildAddTradeButton(context),
                       ),
-                    ),
-                  ),
+                    
+                    // Portfolio Selector
+                    if (portfolios.isNotEmpty)
+                      SharedPortfolioSelector<TradePortfolioViewModel>(
+                        currentPortfolioId: _currentPortfolioId,
+                        currentPortfolioName: _currentPortfolioName,
+                        portfolios: portfolios,
+                        onPortfolioSelected: _onPortfolioSelected,
+                        idExtractor: (p) => p.id,
+                        nameExtractor: (p) => p.name,
+                      ),
+                  ],
                 );
               },
             ),
-
-          // Main content area
-          Expanded(child: _buildMainContent(context)),
+          ),
+          SecondarySidebarSection(
+            title: 'Navigation',
+            items: [
+              SecondarySidebarItem(
+                title: 'Portfolios',
+                icon: Icons.folder_open_outlined,
+                isSelected: _selectedView == TradeViewType.portfolios,
+                onTap: () => _onViewChanged(TradeViewType.portfolios),
+              ),
+              SecondarySidebarItem(
+                title: 'Holdings',
+                icon: Icons.dashboard_outlined,
+                isSelected: _selectedView == TradeViewType.holdings,
+                onTap: () => _onViewChanged(TradeViewType.holdings),
+              ),
+              SecondarySidebarItem(
+                title: 'Calendar',
+                icon: Icons.calendar_today_outlined,
+                isSelected: _selectedView == TradeViewType.calendar,
+                onTap: () => _onViewChanged(TradeViewType.calendar),
+              ),
+              SecondarySidebarItem(
+                title: 'Trades',
+                icon: Icons.list_alt_rounded,
+                isSelected: _selectedView == TradeViewType.trades,
+                onTap: () => _onViewChanged(TradeViewType.trades),
+              ),
+              SecondarySidebarItem(
+                title: 'Journal',
+                icon: Icons.book_outlined,
+                isSelected: _selectedView == TradeViewType.journal,
+                onTap: () => _onViewChanged(TradeViewType.journal),
+              ),
+              SecondarySidebarItem(
+                title: 'Analysis',
+                icon: Icons.analytics_outlined,
+                isSelected: _selectedView == TradeViewType.analysis,
+                onTap: () => _onViewChanged(TradeViewType.analysis),
+              ),
+              SecondarySidebarItem(
+                title: 'Market',
+                icon: Icons.trending_up_rounded,
+                isSelected: _selectedView == TradeViewType.marketAnalysis,
+                onTap: () => _onViewChanged(TradeViewType.marketAnalysis),
+              ),
+              SecondarySidebarItem(
+                title: 'Report',
+                icon: Icons.summarize_outlined,
+                isSelected: _selectedView == TradeViewType.report,
+                onTap: () => _onViewChanged(TradeViewType.report),
+              ),
+              SecondarySidebarItem(
+                title: 'Unified',
+                icon: Icons.view_quilt_outlined,
+                isSelected: _selectedView == TradeViewType.unified,
+                onTap: () => _onViewChanged(TradeViewType.unified),
+              ),
+            ],
+          ),
         ],
+      );
+  }
+
+  Widget _buildAddTradeButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 48,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6C5DD3), Color(0xFF8B80F8)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6C5DD3).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/trade/add',
+              arguments: {
+                'portfolioId': _currentPortfolioId,
+                'portfolioName': _currentPortfolioName
+              },
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: const Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Add Trade',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

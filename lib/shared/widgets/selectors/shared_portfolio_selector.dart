@@ -37,7 +37,12 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isCompact) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Automatically switch to compact mode if width is constrained or explicitly requested
+        final effectiveCompact = isCompact || constraints.maxWidth < 100;
+
+        if (effectiveCompact) {
           if (portfolios.isEmpty) return const SizedBox.shrink();
 
           return Padding(
@@ -185,5 +190,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
             ],
           ),
         );
+      },
+    );
   }
 }

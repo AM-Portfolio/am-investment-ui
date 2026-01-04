@@ -9,7 +9,7 @@ import '../../providers/portfolio_providers.dart';
 import '../cubit/portfolio_analytics_cubit.dart';
 import '../cubit/portfolio_heatmap_cubit.dart';
 import '../cubit/portfolio_state.dart';
-import '../widgets/portfolio_sidebar.dart';
+import '../../../../shared/widgets/selectors/shared_portfolio_selector.dart';
 import 'pages/portfolio_overview_web_page.dart';
 import 'pages/portfolio_holdings_web_page.dart';
 import 'pages/portfolio_analysis_web_page.dart';
@@ -62,161 +62,66 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
     widget.onPortfolioChanged?.call(portfolioId, portfolioName);
   }
 
-  bool _useNewSidebar = false;
 
   @override
   Widget build(BuildContext context) { 
-    if (_useNewSidebar) {
       return UnifiedSidebarScaffold(
         title: 'Portfolio',
         subtitle: widget.selectedPortfolioName ?? 'My Portfolio',
         icon: Icons.pie_chart_rounded,
         accentColor: ModuleColors.portfolio,
         body: _buildMainContent(context),
-        floatingActionButton: FloatingActionButton(
-          mini: true,
-          onPressed: () {
-            setState(() {
-              _useNewSidebar = false;
-            });
-          },
-          backgroundColor: Theme.of(context).cardColor,
-          child: const Icon(Icons.undo_rounded),
-        ),
-        items: [
-           SecondarySidebarItem(
-            title: 'Overview',
-            icon: Icons.dashboard_outlined,
-            isSelected: _selectedView == PortfolioViewType.overview,
-            onTap: () => setState(() => _selectedView = PortfolioViewType.overview),
-          ),
-          SecondarySidebarItem(
-            title: 'Holdings',
-            icon: Icons.list_alt_rounded,
-            isSelected: _selectedView == PortfolioViewType.holdings,
-            onTap: () => setState(() => _selectedView = PortfolioViewType.holdings),
-          ),
-          SecondarySidebarItem(
-            title: 'Analysis',
-            icon: Icons.donut_large_outlined,
-            isSelected: _selectedView == PortfolioViewType.analysis,
-            onTap: () => setState(() => _selectedView = PortfolioViewType.analysis),
-          ),
-          SecondarySidebarItem(
-            title: 'Heatmap',
-            icon: Icons.grid_view_rounded,
-            isSelected: _selectedView == PortfolioViewType.heatmap,
-            onTap: () => setState(() => _selectedView = PortfolioViewType.heatmap),
+        sections: [
+          // Portfolio Selector Section
+          if (widget.portfolios != null && widget.portfolios!.isNotEmpty)
+            SecondarySidebarSection(
+              title: 'Portfolio',
+              customWidget: SharedPortfolioSelector<PortfolioItem>(
+                currentPortfolioId: _currentPortfolioId,
+                currentPortfolioName: widget.selectedPortfolioName,
+                portfolios: widget.portfolios!,
+                onPortfolioSelected: _onPortfolioChanged,
+                idExtractor: (p) => p.portfolioId,
+                nameExtractor: (p) => p.portfolioName,
+                // isCompact is handled internally by LayoutBuilder in SharedPortfolioSelector
+              ),
+            ),
+          
+          // Navigation Section
+          SecondarySidebarSection(
+            title: 'Navigation',
+            items: [
+              SecondarySidebarItem(
+                title: 'Overview',
+                icon: Icons.dashboard_outlined,
+                isSelected: _selectedView == PortfolioViewType.overview,
+                onTap: () => setState(() => _selectedView = PortfolioViewType.overview),
+              ),
+              SecondarySidebarItem(
+                title: 'Holdings',
+                icon: Icons.list_alt_rounded,
+                isSelected: _selectedView == PortfolioViewType.holdings,
+                onTap: () => setState(() => _selectedView = PortfolioViewType.holdings),
+              ),
+              SecondarySidebarItem(
+                title: 'Analysis',
+                icon: Icons.donut_large_outlined,
+                isSelected: _selectedView == PortfolioViewType.analysis,
+                onTap: () => setState(() => _selectedView = PortfolioViewType.analysis),
+              ),
+              SecondarySidebarItem(
+                title: 'Heatmap',
+                icon: Icons.grid_view_rounded,
+                isSelected: _selectedView == PortfolioViewType.heatmap,
+                onTap: () => setState(() => _selectedView = PortfolioViewType.heatmap),
+              ),
+            ],
           ),
         ],
       );
-    }
-
-    return Scaffold(
-    appBar: null, // Hidden as per user request for cleaner UI
-    floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _useNewSidebar = true;
-          });
-        },
-        tooltip: 'Switch to New Sidebar',
-        child: const Icon(Icons.auto_awesome),
-      ),
-    /* AppBar(
-      title: Text(widget.selectedPortfolioName ?? 'Portfolio'),
-      actions: [
-        // Portfolio selector dropdown
-        if (widget.portfolios != null && widget.portfolios!.length > 1)
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: DropdownButton<String>(
-              value: _currentPortfolioId,
-              icon: const Icon(Icons.arrow_drop_down),
-              underline: Container(),
-              items: widget.portfolios!
-                  .map<DropdownMenuItem<String>>(
-                    (portfolio) => DropdownMenuItem<String>(
-                      value: portfolio.portfolioId,
-                      child: Text(
-                        portfolio.portfolioName,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (newValue) {
-                if (newValue != null) {
-                  final selectedPortfolio = widget.portfolios!.firstWhere(
-                    (p) => p.portfolioId == newValue,
-                  );
-                  _onPortfolioChanged(
-                    newValue,
-                    selectedPortfolio.portfolioName,
-                  );
-                }
-              },
-            ),
-          ),
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () {
-            ref.invalidate(portfolioSummaryProvider(widget.userId));
-            ref.invalidate(portfolioHoldingsProvider(widget.userId));
-          },
-        ),
-      ],
-    ), */
-    body: Row(
-      children: [
-        // Left sidebar for navigation
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // Determine if sidebar should be compact based on screen width
-            // Using 1200 as breakpoint for "minimized" view preference
-            final screenWidth = MediaQuery.of(context).size.width;
-            final isCompact = screenWidth < 1200;
-            final sidebarWidth = widget.isSidebarVisible 
-                ? (isCompact ? 72.0 : 250.0) 
-                : 0.0;
-            
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: sidebarWidth,
-              curve: Curves.easeInOut,
-              child: OverflowBox(
-                minWidth: isCompact ? 72 : 250,
-                maxWidth: isCompact ? 72 : 250,
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: isCompact ? 72 : 250,
-                  decoration: BoxDecoration(
-                    border: Border(right: BorderSide(color: Colors.grey.shade300)),
-                  ),
-                  child: PortfolioSidebar(
-                    selectedView: _selectedView,
-                    onViewChanged: (viewType) {
-                      setState(() {
-                        _selectedView = viewType;
-                      });
-                    },
-                    currentPortfolioId: _currentPortfolioId,
-                    currentPortfolioName: widget.selectedPortfolioName,
-                    portfolios: widget.portfolios ?? [],
-                    onPortfolioSelected: widget.onPortfolioChanged,
-                    isCompact: isCompact,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-        // Main content area
-        Expanded(child: _buildMainContent(context)),
-      ],
-    ),
-  );
   }
+
+
 
   /// Build main content based on selected view
   Widget _buildMainContent(BuildContext context) {

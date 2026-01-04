@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/utils/logger.dart';
-import '../../../../../shared/widgets/layouts/web_layout.dart';
 import '../../../../authentication/presentation/cubit/auth_cubit.dart';
 import '../../../../authentication/presentation/cubit/auth_state.dart';
 import '../../../internal/domain/entities/trade_controller_entities.dart';
 import '../../cubit/trade_controller_cubit.dart';
 import '../../cubit/trade_controller_state.dart';
-import '../../web/trade_web_screen.dart';
-import '../../web/widgets/responsive_sidebar.dart';
-import '../../web/widgets/trade_sidebar.dart';
+import '../../web/trade_web_screen.dart'; // For types
+import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit, AuthState, Authenticated;
 import '../components/add_trade_form.dart';
 
 /// Web page for adding new trades with responsive design
@@ -110,10 +108,8 @@ class _AddTradeWebPageState extends State<AddTradeWebPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Get user info from auth state for WebLayout
-    final authState = context.watch<AuthCubit>().state;
-    final userName = authState is Authenticated ? authState.user.displayName ?? authState.user.email : 'User';
-    final userEmail = authState is Authenticated ? authState.user.email : '';
+    // Get user info from auth state (not used for layout anymore but maybe needed for logic?)
+    // UnifiedSidebarScaffold handles layout structure.
 
     return BlocListener<TradeControllerCubit, TradeControllerState>(
       listener: (context, state) {
@@ -167,76 +163,76 @@ class _AddTradeWebPageState extends State<AddTradeWebPage> {
           },
         );
       },
-      child: WebLayout(
-        title: 'Trade',
-        activeNavItem: 'Trade',
-        userName: userName,
-        userEmail: userEmail,
-        onLogout: () async {
-          await context.read<AuthCubit>().logout();
-        },
-        onNavigate: (navItem) {
-          // Navigate back to main screen
-          _navigateBack();
-        },
-        child: Row(
-          children: [
-            // Sidebar
-            ResponsiveSidebar(
-              child: TradeSidebar(
-                selectedView: TradeViewType.holdings,
-                onViewChanged: (_) {},
-                currentPortfolioId: widget.portfolioId,
-                currentPortfolioName: widget.portfolioName,
-              ),
-            ),
-
-            // Main Content
-            Expanded(
-              child: Container(
-                color: theme.colorScheme.surfaceContainerLowest,
-                child: Column(
+      child: UnifiedSidebarScaffold(
+        title: 'Add Trade',
+        subtitle: widget.portfolioName ?? 'Portfolio Management',
+        icon: Icons.add_circle_outline,
+        accentColor: ModuleColors.trade, // Trade accent
+        sections: [
+           SecondarySidebarSection(
+             title: 'Navigation',
+             items: [
+               SecondarySidebarItem(
+                 title: 'Back to Dashboard',
+                 icon: Icons.arrow_back,
+                 onTap: _navigateBack,
+               ),
+               // We could add other items here but they would navigate away.
+               // For "Add Trade", minimal navigation is better to focus user.
+             ]
+           )
+        ],
+        body: Container(
+          color: theme.colorScheme.surfaceContainerLowest,
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
                   children: [
-                    // Header
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: _handleCancel,
-                            tooltip: 'Back to Trades',
-                          ),
-                          const SizedBox(width: 16),
-                          if (widget.portfolioName != null)
-                            Text(
-                              widget.portfolioName!,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.7),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                        ],
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: _handleCancel,
+                      tooltip: 'Back to Trades',
                     ),
-
-                    // Form
-                    Expanded(
-                      child: AddTradeForm(onSave: _handleSave, onCancel: _handleCancel, isLoading: _isLoading),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Text(
+                          'New Trade',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                         ),
+                        if (widget.portfolioName != null)
+                          Text(
+                            widget.portfolioName!,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ), // End of WebLayout child
-      ), // End of BlocListener
+
+              // Form
+              Expanded(
+                child: AddTradeForm(onSave: _handleSave, onCancel: _handleCancel, isLoading: _isLoading),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
