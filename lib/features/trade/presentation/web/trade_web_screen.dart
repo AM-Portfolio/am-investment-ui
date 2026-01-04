@@ -127,6 +127,9 @@ class _TradeWebScreenState extends ConsumerState<TradeWebScreen> {
         module: ModuleType.trade,
         subtitle: _currentPortfolioName ?? 'Portfolio Management',
         onBackToGlobal: widget.onBack,
+        onThemeToggle: () {
+          context.read<ThemeCubit>().toggleTheme();
+        },
         body: _buildMainContent(context),
         sections: [
           SecondarySidebarSection(

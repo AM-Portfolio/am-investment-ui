@@ -71,6 +71,9 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
         module: ModuleType.portfolio,
         subtitle: widget.selectedPortfolioName ?? 'My Portfolio',
         onBackToGlobal: widget.onBack,
+        onThemeToggle: () {
+          context.read<ThemeCubit>().toggleTheme();
+        },
         body: _buildMainContent(context),
         sections: [
           // Portfolio Selector Section

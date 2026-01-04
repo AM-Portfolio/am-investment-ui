@@ -42,7 +42,9 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = accentColor ?? Theme.of(context).primaryColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Priority: explicit accentColor prop > ModuleColorProvider > Theme primaryColor
+    final color = accentColor ?? ModuleColorProvider.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -57,7 +59,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
             child: PopupMenuButton<String>(
               tooltip: 'Select Portfolio',
               offset: const Offset(40, 0),
-              color: const Color(0xFF2C2C3E),
+              color: isDark ? const Color(0xFF2C2C3E) : Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               icon: Container(
                 padding: const EdgeInsets.all(8),
@@ -75,7 +77,7 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
                 value: idExtractor(portfolio),
                 child: Text(
                   nameExtractor(portfolio),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 ),
               )).toList(),
             ),
@@ -121,8 +123,8 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               currentPortfolioName ?? 'No Portfolio',
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -141,27 +143,27 @@ class SharedPortfolioSelector<T> extends StatelessWidget {
                       height: 32,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                        border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: currentPortfolioId,
                           isExpanded: true,
-                          dropdownColor: const Color(0xFF2C2C3E),
-                          icon: const Icon(
+                          dropdownColor: isDark ? const Color(0xFF2C2C3E) : Colors.white,
+                          icon: Icon(
                             Icons.keyboard_arrow_down,
                             size: 16,
-                            color: Colors.white70,
+                            color: isDark ? Colors.white70 : Colors.black54,
                           ),
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
                             fontSize: 12,
                           ),
-                          hint: const Text(
+                          hint: Text(
                             'Select Portfolio',
-                            style: TextStyle(color: Colors.white54, fontSize: 12),
+                            style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: 12),
                           ),
                           items: portfolios.map((portfolio) => DropdownMenuItem<String>(
                             value: idExtractor(portfolio),
