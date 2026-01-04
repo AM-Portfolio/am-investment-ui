@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:am_common_ui/am_common_ui.dart';
+import 'package:am_common_ui/am_common_ui.dart' hide AuthCubit;
 
 import '../../../../core/utils/logger.dart';
 import '../../internal/domain/entities/portfolio_list.dart';
@@ -14,6 +14,8 @@ import 'pages/portfolio_overview_web_page.dart';
 import 'pages/portfolio_holdings_web_page.dart';
 import 'pages/portfolio_analysis_web_page.dart';
 import 'pages/portfolio_heatmap_web_page.dart';
+import '../../../profile/presentation/pages/profile_settings_page.dart';
+import '../../../authentication/presentation/cubit/auth_cubit.dart';
 
 /// Web-specific portfolio screen implementation
 class PortfolioWebScreen extends ConsumerStatefulWidget {
@@ -42,13 +44,62 @@ class PortfolioWebScreen extends ConsumerStatefulWidget {
 }
 
 class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
-  PortfolioViewType _selectedView = PortfolioViewType.overview;
+  late SwipeNavigationController _swipeController;
+  late CacheService _cacheService;
   String? _currentPortfolioId;
 
   @override
   void initState() {
     super.initState();
     _currentPortfolioId = widget.selectedPortfolioId ?? widget.userId;
+    _cacheService = ref.read(cacheServiceProvider);
+    _initializeSwipeController();
+  }
+
+  void _initializeSwipeController() {
+    _swipeController = SwipeNavigationController(
+      items: [
+        NavigationItem(
+          title: 'Overview',
+          subtitle: 'Portfolio summary',
+          icon: Icons.dashboard_outlined,
+          page: PortfolioOverviewWebPage(
+            userId: widget.userId,
+          ),
+          accentColor: ModuleColors.portfolio,
+        ),
+        NavigationItem(
+          title: 'Holdings',
+          subtitle: 'Asset breakdown',
+          icon: Icons.pie_chart,
+          page: PortfolioHoldingsWebPage(
+            userId: widget.userId,
+            portfolioId: _currentPortfolioId ?? widget.userId,
+          ),
+          accentColor: ModuleColors.portfolio,
+        ),
+        NavigationItem(
+          title: 'Analysis',
+          subtitle: 'Performance metrics',
+          icon: Icons.analytics_outlined,
+          page: PortfolioAnalysisWebPage(
+            userId: widget.userId,
+            portfolioId: _currentPortfolioId ?? widget.userId,
+          ),
+          accentColor: ModuleColors.portfolio,
+        ),
+        NavigationItem(
+          title: 'Heatmap',
+          subtitle: 'Visual analysis',
+          icon: Icons.grid_on_outlined,
+          page: PortfolioHeatmapWebPage(
+            userId: widget.userId,
+            portfolioId: _currentPortfolioId ?? widget.userId,
+          ),
+          accentColor: ModuleColors.portfolio,
+        ),
+      ],
+    );
   }
 
   void _onPortfolioChanged(String portfolioId, String portfolioName) {
@@ -74,7 +125,23 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
         onThemeToggle: () {
           context.read<ThemeCubit>().toggleTheme();
         },
-        body: _buildMainContent(context),
+        onProfileTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProfileSettingsPage(userId: widget.userId),
+            ),
+          );
+        },
+        onLogout: () {
+          context.read<AuthCubit>().logout();
+          widget.onBack?.call();
+        },
+        body: SwipeablePageView(
+          controller: _swipeController,
+          showIndicator: true,
+          indicatorPosition: IndicatorPosition.bottom,
+        ),
         sections: [
           // Portfolio Selector Section
           if (widget.portfolios != null && widget.portfolios!.isNotEmpty)
@@ -94,32 +161,16 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
           // Navigation Section
           SecondarySidebarSection(
             title: 'Navigation',
-            items: [
-              SecondarySidebarItem(
-                title: 'Overview',
-                icon: Icons.dashboard_outlined,
-                isSelected: _selectedView == PortfolioViewType.overview,
-                onTap: () => setState(() => _selectedView = PortfolioViewType.overview),
-              ),
-              SecondarySidebarItem(
-                title: 'Holdings',
-                icon: Icons.list_alt_rounded,
-                isSelected: _selectedView == PortfolioViewType.holdings,
-                onTap: () => setState(() => _selectedView = PortfolioViewType.holdings),
-              ),
-              SecondarySidebarItem(
-                title: 'Analysis',
-                icon: Icons.donut_large_outlined,
-                isSelected: _selectedView == PortfolioViewType.analysis,
-                onTap: () => setState(() => _selectedView = PortfolioViewType.analysis),
-              ),
-              SecondarySidebarItem(
-                title: 'Heatmap',
-                icon: Icons.grid_view_rounded,
-                isSelected: _selectedView == PortfolioViewType.heatmap,
-                onTap: () => setState(() => _selectedView = PortfolioViewType.heatmap),
-              ),
-            ],
+            items: _swipeController.items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return SecondarySidebarItem(
+                title: item.title,
+                icon: item.icon,
+                isSelected: _swipeController.currentIndex == index,
+                onTap: () => _swipeController.navigateTo(index),
+              );
+            }).toList(),
           ),
         ],
       );
@@ -127,22 +178,7 @@ class _PortfolioWebScreenState extends ConsumerState<PortfolioWebScreen> {
 
 
 
-  /// Build main content based on selected view
-  Widget _buildMainContent(BuildContext context) {
-    switch (_selectedView) {
-      case PortfolioViewType.overview:
-        return _buildOverviewContent(context);
-      case PortfolioViewType.holdings:
-        return _buildHoldingsContent(context);
-      case PortfolioViewType.analysis:
-        return _buildAnalysisContent(context);
-      case PortfolioViewType.heatmap:
-        return _buildHeatmapContent(context);
-      default:
-        // Fallback to overview if any other view is selected
-        return _buildOverviewContent(context);
-    }
-  }
+
 
   /// Build overview content using dedicated overview page
   Widget _buildOverviewContent(BuildContext context) {
